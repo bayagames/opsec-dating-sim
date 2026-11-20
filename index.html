@@ -450,7 +450,7 @@ img,svg,canvas{-webkit-user-drag:none;user-drag:none}
     <div id="areaName"></div>
     <div id="obj"><div id="objT"></div><div id="objN"></div></div>
     <canvas id="mini" width="264" height="264"></canvas>
-    <div id="lockHint"><b>Click</b> to step back in</div>
+    <div id="lockHint"><b>Click</b> to look around</div>
     <div id="keys"><b>WASD</b> move <b>Shift</b> run <b>E</b> interact <b>M</b> map <b>Esc</b> phone</div>
     <div id="joy"><div id="knob"></div></div>
     <div id="prompt"><span id="promptK">E</span><span id="promptT"></span></div>
@@ -1995,7 +1995,7 @@ function hub(){
  if(!G.ok){hub2d();return}
  S.inWorld=1;S.pos=[WD.reg,WD.x,WD.z,WD.yaw,WD.y];save();show('world');WD.active=true;hud();updObjective();
  // walking around always means mouse-look: grab the mouse now (this runs inside the click/key that ended the scene)
- if(!WD.touch&&!locked())tryLock();
+ if(!WD.touch&&!locked())relock();
 }
 function advance(){
  const nc=newCount();
@@ -2313,8 +2313,8 @@ const G={LK:7.6,HK:5.5,ok:false,regions:{},boxes:{},walls:{},lights:{},surf:{},t
 const lin=c=>c<=.04045?c/12.92:Math.pow((c+.055)/1.055,2.4);
 const QUALITY={
  low:{dpr:1,lights:6,bloom:false,msaa:0,std:false,shadowBlobs:true},
- medium:{dpr:1.5,lights:10,bloom:true,msaa:0,std:true,env:true,grade:true},
- high:{dpr:2,lights:16,bloom:true,msaa:0,fxaa:true,std:true,env:true,grade:true,ao:true}
+ medium:{dpr:1.5,lights:10,bloom:true,msaa:0,std:true,env:true,grade:true,bump:true},
+ high:{dpr:2,lights:16,bloom:true,msaa:0,fxaa:true,std:true,env:true,grade:true,ao:true,shadows:2,bump:true}
 };
 /* the look, in one place: emissive gain is compressed above 1 so signs and fixtures read as lit without
    blooming into fog; bloom only catches what is genuinely bright */
@@ -2426,6 +2426,8 @@ function glInit(cv){
  if(!r||!r.capabilities)return false;
  r.outputColorSpace=T.SRGBColorSpace;r.toneMapping=T.NeutralToneMapping||T.ACESFilmicToneMapping;r.toneMappingExposure=LOOK.exposure;
  G.r=r;G.cv=cv;G.T=T;
+ // shadows: rendered on demand (static level, so only when a shadow light moves or people nearby move)
+ r.shadowMap.enabled=true;r.shadowMap.type=T.PCFShadowMap;r.shadowMap.autoUpdate=false;
  // the level was lit with a bounded (1-d/R)^2 falloff; keep that look instead of inverse-square,
  // which blows out ceilings that sit right next to their lights
  T.ShaderChunk.lights_pars_begin=T.ShaderChunk.lights_pars_begin.replace('float distanceFalloff = 1.0 / max( pow( lightDistance, decayExponent ), 0.01 );','float x_ = saturate( 1.0 - lightDistance / max( cutoffDistance, 0.001 ) ); return x_ * x_; float distanceFalloff = 1.0;');
@@ -2444,7 +2446,10 @@ function setQuality(q){
  // light pool size
  while(G.pool.length<Q.lights){const l=new T.PointLight(0xffffff,0,10,1);l.userData={src:-1,k:0,tk:0};G.scene.add(l);G.pool.push(l)}
  while(G.pool.length>Q.lights){const l=G.pool.pop();G.scene.remove(l);l.dispose&&l.dispose()}
- G.poolT=0;G.poolReg=null;
+ G.spool=G.spool||[];const NS=Q.shadows||0;
+ while(G.spool.length<NS){const l=new T.PointLight(0xffffff,0,10,1);l.castShadow=true;l.shadow.mapSize.set(768,768);l.shadow.bias=-.0025;l.shadow.normalBias=.035;l.shadow.radius=2.5;l.shadow.camera.near=.2;l.userData={src:-1,k:0,tk:0};G.scene.add(l);G.spool.push(l)}
+ while(G.spool.length>NS){const l=G.spool.pop();G.scene.remove(l);l.shadow.dispose&&l.shadow.dispose();l.dispose&&l.dispose()}
+ G.poolT=0;G.poolReg=null;G.shDirty=true;
  // swap world materials
  for(const k in G.regions){const R=G.regions[k];if(!R.obj)continue;R.obj.traverse(o=>{if(o.isMesh&&o.userData.mk)o.material=getMat(o.userData.mk)})}
  // post-processing
@@ -2499,6 +2504,7 @@ function buildEnv(reg){
  sc.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)o.material.dispose()});
  return G.env[reg]=rt.texture;
 }
+const BUMP={brick:2.2,tile:1.2,tileDark:1.2,concrete:1.4,wood:1,woodDark:1,marble:.5,carpetCon:1.6,carpetHotel:1.6,carpetDark:1.6,carpetGrey:1.6,carpetGallery:1.4,wallHotel:.8,wallCon:.8,panel:1.2,pavers:2,gravel:2.4,grass:1.8,ceil:1,metal:.6,road:1.2,rug:1.4,fabric:1,linen:.6,pegs:1.2};
 /* materials are shared between regions and chunks: one per texture/kind/profile */
 function getMat(mk){
  const key=mk+'|'+(QUALITY[G.q].std?'s':'l');if(G.mats[key])return G.mats[key];
@@ -2508,7 +2514,10 @@ function getMat(mk){
  else if(kind==='glass'){const o={vertexColors:true,transparent:true,opacity:.16,depthWrite:false,side:T.DoubleSide};m=QUALITY[G.q].std?new T.MeshStandardMaterial(Object.assign(o,{roughness:.05,metalness:.15,envMapIntensity:1.6})):new T.MeshLambertMaterial(o)}
  else{const pr=prof.split(':'),rough=+pr[0],metal=+pr[1];
   const o={map,vertexColors:true};if(kind==='cut'){o.alphaTest=.5;o.side=T.DoubleSide}
-  if(QUALITY[G.q].std){o.roughness=Math.max(.3,rough);o.metalness=metal;m=new T.MeshStandardMaterial(o)}else m=new T.MeshLambertMaterial(o)}
+  if(QUALITY[G.q].std){o.roughness=Math.max(.3,rough);o.metalness=metal;
+   // surface relief from the texture itself: grout lines, brick courses, wood grain, carpet pile catch the light
+   const bk=QUALITY[G.q].bump&&map&&BUMP[t];if(bk){o.bumpMap=map;o.bumpScale=bk}
+   m=new T.MeshStandardMaterial(o)}else m=new T.MeshLambertMaterial(o)}
  return G.mats[key]=m;
 }
 function texObj(t){
@@ -2540,7 +2549,7 @@ function finishRegions(){
   for(const ck in merged){const M=merged[ck];if(!M.p.length)continue;
    if(M.mk.startsWith('@atlas')){const n=+M.mk.split('|')[0].slice(6);const ak='@atlas'+n;if(!G.tx[ak])G.tx[ak]={atlas:n,used:true}}
    const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(M.p,3));g.setAttribute('normal',new T.Float32BufferAttribute(M.n,3));g.setAttribute('uv',new T.Float32BufferAttribute(M.u,2));g.setAttribute('color',new T.Float32BufferAttribute(M.c,3));g.computeBoundingSphere();
-   const mesh=new T.Mesh(g,null);mesh.userData.mk=M.mk;if(M.mk.split('|')[1]==='glass')mesh.userData.noAO=1;mesh.matrixAutoUpdate=false;root.add(mesh)}
+   const mesh=new T.Mesh(g,null);mesh.userData.mk=M.mk;const kd=M.mk.split('|')[1];if(kd==='glass')mesh.userData.noAO=1;mesh.castShadow=kd==='lit'||kd==='cut';mesh.receiveShadow=kd!=='emit';mesh.matrixAutoUpdate=false;root.add(mesh)}
   R.groups=null;R.obj=root;G.scene.add(root);
   const H={},SH={};
   const put=(Tb,b,x0,z0,x1,z1)=>{for(let x=Math.floor(x0/4);x<=Math.floor(x1/4);x++)for(let z=Math.floor(z0/4);z<=Math.floor(z1/4);z++)(Tb[x+','+z]=Tb[x+','+z]||[]).push(b)};
@@ -2559,22 +2568,33 @@ function sky(){
  G.sky=new T.Mesh(new T.SphereGeometry(300,32,16),m);G.sky.userData.noAO=1;G.sky.renderOrder=-10;G.sky.frustumCulled=false;G.scene.add(G.sky);
 }
 /* ---- light pool: the nearest level lights are mirrored into a fixed set of real point lights ---- */
+/* is this level light usable as a shadow caster? (not buried inside a wall or a solid box) */
+function shadowOK(reg,i){G.shok=G.shok||{};const c=G.shok[reg]||(G.shok[reg]=[]);if(c[i]!==undefined)return c[i];
+ const l=G.lights[reg][i];let ok=true;for(const q of G.boxes[reg]){if(l[0]>q[0]-.05&&l[0]<q[2]+.05&&l[2]>q[1]-.05&&l[2]<q[3]+.05&&l[1]>q[4]-.05&&l[1]<q[5]+.05){ok=false;break}}return c[i]=ok}
 function updLights(dt,force){
- const reg=WD.reg,L=G.lights[reg]||[];const P=G.pool;if(!P.length)return;
+ const reg=WD.reg,L=G.lights[reg]||[];const P=G.pool,SP=G.spool||[];if(!P.length)return;
  G.poolT-=dt;
+ const assign=(p,i,instant)=>{const l=L[i],u=p.userData;u.src=i;u.k=instant?1:0;u.tk=1;p.position.set(l[0],l[1],l[2]);p.color.setRGB(lin(l[3]),lin(l[4]),lin(l[5]));p.distance=l[6]*LOOK.reach;u.base=l[7]*G.LK};
  if(force||G.poolReg!==reg||G.poolT<=0){G.poolT=.2;
   const instant=force||G.poolReg!==reg;G.poolReg=reg;
   const ex=WD.x,ey=WD.eye,ez=WD.z,fx=-Math.sin(WD.yaw),fz=-Math.cos(WD.yaw);
   const sc=[];for(let i=0;i<L.length;i++){const l=L[i],dx=l[0]-ex,dy=(l[1]-ey)*1.6,dz=l[2]-ez,d=Math.hypot(dx,dy,dz);const ahead=(dx*fx+dz*fz)/(d||1);const s=d-l[6]*.55-ahead*3;if(d<l[6]+26)sc.push([s,i])}
-  sc.sort((a,b)=>a[0]-b[0]);const want=new Set(sc.slice(0,P.length).map(s=>s[1]));
+  sc.sort((a,b)=>a[0]-b[0]);const ranked=sc.map(s=>s[1]);
+  // the two most important nearby lights cast shadows; they cross-fade with the plain pool, so nothing pops
+  const shWant=[];for(const i of ranked.slice(0,8)){if(shWant.length>=SP.length)break;if(shadowOK(reg,i)&&L[i][7]>=.5)shWant.push(i)}
+  const shHave=new Set();
+  for(const p of SP){const u=p.userData;if(u.src>=0&&shWant.includes(u.src)&&!instant){u.tk=1;shHave.add(u.src)}else{u.tk=0;if(instant){u.k=0;u.src=-1}}}
+  for(const i of shWant){if(shHave.has(i))continue;const p=SP.find(p=>p.userData.src<0||(p.userData.k<=.01&&p.userData.tk===0));if(!p)break;assign(p,i,instant);shHave.add(i);G.shDirty=true}
+  const want=new Set(ranked.filter(i=>!shHave.has(i)).slice(0,P.length));
   const have=new Set();
   for(const p of P){const u=p.userData;if(u.src>=0&&want.has(u.src)&&!instant){u.tk=1;have.add(u.src)}else{u.tk=0;if(instant){u.k=0;u.src=-1}}}
   const free=P.filter(p=>p.userData.src<0||(p.userData.k<=.01&&p.userData.tk===0));
-  for(const i of want){if(have.has(i))continue;const p=free.shift();if(!p)break;const l=L[i],u=p.userData;u.src=i;u.k=instant?1:0;u.tk=1;have.add(i);
-   p.position.set(l[0],l[1],l[2]);p.color.setRGB(lin(l[3]),lin(l[4]),lin(l[5]));p.distance=l[6]*LOOK.reach;u.base=l[7]*G.LK}
+  for(const i of want){if(have.has(i))continue;const p=free.shift();if(!p)break;assign(p,i,instant);have.add(i)}
  }
- for(const p of P){const u=p.userData;if(u.src<0){p.intensity=0;continue}u.k+=(u.tk-u.k)*Math.min(1,dt*5);if(u.tk===0&&u.k<.01){u.k=0;u.src=-1}
+ for(const p of P.concat(SP)){const u=p.userData;if(u.src<0){p.intensity=0;continue}u.k+=(u.tk-u.k)*Math.min(1,dt*5);if(u.tk===0&&u.k<.01){u.k=0;u.src=-1}
   p.intensity=u.base*u.k}
+ // refresh shadow maps when a caster moved, otherwise ~15 times a second for people walking about
+ if(SP.length){G.shT=(G.shT||0)-dt;if(G.shDirty||G.shT<=0){G.r.shadowMap.needsUpdate=true;G.shDirty=false;G.shT=1/15}}
 }
 /* ---- characters as lit, camera-facing cut-outs ---- */
 const SPRW=288,SPRH=720;
@@ -2590,7 +2610,7 @@ function cutout(texture,w,h,o){
  const T=G.T;o=o||{};
  const geo=new T.PlaneGeometry(w,h);geo.translate(0,h/2,0);
  const mat=new T.MeshLambertMaterial({map:texture,alphaTest:.5,emissive:0xffffff,emissiveMap:texture,emissiveIntensity:o.glow!==undefined?o.glow:.22});
- const m=new T.Mesh(geo,mat);m.userData.noAO=1;
+ const m=new T.Mesh(geo,mat);m.userData.noAO=1;m.castShadow=!o.noShadow;m.customDistanceMaterial=new T.MeshDistanceMaterial({map:texture,alphaTest:.5,side:T.DoubleSide});
  if(!o.noShadow){const s=new T.Mesh(new T.PlaneGeometry(w*.95,w*.5),new T.MeshBasicMaterial({map:blobTex(),transparent:true,depthWrite:false}));s.rotation.x=-Math.PI/2;s.position.y=.025;s.renderOrder=1;s.userData.noAO=1;const gg=new T.Group();gg.add(s);gg.add(m);gg.userData.body=m;return gg}
  const gg=new T.Group();gg.add(m);gg.userData.body=m;return gg;
 }
@@ -2757,8 +2777,10 @@ function paintTextures(){
  tex('traindoor',128,192,(c,w,h)=>{c.fillStyle='#c9ced8';c.fillRect(0,0,w,h);c.fillStyle='#ffd166';c.fillRect(0,0,w,6);c.fillRect(0,0,6,h);c.fillRect(w-6,0,6,h);c.fillStyle='#8a909c';c.fillRect(w/2-1,0,2,h);
   for(const x of[14,72]){const g=c.createLinearGradient(0,22,0,96);g.addColorStop(0,'#3a4a6a');g.addColorStop(1,'#1a2034');c.fillStyle=g;c.fillRect(x,22,42,74);c.fillStyle='#ffffff2a';c.fillRect(x+3,25,10,68)}
   c.fillStyle='#2a4a8a';c.fillRect(0,150,w,10);grain(c,w,h,8)});
- tex('trainin',128,192,(c,w,h)=>{const g=c.createLinearGradient(0,0,0,h);g.addColorStop(0,'#fff1d6');g.addColorStop(.35,'#d8c3a0');g.addColorStop(1,'#5a4a3a');c.fillStyle=g;c.fillRect(0,0,w,h);
-  c.fillStyle='#2a4a8a';c.fillRect(10,96,40,60);c.fillRect(78,96,40,60);c.fillStyle='#22406f';c.fillRect(10,140,40,16);c.fillRect(78,140,40,16);c.fillStyle='#c8ccd6';c.fillRect(62,0,4,h);c.fillStyle='#00000040';c.fillRect(0,170,w,22)});
+ tex('trainin',128,192,(c,w,h)=>{const g=c.createLinearGradient(0,0,0,h);g.addColorStop(0,'#f4e2c0');g.addColorStop(.5,'#cdb894');g.addColorStop(1,'#6a5a48');c.fillStyle=g;c.fillRect(0,0,w,h);
+  c.fillStyle='#b8a888';c.beginPath();c.moveTo(0,150);c.lineTo(w,150);c.lineTo(w,h);c.lineTo(0,h);c.fill();c.fillStyle='#8a7a62';c.fillRect(0,150,w,3);
+  c.fillStyle='#2a4a8a';c.fillRect(4,98,46,40);c.fillRect(78,98,46,40);c.fillStyle='#1f3a6e';c.fillRect(4,130,46,20);c.fillRect(78,130,46,20);c.fillStyle='#3a5a9a';c.fillRect(4,92,46,8);c.fillRect(78,92,46,8);
+  c.fillStyle='#dfe3ea';c.fillRect(61,0,6,150);c.fillStyle='#ffffff55';c.fillRect(62,0,2,150);c.fillStyle='#fff6e0';c.fillRect(10,8,108,6);grain(c,w,h,6)});
  tex('dark',16,16,(c,w,h)=>{c.fillStyle='#14101a';c.fillRect(0,0,w,h)});
  tex('black',16,16,(c,w,h)=>{c.fillStyle='#000';c.fillRect(0,0,w,h)});
 }
@@ -3560,15 +3582,14 @@ function buildStation(){
  for(let x=704;x<772;x+=12){box(x-.15,0,15,x+.15,7,15.3,MT.metal);panel(x,4.6,15.31,1.6,1,'s',sign('4','#1b1026','#f6eefc',128,96))}
  for(let x=706;x<772;x+=12)lightPanel(x,7,10,4,.6,'#f4f8ff',12,.7);
  box(700,7,19.85,772,12,20.15,MT.brick,{col:false});box(700,-1.2,-.3,772,7,0,MT.brick,{col:false});floorQ(700,0,772,6,-1.2,MT.gravel);for(const z of[1.6,4.4])box(700,-1.2,z-.05,772,-1.05,z+.05,MT.chrome,{col:false});box(699.8,-1.2,6,772,0,6.2,MT.concrete);colBox(700,0,772,6,-2,6);
- // the train: floor level with the platform (a real step-across gap, not a pit), sliding doors on the carriage seams
- box(704,-.95,1,768,3.4,5.7,{side:MT.plain('#d9dde6'),top:MT.plain('#8a8a94')},{col:false,nz1:1});for(let i=0;i<4;i++)panel(712+i*16,-.4,5.705,15.6,3.8,'s',MT.trainside);box(704,3.4,1.1,768,3.75,5.6,{side:MT.plain('#9a9ea8'),top:MT.plain('#5a5a64')},{col:false});
+ // the train: floor level with the platform, one solid body (no see-through seams), sliding doors on the carriage seams
+ box(704,-.95,1,768,3.4,5.7,{side:MT.plain('#c9ced8'),top:MT.plain('#8a8a94')},{col:false});for(let i=0;i<4;i++)panel(712+i*16,-.4,5.705,16,3.8,'s',MT.trainside);box(704,3.4,1.1,768,3.75,5.6,{side:MT.plain('#9a9ea8'),top:MT.plain('#5a5a64')},{col:false});
  box(704,-.95,5.7,768,-.4,5.72,MT.plain('#1a1a22'),{col:false});
  for(const x of[720,752,708.6,763.4])panel(x,.05,5.715,1.5,2.3,'s',MT.traindoor);
- // the boarding door at 736: slid open, warm carriage light spilling out, a green "doors open" lamp
- panel(735.6,.05,5.715,.75,2.3,'s',MT.traindoor);panel(737.3,.05,5.715,.75,2.3,'s',MT.traindoor);
- box(735.98,.05,4.2,736.02,2.35,5.7,MT.plain('#2a2a34'),{col:false});box(735.2,.05,4.2,736.8,.07,5.7,MT.plain('#5a5a66'),{col:false});
- panel(736,.05,4.21,1.6,2.3,'s',MT.trainin);box(735.18,2.36,5.66,736.82,2.42,5.74,MT.glow('#8affc1',1.1),{col:false});
- box(734.9,2.5,5.72,735.1,2.62,5.78,MT.glow('#8affc1',1.6),{col:false});addLight(736,1.9,5.1,[1,.88,.7],5.5,.8);
+ // the boarding door at 736 stands open: the carriage inside, warm light, a yellow frame and a green "doors open" bar
+ panel(736,.05,5.725,1.5,2.3,'s',MT.trainin);
+ for(const x of[735.2,736.75])box(x,.05,5.71,x+.05,2.38,5.76,MT.plain('#ffd166'),{col:false});box(735.2,2.33,5.71,736.8,2.38,5.76,MT.plain('#ffd166'),{col:false});
+ box(735.3,2.48,5.71,736.7,2.56,5.76,MT.glow('#8affc1',1.1),{col:false});addLight(736,1.9,6.2,[1,.88,.7],4.5,.6);
  box(703.6,-.95,1.1,704,3.3,5.6,MT.plain('#ff5d73'),{col:false});
  box(732,5.1,6.15,740,5.95,6.2,MT.plain('#1b1026'),{col:false});panel(736,5.2,6.21,8,.7,'s',sign('PLATFORM 4 · CONFERENCE QUARTER','#ffd166','#1b1026',512,64));for(const x of[732.5,739.5])box(x-.02,5.95,6.16,x+.02,7,6.2,MT.metal,{col:false});
  (MAPR.station=MAPR.station||[]).push({x0:700,z0:0,x1:772,z1:6,y:0,n:'',c:'#2a2a30'});
@@ -3617,13 +3638,17 @@ function setupInput(){
   if(!worldLive())return;
   if(k==='e'||k==='enter'||k==='f'){e.preventDefault();doInteract()}
   if(k==='m'&&S.unl.map){e.preventDefault();phone('map')}});
- addEventListener('keyup',e=>{WD.keys[e.key.toLowerCase()]=false});
+ addEventListener('keyup',e=>{WD.keys[e.key.toLowerCase()]=false;if(e.key==='Escape'){WD.escDown=false;if(WD.lockAfterEsc){WD.lockAfterEsc=false;setTimeout(tryLock,30)}}});
+ addEventListener('keydown',e=>{if(e.key==='Escape')WD.escDown=true},true);
  addEventListener('blur',()=>{WD.keys={}});
  document.addEventListener('pointerlockerror',()=>{if(!WD.clickLock)return;WD.clickLock=false;WD.lockFails=(WD.lockFails||0)+1;if(WD.lockFails>=3&&!WD.everLocked){WD.noLock=true;$('lockHint').innerHTML='<b>Drag</b> to look around'}});
  document.addEventListener('pointerlockchange',()=>{
   WD.locked=document.pointerLockElement===lockEl();
-  if(WD.locked){WD.everLocked=true;WD.lockFails=0;return}
+  if(WD.locked){WD.everLocked=true;WD.lockFails=0;WD.lockAt=performance.now();return}
+  WD.unlockAt=performance.now();
   const self=WD.selfUnlock;WD.selfUnlock=false;
+  // a lock that dies within a moment of being granted was the browser finishing an Esc press, not the player asking for the phone
+  if(performance.now()-(WD.lockAt||0)<450)return;
   // Esc released the mouse: that's the "open phone" key
   if(!self&&S&&S.inWorld&&(worldLive()||$('vn').classList.contains('on')))phone();
  });
@@ -3650,6 +3675,9 @@ function setupInput(){
  tz.addEventListener('touchstart',tStart,{passive:false});tz.addEventListener('touchmove',tMove,{passive:false});tz.addEventListener('touchend',tEnd);tz.addEventListener('touchcancel',tEnd);
  $('actBtn').addEventListener('click',e=>{e.stopPropagation();doInteract()});
 }
+/* step back into mouse-look (after the phone closes, a scene ends...). While Esc is held, wait for it to come up:
+   locking during an Esc press hands the browser an Esc to cancel the lock with, and the phone pops straight back */
+function relock(){if(WD.touch||WD.noLock||locked())return;if(WD.escDown){WD.lockAfterEsc=true;return}tryLock()}
 function tryLock(){if(WD.touch||WD.noLock)return;const el=lockEl();if(document.pointerLockElement===el)return;try{const p=el.requestPointerLock&&el.requestPointerLock();if(p&&p.catch)p.catch(()=>{})}catch(e){}}
 function setTouch(on){WD.touch=on;document.body.classList.toggle('touchui',on);document.body.classList.toggle('desk',!on)}
 /* dx>0 (mouse/finger moves right) turns right; dy<0 (moves up) looks up. Never inverted. */
@@ -3798,7 +3826,7 @@ function updSprites(dt){
   const vis=c.reg===WD.reg&&c.when();
   if(!c.obj){if(!vis)continue;c.obj=cutout(null,.98,2.45);G.scene.add(c.obj);c.mark=markObj();G.scene.add(c.mark)}
   c.obj.visible=vis;c.mark.visible=false;if(!vis)continue;
-  const sk=charSVGKey(c);if(c.objKey!==sk){c.objKey=sk;const t=spriteTex('c:'+sk,fullSVG(sk));const b=c.obj.userData.body.material;b.map=t;b.emissiveMap=t;b.needsUpdate=true}
+  const sk=charSVGKey(c);if(c.objKey!==sk){c.objKey=sk;const t=spriteTex('c:'+sk,fullSVG(sk));const bd=c.obj.userData.body,b=bd.material;b.map=t;b.emissiveMap=t;b.needsUpdate=true;if(bd.customDistanceMaterial){bd.customDistanceMaterial.map=t;bd.customDistanceMaterial.needsUpdate=true}}
   c.obj.position.set(c.x,c.y||0,c.z);c.obj.rotation.y=yaw;
   const body=c.obj.userData.body;body.scale.y=1+Math.sin(tt*1.7+c.x)*.007;body.scale.x=1-Math.sin(tt*1.7+c.x)*.004;
   if(G.news.has(c.id)||storyMark(c)){c.mark.visible=true;c.mark.position.set(c.x,(c.y||0)+2.62+Math.sin(tt*3)*.07,c.z)}
@@ -3826,9 +3854,20 @@ function gateObj(g){
  if(g.kind==='rope'){const n=Math.max(1,Math.round(L/2.4));
   for(let i=0;i<=n;i++){const t=i/n,p=new T.Mesh(new T.CylinderGeometry(.045,.06,1,10),G.gm.post);p.position.set(g.x0+dx*t,g.y+.5,g.z0+dz*t);grp.add(p);const b=new T.Mesh(new T.CylinderGeometry(.16,.18,.04,14),G.gm.post);b.position.set(p.position.x,g.y+.02,p.position.z);grp.add(b)}
   for(let i=0;i<n;i++){const t=(i+.5)/n,seg=L/n,r=new T.Mesh(new T.BoxGeometry(seg,.05,.05),G.gm.rope);r.position.set(g.x0+dx*t,g.y+.86,g.z0+dz*t);r.rotation.y=-ang;grp.add(r)}}
- else{const h=g.kind==='card'||g.label==='The bar'?2.6:2.4,d=new T.Mesh(new T.BoxGeometry(L,h,.08),G.gm.door);d.position.set((g.x0+g.x1)/2,g.y+h/2,(g.z0+g.z1)/2);d.rotation.y=-ang;grp.add(d);
-  if(g.kind==='card'){const r=new T.Mesh(new T.BoxGeometry(.12,.18,.14),G.gm.red);r.position.set(d.position.x,g.y+1.25,d.position.z);r.rotation.y=-ang;r.translateX(L/2+.15);grp.add(r)}}
- return grp}
+ else{const f=fitGate(g);let w=L,h=g.kind==='card'||g.label==='The bar'?2.6:2.4,cx=(g.x0+g.x1)/2,cz=(g.z0+g.z1)/2,y=g.y,a=-ang;
+  if(f){w=f.w-.02;h=f.h-.01;cx=f.cx;cz=f.cz;y=f.y;a=f.o==='h'?0:-Math.PI/2}
+  const d=new T.Mesh(new T.BoxGeometry(w,h,.07),G.gm.door);d.position.set(cx,y+h/2,cz);d.rotation.y=a;grp.add(d);
+  if(g.kind==='card'){const r=new T.Mesh(new T.BoxGeometry(.12,.18,.14),G.gm.red);r.position.set(cx,y+1.25,cz);r.rotation.y=a;r.translateX(w/2+.22);grp.add(r)}}
+ grp.traverse(o=>{if(o.isMesh){o.castShadow=o.receiveShadow=true}});return grp}
+/* find the doorway a gate stands in (from the level's door list) so the door fills it exactly, centred in the wall */
+function fitGate(g){
+ const L=DOORS[g.reg]||[],hz=Math.abs(g.z1-g.z0)<.05,o=hz?'h':'v',at=hz?g.z0:g.x0,c0=hz?Math.min(g.x0,g.x1):Math.min(g.z0,g.z1),c1=hz?Math.max(g.x0,g.x1):Math.max(g.z0,g.z1);
+ let best=null,bs=1e9;for(const d of L){if(d.o!==o||Math.abs(d.at-at)>1.2||Math.abs(d.y-g.y)>.6)continue;if(d.c<c0-.6||d.c>c1+.6)continue;const sc=Math.abs(d.at-at)+Math.abs(d.c-(c0+c1)/2);if(sc<bs){bs=sc;best=d}}
+ if(!best)return null;const d=best,H=G.regions[g.reg].hash,yy=d.y+1;
+ const solid=(x,z)=>{for(const q of H[Math.floor(x/4)+','+Math.floor(z/4)]||[])if(x>q[0]&&x<q[2]&&z>q[1]&&z<q[3]&&yy>q[4]&&yy<q[5])return true;return false};
+ const j=d.c-d.w/2-.05,side=o==='h'?(solid(j,d.at+.1)?1:solid(j,d.at-.1)?-1:0):(solid(d.at+.1,j)?1:solid(d.at-.1,j)?-1:0);
+ const p=d.at+side*.1;return{o,w:d.w,h:d.h,y:d.y,cx:o==='h'?d.c:p,cz:o==='h'?p:d.c};
+}
 function tapeTex(){if(G.tape)return G.tape;const c=document.createElement('canvas');c.width=128;c.height=256;const x=c.getContext('2d');for(let i=0;i<3;i++){x.save();x.translate(64,70+i*50);x.rotate(i%2?.18:-.18);x.fillStyle='#ffd166';x.fillRect(-64,-12,128,24);x.fillStyle='#1b1026';x.font='bold 15px sans-serif';x.textAlign='center';x.fillText('STAFF ONLY',0,6);x.restore()}const t=new G.T.CanvasTexture(c);t.colorSpace=G.T.SRGBColorSpace;return G.tape=t}
 /* ---------- maps ---------- */
 function levelOf(reg,y){const L=LEVELS[reg]||[[0,'']];let b=L[0][0];for(const l of L)if(l[0]<=y+1.2)b=l[0];return b}
@@ -3882,6 +3921,7 @@ function loop(t){
  if(live){adaptRes(dt);}
  $('mini').style.display=S.unl.map?'block':'none';
  vcShow(vcActive());
+ $('lockHint').style.display=live&&!WD.touch&&!WD.noLock&&!locked()&&!WD.escDown&&performance.now()-(WD.unlockAt||0)>700?'block':'none';
  if(live){if(t-icT>66){icT=t;interactCheck()}if(t-mmT>90&&S.unl.map){mmT=t;drawMapCanvas($('mini'),WD.reg,{mini:1,sc:3})}}
  if(typeof audioTick==='function')audioTick(dt);
 }
@@ -4261,7 +4301,7 @@ function phone(app){
  phApp=app||null;phThread=null;phReg=null;drawPhone();
  if(opening){const ph=$('ov').querySelector('.phone');if(ph)ph.classList.add('opening');if(typeof sfx==='function')sfx('phoneOpen')}
 }
-function closePhone(){if($('ov').classList.contains('phoneov')&&typeof sfx==='function')sfx('phoneClose');closeOv();$('ov').classList.remove('phoneov');if($('vn').classList.contains('on'))return;if(G.ok&&S.inWorld)hub();else if($('hub').classList.contains('on'))hub()}
+function closePhone(){if($('ov').classList.contains('phoneov')&&typeof sfx==='function')sfx('phoneClose');closeOv();$('ov').classList.remove('phoneov');if(G.ok&&S&&S.inWorld)relock();if($('vn').classList.contains('on'))return;if(G.ok&&S.inWorld)hub();else if($('hub').classList.contains('on'))hub()}
 function drawPhone(){
  const apps=Object.keys(APPN).filter(a=>!APPU[a]||S.unl[APPU[a]]);
  const unread=S.msgs.filter(m=>!m.r).length,nn=S.ch>0&&G.ok?newScenes().length:0;
@@ -4687,24 +4727,34 @@ function stepBuf(kind,i){
  const thump=(t0,f0,f1,tau,amp)=>{const n0=Math.floor(t0*sr);let ph=0;for(let k=0;n0+k<len&&k<sr*tau*6;k++){const t=k/sr,f=f1+(f0-f1)*Math.exp(-t/.02);ph+=2*Math.PI*f/sr;d[n0+k]+=Math.sin(ph)*Math.exp(-t/tau)*amp*Math.min(1,k/(sr*.002))}};
  const mode=(t0,f,tau,amp)=>{const n0=Math.floor(t0*sr);for(let k=0;n0+k<len&&k<sr*tau*6;k++){const t=k/sr;d[n0+k]+=Math.sin(2*Math.PI*f*t)*Math.exp(-t/tau)*amp}};
  const grains=(t0,span,n,amp,f,q)=>{for(let g=0;g<n;g++){const t=t0+Math.pow(Math.abs(r()),1.6)*span;burst(t,.012,.0025+Math.abs(r())*.003,amp*(.4+Math.abs(r())*.6),[['bp',f*(.7+Math.abs(r())*.8),q]])}};
- const j=1+r()*.08,toe=.055+Math.abs(r())*.03;
- if(kind==='carpet'){thump(0,95*j,52,.034,.55);burst(0,.08,.022,.5,[['lp',520*j,.7]]);burst(toe,.06,.016,.22,[['lp',800,.7]]);burst(.01,.12,.05,.05,[['bp',1500,.6]])}
- else if(kind==='hard'){thump(0,150*j,82,.018,.42);burst(0,.03,.006,.75,[['hp',1100,.7],['bp',3200*j,1.1]]);burst(toe,.02,.004,.4,[['bp',3800*j,1.2]]);mode(0,2250*j,.035,.05)}
- else if(kind==='wood'){thump(0,118*j,70,.04,.62);burst(0,.05,.018,.45,[['bp',420*j,1.4]]);mode(0,182*j,.06,.14);mode(0,315*j,.05,.1);mode(0,530*j,.035,.06);burst(toe,.04,.012,.22,[['bp',900,1.2]])}
- else if(kind==='metal'){thump(0,120*j,70,.025,.45);burst(0,.04,.008,.55,[['bp',1600*j,1]]);mode(0,640*j,.16,.07);mode(0,1370*j,.12,.05);mode(0,2490*j,.08,.035);burst(toe,.03,.006,.3,[['bp',2400,1.3]])}
- else if(kind==='grass'){thump(0,75*j,48,.03,.3);grains(0,.13,34,.22,3200,.9);burst(.01,.14,.05,.08,[['hp',2500,.7]])}
- else if(kind==='gravel'){thump(0,90*j,55,.03,.4);grains(0,.17,60,.32,2200,.8);grains(toe,.08,20,.2,3000,1)}
- else if(kind==='water'){thump(0,80*j,50,.03,.3);burst(0,.2,.06,.35,[['bp',900*j,.8]]);grains(.02,.15,18,.15,1800,2)}
- else if(kind==='land'){thump(0,85,45,.07,.95);burst(0,.08,.02,.6,[['lp',700,.7]])}
- else{thump(0,108*j,62,.024,.5);burst(0,.04,.011,.6,[['bp',950*j,.8]]);grains(.002,.04,10,.12,4200,.9);burst(toe,.06,.02,.2,[['bp',2600*j,.9]])}
- // a hint of the room: hard floors ring out more than soft ones
- const er={hard:[.3,.2,.14,.09],concrete:[.2,.13,.08,.05],metal:[.25,.16,.1,.06],wood:[.15,.1,.06,.03]}[kind];
- if(er){const src=d.slice(),lp=bq(src,'lp',3800,.7);[.013,.023,.037,.053].forEach((t,q)=>{const o=Math.floor(t*sr);for(let n=0;n+o<len;n++)d[n+o]+=lp[n]*er[q]})}
+ // envelope-shaped noise (attack then decay), the building block of a believable scuff or swish
+ const swish=(t0,att,tau,amp,filt)=>{const n0=Math.floor(t0*sr),n=Math.floor((att+tau*6)*sr),b=new Float32Array(n);for(let k=0;k<n;k++){const t=k/sr;b[k]=r()*(t<att?t/att:Math.exp(-(t-att)/tau))}for(const f of filt)bq(b,f[0],f[1],f[2]);for(let k=0;k<n&&n0+k<len;k++)d[n0+k]+=b[k]*amp};
+ // a diffuse room tail: decaying filtered noise after the step, what makes a hard floor sound like a big hall
+ const tail=(t0,tau,amp,lp)=>swish(t0,.004,tau,amp,[['lp',lp,.7],['hp',180,.7]]);
+ // everyone at a con wears trainers: a rubbery heel thud, a short sole scuff, then the toe rolling down
+ const j=1+r()*.07,toe=.085+Math.abs(r())*.03;
+ if(kind==='carpet'){thump(0,92*j,50,.04,.6);swish(.002,.004,.025,.35,[['lp',650*j,.7]]);thump(toe,80*j,48,.03,.3);swish(toe,.006,.03,.16,[['lp',900,.7]])}
+ else if(kind==='hard'){
+  thump(0,105*j,58,.03,.55);swish(.001,.002,.014,.42,[['hp',600,.7],['lp',3800*j,.7]]);swish(.003,.002,.006,.1,[['bp',2600*j,.9]]);
+  thump(toe,92*j,55,.025,.32);swish(toe,.006,.03,.2,[['bp',1900*j,.6]]);
+  if(i===2)mode(toe+.02,2900*j,.012,.025); // the odd squeak of a trainer on polished stone
+  tail(.006,.09,.1,2600)}
+ else if(kind==='wood'){thump(0,112*j,66,.045,.6);swish(0,.002,.016,.32,[['bp',520*j,1.1]]);mode(0,180*j,.07,.12);mode(0,310*j,.05,.08);thump(toe,100*j,60,.035,.3);swish(toe,.006,.025,.14,[['bp',1200,.8]]);tail(.006,.05,.04,2000)}
+ else if(kind==='metal'){thump(0,118*j,70,.03,.5);swish(0,.002,.012,.4,[['bp',1500*j,.9]]);mode(0,640*j,.18,.06);mode(0,1370*j,.13,.04);mode(0,2490*j,.09,.025);thump(toe,105,64,.025,.28);swish(toe,.004,.02,.18,[['bp',2200,1]]);tail(.006,.07,.05,3000)}
+ else if(kind==='grass'){
+  // grass is a soft swish of blades round the shoe, not a crackle: overlapping, smoothly enveloped noise, mostly high
+  thump(.004,70*j,45,.035,.28);
+  swish(0,.018,.05,.34,[['bp',3400*j,.55],['lp',7000,.7]]);swish(.03,.02,.04,.2,[['bp',5200*j,.6]]);swish(toe-.01,.025,.055,.22,[['bp',2700*j,.5]]);
+  for(let g=0;g<5;g++)swish(Math.abs(r())*.12,.004,.006,.035,[['bp',4000+Math.abs(r())*3000,1.2]])}
+ else if(kind==='gravel'){thump(0,90*j,55,.03,.4);swish(0,.01,.05,.18,[['bp',2400*j,.6]]);grains(0,.15,40,.16,2400,.8);grains(toe,.08,18,.12,3200,1)}
+ else if(kind==='water'){thump(0,80*j,50,.03,.3);swish(0,.01,.07,.3,[['bp',900*j,.8]]);grains(.02,.15,14,.1,1800,2)}
+ else if(kind==='land'){thump(0,85,45,.07,.95);swish(0,.003,.03,.5,[['lp',700,.7]])}
+ else{thump(0,100*j,58,.03,.55);swish(.001,.002,.016,.36,[['bp',1100*j,.7]]);grains(.002,.03,6,.06,3800,.9);thump(toe,90*j,55,.025,.3);swish(toe,.006,.03,.16,[['bp',2000*j,.7]]);tail(.006,.06,.05,2400)}
  let pk=0;for(let n=0;n<len;n++)pk=Math.max(pk,Math.abs(d[n]));const g=.9/(pk||1);
  for(let n=0;n<len;n++){d[n]*=g;if(n>len-400)d[n]*=(len-n)/400}
  const b=AC.createBuffer(1,len,sr);b.getChannelData(0).set(d);return STEPS[key]=b;
 }
-const STEPVOL={carpet:.55,hard:.85,wood:.8,metal:.85,concrete:.75,grass:.6,gravel:.8,water:.7,land:.9};
+const STEPVOL={carpet:.6,hard:.62,wood:.75,metal:.75,concrete:.68,grass:.55,gravel:.7,water:.7,land:.9};
 function stepSound(v,kind,left){if(!AU||!AC)return;try{if(AC.state==='suspended')return;
  let st=0;if(!kind){const f=typeof floorKind==='function'?floorKind():['concrete',0];kind=f[0];st=f[1]}
  const s=AC.createBufferSource();s.buffer=stepBuf(kind,Math.random()*6|0);s.playbackRate.value=(.95+Math.random()*.1)*(v>.9?1.04:1);

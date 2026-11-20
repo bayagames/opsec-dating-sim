@@ -226,24 +226,34 @@ function stepBuf(kind,i){
  const thump=(t0,f0,f1,tau,amp)=>{const n0=Math.floor(t0*sr);let ph=0;for(let k=0;n0+k<len&&k<sr*tau*6;k++){const t=k/sr,f=f1+(f0-f1)*Math.exp(-t/.02);ph+=2*Math.PI*f/sr;d[n0+k]+=Math.sin(ph)*Math.exp(-t/tau)*amp*Math.min(1,k/(sr*.002))}};
  const mode=(t0,f,tau,amp)=>{const n0=Math.floor(t0*sr);for(let k=0;n0+k<len&&k<sr*tau*6;k++){const t=k/sr;d[n0+k]+=Math.sin(2*Math.PI*f*t)*Math.exp(-t/tau)*amp}};
  const grains=(t0,span,n,amp,f,q)=>{for(let g=0;g<n;g++){const t=t0+Math.pow(Math.abs(r()),1.6)*span;burst(t,.012,.0025+Math.abs(r())*.003,amp*(.4+Math.abs(r())*.6),[['bp',f*(.7+Math.abs(r())*.8),q]])}};
- const j=1+r()*.08,toe=.055+Math.abs(r())*.03;
- if(kind==='carpet'){thump(0,95*j,52,.034,.55);burst(0,.08,.022,.5,[['lp',520*j,.7]]);burst(toe,.06,.016,.22,[['lp',800,.7]]);burst(.01,.12,.05,.05,[['bp',1500,.6]])}
- else if(kind==='hard'){thump(0,150*j,82,.018,.42);burst(0,.03,.006,.75,[['hp',1100,.7],['bp',3200*j,1.1]]);burst(toe,.02,.004,.4,[['bp',3800*j,1.2]]);mode(0,2250*j,.035,.05)}
- else if(kind==='wood'){thump(0,118*j,70,.04,.62);burst(0,.05,.018,.45,[['bp',420*j,1.4]]);mode(0,182*j,.06,.14);mode(0,315*j,.05,.1);mode(0,530*j,.035,.06);burst(toe,.04,.012,.22,[['bp',900,1.2]])}
- else if(kind==='metal'){thump(0,120*j,70,.025,.45);burst(0,.04,.008,.55,[['bp',1600*j,1]]);mode(0,640*j,.16,.07);mode(0,1370*j,.12,.05);mode(0,2490*j,.08,.035);burst(toe,.03,.006,.3,[['bp',2400,1.3]])}
- else if(kind==='grass'){thump(0,75*j,48,.03,.3);grains(0,.13,34,.22,3200,.9);burst(.01,.14,.05,.08,[['hp',2500,.7]])}
- else if(kind==='gravel'){thump(0,90*j,55,.03,.4);grains(0,.17,60,.32,2200,.8);grains(toe,.08,20,.2,3000,1)}
- else if(kind==='water'){thump(0,80*j,50,.03,.3);burst(0,.2,.06,.35,[['bp',900*j,.8]]);grains(.02,.15,18,.15,1800,2)}
- else if(kind==='land'){thump(0,85,45,.07,.95);burst(0,.08,.02,.6,[['lp',700,.7]])}
- else{thump(0,108*j,62,.024,.5);burst(0,.04,.011,.6,[['bp',950*j,.8]]);grains(.002,.04,10,.12,4200,.9);burst(toe,.06,.02,.2,[['bp',2600*j,.9]])}
- // a hint of the room: hard floors ring out more than soft ones
- const er={hard:[.3,.2,.14,.09],concrete:[.2,.13,.08,.05],metal:[.25,.16,.1,.06],wood:[.15,.1,.06,.03]}[kind];
- if(er){const src=d.slice(),lp=bq(src,'lp',3800,.7);[.013,.023,.037,.053].forEach((t,q)=>{const o=Math.floor(t*sr);for(let n=0;n+o<len;n++)d[n+o]+=lp[n]*er[q]})}
+ // envelope-shaped noise (attack then decay), the building block of a believable scuff or swish
+ const swish=(t0,att,tau,amp,filt)=>{const n0=Math.floor(t0*sr),n=Math.floor((att+tau*6)*sr),b=new Float32Array(n);for(let k=0;k<n;k++){const t=k/sr;b[k]=r()*(t<att?t/att:Math.exp(-(t-att)/tau))}for(const f of filt)bq(b,f[0],f[1],f[2]);for(let k=0;k<n&&n0+k<len;k++)d[n0+k]+=b[k]*amp};
+ // a diffuse room tail: decaying filtered noise after the step, what makes a hard floor sound like a big hall
+ const tail=(t0,tau,amp,lp)=>swish(t0,.004,tau,amp,[['lp',lp,.7],['hp',180,.7]]);
+ // everyone at a con wears trainers: a rubbery heel thud, a short sole scuff, then the toe rolling down
+ const j=1+r()*.07,toe=.085+Math.abs(r())*.03;
+ if(kind==='carpet'){thump(0,92*j,50,.04,.6);swish(.002,.004,.025,.35,[['lp',650*j,.7]]);thump(toe,80*j,48,.03,.3);swish(toe,.006,.03,.16,[['lp',900,.7]])}
+ else if(kind==='hard'){
+  thump(0,105*j,58,.03,.55);swish(.001,.002,.014,.42,[['hp',600,.7],['lp',3800*j,.7]]);swish(.003,.002,.006,.1,[['bp',2600*j,.9]]);
+  thump(toe,92*j,55,.025,.32);swish(toe,.006,.03,.2,[['bp',1900*j,.6]]);
+  if(i===2)mode(toe+.02,2900*j,.012,.025); // the odd squeak of a trainer on polished stone
+  tail(.006,.09,.1,2600)}
+ else if(kind==='wood'){thump(0,112*j,66,.045,.6);swish(0,.002,.016,.32,[['bp',520*j,1.1]]);mode(0,180*j,.07,.12);mode(0,310*j,.05,.08);thump(toe,100*j,60,.035,.3);swish(toe,.006,.025,.14,[['bp',1200,.8]]);tail(.006,.05,.04,2000)}
+ else if(kind==='metal'){thump(0,118*j,70,.03,.5);swish(0,.002,.012,.4,[['bp',1500*j,.9]]);mode(0,640*j,.18,.06);mode(0,1370*j,.13,.04);mode(0,2490*j,.09,.025);thump(toe,105,64,.025,.28);swish(toe,.004,.02,.18,[['bp',2200,1]]);tail(.006,.07,.05,3000)}
+ else if(kind==='grass'){
+  // grass is a soft swish of blades round the shoe, not a crackle: overlapping, smoothly enveloped noise, mostly high
+  thump(.004,70*j,45,.035,.28);
+  swish(0,.018,.05,.34,[['bp',3400*j,.55],['lp',7000,.7]]);swish(.03,.02,.04,.2,[['bp',5200*j,.6]]);swish(toe-.01,.025,.055,.22,[['bp',2700*j,.5]]);
+  for(let g=0;g<5;g++)swish(Math.abs(r())*.12,.004,.006,.035,[['bp',4000+Math.abs(r())*3000,1.2]])}
+ else if(kind==='gravel'){thump(0,90*j,55,.03,.4);swish(0,.01,.05,.18,[['bp',2400*j,.6]]);grains(0,.15,40,.16,2400,.8);grains(toe,.08,18,.12,3200,1)}
+ else if(kind==='water'){thump(0,80*j,50,.03,.3);swish(0,.01,.07,.3,[['bp',900*j,.8]]);grains(.02,.15,14,.1,1800,2)}
+ else if(kind==='land'){thump(0,85,45,.07,.95);swish(0,.003,.03,.5,[['lp',700,.7]])}
+ else{thump(0,100*j,58,.03,.55);swish(.001,.002,.016,.36,[['bp',1100*j,.7]]);grains(.002,.03,6,.06,3800,.9);thump(toe,90*j,55,.025,.3);swish(toe,.006,.03,.16,[['bp',2000*j,.7]]);tail(.006,.06,.05,2400)}
  let pk=0;for(let n=0;n<len;n++)pk=Math.max(pk,Math.abs(d[n]));const g=.9/(pk||1);
  for(let n=0;n<len;n++){d[n]*=g;if(n>len-400)d[n]*=(len-n)/400}
  const b=AC.createBuffer(1,len,sr);b.getChannelData(0).set(d);return STEPS[key]=b;
 }
-const STEPVOL={carpet:.55,hard:.85,wood:.8,metal:.85,concrete:.75,grass:.6,gravel:.8,water:.7,land:.9};
+const STEPVOL={carpet:.6,hard:.62,wood:.75,metal:.75,concrete:.68,grass:.55,gravel:.7,water:.7,land:.9};
 function stepSound(v,kind,left){if(!AU||!AC)return;try{if(AC.state==='suspended')return;
  let st=0;if(!kind){const f=typeof floorKind==='function'?floorKind():['concrete',0];kind=f[0];st=f[1]}
  const s=AC.createBufferSource();s.buffer=stepBuf(kind,Math.random()*6|0);s.playbackRate.value=(.95+Math.random()*.1)*(v>.9?1.04:1);

@@ -37,13 +37,17 @@ function setupInput(){
   if(!worldLive())return;
   if(k==='e'||k==='enter'||k==='f'){e.preventDefault();doInteract()}
   if(k==='m'&&S.unl.map){e.preventDefault();phone('map')}});
- addEventListener('keyup',e=>{WD.keys[e.key.toLowerCase()]=false});
+ addEventListener('keyup',e=>{WD.keys[e.key.toLowerCase()]=false;if(e.key==='Escape'){WD.escDown=false;if(WD.lockAfterEsc){WD.lockAfterEsc=false;setTimeout(tryLock,30)}}});
+ addEventListener('keydown',e=>{if(e.key==='Escape')WD.escDown=true},true);
  addEventListener('blur',()=>{WD.keys={}});
  document.addEventListener('pointerlockerror',()=>{if(!WD.clickLock)return;WD.clickLock=false;WD.lockFails=(WD.lockFails||0)+1;if(WD.lockFails>=3&&!WD.everLocked){WD.noLock=true;$('lockHint').innerHTML='<b>Drag</b> to look around'}});
  document.addEventListener('pointerlockchange',()=>{
   WD.locked=document.pointerLockElement===lockEl();
-  if(WD.locked){WD.everLocked=true;WD.lockFails=0;return}
+  if(WD.locked){WD.everLocked=true;WD.lockFails=0;WD.lockAt=performance.now();return}
+  WD.unlockAt=performance.now();
   const self=WD.selfUnlock;WD.selfUnlock=false;
+  // a lock that dies within a moment of being granted was the browser finishing an Esc press, not the player asking for the phone
+  if(performance.now()-(WD.lockAt||0)<450)return;
   // Esc released the mouse: that's the "open phone" key
   if(!self&&S&&S.inWorld&&(worldLive()||$('vn').classList.contains('on')))phone();
  });
@@ -70,6 +74,9 @@ function setupInput(){
  tz.addEventListener('touchstart',tStart,{passive:false});tz.addEventListener('touchmove',tMove,{passive:false});tz.addEventListener('touchend',tEnd);tz.addEventListener('touchcancel',tEnd);
  $('actBtn').addEventListener('click',e=>{e.stopPropagation();doInteract()});
 }
+/* step back into mouse-look (after the phone closes, a scene ends...). While Esc is held, wait for it to come up:
+   locking during an Esc press hands the browser an Esc to cancel the lock with, and the phone pops straight back */
+function relock(){if(WD.touch||WD.noLock||locked())return;if(WD.escDown){WD.lockAfterEsc=true;return}tryLock()}
 function tryLock(){if(WD.touch||WD.noLock)return;const el=lockEl();if(document.pointerLockElement===el)return;try{const p=el.requestPointerLock&&el.requestPointerLock();if(p&&p.catch)p.catch(()=>{})}catch(e){}}
 function setTouch(on){WD.touch=on;document.body.classList.toggle('touchui',on);document.body.classList.toggle('desk',!on)}
 /* dx>0 (mouse/finger moves right) turns right; dy<0 (moves up) looks up. Never inverted. */
@@ -218,7 +225,7 @@ function updSprites(dt){
   const vis=c.reg===WD.reg&&c.when();
   if(!c.obj){if(!vis)continue;c.obj=cutout(null,.98,2.45);G.scene.add(c.obj);c.mark=markObj();G.scene.add(c.mark)}
   c.obj.visible=vis;c.mark.visible=false;if(!vis)continue;
-  const sk=charSVGKey(c);if(c.objKey!==sk){c.objKey=sk;const t=spriteTex('c:'+sk,fullSVG(sk));const b=c.obj.userData.body.material;b.map=t;b.emissiveMap=t;b.needsUpdate=true}
+  const sk=charSVGKey(c);if(c.objKey!==sk){c.objKey=sk;const t=spriteTex('c:'+sk,fullSVG(sk));const bd=c.obj.userData.body,b=bd.material;b.map=t;b.emissiveMap=t;b.needsUpdate=true;if(bd.customDistanceMaterial){bd.customDistanceMaterial.map=t;bd.customDistanceMaterial.needsUpdate=true}}
   c.obj.position.set(c.x,c.y||0,c.z);c.obj.rotation.y=yaw;
   const body=c.obj.userData.body;body.scale.y=1+Math.sin(tt*1.7+c.x)*.007;body.scale.x=1-Math.sin(tt*1.7+c.x)*.004;
   if(G.news.has(c.id)||storyMark(c)){c.mark.visible=true;c.mark.position.set(c.x,(c.y||0)+2.62+Math.sin(tt*3)*.07,c.z)}
@@ -246,9 +253,20 @@ function gateObj(g){
  if(g.kind==='rope'){const n=Math.max(1,Math.round(L/2.4));
   for(let i=0;i<=n;i++){const t=i/n,p=new T.Mesh(new T.CylinderGeometry(.045,.06,1,10),G.gm.post);p.position.set(g.x0+dx*t,g.y+.5,g.z0+dz*t);grp.add(p);const b=new T.Mesh(new T.CylinderGeometry(.16,.18,.04,14),G.gm.post);b.position.set(p.position.x,g.y+.02,p.position.z);grp.add(b)}
   for(let i=0;i<n;i++){const t=(i+.5)/n,seg=L/n,r=new T.Mesh(new T.BoxGeometry(seg,.05,.05),G.gm.rope);r.position.set(g.x0+dx*t,g.y+.86,g.z0+dz*t);r.rotation.y=-ang;grp.add(r)}}
- else{const h=g.kind==='card'||g.label==='The bar'?2.6:2.4,d=new T.Mesh(new T.BoxGeometry(L,h,.08),G.gm.door);d.position.set((g.x0+g.x1)/2,g.y+h/2,(g.z0+g.z1)/2);d.rotation.y=-ang;grp.add(d);
-  if(g.kind==='card'){const r=new T.Mesh(new T.BoxGeometry(.12,.18,.14),G.gm.red);r.position.set(d.position.x,g.y+1.25,d.position.z);r.rotation.y=-ang;r.translateX(L/2+.15);grp.add(r)}}
- return grp}
+ else{const f=fitGate(g);let w=L,h=g.kind==='card'||g.label==='The bar'?2.6:2.4,cx=(g.x0+g.x1)/2,cz=(g.z0+g.z1)/2,y=g.y,a=-ang;
+  if(f){w=f.w-.02;h=f.h-.01;cx=f.cx;cz=f.cz;y=f.y;a=f.o==='h'?0:-Math.PI/2}
+  const d=new T.Mesh(new T.BoxGeometry(w,h,.07),G.gm.door);d.position.set(cx,y+h/2,cz);d.rotation.y=a;grp.add(d);
+  if(g.kind==='card'){const r=new T.Mesh(new T.BoxGeometry(.12,.18,.14),G.gm.red);r.position.set(cx,y+1.25,cz);r.rotation.y=a;r.translateX(w/2+.22);grp.add(r)}}
+ grp.traverse(o=>{if(o.isMesh){o.castShadow=o.receiveShadow=true}});return grp}
+/* find the doorway a gate stands in (from the level's door list) so the door fills it exactly, centred in the wall */
+function fitGate(g){
+ const L=DOORS[g.reg]||[],hz=Math.abs(g.z1-g.z0)<.05,o=hz?'h':'v',at=hz?g.z0:g.x0,c0=hz?Math.min(g.x0,g.x1):Math.min(g.z0,g.z1),c1=hz?Math.max(g.x0,g.x1):Math.max(g.z0,g.z1);
+ let best=null,bs=1e9;for(const d of L){if(d.o!==o||Math.abs(d.at-at)>1.2||Math.abs(d.y-g.y)>.6)continue;if(d.c<c0-.6||d.c>c1+.6)continue;const sc=Math.abs(d.at-at)+Math.abs(d.c-(c0+c1)/2);if(sc<bs){bs=sc;best=d}}
+ if(!best)return null;const d=best,H=G.regions[g.reg].hash,yy=d.y+1;
+ const solid=(x,z)=>{for(const q of H[Math.floor(x/4)+','+Math.floor(z/4)]||[])if(x>q[0]&&x<q[2]&&z>q[1]&&z<q[3]&&yy>q[4]&&yy<q[5])return true;return false};
+ const j=d.c-d.w/2-.05,side=o==='h'?(solid(j,d.at+.1)?1:solid(j,d.at-.1)?-1:0):(solid(d.at+.1,j)?1:solid(d.at-.1,j)?-1:0);
+ const p=d.at+side*.1;return{o,w:d.w,h:d.h,y:d.y,cx:o==='h'?d.c:p,cz:o==='h'?p:d.c};
+}
 function tapeTex(){if(G.tape)return G.tape;const c=document.createElement('canvas');c.width=128;c.height=256;const x=c.getContext('2d');for(let i=0;i<3;i++){x.save();x.translate(64,70+i*50);x.rotate(i%2?.18:-.18);x.fillStyle='#ffd166';x.fillRect(-64,-12,128,24);x.fillStyle='#1b1026';x.font='bold 15px sans-serif';x.textAlign='center';x.fillText('STAFF ONLY',0,6);x.restore()}const t=new G.T.CanvasTexture(c);t.colorSpace=G.T.SRGBColorSpace;return G.tape=t}
 /* ---------- maps ---------- */
 function levelOf(reg,y){const L=LEVELS[reg]||[[0,'']];let b=L[0][0];for(const l of L)if(l[0]<=y+1.2)b=l[0];return b}
@@ -302,6 +320,7 @@ function loop(t){
  if(live){adaptRes(dt);}
  $('mini').style.display=S.unl.map?'block':'none';
  vcShow(vcActive());
+ $('lockHint').style.display=live&&!WD.touch&&!WD.noLock&&!locked()&&!WD.escDown&&performance.now()-(WD.unlockAt||0)>700?'block':'none';
  if(live){if(t-icT>66){icT=t;interactCheck()}if(t-mmT>90&&S.unl.map){mmT=t;drawMapCanvas($('mini'),WD.reg,{mini:1,sc:3})}}
  if(typeof audioTick==='function')audioTick(dt);
 }
