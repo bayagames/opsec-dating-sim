@@ -1,5 +1,5 @@
 /* ============ WORLD ============ */
-const WD={x:0,y:0,z:0,yaw:0,pit:0,vx:0,vz:0,vy:0,eye:1.62,ground:true,reg:'home',area:null,active:false,keys:{},joy:null,look:null,near:null,t:0,lastSave:0,npcs:[],touch:false,bob:0,stepPh:0,fovk:0};
+const WD={x:0,y:0,z:0,yaw:0,pit:0,vx:0,vz:0,vy:0,eye:1.62,ground:true,reg:'home',area:null,active:false,keys:{},joy:null,look:null,near:null,t:0,lastSave:0,npcs:[],touch:false,bob:0,stepPh:0,fovk:0,land:0,bobAmp:0};
 /* ---------- areas ---------- */
 /* the most specific area wins: 'sub' areas first, then the smallest rectangle (a café inside a lobby, a food court inside the courtyard) */
 function areaAt(reg,x,z,y){let best=null,bs=1e18;for(const k in AREAS){const a=AREAS[k];if(a.reg!==reg)continue;const r=a.r;if(x>=r[0]&&x<=r[2]&&z>=r[1]&&z<=r[3]&&y>=a.y0&&y<=a.y1){const sz=(r[2]-r[0])*(r[3]-r[1])/(a.sub?1e6:1);if(sz<bs){bs=sz;best=k}}}return best}
@@ -209,7 +209,7 @@ function render(dt){
   u.sh.value=u.sh.value||new T.Vector3(.55,.25,.9);u.hi.value=u.hi.value||new T.Vector3(1.04,1.,.95)}
  G.scene.background=G.fog.color;
  // camera
- const sp=Math.hypot(WD.vx,WD.vz),bamp=(WD.bobAmp||0)*(sp>6.5?.024:.016)*(SETTINGS.bob===false?0:1),bob=-bamp*(1-Math.cos(WD.bob*2))*.5-WD.land;
+ const sp=Math.hypot(WD.vx,WD.vz),bamp=(WD.bobAmp||0)*(sp>6.5?.024:.016)*(SETTINGS.bob===false?0:1),bob=-bamp*(1-Math.cos(WD.bob*2))*.5-(WD.land||0);
  const asp=w/h,vf=clamp(2*Math.atan(Math.tan(.75+WD.fovk*.045)/asp),1.05,1.8);
  cam.fov=vf*180/Math.PI;cam.far=(FAR[WD.reg]||180)+40;cam.updateProjectionMatrix();
  cam.position.set(WD.x,WD.eye+bob,WD.z);cam.rotation.set(WD.pit,WD.yaw,0);
