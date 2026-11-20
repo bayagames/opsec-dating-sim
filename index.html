@@ -2788,23 +2788,38 @@ function bakeFinish(reg){
   const t=new T.DataTexture(px,LM.S,LM.S,T.RGBAFormat,T.UnsignedByteType);t.minFilter=t.magFilter=T.LinearFilter;t.generateMipmaps=false;t.channel=1;t.colorSpace=T.NoColorSpace;t.needsUpdate=true;R.lmTex.push(t)}
  r.setRenderTarget(null);R.bk=null;
  R.obj.traverse(o=>{if(o.isMesh&&o.userData.mk&&o.userData.pg>=0){o.userData.lmk=reg+':'+o.userData.pg;o.material=getMat(o.userData.mk,o.userData.lmk)}});
+ return R.lmTex.map(t=>t.image.data);
 }
-/* bake everything, a few lights per frame so the loading bar moves; cb() when done */
-function bakeAll(prog,cb){
+/* the finished pages are cached in IndexedDB, keyed by a fingerprint of the region's lights and lightmap layout,
+   so only the first load on a device (or after the level changes) pays for the bake */
+const LMDB={db:null,open(){return new Promise(res=>{try{const q=indexedDB.open('opsec_lightmaps',1);q.onupgradeneeded=()=>q.result.createObjectStore('lm');q.onsuccess=()=>{LMDB.db=q.result;res()};q.onerror=()=>res()}catch(e){res()}})},
+ get(k){return new Promise(res=>{if(!LMDB.db)return res(null);try{const q=LMDB.db.transaction('lm').objectStore('lm').get(k);q.onsuccess=()=>res(q.result||null);q.onerror=()=>res(null)}catch(e){res(null)}})},
+ put(k,v){if(!LMDB.db)return;try{const t=LMDB.db.transaction('lm','readwrite');t.objectStore('lm').put(v,k)}catch(e){}}};
+function lmKey(reg){const R=G.regions[reg],L=G.lights[reg]||[];let h=0;const add=v=>{h=(h*31+Math.round(v*100))|0};
+ for(const l of L)l.forEach(add);let verts=0;R.obj.traverse(o=>{if(o.isMesh&&o.userData.pg>=0){verts+=o.geometry.attributes.position.count;const a=o.geometry.attributes.lmuv.array;for(let i=0;i<a.length;i+=97)add(a[i]*1e4)}});
+ return['v3',reg,R.lm.S,R.lm.pages,R.lm.D.toFixed(3),verts,h,G.LK,LOOK.reach,BAKE.fill,BAKE.soft,BAKE.cube].join('|')}
+function lmApply(reg,pages){const T=G.T,R=G.regions[reg],S=R.lm.S;R.lmTex=pages.map(px=>{const t=new T.DataTexture(px,S,S,T.RGBAFormat,T.UnsignedByteType);t.minFilter=t.magFilter=T.LinearFilter;t.generateMipmaps=false;t.channel=1;t.colorSpace=T.NoColorSpace;t.needsUpdate=true;return t});
+ R.obj.traverse(o=>{if(o.isMesh&&o.userData.mk&&o.userData.pg>=0){o.userData.lmk=reg+':'+o.userData.pg;o.material=getMat(o.userData.mk,o.userData.lmk)}})}
+/* bake everything, a few lights per frame so the loading bar moves; cb(ok) when done */
+async function bakeAll(prog,cb){
  if(!bakeOK()){cb(false);return}
- const only=window.__bakeOnly,jobs=[];for(const reg in G.regions)if(!only||only.includes(reg))for(let i=0;i<G.lights[reg].length;i++)jobs.push([reg,i]);
- const regs=Object.keys(G.regions);let j=0,setUp={},n=Math.max(1,jobs.length);
- const step=()=>{const t0=performance.now();
-  try{
-   let k=0;while(j<jobs.length&&(k++<1||performance.now()-t0<30)){const[reg,i]=jobs[j];if(!setUp[reg]){bakeSetup(reg);setUp[reg]=1}bakeLight(reg,i);j++;
-    if(j===jobs.length||jobs[j][0]!==reg)bakeFinish(reg)}
-   for(const reg of regs)if(!setUp[reg]&&j>=jobs.length&&(!only||only.includes(reg))){bakeSetup(reg);bakeFinish(reg);setUp[reg]=1} // regions with no lights
-  }catch(e){console.error('bake failed',e);cb(false);return}
-  // wait for the GPU to really finish this batch (reading one pixel forces it), so progress is honest
-  // and the browser never piles up seconds of queued work
-  bakeSync();prog(j/n);
-  if(j<jobs.length)setTimeout(step,0);else{if(G.bkCubeRT){G.bkCubeRT.dispose();G.bkCube=null}cb(true)}};
- requestAnimationFrame(step);
+ await LMDB.open();
+ const only=window.__bakeOnly,regs=Object.keys(G.regions).filter(r=>!only||only.includes(r));
+ const todo=[];let total=0,done=0;
+ for(const reg of regs){const key=lmKey(reg),hit=window.__noLMCache?null:await LMDB.get(key);if(hit&&hit.length===G.regions[reg].lm.pages){lmApply(reg,hit);continue}todo.push([reg,key]);total+=G.lights[reg].length||1}
+ const n=Math.max(1,total);
+ for(const[reg,key]of todo){
+  try{bakeSetup(reg)}catch(e){console.error('bake failed',e);cb(false);return}
+  const L=G.lights[reg];let i=0;
+  await new Promise(res=>{const step=()=>{const t0=performance.now();
+   try{let k=0;while(i<L.length&&(k++<1||performance.now()-t0<30)){bakeLight(reg,i);i++;done++}}catch(e){console.error('bake failed',e);cb(false);return}
+   // wait for the GPU to really finish this batch (reading one pixel forces it): honest progress, no piled-up work
+   bakeSync();prog(done/n);if(i<L.length)setTimeout(step,0);else res()};setTimeout(step,0)});
+  if(!L.length)done++;
+  const px=bakeFinish(reg);LMDB.put(key,px);
+ }
+ if(G.bkCubeRT){G.bkCubeRT.dispose();G.bkCube=null}
+ prog(1);cb(true);
 }
 function bakeSync(){const T=G.T,r=G.r;if(!G.bkSyncRT){G.bkSyncRT=new T.WebGLRenderTarget(1,1,{depthBuffer:false});G.bkSyncBuf=new Uint8Array(4)}
  r.readRenderTargetPixels(G.bkSyncRT,0,0,1,1,G.bkSyncBuf)}
