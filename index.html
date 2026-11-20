@@ -2318,7 +2318,7 @@ const QUALITY={
 };
 /* the look, in one place: emissive gain is compressed above 1 so signs and fixtures read as lit without
    blooming into fog; bloom only catches what is genuinely bright */
-const LOOK={exposure:1.12,hemi:3.2,fill:.5,env:{home:.6,con:.5,f13:.55,office:.7,station:.7},bloomStr:.26,bloomRad:.62,bloomThr:1.05,ao:.85,sat:1.12,con:1.07,vig:.12,light:7.6,reach:1.3};
+const LOOK={exposure:1.12,hemi:3.2,fill:.5,env:{home:.6,con:.5,f13:.55,office:.7,station:.7},bloomStr:.26,bloomRad:.62,bloomThr:1.05,ao:.85,sat:1.12,con:1.07,vig:.12,light:7.6,reach:1.3,shadowK:1.45};
 /* ---- textures: every texture gets its own canvas; small non-repeating ones are packed into atlases later ---- */
 function tex(key,w,h,paint){
  if(G.tx[key])return key;
@@ -2592,7 +2592,7 @@ function updLights(dt,force){
   for(const i of want){if(have.has(i))continue;const p=free.shift();if(!p)break;assign(p,i,instant);have.add(i)}
  }
  for(const p of P.concat(SP)){const u=p.userData;if(u.src<0){p.intensity=0;continue}u.k+=(u.tk-u.k)*Math.min(1,dt*5);if(u.tk===0&&u.k<.01){u.k=0;u.src=-1}
-  p.intensity=u.base*u.k}
+  p.intensity=u.base*u.k*(p.castShadow?LOOK.shadowK:1)}
  // refresh shadow maps when a caster moved, otherwise ~15 times a second for people walking about
  if(SP.length){G.shT=(G.shT||0)-dt;if(G.shDirty||G.shT<=0){G.r.shadowMap.needsUpdate=true;G.shDirty=false;G.shT=1/15}}
 }
