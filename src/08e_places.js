@@ -44,7 +44,7 @@ function buildStation(){
  panel(700.22,2.4,32.5,4,.5,'e',sign('TICKETS','#1b1026','#f6eefc',256,48));
  box(760,0,30,770,2.8,36,MT.plain('#3a2418'));panel(759.99,1.6,33,9,1,'w',sign('PASTY PALACE · HOT DRINKS','#ffd9a0','#3a2418',512,64));box(759.2,0,30.4,760,1.1,35.6,MT.plain('#c9a46a'));
  for(const[x,z]of[[715,34],[725,38],[747,38],[750,30]]){box(x-1.5,0,z-.35,x+1.5,.45,z+.35,MT.woodDark);box(x-1.5,.45,z+.25,x+1.5,.9,z+.35,MT.woodDark,{col:false})}
- for(const[x,z]of[[712,26],[760,26],[712,42],[760,42]])lightPanel(x,12,z,3,3,'#f4f8ff',18,.7);addLight(736,5,32,[1,.95,.9],18,.9);
+ for(const[x,z]of[[712,26],[760,26],[712,42],[760,42]])lightPanel(x,12,z,3,3,'#f4f8ff',18,.32);addLight(736,5,32,[1,.95,.9],16,.4);
  // ticket barriers
  for(let i=0;i<9;i++){const x=716+i*5;if(i===4)continue;box(x-.3,0,19.6,x+.3,1.1,20.6,MT.chrome);box(x-.25,1.1,19.7,x+.25,1.15,20.5,MT.glow(i%2?'#8affc1':'#ffd166',1.6),{col:false})}
  colBox(700,19.6,713,20.6,0,1.2);colBox(759,19.6,772,20.6,0,1.2);
