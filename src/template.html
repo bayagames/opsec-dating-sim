@@ -74,7 +74,7 @@ button:focus-visible{outline:3px solid var(--butter);outline-offset:2px}
 #txt.sms{font:20px/1.25 'VT323',monospace;color:var(--mint)}
 #nexti{position:absolute;right:16px;bottom:6px;color:var(--butter);font-size:13px;animation:bl 1s infinite}
 @keyframes bl{50%{opacity:.2}}
-#chs{position:absolute;left:50%;transform:translateX(-50%);width:min(760px,calc(100% - 24px));bottom:168px;display:flex;flex-direction:column;gap:9px;z-index:15;max-height:calc(100% - 230px);overflow-y:auto}
+#chs{position:absolute;left:50%;transform:translateX(-50%);width:min(760px,calc(100% - 24px));bottom:168px;display:flex;flex-direction:column;gap:9px;z-index:15;max-height:calc(100% - 230px);overflow-y:auto;overflow-x:hidden;padding:2px 10px 2px 4px}
 #chs:not(:empty)~#por,#vn.choosing #por{filter:brightness(.6)}
 .ch{min-height:48px;text-align:left;padding:10px 16px;border-radius:12px;border:2px solid var(--line);background:#1b1026f0;font-size:16px;box-shadow:0 4px 14px #0007;transition:border-color .15s,background .15s,translate .15s,box-shadow .15s}
 .ch:hover,.ch:focus-visible{border-color:var(--butter);background:#352349;translate:5px 0;box-shadow:0 6px 18px #0009,-4px 0 0 var(--butter)}
@@ -256,7 +256,7 @@ button:focus-visible{outline:3px solid var(--butter);outline-offset:2px}
 #keys b{color:var(--ink);font:15px 'VT323',monospace;background:#ffffff1a;border-radius:4px;padding:0 5px;margin:0 2px 0 8px}
 #keys b:first-child{margin-left:0}
 body.desk #keys{display:block}
-body.desk.unlocked #lockHint{display:block}
+
 #joy{display:none;position:absolute;left:28px;bottom:36px;width:136px;height:136px;border-radius:50%;border:2px solid #ffffff55;background:radial-gradient(#ffffff14,#0005);pointer-events:none}
 #knob{position:absolute;left:41px;top:41px;width:54px;height:54px;border-radius:50%;background:#ffffffcc;box-shadow:0 3px 10px #0006;transition:background .15s}
 #joy.run #knob{background:var(--butter)}
@@ -310,7 +310,6 @@ body.talking #gl{filter:blur(7px) brightness(.5) saturate(.85);transform:scale(1
 #cross{transition:width .15s,height .15s,margin .15s,background .15s}
 #card.on>div>*{animation:cardUp .7s cubic-bezier(.2,.8,.2,1) backwards}
 #card.on>div>*:nth-child(2){animation-delay:.15s}#card.on>div>*:nth-child(3){animation-delay:.3s}#card.on>div>*:nth-child(4){animation-delay:.9s}
-#card.on{animation:ovIn .5s ease}
 @keyframes cardUp{from{opacity:0;translate:0 18px;letter-spacing:.12em}}
 #areaName.fade{animation:af 3.2s forwards}
 @keyframes af{0%{opacity:0;letter-spacing:.3em}12%,70%{opacity:1;letter-spacing:.06em}100%{opacity:0;letter-spacing:.06em}}
@@ -330,8 +329,11 @@ body.busyov #phoneBtn{opacity:.35;pointer-events:none}
  #por{left:max(0px,calc(50% - 650px));right:auto;bottom:0;height:calc(100% - 52px);justify-content:flex-start}
  #por svg{max-height:860px}
  #por svg.enter{animation-name:porInL}
- #box{left:auto;right:max(16px,calc(50% - 620px));transform:none;width:min(780px,60vw)}
- #chs{left:auto;right:max(16px,calc(50% - 620px));transform:none;width:min(720px,56vw);bottom:186px}
+ #box{--bw:min(780px,60vw);width:var(--bw);transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+ #chs{--cw:min(720px,56vw);width:var(--cw);bottom:186px;transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+ /* centred by default; when a character portrait is on screen the text slides right to make room */
+ #vn.haspor #box{transform:translateX(calc(-50% + min(50vw - 16px,620px) - var(--bw)/2))}
+ #vn.haspor #chs{transform:translateX(calc(-50% + min(50vw - 16px,620px) - var(--cw)/2 - 30px))}
 }
 @keyframes porInL{from{translate:-70px 0;opacity:0}}
 /* ---- settings ---- */
@@ -349,6 +351,12 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 .seg{display:flex;background:#120c18;border:1px solid var(--line);border-radius:12px;padding:3px;gap:3px}
 .seg button{flex:1;min-height:38px;border:0;border-radius:9px;background:none;font-weight:600;color:var(--dim);transition:background .2s,color .2s}
 .seg button.on{background:var(--butter);color:#1b1026}
+#vcur{position:fixed;left:0;top:0;width:22px;height:22px;margin:-2px 0 0 -2px;z-index:500;pointer-events:none;display:none;background:no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22'%3E%3Cpath d='M2 2 L2 18 L6.5 13.8 L9.6 20.4 L12.6 19 L9.6 12.6 L15.6 12.6Z' fill='%23f6eefc' stroke='%231b1026' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E");filter:drop-shadow(0 2px 3px #0008)}
+.ch.vhover{border-color:var(--butter);background:#352349;translate:5px 0;box-shadow:0 6px 18px #0009,-4px 0 0 var(--butter)}
+.btn.vhover:not(:disabled){translate:0 -2px;box-shadow:0 6px 16px #0007;filter:brightness(1.12)}
+.app.vhover .ic{translate:0 -4px;box-shadow:0 10px 18px #0008}
+.loc.vhover,.chat.vhover,.seg button.vhover,.pback.vhover,.tok.vhover,.chip.vhover,.code button.vhover{border-color:var(--butter);filter:brightness(1.15)}
+#box.vhover{border-color:#6d4d8a}
 </style>
 </head>
 <body>
@@ -410,6 +418,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
   <div id="card"></div>
   <div id="toasts"></div>
   <div id="fade"></div>
+  <div id="vcur"></div>
 </div>
 <script src="vendor/three.bundle.js"></script>
 <script>

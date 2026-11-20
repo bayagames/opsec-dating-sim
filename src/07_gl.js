@@ -18,10 +18,10 @@ function tex(key,w,h,paint){
 }
 /* ---- geometry building ---- */
 let BR=null;
-function region(name,o){G.regions[name]={groups:{},fog:o.fog,fr:o.fr||[8,60],amb:null,sky:o.sky||null};G.boxes[name]=[];G.walls[name]=[];G.lights[name]=[];G.surf[name]=[];BR=name}
+function region(name,o){G.regions[name]={groups:{},fog:o.fog,fr:o.fr||[8,60],amb:null,day:!!o.day};G.boxes[name]=[];G.walls[name]=[];G.lights[name]=[];G.surf[name]=[];BR=name}
 function addLight(x,y,z,col,range,inten){G.lights[BR].push([x,y,z,col[0],col[1],col[2],range,inten||1])}
 function grp(m,cx,cz){
- const R=G.regions[BR],t=m.t||'white',kind=m.e?'emit':(m.cut?'cut':'lit');
+ const R=G.regions[BR],t=m.t||'white',kind=m.glass?'glass':m.e?'emit':(m.cut?'cut':'lit');
  const prof=m.e?'':(m.r!==undefined?m.r:.85)+':'+(m.m||0);
  const k=Math.floor(cx/32)+','+Math.floor(cz/32)+'|'+t+'|'+kind+'|'+prof;
  return R.groups[k]||(R.groups[k]={t,kind,prof,r:m.r,m:m.m||0,p:[],n:[],u:[],c:[]});
@@ -37,7 +37,7 @@ function quad(a,b,c,d,m,uw,vh){
  const lc=[lin(col[0])*gk,lin(col[1])*gk,lin(col[2])*gk];
  // breakpoints along the vertical edge so walls darken towards the floor (cheap baked AO)
  let ss=[0,1],ts=[0,1];
- const vert=Math.abs(ny)<.5&&!m.e&&G.ao!==undefined;
+ const vert=Math.abs(ny)<.5&&!m.e&&!m.glass&&G.ao!==undefined;
  if(vert){const vAx=Math.abs(e2[1])>=Math.abs(e1[1])?2:1,ev=vAx===2?e2:e1,y0=vAx===2?a[1]:a[1];
   const br=[0,1];for(const yy of[G.ao+.3,G.ao+1.1]){const t=(yy-y0)/(ev[1]||1e-9);if(t>.02&&t<.98)br.push(t)}br.sort((p,q)=>p-q);if(vAx===2)ts=br;else ss=br}
  const P=(s,t)=>[a[0]+e1[0]*s+e2[0]*t,a[1]+e1[1]*s+e2[1]*t,a[2]+e1[2]*s+e2[2]*t];
@@ -147,6 +147,7 @@ function getMat(mk){
  const T=G.T,[t,kind,prof]=mk.split('|');const map=t==='white'?null:texObj(t);
  let m;
  if(kind==='emit')m=new T.MeshBasicMaterial({map,vertexColors:true});
+ else if(kind==='glass'){const o={vertexColors:true,transparent:true,opacity:.16,depthWrite:false,side:T.DoubleSide};m=QUALITY[G.q].std?new T.MeshStandardMaterial(Object.assign(o,{roughness:.06,metalness:.3})):new T.MeshLambertMaterial(o)}
  else{const pr=prof.split(':'),rough=+pr[0],metal=+pr[1];
   const o={map,vertexColors:true};if(kind==='cut'){o.alphaTest=.5;o.side=T.DoubleSide}
   if(QUALITY[G.q].std){o.roughness=Math.max(.45,rough);o.metalness=metal;m=new T.MeshStandardMaterial(o)}else m=new T.MeshLambertMaterial(o)}
@@ -194,9 +195,9 @@ function finishRegions(){
 /* ---- sky dome: gradient + stars, follows the camera, fog colour is the horizon ---- */
 function sky(){
  const T=G.T;
- const m=new T.ShaderMaterial({side:T.BackSide,depthWrite:false,fog:false,uniforms:{hz:{value:new T.Color(.1,.06,.16)},zn:{value:new T.Color(.012,.012,.05)},t:{value:0}},
+ const m=new T.ShaderMaterial({side:T.BackSide,depthWrite:false,fog:false,uniforms:{hz:{value:new T.Color(.1,.06,.16)},zn:{value:new T.Color(.012,.012,.05)},t:{value:0},st:{value:1}},
   vertexShader:'varying vec3 vp;void main(){vp=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);gl_Position.z=gl_Position.w*.9999;}',
-  fragmentShader:'uniform vec3 hz;uniform vec3 zn;uniform float t;varying vec3 vp;float h(vec3 p){return fract(sin(dot(p,vec3(12.9898,78.233,45.164)))*43758.5453);}void main(){float y=clamp(vp.y,0.,1.);vec3 c=mix(hz,zn,pow(y,.55));vec3 q=floor(vp*260.);float s=h(q);float st=step(.9975,s)*smoothstep(.05,.35,vp.y)*(.6+.4*sin(t*2.+s*90.));c+=vec3(st);c+=hz*.35*pow(1.-y,10.);gl_FragColor=vec4(c,1.);}'});
+  fragmentShader:'uniform vec3 hz;uniform vec3 zn;uniform float t;uniform float st;varying vec3 vp;float h(vec3 p){return fract(sin(dot(p,vec3(12.9898,78.233,45.164)))*43758.5453);}void main(){float y=clamp(vp.y,0.,1.);vec3 c=mix(hz,zn,pow(y,.55));vec3 q=floor(vp*260.);float s=h(q);float sr=st*step(.9975,s)*smoothstep(.05,.35,vp.y)*(.6+.4*sin(t*2.+s*90.));c+=vec3(sr);c+=hz*.35*pow(1.-y,10.);gl_FragColor=vec4(c,1.);}'});
  G.sky=new T.Mesh(new T.SphereGeometry(300,32,16),m);G.sky.renderOrder=-10;G.sky.frustumCulled=false;G.scene.add(G.sky);
 }
 /* ---- light pool: the nearest level lights are mirrored into a fixed set of real point lights ---- */

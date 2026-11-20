@@ -55,18 +55,27 @@ const CH0B=()=>[{bg:'bakery'},
  N('She hands you the knot in a paper bag with a tiny croissant drawn on it in biro. She draws one on every bag.'),
  N('You\'ve kept all of them. You will never tell anyone this.'),
  ];
-const CH0C=()=>[{bg:'office'},{hide:1},
+/* the office, as an explorable day at work */
+const CH0OFFICE=()=>[{bg:'office'},{hide:1},
  N('Brindle & Co Insurance. Third floor. The IT helpdesk is you, a stapler, and the Accounts printer, which hates you personally.'),
- T('Linda (your boss)','{h}! Half of Claims got weird emails this morning. Before anyone clicks anything, can you go through the queue?'),
- N('Finally. A chance to be the hacker you say you are.'),
+ L('linda','n','{h}! Half of Claims got weird emails this morning. Before anyone clicks anything, can you go through the queue?'),
+ N('Finally. A chance to be the hacker you say you are.')
+];
+const CH0QUEUE=()=>[{bg:'office'},{hide:1},
+ N('You sit down at the helpdesk. Forty-seven tickets. A suspicious number of them have the subject line "URGENT!!!".'),
  {unlock:'skill'},
  {game:'phish',pool:[3,10,4,8,11],title:'Helpdesk queue',noexp:1,res:(ok,n)=>{if(ok>=4)S.f.office_good=1}},
- ()=>S.f.office_good?[T('Linda (your boss)','Brilliant. Honestly, you\'re wasted on us.'),N('You are, for one second, a legend offline too.')]:[T('Linda (your boss)','Hm. Gary already clicked the gift-card one. Gary bought eleven gift cards.')],
- T('Gary from Accounts','Mate. Are you, like, a hacker? A real one?'),
+ ()=>S.f.office_good?[L('linda','h','Brilliant. Honestly, you\'re wasted on us.'),N('You are, for one second, a legend offline too.')]:[L('linda','a','Hm. Gary already clicked the gift-card one. Gary bought eleven gift cards.')],
+ N('Across the office, Gary from Accounts is waving at you. Hard. With both arms.')
+];
+const CH0GARY=()=>[{bg:'office'},
+ L('gary','h','Mate. Are you, like, a hacker? A real one?'),
  {unlock:'clout'},
- C({t:'"Yeah. I could take this building\'s network down from my phone."',fx:{clout:6},then:[T('Gary from Accounts','No way. Sick. Don\'t, though.')]},
-  {t:'"I\'m learning. I read a lot."',fx:{skill:2},then:[T('Gary from Accounts','Respect. Can you un-buy eleven gift cards?')]}),
- {bg:'flat'},
+ C({t:'"Yeah. I could take this building\'s network down from my phone."',fx:{clout:6},then:[L('gary','o','No way. Sick. Don\'t, though.')]},
+  {t:'"I\'m learning. I read a lot."',fx:{skill:2},then:[L('gary','h','Respect. Can you un-buy eleven gift cards?')]}),
+ N('The clock says five. The lift says "going home".')
+];
+const CH0EVE=()=>[{bg:'flat'},{hide:1},
  N('Evening. You\'re halfway through a video called "HACKING IN 10 MINUTES (REAL)" when someone hammers on your door.'),
  L('ellie','d','{h}! Sorry. Sorry. Are you busy? You\'re not busy. Can you hack?'),
  L('ellie','d','My Instagram. The bakery one. Someone\'s taken it. They changed the password, and my face is on there selling... crypto?'),
@@ -127,33 +136,42 @@ const CH0C=()=>[{bg:'office'},{hide:1},
  L('ellie','n','Go to your conference. Learn the real stuff. Then come back and teach me. Deal?'),
  L('ellie','b','And {h}? Thank you. Really.'),
  {hide:1},
- N('The next morning, your cinnamon knot comes in a bag with a new drawing: a tiny person at a laptop, wearing a cape.'),
- {bg:'train'},
- N('Two weeks later. The train to the con. Your hoodie, your sticker-covered laptop, and a plan: stop pretending. Mostly.'),
+ N('The next morning, your cinnamon knot comes in a bag with a new drawing: a tiny person at a laptop, wearing a cape.')
+];
+/* two weeks later: you walk into Central Station */
+const CH0STATION=()=>[{bg:'train'},{hide:1},
+ N('Two weeks later. Central Station. Your hoodie, your sticker-covered laptop, and a plan: stop pretending. Mostly.'),
+ N('The departures board says it in yellow: 09:12 · CONFERENCE QUARTER · PLATFORM 4.')
+];
+const CH0TRAIN=()=>[{bg:'train'},{hide:1},
+ N('The doors hiss shut. The train pulls out past back gardens, warehouses and one enormous billboard: SAFESPHERE · PRIVACY ON THE MOVE.'),
  {unlock:'phone'},
  {msg:['ellie','good luck at hacker camp!! learn everything. don\'t get hacked. bring me a sticker']},
  SMS('Ellie','good luck at hacker camp!! learn everything. don\'t get hacked. bring me a sticker'),
  N('Your phone buzzes again. Unknown sender.'),
  W('SEE YOU AT THE CON, {H}.'),
- N('You stare at it until your stop.')
+ N('You stare at it until your stop. Then a taxi. Then a pair of glass doors with a neon sign above them.')
 ];
-
+const CH0C=()=>[...CH0OFFICE(),...CH0QUEUE(),...CH0GARY(),...CH0EVE(),...CH0STATION(),...CH0TRAIN()];
 const CH0ALL=()=>[...CH0(),...CH0B(),...CH0C()];
+
 /* ============ CHAPTER 1 ============ */
 const OPEN={};const CLOSE={};
+/* Day 1 is played, not narrated: badge at Registration → opening ceremony in Hall A → hotel check-in → Room 1337 → the bar */
 OPEN[1]=()=>[
- {chapter:1},{bg:'con'},{hide:1},
- N('The taxi drops you outside the hotel. A sign taller than you spells it out in neon: CTRL+ALT+CON.'),
+ {chapter:1},{tp:'vestibule'},{bg:'con'},{hide:1},FX({flag:'d1v'}),
+ N('The convention doors slide open. A sign taller than you spells it out in neon outside: CTRL+ALT+CON. Inside it smells of new carpet, energy drinks and four thousand people\'s nerves.'),
  N('Four days. Four thousand hackers. One hotel Wi-Fi network nobody sane would touch.'),
- N('You take a breath, adjust your hoodie, and walk in through the revolving doors.'),{tp:'concourse'},
+ N('Ahead, a velvet rope, a queue, and a desk marked REGISTRATION. Nobody gets past the rope without a badge.'),
+ ()=>G.ok&&S.inWorld?[]:[...D1_BADGE(),...D1_CEREMONY(),...D1_CHECKIN(),...D1_ROOM()]
+];
+const D1_BADGE=()=>[{bg:'con'},{hide:1},
  N('Over the registration desk hangs a banner the size of a tennis court: LUMEN ANALYTICS PRESENTS CTRL+ALT+CON. Underneath, smaller: "Protect yourself with SafeSphere. Free for attendees."'),
  T('Volunteer','Name for your badge? You write it yourself. Marker\'s there.'),
  C({t:'Write your handle: {h}',fx:{skill:1},then:[N('Clean. Anonymous. The volunteer nods, like you passed a test you didn\'t know you were taking.')]},
   {t:'Write your full legal name. For networking!',hint:'You can\'t un-write a badge',fx:{exp:15,clout:2,flag:'leak_name'},then:[N('The volunteer looks at you for a long second. "Bold," they say, in the voice of someone filing an incident report.')]},
   {t:'Draw a skull. Let them wonder.',fx:{clout:4},then:[N('It looks less like a skull and more like a worried potato. People will certainly wonder.')]}),
- N('The key card to Room 1337 is still in your hand. Your phone is already on the camera app.'),
- C({t:'Post a selfie with your badge and room key',fx:{exp:12,clout:6,flag:'leak_photo'},then:[N('Twelve likes. One of them is from an account called whisper_____. Cool. Cool cool cool.')]},
-  {t:'Put the phone away',fx:{skill:2},then:[N('Restraint. The rarest stat at any hacker con.')]}),
+ N('A lanyard goes over your head. The badge has a tiny circuit board on the back and a QR code on the front. You decide not to think about the QR code.'),
  T('Con PA','Reminder: the official Wi-Fi is called CTRLALTCON. There is also a fake one called CTRLALTCON. Good luck, everyone.'),
  N('A man in sunglasses, indoors, slides up holding a SafeSphere tote bag.'),
  L('dave','h','Yo! New guy! MegaHax. Hacker. You\'ve probably heard of me.'),
@@ -161,10 +179,13 @@ OPEN[1]=()=>[
  L('dave','h','Also I basically work for Lumen. Intern. Social media. I run the SafeSphere TikTok. Ten million downloads, bro. Ten. Million.'),
  C({t:'"What does SafeSphere actually do?"',fx:{skill:1},then:[L('dave','o','It... protects you? From... the internet? It\'s got a shield icon.'),L('dave','s','Don\'t worry about it. I don\'t.')]},
   {t:'"Can you get me free merch?"',fx:{dave:5},then:[L('dave','h','Bro. I AM free merch.'),N('He gives you a SafeSphere stress ball. It has a QR code on it. You do not scan it.')]}),
- L('dave','h','Stick with me, bro. I\'m gonna be famous by Sunday.'),
+ L('dave','h','Stick with me, bro. I\'m gonna be famous by Sunday. Opening ceremony\'s in Hall A. North side. Go go go.'),
  N('You recognise in Dave something you fear in yourself.'),
- {bg:'stage'},{hide:1},
- N('The opening ceremony. Two thousand people in a dark hall, one spotlight.'),
+ FX({flag:'d1_badge'}),
+ N('The volunteer unclips the rope. The Foyer opens up: escalators, a giant rotating Lumen logo, glass on every side and, beyond it, a courtyard with one enormous tree.')
+];
+const D1_CEREMONY=()=>[{bg:'stage'},{hide:1},
+ N('The opening ceremony. Two thousand people on a rake of seats rising into the dark, one spotlight on the stage.'),
  L('marge','h','Welcome to CTRL+ALT+CON number twenty! I\'m Marge, your con chair. Three rules.'),
  L('marge','n','Be excellent to each other. Only hack what you\'re allowed to hack. And do NOT trust the Wi-Fi.'),
  L('marge','s','And now, a word from our headline sponsor. He insisted.'),
@@ -174,8 +195,29 @@ OPEN[1]=()=>[
  L('victor','h','Join me at the closing keynote on Sunday. We\'ll be announcing something that changes everything.'),
  {hide:1},
  N('The lights come up. Four days. A whole con. People to meet.'),
+ FX({flag:'d1_open'}),
  {msg:['ellie','did you get there ok?? is it all hoodies? send a pic of the hoodies (not of you, I know, opsec, I\'m learning)']},
- {unlock:'notes'},{unlock:'map'}
+ {unlock:'notes'},{unlock:'map'},
+ N('Your phone buzzes: "Halcyon Hotel: check-in for CTRL+ALT+CON guests is now open. Reception is through the Foyer, west side."')
+];
+const D1_CHECKIN=()=>[{bg:'lobby'},{hide:1},
+ T('Receptionist','Welcome to the Halcyon! Checking in? Name on the booking?'),
+ C({t:'Give the booking reference instead of your name',fx:{skill:2},then:[T('Receptionist','Oh, a reference person. Very tidy. Here we are.')]},
+  {t:'Say your full name, loudly, to the whole lobby',fx:{exp:4},then:[N('Three people in the queue behind you look up. One of them writes something down. Probably nothing. Probably.')]}),
+ T('Receptionist','Would you like to join Halcyon Rewards? Just your email, phone number, date of birth, home address and your mother\'s maiden name.'),
+ C({t:'"No thanks."',fx:{skill:1},then:[T('Receptionist','Of course. Nobody at this conference has said yes. It\'s been very refreshing.')]},
+  {t:'"Sure, free points!"',fx:{exp:8,clout:1,flag:'rewards'},then:[N('You fill in the form. All of it. The receptionist looks genuinely sad for you.')]}),
+ T('Receptionist','Room 1337. Thirteenth floor. Lifts are behind you. Enjoy your stay.'),
+ N('The key card to Room 1337 is in your hand. Your badge is round your neck. Your phone is already on the camera app.'),
+ C({t:'Post a selfie with your badge and room key',fx:{exp:12,clout:6,flag:'leak_photo'},then:[N('Twelve likes. One of them is from an account called whisper_____. Cool. Cool cool cool.')]},
+  {t:'Put the phone away',fx:{skill:2},then:[N('Restraint. The rarest stat at any hacker con.')]}),
+ FX({flag:'d1_checkin'})
+];
+const D1_ROOM=()=>[{bg:'hotel'},{hide:1},
+ N('Room 1337. A corner room: two windows, a seating area, a bathroom with an alarming amount of marble, and a bed that crunches when you sit on it.'),
+ N('You drop your bag. Thirteen floors below, the whole con glows: the courtyard, the glass Foyer, the Lumen logo turning and turning.'),
+ N('Your phone buzzes. "CTRL+ALT+CON · Day 1 social: the Hotel Bar, from 7pm. Everyone welcome. Be excellent."'),
+ FX({flag:'d1_room'})
 ];
 CLOSE[1]=()=>[
  {bg:'bar'},{hide:1},
