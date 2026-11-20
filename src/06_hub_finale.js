@@ -48,7 +48,8 @@ function hub(){
  closeOv();$('ov').classList.remove('phoneov');S.resume=null;
  if(!G.ok){hub2d();return}
  S.inWorld=1;S.pos=[WD.reg,WD.x,WD.z,WD.yaw,WD.y];save();show('world');WD.active=true;hud();updObjective();
- if(WD.wantLock&&!WD.touch&&!WD.locked)tryLock();
+ // walking around always means mouse-look: grab the mouse now (this runs inside the click/key that ended the scene)
+ if(!WD.touch&&!locked())tryLock();
 }
 function advance(){
  const nc=newCount();
@@ -68,7 +69,7 @@ function go(k){
   return run([{bg:'stage'},{hide:1},N('You catch a talk: '+t[0]+'.'),N(t[1]),FX(t[2])],hub);
  }
  if(k==='vendor')return vendor();
- if(k==='hotel')return room();
+ if(k==='hotel')return roomMenu();
  const g=LOCS.find(l=>l.k===k).g;
  if(sceneReady(g)){
   const R=ROUTES[g];
@@ -117,7 +118,7 @@ function shop(){
   $('sx').onclick=()=>{closeOv();hub()};
  };draw();
 }
-function room(){
+function roomMenu(){
  const b=S.ch+'b',i=S.ch+'i';
  run([{bg:'hotel'},{hide:1},{unlock:'room'},N('Room 1337. The minibar hums. The bed crunches. Your laptop waits.'),C(
   {t:'Grind a bug bounty',hint:S.room[b]?'Done for this chapter':'Terminal minigame · credits',if:()=>!S.room[b],then:()=>{S.room[b]=1;return[{game:'pipe',n:3,title:'Bug bounty'}]}},
@@ -345,6 +346,8 @@ $('bGo').onclick=()=>{
  S=fresh(h);S.resume='ch0';startCh0();
 };
 function startCh0(){
+ // grab the mouse inside the "Begin" click, before the (slow) first build eats the browser's gesture window
+ if(!WD.touch&&window.THREE)tryLock();
  initWorld();
  if(!G.ok){run(CH0ALL(),()=>{S.ch=1;S.resume='open';save();run(OPEN[1](),hub)});return}
  S.inWorld=1;teleportArea('flat');

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>OPSEC Dating Simulator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=VT323&display=swap" rel="stylesheet">
@@ -78,7 +78,7 @@ button:focus-visible{outline:3px solid var(--butter);outline-offset:2px}
 #chs:not(:empty)~#por,#vn.choosing #por{filter:brightness(.6)}
 .ch{min-height:48px;text-align:left;padding:10px 16px;border-radius:12px;border:2px solid var(--line);background:#1b1026f0;font-size:16px;box-shadow:0 4px 14px #0007;transition:border-color .15s,background .15s,translate .15s,box-shadow .15s}
 .ch:hover,.ch:focus-visible{border-color:var(--butter);background:#352349;translate:5px 0;box-shadow:0 6px 18px #0009,-4px 0 0 var(--butter)}
-#chs .ch{animation:chIn .38s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:calc(var(--i,0)*70ms)}
+#chs .ch{flex:none;animation:chIn .38s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:calc(var(--i,0)*70ms)}
 @keyframes chIn{from{opacity:0;translate:0 14px}}
 .ch small{display:block;color:var(--dim);font-size:13px}
 /* chapter card */
@@ -336,6 +336,46 @@ body.busyov #phoneBtn{opacity:.35;pointer-events:none}
  #vn.haspor #chs{transform:translateX(calc(-50% + min(50vw - 16px,620px) - var(--cw)/2 - 30px))}
 }
 @keyframes porInL{from{translate:-70px 0;opacity:0}}
+/* ---- phones held sideways: short and wide. Portrait on the left, text and choices on the right, a landscape phone ---- */
+@media (orientation:landscape) and (max-height:520px){
+ #hud{height:42px;padding:0 max(8px,env(safe-area-inset-right)) 0 max(8px,env(safe-area-inset-left))}
+ .tin{flex-direction:row;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px 28px;padding:14px max(20px,env(safe-area-inset-left)) 14px;max-width:none;min-height:100%}
+ .lanyard,.heads{display:none}
+ .badge{width:min(280px,42vw);padding:12px 14px 14px}.badge h1{font-size:38px}.badge p{font-size:12px}
+ .tbtns{margin-top:0;width:min(300px,44vw);gap:8px}.tbtns .btn{min-height:42px;padding:8px 14px}
+ .tin>p.small{flex-basis:100%;margin-top:4px!important;text-align:center}
+ #por{left:max(0px,env(safe-area-inset-left));right:auto;width:36%;bottom:0;height:calc(100% - 42px);justify-content:center}
+ #por svg{max-height:none}
+ #box{left:auto;right:max(8px,env(safe-area-inset-right));transform:none;width:62%;min-height:0;padding:16px 16px 22px;bottom:max(8px,env(safe-area-inset-bottom));border-radius:14px}
+ #vn:not(.haspor) #box{left:50%;right:auto;transform:translateX(-50%);width:min(760px,calc(100% - 24px))}
+ #txt{font-size:15px;min-height:2.4em;max-height:calc(44vh - 40px);overflow-y:auto}
+ #txt.whisper,#txt.sms{font-size:19px}
+ #who{top:-13px;font-size:13px}
+ #chs{left:auto;right:max(8px,env(safe-area-inset-right));transform:none;width:62%;bottom:calc(min(44vh,118px) + 18px);max-height:calc(100% - min(44vh,118px) - 70px);gap:6px;padding:2px 6px 2px 2px}
+ #vn:not(.haspor) #chs{left:50%;right:auto;transform:translateX(-50%);width:min(700px,calc(100% - 24px))}
+ .ch{min-height:38px;padding:6px 12px;font-size:14px;border-radius:10px}#chs .ch{flex:none}.ch small{font-size:12px}
+ .ov{padding:48px 12px 12px}.card{padding:12px 14px;max-width:680px}.card h3{font-size:24px}
+ .q{font-size:16px;margin:4px 0 8px}.ans{gap:6px}.ans .ch{min-height:38px}
+ .track{height:52px;margin:8px 0}
+ /* the phone turns sideways too */
+ .ov.phoneov{padding:46px max(10px,env(safe-area-inset-right)) 8px max(10px,env(safe-area-inset-left))}
+ .phone{width:min(760px,100%);height:calc(100dvh - 54px);border-radius:24px;padding:6px 12px 4px}
+ .pbar{padding:0 10px 2px}.ptop{padding:2px 2px 6px}
+ .home .clock{font-size:34px;margin-top:0}.home .date{margin-bottom:6px}
+ .grid{grid-template-columns:repeat(6,minmax(0,1fr));gap:6px 6px}
+ .app .ic{width:50px;height:50px;border-radius:14px}.app .ic svg{width:28px;height:28px}.app .nm{font-size:12px}
+ .phome{margin:4px 0 0}
+ #pmap{max-height:calc(100dvh - 150px);width:auto;max-width:100%;display:block;margin:6px auto}
+ /* world HUD: smaller corners so the prompt, minimap and stick never collide */
+ #obj{top:48px;max-width:42%;font-size:12px;padding:5px 10px}
+ #mini{top:48px;width:96px;height:96px}
+ #areaName{top:22%;font-size:24px}
+ #joy{left:max(18px,env(safe-area-inset-left));bottom:18px;width:116px;height:116px}#knob{left:31px;top:31px}
+ #actBtn{right:max(18px,env(safe-area-inset-right));bottom:22px;width:76px;height:76px}
+ body.touchui #prompt{right:max(14px,env(safe-area-inset-right));bottom:108px;max-width:calc(100vw - 180px)}
+ body.inworld #toasts{top:150px}
+ #card h2{font-size:44px}
+}
 /* ---- settings ---- */
 .set h4{margin:16px 0 6px;font:22px/1 'VT323',monospace;color:var(--butter);letter-spacing:.04em}
 .set h4:first-child{margin-top:2px}
@@ -351,12 +391,21 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 .seg{display:flex;background:#120c18;border:1px solid var(--line);border-radius:12px;padding:3px;gap:3px}
 .seg button{flex:1;min-height:38px;border:0;border-radius:9px;background:none;font-weight:600;color:var(--dim);transition:background .2s,color .2s}
 .seg button.on{background:var(--butter);color:#1b1026}
+/* one cursor everywhere: the same arrow the game draws while the mouse is captured, butter-yellow over anything clickable */
+html,body,*{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'%3E%3Cpath d='M2 2 L2 18 L6.5 13.8 L9.6 20.4 L12.6 19 L9.6 12.6 L15.6 12.6Z' fill='%23f6eefc' stroke='%231b1026' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") 2 2,default!important}
+button:not(:disabled),button:not(:disabled) *,.loc,.loc *,.chat,.app,.app *,#box,#box *,#card,#card *,label,input[type=range],.track,.track *{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'%3E%3Cpath d='M2 2 L2 18 L6.5 13.8 L9.6 20.4 L12.6 19 L9.6 12.6 L15.6 12.6Z' fill='%23ffd166' stroke='%231b1026' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") 2 2,pointer!important}
+input[type=text],input:not([type]),textarea{cursor:text!important}
+/* a game, not a document: no text selection, callouts or drag ghosts (long-presses on phones were selecting dialogue) */
+body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+input,textarea{-webkit-user-select:text;user-select:text}
+img,svg,canvas{-webkit-user-drag:none;user-drag:none}
 #vcur{position:fixed;left:0;top:0;width:22px;height:22px;margin:-2px 0 0 -2px;z-index:500;pointer-events:none;display:none;background:no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22'%3E%3Cpath d='M2 2 L2 18 L6.5 13.8 L9.6 20.4 L12.6 19 L9.6 12.6 L15.6 12.6Z' fill='%23f6eefc' stroke='%231b1026' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E");filter:drop-shadow(0 2px 3px #0008)}
 .ch.vhover{border-color:var(--butter);background:#352349;translate:5px 0;box-shadow:0 6px 18px #0009,-4px 0 0 var(--butter)}
 .btn.vhover:not(:disabled){translate:0 -2px;box-shadow:0 6px 16px #0007;filter:brightness(1.12)}
 .app.vhover .ic{translate:0 -4px;box-shadow:0 10px 18px #0008}
 .loc.vhover,.chat.vhover,.seg button.vhover,.pback.vhover,.tok.vhover,.chip.vhover,.code button.vhover{border-color:var(--butter);filter:brightness(1.15)}
 #box.vhover{border-color:#6d4d8a}
+#vcur.hot{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22'%3E%3Cpath d='M2 2 L2 18 L6.5 13.8 L9.6 20.4 L12.6 19 L9.6 12.6 L15.6 12.6Z' fill='%23ffd166' stroke='%231b1026' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E")}
 </style>
 </head>
 <body>

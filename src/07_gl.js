@@ -7,18 +7,28 @@ const G={LK:6,HK:5.5,ok:false,regions:{},boxes:{},walls:{},lights:{},surf:{},tx:
 const lin=c=>c<=.04045?c/12.92:Math.pow((c+.055)/1.055,2.4);
 const QUALITY={
  low:{dpr:1,lights:6,bloom:false,msaa:0,std:false,shadowBlobs:true},
- medium:{dpr:1.5,lights:10,bloom:true,msaa:0,std:true},
- high:{dpr:2,lights:16,bloom:true,msaa:0,fxaa:true,std:true}
+ medium:{dpr:1.5,lights:10,bloom:true,msaa:0,std:true,env:true,grade:true},
+ high:{dpr:2,lights:16,bloom:true,msaa:0,fxaa:true,std:true,env:true,grade:true,ao:true}
 };
+/* the look, in one place: emissive gain is compressed above 1 so signs and fixtures read as lit without
+   blooming into fog; bloom only catches what is genuinely bright */
+const LOOK={exposure:1.18,hemi:3.4,env:{home:.75,con:.62,f13:.7,office:.85,station:.8},bloomStr:.26,bloomRad:.62,bloomThr:1.05,ao:.82,sat:1.08,con:1.05,vig:.12};
 /* ---- textures: every texture gets its own canvas; small non-repeating ones are packed into atlases later ---- */
 function tex(key,w,h,paint){
  if(G.tx[key])return key;
  const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');paint(x,w,h);
- G.tx[key]={c,w,h,rep:false,used:false};return key;
+ G.tx[key]={c,w,h,rep:false,used:false,paint};return key;
+}
+/* a texture of its own (never the shared atlas) for meshes built outside the level builder, whose UVs span 0..1:
+   handing them an atlased texture shows the whole atlas, every sign and poster in the game, on one door */
+function soloTex(key){
+ G.solo=G.solo||{};if(G.solo[key])return G.solo[key];const X=G.tx[key];if(!X)return null;const T=G.T;
+ const c=document.createElement('canvas');c.width=X.w;c.height=X.h;X.paint(c.getContext('2d'),X.w,X.h);
+ const t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;t.anisotropy=G.aniso;return G.solo[key]=t;
 }
 /* ---- geometry building ---- */
 let BR=null;
-function region(name,o){G.regions[name]={groups:{},fog:o.fog,fr:o.fr||[8,60],amb:null,day:!!o.day};G.boxes[name]=[];G.walls[name]=[];G.lights[name]=[];G.surf[name]=[];BR=name}
+function region(name,o){G.regions[name]={groups:{},fog:o.fog,fr:o.fr||[8,60],amb:null,day:!!o.day};G.ftag=G.ftag||{};G.ftag[name]=[];G.boxes[name]=[];G.walls[name]=[];G.lights[name]=[];G.surf[name]=[];BR=name}
 function addLight(x,y,z,col,range,inten){G.lights[BR].push([x,y,z,col[0],col[1],col[2],range,inten||1])}
 function grp(m,cx,cz){
  const R=G.regions[BR],t=m.t||'white',kind=m.glass?'glass':m.e?'emit':(m.cut?'cut':'lit');
@@ -33,7 +43,7 @@ function quad(a,b,c,d,m,uw,vh){
  nx/=nl;ny/=nl;nz/=nl;
  const cx=(a[0]+c[0])/2,cz=(a[2]+c[2])/2;const g=grp(m,cx,cz);
  const T=G.tx[m.t||'white'];if(T){T.used=true;if(uw>1.01||vh>1.01||uw<0||vh<0)T.rep=true}
- const col=m.c||[1,1,1];const gk=m.e?(m.k!==undefined?m.k:(m.t==='white'||!m.t?1.9:1.05)):1;
+ const col=m.c||[1,1,1];const gk0=m.e?(m.k!==undefined?m.k:(m.t==='white'||!m.t?1.9:1.05)):1,gk=gk0>1?1+(gk0-1)*.55:gk0;
  const lc=[lin(col[0])*gk,lin(col[1])*gk,lin(col[2])*gk];
  // breakpoints along the vertical edge so walls darken towards the floor (cheap baked AO)
  let ss=[0,1],ts=[0,1];
@@ -59,7 +69,7 @@ function box(x0,y0,z0,x1,y1,z1,m,o){
  if(!o.nt)quad([x0,y1,z1],[x1,y1,z1],[x1,y1,z0],[x0,y1,z0],t,W*(t.s||.5),D*(t.s||.5));
  if(o.b)quad([x0,y0,z0],[x1,y0,z0],[x1,y0,z1],[x0,y0,z1],bt,W*(bt.s||.5),D*(bt.s||.5));
  if(o.col!==false&&H>.1)colBox(x0,z0,x1,z1,y0,y1);
- if(o.walk)surf(x0,z0,x1,z1,y1);
+ if(o.walk){surf(x0,z0,x1,z1,y1);ftag(x0,z0,x1,z1,y1,t)}
 }
 function panel(cx,y,cz,w,h,dir,m){
  const hw=w/2;
@@ -68,7 +78,9 @@ function panel(cx,y,cz,w,h,dir,m){
  if(dir==='e')quad([cx,y,cz+hw],[cx,y,cz-hw],[cx,y+h,cz-hw],[cx,y+h,cz+hw],m,1,1);
  if(dir==='w')quad([cx,y,cz-hw],[cx,y,cz+hw],[cx,y+h,cz+hw],[cx,y+h,cz-hw],m,1,1);
 }
-function floorQ(x0,z0,x1,z1,y,m){quad([x0,y,z1],[x1,y,z1],[x1,y,z0],[x0,y,z0],m,(x1-x0)*m.s,(z1-z0)*m.s)}
+/* every floor remembers what it's made of, so footsteps can sound like it */
+function ftag(x0,z0,x1,z1,y,m,st){if(G.ftag&&G.ftag[BR]&&m)G.ftag[BR].push([Math.min(x0,x1),Math.min(z0,z1),Math.max(x0,x1),Math.max(z0,z1),y,m.t||'white',st?1:0,m.m||0])}
+function floorQ(x0,z0,x1,z1,y,m){ftag(x0,z0,x1,z1,y,m);quad([x0,y,z1],[x1,y,z1],[x1,y,z0],[x0,y,z0],m,(x1-x0)*m.s,(z1-z0)*m.s)}
 function ceilQ(x0,z0,x1,z1,y,m){quad([x0,y,z0],[x1,y,z0],[x1,y,z1],[x0,y,z1],m,(x1-x0)*m.s,(z1-z0)*m.s)}
 function cross(x,y,z,w,h,m){const hw=w/2;
  quad([x-hw,y,z],[x+hw,y,z],[x+hw,y+h,z],[x-hw,y+h,z],m,1,1);quad([x+hw,y,z],[x-hw,y,z],[x-hw,y+h,z],[x+hw,y+h,z],m,1,1);
@@ -83,6 +95,7 @@ function stairs(x0,z0,x1,z1,y0,y1,dir,m,o){
  for(let i=0;i<n;i++){const top=y0+(i+1)*dh;const a=up?i*dl:L-(i+1)*dl;
   if(ax==='x'){box(x0+a,o.solid===false?top-.12:y0,z0,x0+a+dl,top,z1,m,{col:false,nz0:1,nz1:o.sides?0:1});const ex=up?x0+a:x0+a+dl;box(ex-.025,top-.03,z0,ex+.025,top+.005,z1,nose,{col:false,nz0:1,nz1:1})}
   else{box(x0,o.solid===false?top-.12:y0,z0+a,x1,top,z0+a+dl,m,{col:false,nx0:1,nx1:o.sides?0:1});const ez=up?z0+a:z0+a+dl;box(x0,top-.03,ez-.025,x1,top+.005,ez+.025,nose,{col:false,nx0:1,nx1:1})}}
+ ftag(x0,z0,x1,z1,Math.max(y0,y1),m.top||m,1);
  if(ax==='x')ramp(x0,z0,x1,z1,up?y0:y1,up?y1:y0,'x');else ramp(x0,z0,x1,z1,up?y0:y1,up?y1:y0,'z');
 }
 function slab(x0,z0,x1,z1,y,th,m,mu){floorQ(x0,z0,x1,z1,y,m);ceilQ(x0,z0,x1,z1,y-th,mu||m);const e=mu||m;
@@ -105,14 +118,14 @@ function glInit(cv){
  const T=THREE;
  let r=null;try{r=new T.WebGLRenderer({canvas:cv,antialias:true,powerPreference:'high-performance',stencil:false})}catch(e){console.warn(e)}
  if(!r||!r.capabilities)return false;
- r.outputColorSpace=T.SRGBColorSpace;r.toneMapping=T.NeutralToneMapping||T.ACESFilmicToneMapping;r.toneMappingExposure=1.25;
+ r.outputColorSpace=T.SRGBColorSpace;r.toneMapping=T.AgXToneMapping||T.NeutralToneMapping;r.toneMappingExposure=LOOK.exposure;
  G.r=r;G.cv=cv;G.T=T;
  // the level was lit with a bounded (1-d/R)^2 falloff; keep that look instead of inverse-square,
  // which blows out ceilings that sit right next to their lights
  T.ShaderChunk.lights_pars_begin=T.ShaderChunk.lights_pars_begin.replace('float distanceFalloff = 1.0 / max( pow( lightDistance, decayExponent ), 0.01 );','float x_ = saturate( 1.0 - lightDistance / max( cutoffDistance, 0.001 ) ); return x_ * x_; float distanceFalloff = 1.0;');
  G.scene=new T.Scene();
  G.cam=new T.PerspectiveCamera(70,1,.05,500);G.cam.rotation.order='YXZ';
- G.hemi=new T.HemisphereLight(0xffffff,0x222222,1);G.scene.add(G.hemi);
+ G.HK=LOOK.hemi;G.hemi=new T.HemisphereLight(0xffffff,0x222222,1);G.scene.add(G.hemi);
  G.fog=new T.Fog(0x000000,10,80);G.scene.fog=G.fog;
  G.aniso=Math.min(8,r.capabilities.getMaxAnisotropy());
  G.pool=[];
@@ -135,11 +148,50 @@ function setQuality(q){
   const rt=new T.WebGLRenderTarget(Math.max(1,size.x),Math.max(1,size.y),{type:T.HalfFloatType,samples:Q.msaa});
   const c=new T.EffectComposer(G.r,rt);c.addPass(new T.RenderPass(G.scene,G.cam));
   // glossy floors right under bright lights can overflow half-float to Inf; bloom would smear that into NaN
+  // ambient occlusion: contact shadows where walls meet floors, under furniture, round people's feet
+  G.gtao=null;if(Q.ao&&T.GTAOPass){try{const ao=new T.GTAOPass(G.scene,G.cam,Math.max(1,size.x>>1),Math.max(1,size.y>>1));
+   ao.updateGtaoMaterial({radius:.55,distanceExponent:1.6,thickness:1.2,scale:1,samples:12,distanceFallOff:1});ao.updatePdMaterial({lumaPhi:10,depthPhi:2,normalPhi:3,radius:6,rings:2,samples:12});ao.blendIntensity=LOOK.ao;
+   // cut-out characters, glass, the sky and markers would stamp rectangles into the AO buffer: leave them out
+   ao.overrideVisibility=function(){const cache=this._visibilityCache;this.scene.traverse(o=>{cache.set(o,o.visible);if(o.isPoints||o.isLine||o.isSprite||o.userData.noAO)o.visible=false})};
+   const ss=ao.setSize.bind(ao);ao.setSize=(w,h)=>ss(Math.max(1,w>>1),Math.max(1,h>>1));c.addPass(ao);G.gtao=ao}catch(e){console.warn(e);G.gtao=null}}
   c.addPass(new T.ShaderPass({uniforms:{tDiffuse:{value:null}},vertexShader:'varying vec2 v;void main(){v=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:'uniform sampler2D tDiffuse;varying vec2 v;void main(){vec4 c=texture2D(tDiffuse,v);c.rgb=clamp(c.rgb,0.,48.);if(c.r!=c.r||c.g!=c.g||c.b!=c.b)c.rgb=vec3(0.);gl_FragColor=c;}'}));
-  G.bloom=new T.UnrealBloomPass(new T.Vector2(size.x/2,size.y/2),.42,.32,.98);c.addPass(G.bloom);
-  c.addPass(new T.OutputPass());G.fxaa=null;if(Q.fxaa){G.fxaa=new T.ShaderPass(T.FXAAShader);c.addPass(G.fxaa)}G.composer=c;
+  G.bloom=new T.UnrealBloomPass(new T.Vector2(size.x/2,size.y/2),LOOK.bloomStr,LOOK.bloomRad,LOOK.bloomThr);c.addPass(G.bloom);
+  c.addPass(new T.OutputPass());
+  G.grade=null;if(Q.grade){G.grade=new T.ShaderPass(GRADE);c.addPass(G.grade)}
+  G.fxaa=null;if(Q.fxaa){G.fxaa=new T.ShaderPass(T.FXAAShader);c.addPass(G.fxaa)}G.composer=c;
  }
  G.dprCap=Q.dpr;G.dprK=1;G.sizeKey='';
+}
+/* colour grade, after tone mapping: a touch of contrast and saturation, cool aubergine shadows, warm highlights,
+   a soft vignette, and a whisper of animated grain that also dithers away banding in the dark gradients */
+const GRADE={uniforms:{tDiffuse:{value:null},t:{value:0},res:{value:null},sat:{value:1},con:{value:1},vig:{value:0},sh:{value:null},hi:{value:null}},
+ vertexShader:'varying vec2 v;void main(){v=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+ fragmentShader:'uniform sampler2D tDiffuse;uniform float t,sat,con,vig;uniform vec2 res;uniform vec3 sh,hi;varying vec2 v;float h(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}'+
+ 'void main(){vec4 c=texture2D(tDiffuse,v);vec3 x=c.rgb;float l=dot(x,vec3(.2126,.7152,.0722));x=mix(vec3(l),x,sat);x=clamp((x-.5)*con+.5,0.,1.);'+
+ 'float s=1.-smoothstep(0.,.45,l),g=smoothstep(.45,1.,l);x+=sh*s*.06;x*=mix(vec3(1.),hi,g*.6);'+
+ 'vec2 q=v-.5;q.x*=res.x/res.y;x*=1.-vig*smoothstep(.3,1.,length(q));'+
+ 'x+=(h(v*res+fract(t)*91.7)-.5)*(2.2/255.);gl_FragColor=vec4(clamp(x,0.,1.),c.a);}'};
+/* reflection + soft ambient light per region: a small room built from that region's own light colours
+   (warm ceiling glow, darker walls, a floor that catches it), blurred into an environment map. Glossy floors,
+   brass, chrome and glass finally have something to reflect, and the fill light has direction. */
+function buildEnv(reg){
+ const T=G.T,R=G.regions[reg],L=G.lights[reg]||[];G.env=G.env||{};if(G.env[reg])return G.env[reg];
+ let cr=0,cg=0,cb=0,w=0;for(const l of L){const k=l[7]*l[6];cr+=lin(l[3])*k;cg+=lin(l[4])*k;cb+=lin(l[5])*k;w+=k}
+ const lc=w?[cr/w,cg/w,cb/w]:[1,.9,.8],a=(R.amb||[.3,.3,.35]).map(lin),fg=(R.fog||[.1,.1,.1]).map(lin);
+ const sc=new T.Scene(),day=R.day;
+ const top=day?new T.Color(.55,.7,1):new T.Color(lc[0]*.55+a[0],lc[1]*.55+a[1],lc[2]*.55+a[2]),wall=new T.Color(a[0]*1.1+fg[0]*.4,a[1]*1.1+fg[1]*.4,a[2]*1.1+fg[2]*.4),floor=new T.Color(a[0]*.35,a[1]*.32,a[2]*.32);
+ const m=new T.ShaderMaterial({side:T.BackSide,depthWrite:false,uniforms:{top:{value:top},wall:{value:wall},floor:{value:floor}},
+  vertexShader:'varying vec3 p;void main(){p=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+  fragmentShader:'uniform vec3 top,wall,floor;varying vec3 p;void main(){vec3 c=mix(floor,wall,smoothstep(-.35,.05,p.y));c=mix(c,top,smoothstep(.1,.85,p.y));gl_FragColor=vec4(c,1.);}'});
+ sc.add(new T.Mesh(new T.SphereGeometry(10,32,16),m));
+ // fixtures overhead: a few bright panels and strips, in the region's light colour
+ const pm=new T.MeshBasicMaterial({color:new T.Color(lc[0]*(day?5:7),lc[1]*(day?5:7),lc[2]*(day?5:7))});
+ for(let i=0;i<6;i++){const an=i/6*Math.PI*2,b=new T.Mesh(new T.BoxGeometry(1.6,.1,.6),pm);b.position.set(Math.cos(an)*3.4,4.2,Math.sin(an)*3.4);b.rotation.y=an;sc.add(b)}
+ const c=new T.Mesh(new T.BoxGeometry(2.2,.1,2.2),pm);c.position.set(0,5,0);sc.add(c);
+ if(day){const sun=new T.Mesh(new T.SphereGeometry(.7,16,8),new T.MeshBasicMaterial({color:new T.Color(14,12,9)}));sun.position.set(5,6,-3);sc.add(sun)}
+ const gen=new T.PMREMGenerator(G.r);const rt=gen.fromScene(sc,.035);gen.dispose();
+ sc.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)o.material.dispose()});
+ return G.env[reg]=rt.texture;
 }
 /* materials are shared between regions and chunks: one per texture/kind/profile */
 function getMat(mk){
@@ -147,10 +199,10 @@ function getMat(mk){
  const T=G.T,[t,kind,prof]=mk.split('|');const map=t==='white'?null:texObj(t);
  let m;
  if(kind==='emit')m=new T.MeshBasicMaterial({map,vertexColors:true});
- else if(kind==='glass'){const o={vertexColors:true,transparent:true,opacity:.16,depthWrite:false,side:T.DoubleSide};m=QUALITY[G.q].std?new T.MeshStandardMaterial(Object.assign(o,{roughness:.06,metalness:.3})):new T.MeshLambertMaterial(o)}
+ else if(kind==='glass'){const o={vertexColors:true,transparent:true,opacity:.16,depthWrite:false,side:T.DoubleSide};m=QUALITY[G.q].std?new T.MeshStandardMaterial(Object.assign(o,{roughness:.05,metalness:.15,envMapIntensity:1.6})):new T.MeshLambertMaterial(o)}
  else{const pr=prof.split(':'),rough=+pr[0],metal=+pr[1];
   const o={map,vertexColors:true};if(kind==='cut'){o.alphaTest=.5;o.side=T.DoubleSide}
-  if(QUALITY[G.q].std){o.roughness=Math.max(.45,rough);o.metalness=metal;m=new T.MeshStandardMaterial(o)}else m=new T.MeshLambertMaterial(o)}
+  if(QUALITY[G.q].std){o.roughness=Math.max(.3,rough);o.metalness=metal;m=new T.MeshStandardMaterial(o)}else m=new T.MeshLambertMaterial(o)}
  return G.mats[key]=m;
 }
 function texObj(t){
@@ -182,7 +234,7 @@ function finishRegions(){
   for(const ck in merged){const M=merged[ck];if(!M.p.length)continue;
    if(M.mk.startsWith('@atlas')){const n=+M.mk.split('|')[0].slice(6);const ak='@atlas'+n;if(!G.tx[ak])G.tx[ak]={atlas:n,used:true}}
    const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(M.p,3));g.setAttribute('normal',new T.Float32BufferAttribute(M.n,3));g.setAttribute('uv',new T.Float32BufferAttribute(M.u,2));g.setAttribute('color',new T.Float32BufferAttribute(M.c,3));g.computeBoundingSphere();
-   const mesh=new T.Mesh(g,null);mesh.userData.mk=M.mk;mesh.matrixAutoUpdate=false;root.add(mesh)}
+   const mesh=new T.Mesh(g,null);mesh.userData.mk=M.mk;if(M.mk.split('|')[1]==='glass')mesh.userData.noAO=1;mesh.matrixAutoUpdate=false;root.add(mesh)}
   R.groups=null;R.obj=root;G.scene.add(root);
   const H={},SH={};
   const put=(Tb,b,x0,z0,x1,z1)=>{for(let x=Math.floor(x0/4);x<=Math.floor(x1/4);x++)for(let z=Math.floor(z0/4);z<=Math.floor(z1/4);z++)(Tb[x+','+z]=Tb[x+','+z]||[]).push(b)};
@@ -198,7 +250,7 @@ function sky(){
  const m=new T.ShaderMaterial({side:T.BackSide,depthWrite:false,fog:false,uniforms:{hz:{value:new T.Color(.1,.06,.16)},zn:{value:new T.Color(.012,.012,.05)},t:{value:0},st:{value:1}},
   vertexShader:'varying vec3 vp;void main(){vp=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);gl_Position.z=gl_Position.w*.9999;}',
   fragmentShader:'uniform vec3 hz;uniform vec3 zn;uniform float t;uniform float st;varying vec3 vp;float h(vec3 p){return fract(sin(dot(p,vec3(12.9898,78.233,45.164)))*43758.5453);}void main(){float y=clamp(vp.y,0.,1.);vec3 c=mix(hz,zn,pow(y,.55));vec3 q=floor(vp*260.);float s=h(q);float sr=st*step(.9975,s)*smoothstep(.05,.35,vp.y)*(.6+.4*sin(t*2.+s*90.));c+=vec3(sr);c+=hz*.35*pow(1.-y,10.);gl_FragColor=vec4(c,1.);}'});
- G.sky=new T.Mesh(new T.SphereGeometry(300,32,16),m);G.sky.renderOrder=-10;G.sky.frustumCulled=false;G.scene.add(G.sky);
+ G.sky=new T.Mesh(new T.SphereGeometry(300,32,16),m);G.sky.userData.noAO=1;G.sky.renderOrder=-10;G.sky.frustumCulled=false;G.scene.add(G.sky);
 }
 /* ---- light pool: the nearest level lights are mirrored into a fixed set of real point lights ---- */
 function updLights(dt,force){
@@ -232,8 +284,8 @@ function cutout(texture,w,h,o){
  const T=G.T;o=o||{};
  const geo=new T.PlaneGeometry(w,h);geo.translate(0,h/2,0);
  const mat=new T.MeshLambertMaterial({map:texture,alphaTest:.5,emissive:0xffffff,emissiveMap:texture,emissiveIntensity:o.glow!==undefined?o.glow:.22});
- const m=new T.Mesh(geo,mat);
- if(!o.noShadow){const s=new T.Mesh(new T.PlaneGeometry(w*.95,w*.5),new T.MeshBasicMaterial({map:blobTex(),transparent:true,depthWrite:false}));s.rotation.x=-Math.PI/2;s.position.y=.025;s.renderOrder=1;const gg=new T.Group();gg.add(s);gg.add(m);gg.userData.body=m;return gg}
+ const m=new T.Mesh(geo,mat);m.userData.noAO=1;
+ if(!o.noShadow){const s=new T.Mesh(new T.PlaneGeometry(w*.95,w*.5),new T.MeshBasicMaterial({map:blobTex(),transparent:true,depthWrite:false}));s.rotation.x=-Math.PI/2;s.position.y=.025;s.renderOrder=1;s.userData.noAO=1;const gg=new T.Group();gg.add(s);gg.add(m);gg.userData.body=m;return gg}
  const gg=new T.Group();gg.add(m);gg.userData.body=m;return gg;
 }
 function markObj(){
@@ -242,5 +294,5 @@ function markObj(){
 }
 function ringObj(){
  const T=G.T;const g=new T.RingGeometry(.42,.52,40);g.rotateX(-Math.PI/2);
- const m=new T.Mesh(g,new T.MeshBasicMaterial({color:new T.Color(2.2,1.7,.8),transparent:true,opacity:.8,depthWrite:false}));m.renderOrder=2;return m;
+ const m=new T.Mesh(g,new T.MeshBasicMaterial({color:new T.Color(2.2,1.7,.8),transparent:true,opacity:.8,depthWrite:false}));m.renderOrder=2;m.userData.noAO=1;return m;
 }

@@ -77,6 +77,11 @@ function paintTextures(){
  tex('glass',64,64,(c,w,h)=>{c.fillStyle='#9fc4e0';c.fillRect(0,0,w,h);c.fillStyle='#ffffff40';c.fillRect(0,0,w,3)});
  tex('board',512,64,(c,w,h)=>{c.fillStyle='#07080e';c.fillRect(0,0,w,h);c.font='bold 11px monospace';c.fillStyle='#ffd166';[['09:12','CONFERENCE QUARTER · HALCYON','4','ON TIME'],['09:20','AIRPORT','2','DELAYED'],['09:31','THE COAST','7','ON TIME']].forEach((r,i)=>{c.fillStyle=i?'#ffb347':'#ffd166';c.fillText(r[0],8,18+i*17);c.fillText(r[1],60,18+i*17);c.fillText('PLAT '+r[2],330,18+i*17);c.fillStyle=r[3]==='DELAYED'?'#ff5d73':'#8affc1';c.fillText(r[3],420,18+i*17)})});
  tex('trainside',512,128,(c,w,h)=>{c.fillStyle='#d9dde6';c.fillRect(0,0,w,h);c.fillStyle='#2a4a8a';c.fillRect(0,92,w,14);c.fillStyle='#ff5d73';c.fillRect(0,106,w,4);for(let x=10;x<w;x+=42){const g=c.createLinearGradient(0,26,0,70);g.addColorStop(0,'#3a4a6a');g.addColorStop(1,'#1a2034');c.fillStyle=g;c.fillRect(x,26,30,44);c.fillStyle='#ffffff30';c.fillRect(x+2,28,8,40)}});
+ tex('traindoor',128,192,(c,w,h)=>{c.fillStyle='#c9ced8';c.fillRect(0,0,w,h);c.fillStyle='#ffd166';c.fillRect(0,0,w,6);c.fillRect(0,0,6,h);c.fillRect(w-6,0,6,h);c.fillStyle='#8a909c';c.fillRect(w/2-1,0,2,h);
+  for(const x of[14,72]){const g=c.createLinearGradient(0,22,0,96);g.addColorStop(0,'#3a4a6a');g.addColorStop(1,'#1a2034');c.fillStyle=g;c.fillRect(x,22,42,74);c.fillStyle='#ffffff2a';c.fillRect(x+3,25,10,68)}
+  c.fillStyle='#2a4a8a';c.fillRect(0,150,w,10);grain(c,w,h,8)});
+ tex('trainin',128,192,(c,w,h)=>{const g=c.createLinearGradient(0,0,0,h);g.addColorStop(0,'#fff1d6');g.addColorStop(.35,'#d8c3a0');g.addColorStop(1,'#5a4a3a');c.fillStyle=g;c.fillRect(0,0,w,h);
+  c.fillStyle='#2a4a8a';c.fillRect(10,96,40,60);c.fillRect(78,96,40,60);c.fillStyle='#22406f';c.fillRect(10,140,40,16);c.fillRect(78,140,40,16);c.fillStyle='#c8ccd6';c.fillRect(62,0,4,h);c.fillStyle='#00000040';c.fillRect(0,170,w,22)});
  tex('dark',16,16,(c,w,h)=>{c.fillStyle='#14101a';c.fillRect(0,0,w,h)});
  tex('black',16,16,(c,w,h)=>{c.fillStyle='#000';c.fillRect(0,0,w,h)});
 }
@@ -97,7 +102,7 @@ function mats(){MT={
  lava:mt('lava',0,1,1,{k:1.6}),bread:mt('bread',0,1,0,{r:.7}),bottles:mt('bottles',0,1,1,{k:.9}),pegs:mt('pegs',0,.6,0,{r:.7}),door:mt('door',0,1,0,{r:.6}),elev:mt('elev',0,1,0,{r:.25,m:.7}),rug:mt('rug',0,.4,0,{r:1}),fan:mt('fan',0,1,0,{r:.6,m:.4}),
  cityview:mt('cityview',0,1,1,{k:.95}),morning:mt('morning',0,1,1,{k:1.15}),code:mt('code',0,1,1,{k:1.3}),dash:mt('dash',0,1,1,{k:1.3}),score:mt('score',0,1,1,{k:1.3}),stream:mt('stream',0,1,1,{k:1.25}),lumen:mt('lumen',0,1,1,{k:1.2}),lumenbanner:mt('lumenbanner',0,1,1,{k:1.15}),keyscreen:mt('keyscreen',0,1,1,{k:1.3}),chalk:mt('chalk',0,1,0,{r:.9}),
  poster:i=>mt('poster'+i,0,1,0,{r:.7}),road:mt('road',0,.25,0,{r:.75}),ledwall:mt('ledwall',0,1,1,{k:1.5}),oven:mt('oven',0,1,1,{k:1.1}),scope:mt('scope',0,1,1,{k:1.3}),
- board:mt('board',0,1,1,{k:1.4}),trainside:mt('trainside',0,.5,0,{r:.4}),arcade:mt('arcade',0,1,1,{k:1.4}),arcade2:mt('arcade2',0,1,1,{k:1.4}),slides:mt('slides',0,1,1,{k:1.05}),vend:mt('vend',0,1,1,{k:1.1}),
+ board:mt('board',0,1,1,{k:1.4}),trainside:mt('trainside',0,.5,0,{r:.4}),traindoor:mt('traindoor',0,1,0,{r:.35,m:.2}),trainin:mt('trainin',0,1,1,{k:.85}),arcade:mt('arcade',0,1,1,{k:1.4}),arcade2:mt('arcade2',0,1,1,{k:1.4}),slides:mt('slides',0,1,1,{k:1.05}),vend:mt('vend',0,1,1,{k:1.1}),
  frame:mt('white','#2a2026',.5,0,{r:.5}),skirt:mt('white','#1e1724',.5,0,{r:.5}),dark:mt('dark'),black:mt('black',0,1,1)
 }}
 const sign=(text,fg,bg,w,h)=>mt(signTex(text,fg||'#ffd166',bg||'#1b1026',w,h),0,1,1,{k:1.25});

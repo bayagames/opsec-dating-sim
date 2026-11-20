@@ -16,6 +16,17 @@ function blockedAt(reg,x,z,y,r){const H=G.regions[reg].hash,a=y+.4,b=y+1.75;
  for(const d of DYN){if(d.reg!==reg||!d.when())continue;const q=d.b;if(x+r>q[0]&&x-r<q[2]&&z+r>q[1]&&z-r<q[3]&&q[5]>a&&q[4]<b)return true}
  const h=heightAt(reg,x,z,y);if(h===null)return true;
  return false}
+/* what's underfoot: the floor's texture decides how a footstep sounds */
+function floorKind(){
+ const L=(G.ftag&&G.ftag[WD.reg])||[],x=WD.x,z=WD.z,y=WD.y;let best=null,bd=.3,stair=null;
+ for(const t of L){if(x<t[0]||x>t[2]||z<t[1]||z>t[3])continue;
+  if(t[6]){if(y<=t[4]+.3&&y>=t[4]-7)stair=t;continue}
+  const d=Math.abs(t[4]-y);if(d<bd){bd=d;best=t}}
+ const t=best||stair;if(!t)return['concrete',0];
+ const k=t[5],m=t[7];
+ const kind=/^carpet|^rug|^linen|^fabric/.test(k)?'carpet':/^(marble|tile|tileDark)$/.test(k)?'hard':/^wood/.test(k)?'wood':k==='grass'?'grass':k==='gravel'?'gravel':k==='water'?'water':(m>.5||k==='metal')?'metal':'concrete';
+ return[kind,best?0:1];
+}
 /* ---------- input ---------- */
 /* Desktop: the view is always pointer-locked while you walk around. Esc (which the browser uses to release
    the mouse) opens the phone; closing the phone locks the view again. Touch: left stick moves, dragging
@@ -39,8 +50,8 @@ function setupInput(){
  // only explicit clicks count towards the 'pointer lock is impossible here' fallback (e.g. a sandboxed iframe)
  tz.addEventListener('click',()=>{if(WD.touch||!worldLive())return;WD.clickLock=true;tryLock()});
  // step back in automatically: any click or key in the world re-captures the mouse (no "click to play" prompt)
- addEventListener('mousedown',()=>{if(S&&S.inWorld&&!WD.touch&&!locked()&&(worldLive()||$('vn').classList.contains('on'))&&!$('ov').classList.contains('phoneov'))tryLock()},true);
- addEventListener('keydown',e=>{if(e.key==='Escape'||e.key==='p'||e.key==='P'||e.key==='Tab')return;if(S&&S.inWorld&&!WD.touch&&!locked()&&worldLive())tryLock()},true);
+ addEventListener('mousedown',e=>{if(e.isTrusted&&S&&S.inWorld&&!WD.touch&&!locked()&&!$('title').classList.contains('on')&&!$('ov').classList.contains('phoneov'))tryLock()},true);
+ addEventListener('keydown',e=>{if(e.key==='Escape'||e.key==='p'||e.key==='P'||e.key==='Tab')return;if(S&&S.inWorld&&!WD.touch&&!locked()&&(worldLive()||$('vn').classList.contains('on'))&&!$('ov').classList.contains('phoneov'))tryLock()},true);
  let drag=null;
  tz.addEventListener('mousedown',e=>{if(WD.noLock)drag=[e.clientX,e.clientY]});
  addEventListener('mouseup',()=>drag=null);
@@ -73,22 +84,31 @@ function update(dt){
  let run=K.shift;
  if(WD.joy){const R=52,d=Math.hypot(WD.joy.dx,WD.joy.dy);if(d>7){const mag=Math.min(1,(d-7)/(R-7)),c=mag*mag*.35+mag*.65;f=-WD.joy.dy/d*c;r=WD.joy.dx/d*c;if(d>R*.92)run=true}}
  const m=Math.hypot(f,r);if(m>1){f/=m;r/=m}
- const spd=run?6.6:3.9;
+ // walking pace is a brisk 5 m/s, sprinting 8.6; running backwards or sideways is a little slower, like a person
+ const back=f<-.1&&Math.abs(f)>Math.abs(r);
+ const spd=(run&&!back?8.6:5.1)*(back?.8:1);
  const fx=-Math.sin(WD.yaw),fz=-Math.cos(WD.yaw),rx=Math.cos(WD.yaw),rz=-Math.sin(WD.yaw);
  const tvx=(fx*f+rx*r)*spd,tvz=(fz*f+rz*r)*spd;
- const acc=Math.min(1,dt*(WD.ground?11:2.5));WD.vx+=(tvx-WD.vx)*acc;WD.vz+=(tvz-WD.vz)*acc;
+ // quick to get going, quicker to stop: responsive, but with enough weight that turns feel smooth
+ const want=Math.hypot(tvx,tvz),have=Math.hypot(WD.vx,WD.vz);
+ const k=WD.ground?(want<.01?16:want<have-.5?12:9):2.5,acc=1-Math.exp(-dt*k);
+ WD.vx+=(tvx-WD.vx)*acc;WD.vz+=(tvz-WD.vz)*acc;if(want<.01&&have<.05){WD.vx=WD.vz=0}
  const R=.3,reg=WD.reg;
  const nx=WD.x+WD.vx*dt,nz=WD.z+WD.vz*dt;
  if(Math.abs(WD.vx)>1e-4){if(!blockedAt(reg,nx,WD.z,WD.y,R))WD.x=nx;else WD.vx=0}
  if(Math.abs(WD.vz)>1e-4){if(!blockedAt(reg,WD.x,nz,WD.y,R))WD.z=nz;else WD.vz=0}
  // vertical
  const gh=heightAt(reg,WD.x,WD.z,WD.y);const gy=gh===null?WD.y:gh;
- if(WD.vy>0||WD.y>gy+.02){WD.vy-=16*dt;WD.y+=WD.vy*dt;if(WD.y<=gy){if(WD.vy<-4)stepSound(.3,180);WD.y=gy;WD.vy=0;WD.ground=true}else WD.ground=false}
+ if(WD.vy>0||WD.y>gy+.02){WD.vy-=18*dt;WD.y+=WD.vy*dt;if(WD.y<=gy){if(WD.vy<-4){stepSound(.3,'land');WD.land=Math.min(.09,-WD.vy*.012)}WD.y=gy;WD.vy=0;WD.ground=true}else WD.ground=false}
  else{WD.y=gy;WD.vy=0;WD.ground=true}
- const target=WD.y+1.62;WD.eye+=(target-WD.eye)*Math.min(1,dt*(WD.eye<target?12:20));if(Math.abs(target-WD.eye)>1.2)WD.eye=target;
+ const target=WD.y+1.62;WD.eye+=(target-WD.eye)*Math.min(1,dt*(WD.eye<target?14:20));if(Math.abs(target-WD.eye)>1.2)WD.eye=target;
  const sp=Math.hypot(WD.vx,WD.vz);
- if(WD.ground&&sp>.4){const ph=WD.bob;WD.bob+=dt*sp*2.3;if(Math.floor(ph/Math.PI)!==Math.floor(WD.bob/Math.PI))stepSound(run?.2:.14)}
- WD.fovk+=((run&&sp>4?1:0)-WD.fovk)*Math.min(1,dt*6);
+ // one gentle dip per footstep, timed to a real stride (longer when sprinting); no side-to-side sway
+ WD.bobAmp=(WD.bobAmp||0)+((WD.ground&&sp>.6?Math.min(1,sp/5.1):0)-(WD.bobAmp||0))*Math.min(1,dt*8);
+ if(WD.ground&&sp>.6){const stride=sp>6.5?2.55:1.95,ph=WD.bob;WD.bob+=dt*sp/stride*Math.PI;if(Math.floor(ph/Math.PI)!==Math.floor(WD.bob/Math.PI))stepSound(sp>6.5?1:.72,null,WD.foot=!WD.foot)}
+ else if(WD.bobAmp<.05)WD.bob=Math.round(WD.bob/Math.PI)*Math.PI;
+ WD.land=(WD.land||0)*Math.exp(-dt*9);
+ WD.fovk+=((run&&sp>6?1:0)-WD.fovk)*Math.min(1,dt*5);
  // npc wander
  for(const n of WD.npcs){if(n.reg!==WD.reg||n.still)continue;
   if(n.wait>0){n.wait-=dt;continue}
@@ -174,13 +194,18 @@ function render(dt){
  G.fog.near+=(fr[0]-G.fog.near)*ease;G.fog.far+=(fr[1]-G.fog.far)*ease;
  G.hT=G.hT||new T.Color();G.hT.setRGB(amb[0]*1.25,amb[1]*1.25,amb[2]*1.35,T.SRGBColorSpace);G.hemi.color.lerp(G.hT,ease);
  G.gT=G.gT||new T.Color();G.gT.setRGB(amb[0]*.55,amb[1]*.5,amb[2]*.5,T.SRGBColorSpace);G.hemi.groundColor.lerp(G.gT,ease);
- G.hemi.intensity=(A&&A.out?1.2:1)*G.HK;
+ G.hemi.intensity=(A&&A.out?1.2:1)*G.HK*(QUALITY[G.q].env?.62:1);
+ // reflections + directional fill from the region's environment (medium/high); outdoors leans on the sky instead
+ if(QUALITY[G.q].env){const env=buildEnv(WD.reg);if(G.scene.environment!==env)G.scene.environment=env;const ek=(LOOK.env[WD.reg]||.7)*(A&&A.out?.55:1)*(A&&A.envk||1);
+  G.scene.environmentIntensity=G.scene.environmentIntensity===undefined?ek:G.scene.environmentIntensity+(ek-G.scene.environmentIntensity)*ease}else G.scene.environment=null;
+ if(G.grade){const u=G.grade.uniforms;u.t.value=performance.now()/1000;u.res.value=u.res.value||new T.Vector2();u.res.value.set(w,h);u.sat.value=LOOK.sat;u.con.value=LOOK.con;u.vig.value=LOOK.vig;
+  u.sh.value=u.sh.value||new T.Vector3(.55,.25,.9);u.hi.value=u.hi.value||new T.Vector3(1.04,1.,.95)}
  G.scene.background=G.fog.color;
  // camera
- const sp=Math.hypot(WD.vx,WD.vz),bob=WD.ground?Math.sin(WD.bob*2)*.03*Math.min(1,sp/3):0,sway=Math.sin(WD.bob)*.012*Math.min(1,sp/3);
- const asp=w/h,vf=clamp(2*Math.atan(Math.tan(.75+WD.fovk*.06)/asp),1.05,1.8);
+ const sp=Math.hypot(WD.vx,WD.vz),bamp=(WD.bobAmp||0)*(sp>6.5?.024:.016)*(SETTINGS.bob===false?0:1),bob=-bamp*(1-Math.cos(WD.bob*2))*.5-WD.land;
+ const asp=w/h,vf=clamp(2*Math.atan(Math.tan(.75+WD.fovk*.045)/asp),1.05,1.8);
  cam.fov=vf*180/Math.PI;cam.far=(FAR[WD.reg]||180)+40;cam.updateProjectionMatrix();
- cam.position.set(WD.x+Math.cos(WD.yaw)*sway,WD.eye+bob,WD.z-Math.sin(WD.yaw)*sway);cam.rotation.set(WD.pit,WD.yaw,Math.sin(WD.bob)*.004*Math.min(1,sp/3));
+ cam.position.set(WD.x,WD.eye+bob,WD.z);cam.rotation.set(WD.pit,WD.yaw,0);
  G.sky.position.copy(cam.position);const su=G.sky.material.uniforms;su.hz.value.copy(G.fog.color);su.t.value=performance.now()/1000;if(R.day){su.zn.value.setRGB(.12,.3,.75);su.st.value=0}else{su.zn.value.setRGB(.012,.012,.05);su.st.value=1}
  updLights(dt);
  updSprites(dt);
@@ -216,7 +241,7 @@ function updSprites(dt){
 }
 /* gate visuals: velvet rope on chrome posts, or a closed door with a card reader */
 function gateObj(g){
- const T=G.T,grp=new T.Group();G.gm=G.gm||{post:new T.MeshStandardMaterial({color:0xc8ccd6,metalness:.9,roughness:.25}),rope:new T.MeshStandardMaterial({color:0x8a1e3a,roughness:.7}),door:new T.MeshStandardMaterial({map:texObj('door'),roughness:.6}),red:new T.MeshBasicMaterial({color:new T.Color(3,.4,.5)})};
+ const T=G.T,grp=new T.Group();G.gm=G.gm||{post:new T.MeshStandardMaterial({color:0xc8ccd6,metalness:.9,roughness:.25}),rope:new T.MeshStandardMaterial({color:0x8a1e3a,roughness:.7}),door:new T.MeshStandardMaterial({map:soloTex('door'),roughness:.6}),red:new T.MeshBasicMaterial({color:new T.Color(3,.4,.5)})};
  const dx=g.x1-g.x0,dz=g.z1-g.z0,L=Math.hypot(dx,dz)||.01,ang=Math.atan2(dz,dx);
  if(g.kind==='rope'){const n=Math.max(1,Math.round(L/2.4));
   for(let i=0;i<=n;i++){const t=i/n,p=new T.Mesh(new T.CylinderGeometry(.045,.06,1,10),G.gm.post);p.position.set(g.x0+dx*t,g.y+.5,g.z0+dz*t);grp.add(p);const b=new T.Mesh(new T.CylinderGeometry(.16,.18,.04,14),G.gm.post);b.position.set(p.position.x,g.y+.02,p.position.z);grp.add(b)}

@@ -54,10 +54,17 @@ function buildStation(){
  for(let x=704;x<772;x+=12){box(x-.15,0,15,x+.15,7,15.3,MT.metal);panel(x,4.6,15.31,1.6,1,'s',sign('4','#1b1026','#f6eefc',128,96))}
  for(let x=706;x<772;x+=12)lightPanel(x,7,10,4,.6,'#f4f8ff',12,.7);
  box(700,7,19.85,772,12,20.15,MT.brick,{col:false});box(700,-1.2,-.3,772,7,0,MT.brick,{col:false});floorQ(700,0,772,6,-1.2,MT.gravel);for(const z of[1.6,4.4])box(700,-1.2,z-.05,772,-1.05,z+.05,MT.chrome,{col:false});box(699.8,-1.2,6,772,0,6.2,MT.concrete);colBox(700,0,772,6,-2,6);
- box(704,-1,.8,768,2.8,5.2,{side:MT.plain('#d9dde6'),top:MT.plain('#8a8a94')},{col:false});for(let i=0;i<4;i++)panel(712+i*16,-1,5.205,15.6,3.8,'s',MT.trainside);box(704,2.8,.9,768,3.1,5.1,MT.plain('#5a5a64'),{col:false});
- for(let x=708;x<768;x+=16){panel(x,-.3,5.21,1.6,2.6,'s',MT.door)}panel(736,-.3,5.22,1.6,2.6,'s',MT.glow('#fff4e0',1.4));
- box(703.6,-1,1,704,2.6,5,MT.plain('#ff5d73'),{col:false});
- panel(736,5.2,6.2,8,.7,'s',sign('PLATFORM 4 · CONFERENCE QUARTER','#ffd166','#1b1026',512,64));
+ // the train: floor level with the platform (a real step-across gap, not a pit), sliding doors on the carriage seams
+ box(704,-.95,1,768,3.4,5.7,{side:MT.plain('#d9dde6'),top:MT.plain('#8a8a94')},{col:false,nz1:1});for(let i=0;i<4;i++)panel(712+i*16,-.4,5.705,15.6,3.8,'s',MT.trainside);box(704,3.4,1.1,768,3.75,5.6,{side:MT.plain('#9a9ea8'),top:MT.plain('#5a5a64')},{col:false});
+ box(704,-.95,5.7,768,-.4,5.72,MT.plain('#1a1a22'),{col:false});
+ for(const x of[720,752,708.6,763.4])panel(x,.05,5.715,1.5,2.3,'s',MT.traindoor);
+ // the boarding door at 736: slid open, warm carriage light spilling out, a green "doors open" lamp
+ panel(735.6,.05,5.715,.75,2.3,'s',MT.traindoor);panel(737.3,.05,5.715,.75,2.3,'s',MT.traindoor);
+ box(735.98,.05,4.2,736.02,2.35,5.7,MT.plain('#2a2a34'),{col:false});box(735.2,.05,4.2,736.8,.07,5.7,MT.plain('#5a5a66'),{col:false});
+ panel(736,.05,4.21,1.6,2.3,'s',MT.trainin);box(735.18,2.36,5.66,736.82,2.42,5.74,MT.glow('#8affc1',1.1),{col:false});
+ box(734.9,2.5,5.72,735.1,2.62,5.78,MT.glow('#8affc1',1.6),{col:false});addLight(736,1.9,5.1,[1,.88,.7],5.5,.8);
+ box(703.6,-.95,1.1,704,3.3,5.6,MT.plain('#ff5d73'),{col:false});
+ box(732,5.1,6.15,740,5.95,6.2,MT.plain('#1b1026'),{col:false});panel(736,5.2,6.21,8,.7,'s',sign('PLATFORM 4 · CONFERENCE QUARTER','#ffd166','#1b1026',512,64));for(const x of[732.5,739.5])box(x-.02,5.95,6.16,x+.02,7,6.2,MT.metal,{col:false});
  (MAPR.station=MAPR.station||[]).push({x0:700,z0:0,x1:772,z1:6,y:0,n:'',c:'#2a2a30'});
  skyline(736,22,120,190,30,-6);
  const A=(k,n,r,sp,bg,o)=>area(k,n,'station',r,sp,bg,o);
