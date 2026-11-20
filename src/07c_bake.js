@@ -71,7 +71,10 @@ function bakeFinish(reg){
  R.lmTex=[];
  for(let p=0;p<LM.pages;p++){const out=new T.WebGLRenderTarget(LM.S,LM.S,{type:T.UnsignedByteType,format:T.RGBAFormat,minFilter:T.LinearFilter,magFilter:T.LinearFilter,depthBuffer:false,generateMipmaps:false});
   BK.fin.uniforms.src.value=R.bk.rt[p].texture;BK.fin.uniforms.px.value=1/LM.S;r.setRenderTarget(out);r.render(G.bkQS,R.bk.cam);
-  const t=out.texture;t.channel=1;t.colorSpace=T.NoColorSpace;R.lmTex.push(t);R.bk.rt[p].dispose()}
+  // read the page back into a plain texture and delete the framebuffer: a texture still attached to a render target
+  // and sampled every frame can make drivers copy it per draw (that leaked memory fast)
+  const px=new Uint8Array(LM.S*LM.S*4);r.readRenderTargetPixels(out,0,0,LM.S,LM.S,px);out.dispose();R.bk.rt[p].dispose();
+  const t=new T.DataTexture(px,LM.S,LM.S,T.RGBAFormat,T.UnsignedByteType);t.minFilter=t.magFilter=T.LinearFilter;t.generateMipmaps=false;t.channel=1;t.colorSpace=T.NoColorSpace;t.needsUpdate=true;R.lmTex.push(t)}
  r.setRenderTarget(null);R.bk=null;
  R.obj.traverse(o=>{if(o.isMesh&&o.userData.mk&&o.userData.pg>=0){o.userData.lmk=reg+':'+o.userData.pg;o.material=getMat(o.userData.mk,o.userData.lmk)}});
 }
