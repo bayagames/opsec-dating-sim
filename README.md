@@ -24,7 +24,8 @@ Source lives in `src/`. To rebuild `index.html` after editing:
 - `04_routes_a.js` Nyx, Ada, Priya, Juno routes
 - `05_routes_b.js` Kit, Rin, Bea, Ellie, Mira routes + Dave
 - `06_hub_finale.js` hangouts, shop, keynote, endings, title
-- `07_gl.js`       three.js renderer: level builder API, chunked geometry, glass, light pool, per-region environment maps, two shadow-casting lights, bump relief, AO, bloom, colour grade, sky. `LOOK` holds every lighting knob in one place
+- `07_gl.js`       three.js renderer: level builder API, chunked geometry, glass, light pool, per-region environment maps, lightmap packing, bump relief, AO, bloom, colour grade, sky. `LOOK` holds every lighting knob in one place
+- `07c_bake.js`    baked lighting: on load every level light renders a cube shadow map and is accumulated into per-region lightmaps (soft shadows, falloff, fill), stored as RGBM. Moving things are lit by `probeAt`
 - `07b_chars.js`   full-body character and crowd art
 - `08_level.js`    textures and materials
 - `08b_level.js`   level helpers + home (flat and bakery)

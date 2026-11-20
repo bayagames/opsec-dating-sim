@@ -202,7 +202,7 @@ function render(dt){
  G.hT=G.hT||new T.Color();G.hT.setRGB(amb[0]*1.25,amb[1]*1.25,amb[2]*1.35,T.SRGBColorSpace);G.hemi.color.lerp(G.hT,ease);
  G.gT=G.gT||new T.Color();G.gT.setRGB(amb[0]*.55,amb[1]*.5,amb[2]*.5,T.SRGBColorSpace);G.hemi.groundColor.lerp(G.gT,ease);
  // with baked light the sources do the work: only a faint fill remains (more outdoors and in daylight)
- const fillK=G.baked?(R.day?LOOK.bakeFill*2.2:A&&A.out?LOOK.bakeFill*1.8:LOOK.bakeFill):(QUALITY[G.q].env?LOOK.fill:1);
+ const fillK=G.baked?(R.day?LOOK.bakeFill*1.2:A&&A.out?LOOK.bakeFill*1.8:LOOK.bakeFill):(QUALITY[G.q].env?LOOK.fill:1);
  G.hemi.intensity=(A&&A.out?1.2:1)*G.HK*fillK;
  // reflections + directional fill from the region's environment (medium/high); outdoors leans on the sky instead
  if(QUALITY[G.q].env){const env=buildEnv(WD.reg);if(G.scene.environment!==env)G.scene.environment=env;const ek=(LOOK.env[WD.reg]||.7)*(A&&A.out?.55:1)*(A&&A.envk||1)*(G.baked&&!R.day?LOOK.bakeEnv:1);

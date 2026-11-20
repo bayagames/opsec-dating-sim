@@ -12,7 +12,7 @@ const QUALITY={
 };
 /* the look, in one place: emissive gain is compressed above 1 so signs and fixtures read as lit without
    blooming into fog; bloom only catches what is genuinely bright */
-const LOOK={exposure:1.12,hemi:3.2,fill:.5,env:{home:.6,con:.5,f13:.55,office:.7,station:.7},bloomStr:.26,bloomRad:.62,bloomThr:1.05,ao:.85,sat:1.12,con:1.07,vig:.12,light:7.6,reach:1.3,bake:1,bakeFill:.28,bakeEnv:.4};
+const LOOK={exposure:1.12,hemi:3.2,fill:.5,env:{home:.6,con:.5,f13:.55,office:.7,station:.7},bloomStr:.26,bloomRad:.62,bloomThr:1.05,ao:.85,sat:1.12,con:1.07,vig:.12,light:7.6,reach:1.3,bake:.85,bakeFill:.3,bakeEnv:.4};
 /* ---- textures: every texture gets its own canvas; small non-repeating ones are packed into atlases later ---- */
 function tex(key,w,h,paint){
  if(G.tx[key])return key;
