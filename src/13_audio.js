@@ -209,7 +209,47 @@ function sfx(k,o){
   case'chapter':[262,330,392,523].forEach((f,i)=>T(f,1.4,{v:.05,at:i*.12,type:'triangle'}));break;
  }
 }
-function stepSound(v,f){if(!AU||!AC)return;try{if(AC.state==='suspended')return;const s=AC.createBufferSource();s.buffer=AU.nb;const bp=AC.createBiquadFilter();bp.type='bandpass';bp.frequency.value=f||(380+Math.random()*260);bp.Q.value=1.2;const g=AC.createGain();g.gain.value=(v||.18)*.8;s.connect(bp);bp.connect(g);g.connect(AU.sfx);s.start()}catch(e){}}
+/* ---------- footsteps ----------
+   Each step is synthesised once per surface (a few variants each) and then played from a buffer: a heel strike
+   (a low body thump plus a filtered click), a softer toe roll a few hundredths of a second later, and whatever
+   the floor adds: carpet swallows the click, marble and tile ring out into the room, wood knocks hollow, metal
+   stairs clang, grass and gravel crunch. Steps alternate slightly left and right and never repeat exactly. */
+const STEPS={};
+function stepBuf(kind,i){
+ const key=kind+i;if(STEPS[key])return STEPS[key];
+ const sr=AC.sampleRate,len=Math.floor(sr*.42),d=new Float32Array(len);
+ let seed=(i+1)*9301+kind.length*49297;const r=()=>(seed=(seed*16807)%2147483647)/2147483647*2-1;
+ const bq=(x,type,f,q)=>{const w=2*Math.PI*f/sr,c=Math.cos(w),a=Math.sin(w)/(2*q);let b0,b1,b2;
+  if(type==='lp'){b0=(1-c)/2;b1=1-c;b2=b0}else if(type==='hp'){b0=(1+c)/2;b1=-(1+c);b2=b0}else{b0=a;b1=0;b2=-a}
+  const a0=1+a,a1=-2*c,a2=1-a;let x1=0,x2=0,y1=0,y2=0;for(let n=0;n<x.length;n++){const y=(b0*x[n]+b1*x1+b2*x2-a1*y1-a2*y2)/a0;x2=x1;x1=x[n];y2=y1;y1=y;x[n]=y}return x};
+ const burst=(t0,dur,tau,amp,filt)=>{const n0=Math.floor(t0*sr),n=Math.floor(dur*sr),b=new Float32Array(n);for(let k=0;k<n;k++)b[k]=r()*Math.exp(-k/sr/tau);for(const f of filt)bq(b,f[0],f[1],f[2]);for(let k=0;k<n&&n0+k<len;k++)d[n0+k]+=b[k]*amp};
+ const thump=(t0,f0,f1,tau,amp)=>{const n0=Math.floor(t0*sr);let ph=0;for(let k=0;n0+k<len&&k<sr*tau*6;k++){const t=k/sr,f=f1+(f0-f1)*Math.exp(-t/.02);ph+=2*Math.PI*f/sr;d[n0+k]+=Math.sin(ph)*Math.exp(-t/tau)*amp*Math.min(1,k/(sr*.002))}};
+ const mode=(t0,f,tau,amp)=>{const n0=Math.floor(t0*sr);for(let k=0;n0+k<len&&k<sr*tau*6;k++){const t=k/sr;d[n0+k]+=Math.sin(2*Math.PI*f*t)*Math.exp(-t/tau)*amp}};
+ const grains=(t0,span,n,amp,f,q)=>{for(let g=0;g<n;g++){const t=t0+Math.pow(Math.abs(r()),1.6)*span;burst(t,.012,.0025+Math.abs(r())*.003,amp*(.4+Math.abs(r())*.6),[['bp',f*(.7+Math.abs(r())*.8),q]])}};
+ const j=1+r()*.08,toe=.055+Math.abs(r())*.03;
+ if(kind==='carpet'){thump(0,95*j,52,.034,.55);burst(0,.08,.022,.5,[['lp',520*j,.7]]);burst(toe,.06,.016,.22,[['lp',800,.7]]);burst(.01,.12,.05,.05,[['bp',1500,.6]])}
+ else if(kind==='hard'){thump(0,150*j,82,.018,.42);burst(0,.03,.006,.75,[['hp',1100,.7],['bp',3200*j,1.1]]);burst(toe,.02,.004,.4,[['bp',3800*j,1.2]]);mode(0,2250*j,.035,.05)}
+ else if(kind==='wood'){thump(0,118*j,70,.04,.62);burst(0,.05,.018,.45,[['bp',420*j,1.4]]);mode(0,182*j,.06,.14);mode(0,315*j,.05,.1);mode(0,530*j,.035,.06);burst(toe,.04,.012,.22,[['bp',900,1.2]])}
+ else if(kind==='metal'){thump(0,120*j,70,.025,.45);burst(0,.04,.008,.55,[['bp',1600*j,1]]);mode(0,640*j,.16,.07);mode(0,1370*j,.12,.05);mode(0,2490*j,.08,.035);burst(toe,.03,.006,.3,[['bp',2400,1.3]])}
+ else if(kind==='grass'){thump(0,75*j,48,.03,.3);grains(0,.13,34,.22,3200,.9);burst(.01,.14,.05,.08,[['hp',2500,.7]])}
+ else if(kind==='gravel'){thump(0,90*j,55,.03,.4);grains(0,.17,60,.32,2200,.8);grains(toe,.08,20,.2,3000,1)}
+ else if(kind==='water'){thump(0,80*j,50,.03,.3);burst(0,.2,.06,.35,[['bp',900*j,.8]]);grains(.02,.15,18,.15,1800,2)}
+ else if(kind==='land'){thump(0,85,45,.07,.95);burst(0,.08,.02,.6,[['lp',700,.7]])}
+ else{thump(0,108*j,62,.024,.5);burst(0,.04,.011,.6,[['bp',950*j,.8]]);grains(.002,.04,10,.12,4200,.9);burst(toe,.06,.02,.2,[['bp',2600*j,.9]])}
+ // a hint of the room: hard floors ring out more than soft ones
+ const er={hard:[.3,.2,.14,.09],concrete:[.2,.13,.08,.05],metal:[.25,.16,.1,.06],wood:[.15,.1,.06,.03]}[kind];
+ if(er){const src=d.slice(),lp=bq(src,'lp',3800,.7);[.013,.023,.037,.053].forEach((t,q)=>{const o=Math.floor(t*sr);for(let n=0;n+o<len;n++)d[n+o]+=lp[n]*er[q]})}
+ let pk=0;for(let n=0;n<len;n++)pk=Math.max(pk,Math.abs(d[n]));const g=.9/(pk||1);
+ for(let n=0;n<len;n++){d[n]*=g;if(n>len-400)d[n]*=(len-n)/400}
+ const b=AC.createBuffer(1,len,sr);b.getChannelData(0).set(d);return STEPS[key]=b;
+}
+const STEPVOL={carpet:.55,hard:.85,wood:.8,metal:.85,concrete:.75,grass:.6,gravel:.8,water:.7,land:.9};
+function stepSound(v,kind,left){if(!AU||!AC)return;try{if(AC.state==='suspended')return;
+ let st=0;if(!kind){const f=typeof floorKind==='function'?floorKind():['concrete',0];kind=f[0];st=f[1]}
+ const s=AC.createBufferSource();s.buffer=stepBuf(kind,Math.random()*6|0);s.playbackRate.value=(.95+Math.random()*.1)*(v>.9?1.04:1);
+ const g=AC.createGain();g.gain.value=(v||.7)*.3*(STEPVOL[kind]||.7)*(st?1.15:1)*(.88+Math.random()*.24);
+ let out=g;if(AC.createStereoPanner){const p=AC.createStereoPanner();p.pan.value=(left?-1:1)*.1;g.connect(p);out=p}
+ s.connect(g);out.connect(AU.sfx);s.start()}catch(e){}}
 /* hover/tap feedback for every button, without wiring each one */
 let hovT=0;
 document.addEventListener('pointerover',e=>{const b=e.target.closest&&e.target.closest('button:not([disabled])');if(!b||b===AU?.lastHover)return;if(AU)AU.lastHover=b;const n=performance.now();if(n-hovT<45)return;hovT=n;sfx('hover')},{passive:true});

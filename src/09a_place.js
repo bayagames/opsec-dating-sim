@@ -1,5 +1,5 @@
 /* ============ WORLD CONTENT: who stands where, what you can use, what's locked ============ */
-const BG2AREA={con:'foyer',lock:'lockpick',ctf:'ctf',soc:'soc',stream:'creator',hotel:'room1337',roof:'plantdeck',stage:'hallA',keynote:'hallA',vendor:'vendor',flat:'flat',bakery:'bakery',cos:'cosplay',chill:'lounge',bar:'bar',lobby:'lobby',office:'office'};
+const BG2AREA={train:'platform',con:'foyer',lock:'lockpick',ctf:'ctf',soc:'soc',stream:'creator',hotel:'room1337',roof:'plantdeck',stage:'hallA',keynote:'hallA',vendor:'vendor',flat:'flat',bakery:'bakery',cos:'cosplay',chill:'lounge',bar:'bar',lobby:'lobby',office:'office'};
 const FAR={home:70,con:260,f13:460,office:80,station:220};
 /* Day 1 onboarding steps: badge → opening ceremony → hotel check-in → drop your bag → (the whole con) */
 const d1=k=>S&&(S.ch>1||(S.ch===1&&!!S.f['d1_'+k]));
@@ -177,7 +177,7 @@ function placeWorld(){
  int('office',528,15.2,()=>'Look into the meeting room',N1('A slide titled "Synergy Q3". Below it, someone has drawn a duck. The duck is the only thing in the meeting that made sense.'));
  int('office',503,.9,()=>'Look out of the window',N1('The city, grey and busy. Somewhere out there, four thousand hackers are packing hoodies. In two weeks you\'ll be one of them.'));
  /* ---- station ---- */
- int('station',736,7,()=>'Board the train',()=>trainMenu());
+ int('station',736,6.5,()=>'Board the train',()=>trainMenu(),{r:2.6});
  int('station',736,42.6,()=>'Exit · taxi rank',()=>{if(S.ch===0)return run([N('Your train\'s on Platform 4. You\'ve checked three times. You check a fourth time.')],hub);fadeTp(()=>{teleportArea('plaza');run([N('Twenty minutes later the taxi pulls up outside the Halcyon. The neon sign is still shouting.')],hub)})});
  int('station',736,25,()=>'Read the departures board',N1('09:12 CONFERENCE QUARTER · HALCYON — PLATFORM 4 — ON TIME. A man next to you photographs the board, then his ticket, then his face. Then he posts all three.'));
  int('station',759,33,()=>'Pasty Palace',N1('"Cheese and onion, or cheese and onion?" You pick cheese and onion. It\'s the right choice.'));
@@ -271,7 +271,7 @@ function placeWorld(){
  int('f13',261.4,13.4,()=>'Drop into Room 1336',()=>run([{w:'Partygoer',np:1,t:pick(ROLELINES.Partygoer)},N('The room is twelve people, six laptops, a mountain of fries and a TV showing a Linux boot screen on loop. Someone hands you a fry. You have been accepted.')],hub));
  int('f13',212+8*16/3+2.67,-12.7,()=>'Room 1309',()=>run([N(S.stage.kit>=3?'Room 1309. Kit\'s room. A new sign on the door: "DO NOT DISTURB". The peephole has a sticker over it from the outside. You hope it was her.':S.stage.kit>=2?'Room 1309. A photo taken outside this door is how the creep found her. You don\'t linger. You check the corridor both ways when you leave.':'Room 1309. A cyan strip of armour paint on the door handle. Someone\'s been in and out in a hurry, carrying a costume.')],hub));
  int('f13',212+2*16/3+2.67,-12.7,()=>'Room 1303',N1('Room 1303. A Faraday bag hangs on the door handle like a "do not disturb" sign. Even the peephole has a tiny square of tape over it. You don\'t need to ask whose room this is.'));
- int('f13',269.5,13.6,()=>'Use your laptop',()=>room());
+ int('f13',269.5,13.6,()=>'Use your laptop',()=>roomMenu());
  int('f13',273.6,14.2,()=>S.ch===1&&S.f.d1_checkin&&!S.f.d1_room?'Drop your bag':S.ch===2?'Go to bed (end Day 2)':S.ch===3?'Get ready: everyone\'s coming over (Night 3)':'Lie on the bed',()=>{if(S.ch===1&&!S.f.d1_room&&S.f.d1_checkin)return run(D1_ROOM(),hub);if(S.ch===2||S.ch===3)return advance();run([N('The bed crunches. You stare at the ceiling for a bit. It\'s weirdly restful.')],hub)});
  int('f13',274.6,17.4,()=>'Look out of the window',N1('Two windows. The city glitters through both. Somewhere out there, Proof is closed for the night, and a tiny person in a cape is drawn on a stack of empty bags.'));
  int('f13',264.9,13.9,()=>'Open the minibar',N1('£9 for a Toblerone. You close the minibar with respect.'));
@@ -288,9 +288,8 @@ function placeWorld(){
 function liftMenu(){
  const here=WD.reg,onL1=here==='con'&&WD.y>3,onB=here==='con'&&WD.y<-2;
  if(S.ch===1&&!S.f.d1_checkin)return run([N('You press the button. A little screen asks you to tap your room key. You don\'t have a room key yet. Reception first.')],hub);
- run([{hide:1},N('The lift arrives with a soft ding. Muzak. A mirror. You look tired, but in a cool way.'),C(
+ run([{hide:1},N(here==='con'?'The lift arrives with a soft ding. Muzak. A mirror. The panel has G, 13 and, under a little cover, B. Level 1 is just the mezzanine: that\'s the grand staircase.':'The lift arrives with a soft ding. Muzak. A mirror. You look tired, but in a cool way.'),C(
   {t:'Ground floor · Lobby',if:()=>here!=='con'||onL1||onB,then:()=>{fadeTp(()=>teleport('con',-78,26.6,0,0));return[]}},
-  {t:'Level 1 · Hotel mezzanine',if:()=>!onL1&&d1('open'),then:()=>{fadeTp(()=>teleport('con',-56,-6.4,Math.PI/2,L1));return[]}},
   {t:'13th floor · Room 1337',if:()=>here!=='f13',then:()=>{fadeTp(()=>teleport('f13',243,-10.2,0,0));return[]}},
   {t:'B · Car park',if:()=>S.ch>=2&&!onB,then:()=>{fadeTp(()=>teleport('con',-90,22,-Math.PI/2,BY));return[]}},
   {t:'Stay here',then:[]})],hub);
