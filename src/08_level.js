@@ -80,8 +80,10 @@ function paintTextures(){
  tex('traindoor',128,192,(c,w,h)=>{c.fillStyle='#c9ced8';c.fillRect(0,0,w,h);c.fillStyle='#ffd166';c.fillRect(0,0,w,6);c.fillRect(0,0,6,h);c.fillRect(w-6,0,6,h);c.fillStyle='#8a909c';c.fillRect(w/2-1,0,2,h);
   for(const x of[14,72]){const g=c.createLinearGradient(0,22,0,96);g.addColorStop(0,'#3a4a6a');g.addColorStop(1,'#1a2034');c.fillStyle=g;c.fillRect(x,22,42,74);c.fillStyle='#ffffff2a';c.fillRect(x+3,25,10,68)}
   c.fillStyle='#2a4a8a';c.fillRect(0,150,w,10);grain(c,w,h,8)});
- tex('trainin',128,192,(c,w,h)=>{const g=c.createLinearGradient(0,0,0,h);g.addColorStop(0,'#fff1d6');g.addColorStop(.35,'#d8c3a0');g.addColorStop(1,'#5a4a3a');c.fillStyle=g;c.fillRect(0,0,w,h);
-  c.fillStyle='#2a4a8a';c.fillRect(10,96,40,60);c.fillRect(78,96,40,60);c.fillStyle='#22406f';c.fillRect(10,140,40,16);c.fillRect(78,140,40,16);c.fillStyle='#c8ccd6';c.fillRect(62,0,4,h);c.fillStyle='#00000040';c.fillRect(0,170,w,22)});
+ tex('trainin',128,192,(c,w,h)=>{const g=c.createLinearGradient(0,0,0,h);g.addColorStop(0,'#f4e2c0');g.addColorStop(.5,'#cdb894');g.addColorStop(1,'#6a5a48');c.fillStyle=g;c.fillRect(0,0,w,h);
+  c.fillStyle='#b8a888';c.beginPath();c.moveTo(0,150);c.lineTo(w,150);c.lineTo(w,h);c.lineTo(0,h);c.fill();c.fillStyle='#8a7a62';c.fillRect(0,150,w,3);
+  c.fillStyle='#2a4a8a';c.fillRect(4,98,46,40);c.fillRect(78,98,46,40);c.fillStyle='#1f3a6e';c.fillRect(4,130,46,20);c.fillRect(78,130,46,20);c.fillStyle='#3a5a9a';c.fillRect(4,92,46,8);c.fillRect(78,92,46,8);
+  c.fillStyle='#dfe3ea';c.fillRect(61,0,6,150);c.fillStyle='#ffffff55';c.fillRect(62,0,2,150);c.fillStyle='#fff6e0';c.fillRect(10,8,108,6);grain(c,w,h,6)});
  tex('dark',16,16,(c,w,h)=>{c.fillStyle='#14101a';c.fillRect(0,0,w,h)});
  tex('black',16,16,(c,w,h)=>{c.fillStyle='#000';c.fillRect(0,0,w,h)});
 }

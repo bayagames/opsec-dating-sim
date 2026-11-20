@@ -226,27 +226,43 @@ function stepBuf(kind,i){
  const thump=(t0,f0,f1,tau,amp)=>{const n0=Math.floor(t0*sr);let ph=0;for(let k=0;n0+k<len&&k<sr*tau*6;k++){const t=k/sr,f=f1+(f0-f1)*Math.exp(-t/.02);ph+=2*Math.PI*f/sr;d[n0+k]+=Math.sin(ph)*Math.exp(-t/tau)*amp*Math.min(1,k/(sr*.002))}};
  const mode=(t0,f,tau,amp)=>{const n0=Math.floor(t0*sr);for(let k=0;n0+k<len&&k<sr*tau*6;k++){const t=k/sr;d[n0+k]+=Math.sin(2*Math.PI*f*t)*Math.exp(-t/tau)*amp}};
  const grains=(t0,span,n,amp,f,q)=>{for(let g=0;g<n;g++){const t=t0+Math.pow(Math.abs(r()),1.6)*span;burst(t,.012,.0025+Math.abs(r())*.003,amp*(.4+Math.abs(r())*.6),[['bp',f*(.7+Math.abs(r())*.8),q]])}};
- const j=1+r()*.08,toe=.055+Math.abs(r())*.03;
- if(kind==='carpet'){thump(0,95*j,52,.034,.55);burst(0,.08,.022,.5,[['lp',520*j,.7]]);burst(toe,.06,.016,.22,[['lp',800,.7]]);burst(.01,.12,.05,.05,[['bp',1500,.6]])}
- else if(kind==='hard'){thump(0,150*j,82,.018,.42);burst(0,.03,.006,.75,[['hp',1100,.7],['bp',3200*j,1.1]]);burst(toe,.02,.004,.4,[['bp',3800*j,1.2]]);mode(0,2250*j,.035,.05)}
- else if(kind==='wood'){thump(0,118*j,70,.04,.62);burst(0,.05,.018,.45,[['bp',420*j,1.4]]);mode(0,182*j,.06,.14);mode(0,315*j,.05,.1);mode(0,530*j,.035,.06);burst(toe,.04,.012,.22,[['bp',900,1.2]])}
- else if(kind==='metal'){thump(0,120*j,70,.025,.45);burst(0,.04,.008,.55,[['bp',1600*j,1]]);mode(0,640*j,.16,.07);mode(0,1370*j,.12,.05);mode(0,2490*j,.08,.035);burst(toe,.03,.006,.3,[['bp',2400,1.3]])}
- else if(kind==='grass'){thump(0,75*j,48,.03,.3);grains(0,.13,34,.22,3200,.9);burst(.01,.14,.05,.08,[['hp',2500,.7]])}
- else if(kind==='gravel'){thump(0,90*j,55,.03,.4);grains(0,.17,60,.32,2200,.8);grains(toe,.08,20,.2,3000,1)}
- else if(kind==='water'){thump(0,80*j,50,.03,.3);burst(0,.2,.06,.35,[['bp',900*j,.8]]);grains(.02,.15,18,.15,1800,2)}
- else if(kind==='land'){thump(0,85,45,.07,.95);burst(0,.08,.02,.6,[['lp',700,.7]])}
- else{thump(0,108*j,62,.024,.5);burst(0,.04,.011,.6,[['bp',950*j,.8]]);grains(.002,.04,10,.12,4200,.9);burst(toe,.06,.02,.2,[['bp',2600*j,.9]])}
- // a hint of the room: hard floors ring out more than soft ones
- const er={hard:[.3,.2,.14,.09],concrete:[.2,.13,.08,.05],metal:[.25,.16,.1,.06],wood:[.15,.1,.06,.03]}[kind];
- if(er){const src=d.slice(),lp=bq(src,'lp',3800,.7);[.013,.023,.037,.053].forEach((t,q)=>{const o=Math.floor(t*sr);for(let n=0;n+o<len;n++)d[n+o]+=lp[n]*er[q]})}
+ // envelope-shaped noise (attack then decay), the building block of a believable scuff or swish
+ const swish=(t0,att,tau,amp,filt)=>{const n0=Math.floor(t0*sr),n=Math.floor((att+tau*6)*sr),b=new Float32Array(n);for(let k=0;k<n;k++){const t=k/sr;b[k]=r()*(t<att?t/att:Math.exp(-(t-att)/tau))}for(const f of filt)bq(b,f[0],f[1],f[2]);for(let k=0;k<n&&n0+k<len;k++)d[n0+k]+=b[k]*amp};
+ // a diffuse room tail: decaying filtered noise after the step, what makes a hard floor sound like a big hall
+ const tail=(t0,tau,amp,lp)=>swish(t0,.004,tau,amp,[['lp',lp,.7],['hp',180,.7]]);
+ // a foot hitting a floor is noise, not a tone: a low, dull body (heavily low-passed noise) plus a brighter contact
+ // whose colour is the surface. No sine sweeps: those read as a kick drum. Trainers throughout (it's a con).
+ const hit=(t0,tau,amp,filt)=>swish(t0,.0012,tau,amp,filt);
+ const j=1+r()*.08,toe=.09+Math.abs(r())*.035,tv=.5+Math.abs(r())*.25;
+ if(kind==='carpet'){hit(0,.028,.9,[['lp',260*j,.7],['lp',600,.7]]);hit(.001,.01,.22,[['bp',900*j,.7]]);hit(toe,.022,.5*tv,[['lp',320*j,.7],['lp',700,.7]]);swish(toe,.008,.03,.06,[['bp',1600,.7]])}
+ else if(kind==='hard'){
+  hit(0,.018,.75,[['lp',380*j,.7],['lp',900,.7]]);hit(.0005,.007,.42,[['bp',1700*j,.8]]);hit(.0005,.003,.12,[['hp',3200,.7]]);
+  hit(toe,.014,.4*tv,[['lp',420*j,.7]]);swish(toe,.005,.022,.16*tv,[['bp',1300*j,.7]]);
+  if(i===2)swish(toe+.01,.01,.018,.05,[['bp',3100*j,6]]); // the odd squeak of a trainer on polished stone
+  tail(.004,.11,.045,2200)}
+ else if(kind==='wood'){hit(0,.03,.8,[['lp',300*j,.7],['lp',700,.7]]);hit(0,.045,.3,[['bp',240*j,4]]);hit(.0005,.008,.3,[['bp',1100*j,.8]]);hit(toe,.022,.4*tv,[['lp',340,.7]]);hit(toe,.03,.14*tv,[['bp',260*j,4]]);tail(.004,.05,.025,1800)}
+ else if(kind==='metal'){hit(0,.02,.6,[['lp',400,.7]]);hit(0,.008,.4,[['bp',2000*j,.9]]);mode(0,640*j,.16,.05);mode(0,1370*j,.11,.035);mode(0,2490*j,.07,.02);hit(toe,.015,.3*tv,[['lp',450,.7]]);hit(toe,.006,.2*tv,[['bp',2400,.9]]);tail(.004,.08,.04,3000)}
+ else if(kind==='grass'){
+  // blades brushing the shoe: soft, overlapping, high swishes with a muffled earth thud under them
+  hit(.003,.03,.38,[['lp',220*j,.7],['lp',500,.7]]);
+  swish(0,.02,.045,.3,[['bp',3600*j,.5],['lp',8000,.7]]);swish(.025,.022,.04,.18,[['bp',5400*j,.6]]);swish(toe-.015,.028,.05,.22*tv,[['bp',2800*j,.5]]);
+  for(let g=0;g<4;g++)swish(Math.abs(r())*.12,.006,.008,.03,[['bp',4200+Math.abs(r())*2500,1]])}
+ else if(kind==='gravel'){hit(0,.03,.55,[['lp',300,.7]]);swish(0,.008,.05,.16,[['bp',2400*j,.6]]);grains(0,.15,36,.14,2400,.8);grains(toe,.08,16,.11*tv,3200,1)}
+ else if(kind==='water'){hit(0,.03,.4,[['lp',300,.7]]);swish(0,.01,.07,.3,[['bp',900*j,.8]]);grains(.02,.15,14,.1,1800,2)}
+ else if(kind==='land'){hit(0,.06,1,[['lp',200,.7],['lp',500,.7]]);hit(0,.015,.35,[['bp',900,.7]])}
+ else{hit(0,.02,.75,[['lp',340*j,.7],['lp',800,.7]]);hit(.0005,.008,.38,[['bp',1200*j,.8]]);grains(.001,.025,5,.05,3800,.9);hit(toe,.016,.38*tv,[['lp',380,.7]]);swish(toe,.005,.025,.15*tv,[['bp',1800*j,.7]]);tail(.004,.07,.03,2200)}
  let pk=0;for(let n=0;n<len;n++)pk=Math.max(pk,Math.abs(d[n]));const g=.9/(pk||1);
  for(let n=0;n<len;n++){d[n]*=g;if(n>len-400)d[n]*=(len-n)/400}
  const b=AC.createBuffer(1,len,sr);b.getChannelData(0).set(d);return STEPS[key]=b;
 }
-const STEPVOL={carpet:.55,hard:.85,wood:.8,metal:.85,concrete:.75,grass:.6,gravel:.8,water:.7,land:.9};
-function stepSound(v,kind,left){if(!AU||!AC)return;try{if(AC.state==='suspended')return;
+const STEPVOL={carpet:.6,hard:.62,wood:.75,metal:.75,concrete:.68,grass:.55,gravel:.7,water:.7,land:.9};
+/* recorded footsteps win if present: audio/steps/<surface>_1.mp3 ... _4.mp3 (carpet, hard, wood, metal, concrete, grass, gravel) */
+const STEPREC={};let stepRecTried=false;
+function loadStepSamples(){if(stepRecTried||!AC||location.protocol==='file:')return;stepRecTried=true;
+ for(const k of['carpet','hard','wood','metal','concrete','grass','gravel'])for(let n=1;n<=4;n++)fetch('audio/steps/'+k+'_'+n+'.mp3').then(r=>r.ok?r.arrayBuffer():null).then(b=>b&&AC.decodeAudioData(b)).then(buf=>{if(buf)(STEPREC[k]=STEPREC[k]||[]).push(buf)}).catch(()=>{})}
+function stepSound(v,kind,left){if(!AU||!AC)return;try{if(AC.state==='suspended')return;loadStepSamples();
  let st=0;if(!kind){const f=typeof floorKind==='function'?floorKind():['concrete',0];kind=f[0];st=f[1]}
- const s=AC.createBufferSource();s.buffer=stepBuf(kind,Math.random()*6|0);s.playbackRate.value=(.95+Math.random()*.1)*(v>.9?1.04:1);
+ const s=AC.createBufferSource();const rec=STEPREC[kind];s.buffer=rec&&rec.length?rec[Math.random()*rec.length|0]:stepBuf(kind,Math.random()*6|0);s.playbackRate.value=(.95+Math.random()*.1)*(v>.9?1.04:1);
  const g=AC.createGain();g.gain.value=(v||.7)*.3*(STEPVOL[kind]||.7)*(st?1.15:1)*(.88+Math.random()*.24);
  let out=g;if(AC.createStereoPanner){const p=AC.createStereoPanner();p.pan.value=(left?-1:1)*.1;g.connect(p);out=p}
  s.connect(g);out.connect(AU.sfx);s.start()}catch(e){}}

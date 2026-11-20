@@ -26,7 +26,7 @@ function phone(app){
  phApp=app||null;phThread=null;phReg=null;drawPhone();
  if(opening){const ph=$('ov').querySelector('.phone');if(ph)ph.classList.add('opening');if(typeof sfx==='function')sfx('phoneOpen')}
 }
-function closePhone(){if($('ov').classList.contains('phoneov')&&typeof sfx==='function')sfx('phoneClose');closeOv();$('ov').classList.remove('phoneov');if($('vn').classList.contains('on'))return;if(G.ok&&S.inWorld)hub();else if($('hub').classList.contains('on'))hub()}
+function closePhone(){if($('ov').classList.contains('phoneov')&&typeof sfx==='function')sfx('phoneClose');closeOv();$('ov').classList.remove('phoneov');if(G.ok&&S&&S.inWorld)relock();if($('vn').classList.contains('on'))return;if(G.ok&&S.inWorld)hub();else if($('hub').classList.contains('on'))hub()}
 function drawPhone(){
  const apps=Object.keys(APPN).filter(a=>!APPU[a]||S.unl[APPU[a]]);
  const unread=S.msgs.filter(m=>!m.r).length,nn=S.ch>0&&G.ok?newScenes().length:0;

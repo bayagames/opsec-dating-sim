@@ -49,7 +49,7 @@ function hub(){
  if(!G.ok){hub2d();return}
  S.inWorld=1;S.pos=[WD.reg,WD.x,WD.z,WD.yaw,WD.y];save();show('world');WD.active=true;hud();updObjective();
  // walking around always means mouse-look: grab the mouse now (this runs inside the click/key that ended the scene)
- if(!WD.touch&&!locked())tryLock();
+ if(!WD.touch&&!locked())relock();
 }
 function advance(){
  const nc=newCount();
