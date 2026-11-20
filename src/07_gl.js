@@ -236,13 +236,13 @@ function buildAtlases(){
    Density is chosen per region so the whole region fits the page budget; a 1-texel gutter stops neighbours bleeding. */
 function packLM(Q){
  const S=2048,maxP={high:4,medium:3,low:2}[G.q]||3;let area=0;for(const q of Q)area+=(q.w+.25)*(q.h+.25);
- let D=Math.min(14,Math.max(1.5,Math.sqrt(maxP*S*S*.62/Math.max(1,area))));
+ let D=Math.min(9,Math.max(1.5,Math.sqrt(maxP*S*S*.62/Math.max(1,area))));
  const order=Q.map((q,i)=>i);
  for(let tries=0;tries<12;tries++){
   for(const q of Q){q.cw=Math.max(2,Math.ceil(q.w*D));q.ch=Math.max(2,Math.ceil(q.h*D))}
   order.sort((a,b)=>Q[b].ch-Q[a].ch);let pg=0,x=0,y=0,sh=0,ok=true;
   for(const i of order){const q=Q[i],w=q.cw+2,h=q.ch+2;if(x+w>S){x=0;y+=sh;sh=0}if(y+h>S){pg++;x=0;y=0;sh=0;if(pg>=maxP){ok=false;break}}q.pg=pg;q.x=x+1;q.y=y+1;x+=w;sh=Math.max(sh,h)}
-  if(ok){if(pg===0&&S>1024&&D>=10){const r=packAt(Q,order,1024,D);if(r)return r}return{S,D,pages:pg+1}}D*=.85}
+  if(ok){if(pg===0&&S>1024){const r=packAt(Q,order,1024,D);if(r)return r}return{S,D,pages:pg+1}}D*=.85}
  return{S,D,pages:maxP};
 }
 function packAt(Q,order,S,D){let x=0,y=0,sh=0;const save=Q.map(q=>[q.x,q.y,q.pg]);
