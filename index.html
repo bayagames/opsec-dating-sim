@@ -2789,18 +2789,22 @@ function bakeFinish(reg){
 /* bake everything, a few lights per frame so the loading bar moves; cb() when done */
 function bakeAll(prog,cb){
  if(!bakeOK()){cb(false);return}
- const jobs=[];for(const reg in G.regions)for(let i=0;i<G.lights[reg].length;i++)jobs.push([reg,i]);
+ const only=window.__bakeOnly,jobs=[];for(const reg in G.regions)if(!only||only.includes(reg))for(let i=0;i<G.lights[reg].length;i++)jobs.push([reg,i]);
  const regs=Object.keys(G.regions);let j=0,setUp={},n=Math.max(1,jobs.length);
  const step=()=>{const t0=performance.now();
   try{
-   while(j<jobs.length&&performance.now()-t0<22){const[reg,i]=jobs[j];if(!setUp[reg]){bakeSetup(reg);setUp[reg]=1}bakeLight(reg,i);j++;
+   let k=0;while(j<jobs.length&&(k++<1||performance.now()-t0<30)){const[reg,i]=jobs[j];if(!setUp[reg]){bakeSetup(reg);setUp[reg]=1}bakeLight(reg,i);j++;
     if(j===jobs.length||jobs[j][0]!==reg)bakeFinish(reg)}
-   for(const reg of regs)if(!setUp[reg]&&j>=jobs.length){bakeSetup(reg);bakeFinish(reg);setUp[reg]=1} // regions with no lights
+   for(const reg of regs)if(!setUp[reg]&&j>=jobs.length&&(!only||only.includes(reg))){bakeSetup(reg);bakeFinish(reg);setUp[reg]=1} // regions with no lights
   }catch(e){console.error('bake failed',e);cb(false);return}
-  prog(j/n);
-  if(j<jobs.length)requestAnimationFrame(step);else{if(G.bkCubeRT){G.bkCubeRT.dispose();G.bkCube=null}cb(true)}};
+  // wait for the GPU to really finish this batch (reading one pixel forces it), so progress is honest
+  // and the browser never piles up seconds of queued work
+  bakeSync();prog(j/n);
+  if(j<jobs.length)setTimeout(step,0);else{if(G.bkCubeRT){G.bkCubeRT.dispose();G.bkCube=null}cb(true)}};
  requestAnimationFrame(step);
 }
+function bakeSync(){const T=G.T,r=G.r;if(!G.bkSyncRT){G.bkSyncRT=new T.WebGLRenderTarget(1,1,{depthBuffer:false});G.bkSyncBuf=new Uint8Array(4)}
+ r.readRenderTargetPixels(G.bkSyncRT,0,0,1,1,G.bkSyncBuf)}
 /* light at a point, for things that move (characters, crowds, doors): every nearby source, no shadows */
 function probeAt(reg,x,y,z,out){
  const L=G.lights[reg]||[];let r=0,g=0,b=0;
