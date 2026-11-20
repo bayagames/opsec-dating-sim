@@ -28,4 +28,6 @@ Source lives in `src/`. To rebuild `index.html` after editing:
 - `99_boot.js`     startup
 
 ## Deploy to GitHub Pages
-Push this folder to a repo, then Settings → Pages → Deploy from branch → `main` / root.
+Settings → Pages → Build and deployment → Source: "Deploy from a branch" → `main` / `(root)`.
+The site is served from `index.html` at the repo root; `.nojekyll` stops Jekyll from processing the files.
+Remember to run `python3 build.py` and commit `index.html` after editing `src/`.
