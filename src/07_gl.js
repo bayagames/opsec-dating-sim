@@ -3,16 +3,16 @@
    per region, per 32 m chunk and per material, then turned into merged BufferGeometries so the scene is a
    few hundred draw calls with frustum culling. Lighting is real time: a hemisphere fill per area plus a
    pool of point lights that follows the player and picks the nearest level lights. */
-const G={LK:7.6,HK:5.5,ok:false,regions:{},boxes:{},walls:{},lights:{},surf:{},tx:{},mats:{},rects:{},chars:[],q:'high'};
+const G={qd:{},LK:7.6,HK:5.5,ok:false,regions:{},boxes:{},walls:{},lights:{},surf:{},tx:{},mats:{},rects:{},chars:[],q:'high'};
 const lin=c=>c<=.04045?c/12.92:Math.pow((c+.055)/1.055,2.4);
 const QUALITY={
  low:{dpr:1,lights:6,bloom:false,msaa:0,std:false,shadowBlobs:true},
  medium:{dpr:1.5,lights:10,bloom:true,msaa:0,std:true,env:true,grade:true,bump:true},
- high:{dpr:2,lights:16,bloom:true,msaa:0,fxaa:true,std:true,env:true,grade:true,ao:true,shadows:2,bump:true}
+ high:{dpr:2,lights:16,bloom:true,msaa:0,fxaa:true,std:true,env:true,grade:true,ao:true,bump:true}
 };
 /* the look, in one place: emissive gain is compressed above 1 so signs and fixtures read as lit without
    blooming into fog; bloom only catches what is genuinely bright */
-const LOOK={exposure:1.12,hemi:3.2,fill:.5,env:{home:.6,con:.5,f13:.55,office:.7,station:.7},bloomStr:.26,bloomRad:.62,bloomThr:1.05,ao:.85,sat:1.12,con:1.07,vig:.12,light:7.6,reach:1.3,shadowK:1.45};
+const LOOK={exposure:1.12,hemi:3.2,fill:.5,env:{home:.6,con:.5,f13:.55,office:.7,station:.7},bloomStr:.26,bloomRad:.62,bloomThr:1.05,ao:.85,sat:1.12,con:1.07,vig:.12,light:7.6,reach:1.3,bake:1.7,bakeFill:.3,bakeEnv:.4};
 /* ---- textures: every texture gets its own canvas; small non-repeating ones are packed into atlases later ---- */
 function tex(key,w,h,paint){
  if(G.tx[key])return key;
@@ -34,7 +34,7 @@ function grp(m,cx,cz){
  const R=G.regions[BR],t=m.t||'white',kind=m.glass?'glass':m.e?'emit':(m.cut?'cut':'lit');
  const prof=m.e?'':(m.r!==undefined?m.r:.85)+':'+(m.m||0);
  const k=Math.floor(cx/32)+','+Math.floor(cz/32)+'|'+t+'|'+kind+'|'+prof;
- return R.groups[k]||(R.groups[k]={t,kind,prof,r:m.r,m:m.m||0,p:[],n:[],u:[],c:[]});
+ return R.groups[k]||(R.groups[k]={t,kind,prof,r:m.r,m:m.m||0,p:[],n:[],u:[],c:[],l:[],q:[]});
 }
 function quad(a,b,c,d,m,uw,vh){
  const e1=[b[0]-a[0],b[1]-a[1],b[2]-a[2]],e2=[d[0]-a[0],d[1]-a[1],d[2]-a[2]];
@@ -52,7 +52,9 @@ function quad(a,b,c,d,m,uw,vh){
   const br=[0,1];for(const yy of[G.ao+.3,G.ao+1.1]){const t=(yy-y0)/(ev[1]||1e-9);if(t>.02&&t<.98)br.push(t)}br.sort((p,q)=>p-q);if(vAx===2)ts=br;else ss=br}
  const P=(s,t)=>[a[0]+e1[0]*s+e2[0]*t,a[1]+e1[1]*s+e2[1]*t,a[2]+e1[2]*s+e2[2]*t];
  const ao=y=>vert?(.62+.38*Math.min(1,Math.max(0,(y-G.ao)/1.1))):1;
- const push=(s,t)=>{const p=P(s,t),k=ao(p[1]);g.p.push(p[0],p[1],p[2]);g.n.push(nx,ny,nz);g.u.push(uw*s,vh*t);g.c.push(lc[0]*k,lc[1]*k,lc[2]*k)};
+ // every lit quad gets its own patch in the region's lightmap (packed later); (s,t) place each vertex inside it
+ const lmq=!m.e&&!m.glass&&!m.cut?(G.qd[BR]||(G.qd[BR]=[])).push({w:Math.hypot(e1[0],e1[1],e1[2]),h:Math.hypot(e2[0],e2[1],e2[2])})-1:-1;
+ const push=(s,t)=>{const p=P(s,t),k=ao(p[1]);g.p.push(p[0],p[1],p[2]);g.n.push(nx,ny,nz);g.u.push(uw*s,vh*t);g.c.push(lc[0]*k,lc[1]*k,lc[2]*k);g.l.push(s,t);g.q.push(lmq)};
  for(let i=0;i<ss.length-1;i++)for(let j=0;j<ts.length-1;j++){const s0=ss[i],s1=ss[i+1],t0=ts[j],t1=ts[j+1];push(s0,t0);push(s1,t0);push(s1,t1);push(s0,t0);push(s1,t1);push(s0,t1)}
 }
 function colBox(x0,z0,x1,z1,y0,y1){G.boxes[BR].push([Math.min(x0,x1),Math.min(z0,z1),Math.max(x0,x1),Math.max(z0,z1),y0,y1])}
@@ -120,11 +122,11 @@ function glInit(cv){
  if(!r||!r.capabilities)return false;
  r.outputColorSpace=T.SRGBColorSpace;r.toneMapping=T.NeutralToneMapping||T.ACESFilmicToneMapping;r.toneMappingExposure=LOOK.exposure;
  G.r=r;G.cv=cv;G.T=T;
- // shadows: rendered on demand (static level, so only when a shadow light moves or people nearby move)
- r.shadowMap.enabled=true;r.shadowMap.type=T.PCFShadowMap;r.shadowMap.autoUpdate=false;
  // the level was lit with a bounded (1-d/R)^2 falloff; keep that look instead of inverse-square,
  // which blows out ceilings that sit right next to their lights
  T.ShaderChunk.lights_pars_begin=T.ShaderChunk.lights_pars_begin.replace('float distanceFalloff = 1.0 / max( pow( lightDistance, decayExponent ), 0.01 );','float x_ = saturate( 1.0 - lightDistance / max( cutoffDistance, 0.001 ) ); return x_ * x_; float distanceFalloff = 1.0;');
+ // baked lightmaps are stored as 8-bit RGBM (rgb * a * range): decode where three reads the lightmap
+ T.ShaderChunk.lights_fragment_maps=T.ShaderChunk.lights_fragment_maps.replace('vec3 lightMapIrradiance = lightMapTexel.rgb * lightMapIntensity;','vec3 lightMapIrradiance = lightMapTexel.rgb * lightMapTexel.a * '+BAKE.rgbm.toFixed(1)+' * lightMapIntensity;');
  G.scene=new T.Scene();
  G.cam=new T.PerspectiveCamera(70,1,.05,500);G.cam.rotation.order='YXZ';
  G.HK=LOOK.hemi;G.hemi=new T.HemisphereLight(0xffffff,0x222222,1);G.scene.add(G.hemi);
@@ -138,14 +140,12 @@ function glInit(cv){
 function setQuality(q){
  if(!QUALITY[q])q='high';G.q=q;const Q=QUALITY[q],T=G.T;if(!G.r)return;
  // light pool size
- while(G.pool.length<Q.lights){const l=new T.PointLight(0xffffff,0,10,1);l.userData={src:-1,k:0,tk:0};G.scene.add(l);G.pool.push(l)}
- while(G.pool.length>Q.lights){const l=G.pool.pop();G.scene.remove(l);l.dispose&&l.dispose()}
- G.spool=G.spool||[];const NS=Q.shadows||0;
- while(G.spool.length<NS){const l=new T.PointLight(0xffffff,0,10,1);l.castShadow=true;l.shadow.mapSize.set(768,768);l.shadow.bias=-.0025;l.shadow.normalBias=.035;l.shadow.radius=2.5;l.shadow.camera.near=.2;l.userData={src:-1,k:0,tk:0};G.scene.add(l);G.spool.push(l)}
- while(G.spool.length>NS){const l=G.spool.pop();G.scene.remove(l);l.shadow.dispose&&l.shadow.dispose();l.dispose&&l.dispose()}
- G.poolT=0;G.poolReg=null;G.shDirty=true;
+ const NL=G.baked?0:Q.lights;
+ while(G.pool.length<NL){const l=new T.PointLight(0xffffff,0,10,1);l.userData={src:-1,k:0,tk:0};G.scene.add(l);G.pool.push(l)}
+ while(G.pool.length>NL){const l=G.pool.pop();G.scene.remove(l);l.dispose&&l.dispose()}
+ G.poolT=0;G.poolReg=null;
  // swap world materials
- for(const k in G.regions){const R=G.regions[k];if(!R.obj)continue;R.obj.traverse(o=>{if(o.isMesh&&o.userData.mk)o.material=getMat(o.userData.mk)})}
+ for(const k in G.regions){const R=G.regions[k];if(!R.obj)continue;R.obj.traverse(o=>{if(o.isMesh&&o.userData.mk)o.material=getMat(o.userData.mk,o.userData.lmk)})}
  // post-processing
  if(G.composer){G.composer.renderTarget1.dispose();G.composer.renderTarget2.dispose();G.composer=null}
  if(Q.bloom){
@@ -200,8 +200,8 @@ function buildEnv(reg){
 }
 const BUMP={brick:2.2,tile:1.2,tileDark:1.2,concrete:1.4,wood:1,woodDark:1,marble:.5,carpetCon:1.6,carpetHotel:1.6,carpetDark:1.6,carpetGrey:1.6,carpetGallery:1.4,wallHotel:.8,wallCon:.8,panel:1.2,pavers:2,gravel:2.4,grass:1.8,ceil:1,metal:.6,road:1.2,rug:1.4,fabric:1,linen:.6,pegs:1.2};
 /* materials are shared between regions and chunks: one per texture/kind/profile */
-function getMat(mk){
- const key=mk+'|'+(QUALITY[G.q].std?'s':'l');if(G.mats[key])return G.mats[key];
+function getMat(mk,lmk){
+ const key=mk+'|'+(QUALITY[G.q].std?'s':'l')+(lmk?'|'+lmk:'');if(G.mats[key])return G.mats[key];
  const T=G.T,[t,kind,prof]=mk.split('|');const map=t==='white'?null:texObj(t);
  let m;
  if(kind==='emit')m=new T.MeshBasicMaterial({map,vertexColors:true});
@@ -212,6 +212,7 @@ function getMat(mk){
    // surface relief from the texture itself: grout lines, brick courses, wood grain, carpet pile catch the light
    const bk=QUALITY[G.q].bump&&map&&BUMP[t];if(bk){o.bumpMap=map;o.bumpScale=bk}
    m=new T.MeshStandardMaterial(o)}else m=new T.MeshLambertMaterial(o)}
+ if(lmk&&m.isMeshStandardMaterial||lmk&&m.isMeshLambertMaterial){const[rg,pg]=lmk.split(':'),R=G.regions[rg];if(R&&R.lmTex&&R.lmTex[+pg]){m.lightMap=R.lmTex[+pg];m.lightMapIntensity=LOOK.bake}}
  return G.mats[key]=m;
 }
 function texObj(t){
@@ -231,19 +232,39 @@ function buildAtlases(){
   X.atlas=A.n;X.rect=[(px+1)/W,1-(py+X.h-1)/H,(X.w-2)/W,(X.h-2)/H];sx+=w;sh=Math.max(sh,h)}
  for(const A of G.atlas){const t=new T.CanvasTexture(A.c);t.colorSpace=T.SRGBColorSpace;t.anisotropy=G.aniso;t.generateMipmaps=true;t.minFilter=T.LinearMipmapLinearFilter;A.tex=t;A.c=null;A.x=null}
 }
+/* ---- lightmap packing: each lit quad is a rectangle of texels (its real size x density), shelf-packed onto square pages.
+   Density is chosen per region so the whole region fits the page budget; a 1-texel gutter stops neighbours bleeding. */
+function packLM(Q){
+ const S=2048,maxP={high:4,medium:3,low:2}[G.q]||3;let area=0;for(const q of Q)area+=(q.w+.25)*(q.h+.25);
+ let D=Math.min(9,Math.max(1.5,Math.sqrt(maxP*S*S*.62/Math.max(1,area))));
+ const order=Q.map((q,i)=>i);
+ for(let tries=0;tries<12;tries++){
+  for(const q of Q){q.cw=Math.max(2,Math.ceil(q.w*D));q.ch=Math.max(2,Math.ceil(q.h*D))}
+  order.sort((a,b)=>Q[b].ch-Q[a].ch);let pg=0,x=0,y=0,sh=0,ok=true;
+  for(const i of order){const q=Q[i],w=q.cw+2,h=q.ch+2;if(x+w>S){x=0;y+=sh;sh=0}if(y+h>S){pg++;x=0;y=0;sh=0;if(pg>=maxP){ok=false;break}}q.pg=pg;q.x=x+1;q.y=y+1;x+=w;sh=Math.max(sh,h)}
+  if(ok){if(pg===0&&S>1024){const r=packAt(Q,order,1024,D);if(r)return r}return{S,D,pages:pg+1}}D*=.85}
+ return{S,D,pages:maxP};
+}
+function packAt(Q,order,S,D){let x=0,y=0,sh=0;const save=Q.map(q=>[q.x,q.y,q.pg]);
+ for(const i of order){const q=Q[i],w=q.cw+2,h=q.ch+2;if(x+w>S){x=0;y+=sh;sh=0}if(y+h>S){Q.forEach((q,k)=>{[q.x,q.y,q.pg]=save[k]});return null}q.pg=0;q.x=x+1;q.y=y+1;x+=w;sh=Math.max(sh,h)}return{S,D,pages:1}}
 function finishRegions(){
  const T=G.T;buildAtlases();
  for(const k in G.regions){const R=G.regions[k];const root=new T.Group();root.visible=false;
   // merge groups that now share an atlas texture
-  const merged={};
+  const merged={},LM=R.lm=packLM(G.qd[k]||[]),QD=G.qd[k]||[];
   for(const gk in R.groups){const g=R.groups[gk],X=G.tx[g.t];let tk=g.t;
    if(X&&X.atlas!==undefined){const r=X.rect;for(let i=0;i<g.u.length;i+=2){const u=Math.min(1,Math.max(0,g.u[i])),v=Math.min(1,Math.max(0,g.u[i+1]));g.u[i]=r[0]+u*r[2];g.u[i+1]=r[1]+v*r[3]}tk='@atlas'+X.atlas}
-   const mk=tk+'|'+g.kind+'|'+g.prof,ck=gk.split('|')[0]+'|'+mk;
-   const M=merged[ck]||(merged[ck]={mk,p:[],n:[],u:[],c:[]});M.p.push(...g.p);M.n.push(...g.n);M.u.push(...g.u);M.c.push(...g.c)}
+   const mk=tk+'|'+g.kind+'|'+g.prof;
+   // a merged mesh may only use one lightmap page, so split by page as well as chunk and material
+   for(let v=0;v<g.q.length;v+=3){const q=g.q[v]>=0?QD[g.q[v]]:null,pg=q?q.pg:-1,ck=gk.split('|')[0]+'|'+mk+'|'+pg;
+    const M=merged[ck]||(merged[ck]={mk,pg,p:[],n:[],u:[],c:[],l:[]});
+    for(let w=v;w<v+3;w++){M.p.push(g.p[w*3],g.p[w*3+1],g.p[w*3+2]);M.n.push(g.n[w*3],g.n[w*3+1],g.n[w*3+2]);M.u.push(g.u[w*2],g.u[w*2+1]);M.c.push(g.c[w*3],g.c[w*3+1],g.c[w*3+2]);
+     if(q)M.l.push((q.x+g.l[w*2]*q.cw)/LM.S,(q.y+g.l[w*2+1]*q.ch)/LM.S);else M.l.push(0,0)}}}
+  G.qd[k]=null;
   for(const ck in merged){const M=merged[ck];if(!M.p.length)continue;
    if(M.mk.startsWith('@atlas')){const n=+M.mk.split('|')[0].slice(6);const ak='@atlas'+n;if(!G.tx[ak])G.tx[ak]={atlas:n,used:true}}
-   const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(M.p,3));g.setAttribute('normal',new T.Float32BufferAttribute(M.n,3));g.setAttribute('uv',new T.Float32BufferAttribute(M.u,2));g.setAttribute('color',new T.Float32BufferAttribute(M.c,3));g.computeBoundingSphere();
-   const mesh=new T.Mesh(g,null);mesh.userData.mk=M.mk;const kd=M.mk.split('|')[1];if(kd==='glass')mesh.userData.noAO=1;mesh.castShadow=kd==='lit'||kd==='cut';mesh.receiveShadow=kd!=='emit';mesh.matrixAutoUpdate=false;root.add(mesh)}
+   const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(M.p,3));g.setAttribute('normal',new T.Float32BufferAttribute(M.n,3));g.setAttribute('uv',new T.Float32BufferAttribute(M.u,2));g.setAttribute('color',new T.Float32BufferAttribute(M.c,3));if(M.pg>=0){const a=new T.Float32BufferAttribute(M.l,2);g.setAttribute('uv1',a);g.setAttribute('lmuv',a)}g.computeBoundingSphere();
+   const mesh=new T.Mesh(g,null);mesh.userData.mk=M.mk;mesh.userData.pg=M.pg;mesh.userData.reg=k;const kd=M.mk.split('|')[1];if(kd==='glass')mesh.userData.noAO=1;mesh.matrixAutoUpdate=false;root.add(mesh)}
   R.groups=null;R.obj=root;G.scene.add(root);
   const H={},SH={};
   const put=(Tb,b,x0,z0,x1,z1)=>{for(let x=Math.floor(x0/4);x<=Math.floor(x1/4);x++)for(let z=Math.floor(z0/4);z<=Math.floor(z1/4);z++)(Tb[x+','+z]=Tb[x+','+z]||[]).push(b)};
@@ -262,33 +283,23 @@ function sky(){
  G.sky=new T.Mesh(new T.SphereGeometry(300,32,16),m);G.sky.userData.noAO=1;G.sky.renderOrder=-10;G.sky.frustumCulled=false;G.scene.add(G.sky);
 }
 /* ---- light pool: the nearest level lights are mirrored into a fixed set of real point lights ---- */
-/* is this level light usable as a shadow caster? (not buried inside a wall or a solid box) */
-function shadowOK(reg,i){G.shok=G.shok||{};const c=G.shok[reg]||(G.shok[reg]=[]);if(c[i]!==undefined)return c[i];
- const l=G.lights[reg][i];let ok=true;for(const q of G.boxes[reg]){if(l[0]>q[0]-.05&&l[0]<q[2]+.05&&l[2]>q[1]-.05&&l[2]<q[3]+.05&&l[1]>q[4]-.05&&l[1]<q[5]+.05){ok=false;break}}return c[i]=ok}
+/* ---- light pool (only without baked lighting): the nearest level lights are mirrored into a few real point lights ---- */
 function updLights(dt,force){
- const reg=WD.reg,L=G.lights[reg]||[];const P=G.pool,SP=G.spool||[];if(!P.length)return;
+ const reg=WD.reg,L=G.lights[reg]||[];const P=G.pool;if(!P.length)return;
  G.poolT-=dt;
- const assign=(p,i,instant)=>{const l=L[i],u=p.userData;u.src=i;u.k=instant?1:0;u.tk=1;p.position.set(l[0],l[1],l[2]);p.color.setRGB(lin(l[3]),lin(l[4]),lin(l[5]));p.distance=l[6]*LOOK.reach;u.base=l[7]*G.LK};
  if(force||G.poolReg!==reg||G.poolT<=0){G.poolT=.2;
   const instant=force||G.poolReg!==reg;G.poolReg=reg;
   const ex=WD.x,ey=WD.eye,ez=WD.z,fx=-Math.sin(WD.yaw),fz=-Math.cos(WD.yaw);
   const sc=[];for(let i=0;i<L.length;i++){const l=L[i],dx=l[0]-ex,dy=(l[1]-ey)*1.6,dz=l[2]-ez,d=Math.hypot(dx,dy,dz);const ahead=(dx*fx+dz*fz)/(d||1);const s=d-l[6]*.55-ahead*3;if(d<l[6]+26)sc.push([s,i])}
-  sc.sort((a,b)=>a[0]-b[0]);const ranked=sc.map(s=>s[1]);
-  // the two most important nearby lights cast shadows; they cross-fade with the plain pool, so nothing pops
-  const shWant=[];for(const i of ranked.slice(0,8)){if(shWant.length>=SP.length)break;if(shadowOK(reg,i)&&L[i][7]>=.5)shWant.push(i)}
-  const shHave=new Set();
-  for(const p of SP){const u=p.userData;if(u.src>=0&&shWant.includes(u.src)&&!instant){u.tk=1;shHave.add(u.src)}else{u.tk=0;if(instant){u.k=0;u.src=-1}}}
-  for(const i of shWant){if(shHave.has(i))continue;const p=SP.find(p=>p.userData.src<0||(p.userData.k<=.01&&p.userData.tk===0));if(!p)break;assign(p,i,instant);shHave.add(i);G.shDirty=true}
-  const want=new Set(ranked.filter(i=>!shHave.has(i)).slice(0,P.length));
+  sc.sort((a,b)=>a[0]-b[0]);const want=new Set(sc.slice(0,P.length).map(s=>s[1]));
   const have=new Set();
   for(const p of P){const u=p.userData;if(u.src>=0&&want.has(u.src)&&!instant){u.tk=1;have.add(u.src)}else{u.tk=0;if(instant){u.k=0;u.src=-1}}}
   const free=P.filter(p=>p.userData.src<0||(p.userData.k<=.01&&p.userData.tk===0));
-  for(const i of want){if(have.has(i))continue;const p=free.shift();if(!p)break;assign(p,i,instant);have.add(i)}
+  for(const i of want){if(have.has(i))continue;const p=free.shift();if(!p)break;const l=L[i],u=p.userData;u.src=i;u.k=instant?1:0;u.tk=1;
+   p.position.set(l[0],l[1],l[2]);p.color.setRGB(lin(l[3]),lin(l[4]),lin(l[5]));p.distance=l[6]*LOOK.reach;u.base=l[7]*G.LK}
  }
- for(const p of P.concat(SP)){const u=p.userData;if(u.src<0){p.intensity=0;continue}u.k+=(u.tk-u.k)*Math.min(1,dt*5);if(u.tk===0&&u.k<.01){u.k=0;u.src=-1}
-  p.intensity=u.base*u.k*(p.castShadow?LOOK.shadowK:1)}
- // refresh shadow maps when a caster moved, otherwise ~15 times a second for people walking about
- if(SP.length){G.shT=(G.shT||0)-dt;if(G.shDirty||G.shT<=0){G.r.shadowMap.needsUpdate=true;G.shDirty=false;G.shT=1/15}}
+ for(const p of P){const u=p.userData;if(u.src<0){p.intensity=0;continue}u.k+=(u.tk-u.k)*Math.min(1,dt*5);if(u.tk===0&&u.k<.01){u.k=0;u.src=-1}
+  p.intensity=u.base*u.k}
 }
 /* ---- characters as lit, camera-facing cut-outs ---- */
 const SPRW=288,SPRH=720;
@@ -304,7 +315,7 @@ function cutout(texture,w,h,o){
  const T=G.T;o=o||{};
  const geo=new T.PlaneGeometry(w,h);geo.translate(0,h/2,0);
  const mat=new T.MeshLambertMaterial({map:texture,alphaTest:.5,emissive:0xffffff,emissiveMap:texture,emissiveIntensity:o.glow!==undefined?o.glow:.22});
- const m=new T.Mesh(geo,mat);m.userData.noAO=1;m.castShadow=!o.noShadow;m.customDistanceMaterial=new T.MeshDistanceMaterial({map:texture,alphaTest:.5,side:T.DoubleSide});
+ const m=new T.Mesh(geo,mat);m.userData.noAO=1;
  if(!o.noShadow){const s=new T.Mesh(new T.PlaneGeometry(w*.95,w*.5),new T.MeshBasicMaterial({map:blobTex(),transparent:true,depthWrite:false}));s.rotation.x=-Math.PI/2;s.position.y=.025;s.renderOrder=1;s.userData.noAO=1;const gg=new T.Group();gg.add(s);gg.add(m);gg.userData.body=m;return gg}
  const gg=new T.Group();gg.add(m);gg.userData.body=m;return gg;
 }
