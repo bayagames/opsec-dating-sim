@@ -201,9 +201,11 @@ function render(dt){
  G.fog.near+=(fr[0]-G.fog.near)*ease;G.fog.far+=(fr[1]-G.fog.far)*ease;
  G.hT=G.hT||new T.Color();G.hT.setRGB(amb[0]*1.25,amb[1]*1.25,amb[2]*1.35,T.SRGBColorSpace);G.hemi.color.lerp(G.hT,ease);
  G.gT=G.gT||new T.Color();G.gT.setRGB(amb[0]*.55,amb[1]*.5,amb[2]*.5,T.SRGBColorSpace);G.hemi.groundColor.lerp(G.gT,ease);
- G.hemi.intensity=(A&&A.out?1.2:1)*G.HK*(QUALITY[G.q].env?LOOK.fill:1);
+ // with baked light the sources do the work: only a faint fill remains (more outdoors and in daylight)
+ const fillK=G.baked?(R.day?LOOK.bakeFill*2.2:A&&A.out?LOOK.bakeFill*1.8:LOOK.bakeFill):(QUALITY[G.q].env?LOOK.fill:1);
+ G.hemi.intensity=(A&&A.out?1.2:1)*G.HK*fillK;
  // reflections + directional fill from the region's environment (medium/high); outdoors leans on the sky instead
- if(QUALITY[G.q].env){const env=buildEnv(WD.reg);if(G.scene.environment!==env)G.scene.environment=env;const ek=(LOOK.env[WD.reg]||.7)*(A&&A.out?.55:1)*(A&&A.envk||1);
+ if(QUALITY[G.q].env){const env=buildEnv(WD.reg);if(G.scene.environment!==env)G.scene.environment=env;const ek=(LOOK.env[WD.reg]||.7)*(A&&A.out?.55:1)*(A&&A.envk||1)*(G.baked&&!R.day?LOOK.bakeEnv:1);
   G.scene.environmentIntensity=G.scene.environmentIntensity===undefined?ek:G.scene.environmentIntensity+(ek-G.scene.environmentIntensity)*ease}else G.scene.environment=null;
  if(G.grade){const u=G.grade.uniforms;u.t.value=performance.now()/1000;u.res.value=u.res.value||new T.Vector2();u.res.value.set(w,h);u.sat.value=LOOK.sat;u.con.value=LOOK.con;u.vig.value=LOOK.vig;
   u.sh.value=u.sh.value||new T.Vector3(.55,.25,.9);u.hi.value=u.hi.value||new T.Vector3(1.04,1.,.95)}
@@ -226,7 +228,7 @@ function updSprites(dt){
   if(!c.obj){if(!vis)continue;c.obj=cutout(null,.98,2.45);G.scene.add(c.obj);c.mark=markObj();G.scene.add(c.mark)}
   c.obj.visible=vis;c.mark.visible=false;if(!vis)continue;
   const sk=charSVGKey(c);if(c.objKey!==sk){c.objKey=sk;const t=spriteTex('c:'+sk,fullSVG(sk));const bd=c.obj.userData.body,b=bd.material;b.map=t;b.emissiveMap=t;b.needsUpdate=true;if(bd.customDistanceMaterial){bd.customDistanceMaterial.map=t;bd.customDistanceMaterial.needsUpdate=true}}
-  c.obj.position.set(c.x,c.y||0,c.z);c.obj.rotation.y=yaw;
+  c.obj.position.set(c.x,c.y||0,c.z);c.obj.rotation.y=yaw;litSprite(c.obj,WD.reg,c.x,(c.y||0)+1.2,c.z,tt);
   const body=c.obj.userData.body;body.scale.y=1+Math.sin(tt*1.7+c.x)*.007;body.scale.x=1-Math.sin(tt*1.7+c.x)*.004;
   if(G.news.has(c.id)||storyMark(c)){c.mark.visible=true;c.mark.position.set(c.x,(c.y||0)+2.62+Math.sin(tt*3)*.07,c.z)}
  }
@@ -235,7 +237,7 @@ function updSprites(dt){
   if(!n.obj){if(!vis)continue;const v=n.role?7:n.v;n.obj=cutout(spriteTex('anon'+v,anonSVG(v)),.94,2.3);G.scene.add(n.obj)}
   n.obj.visible=vis;if(!vis)continue;
   const moving=!n.still&&n.wait<=0;const ph=tt*6.5+n.hx;
-  n.obj.position.set(n.x,n.y,n.z);n.obj.rotation.y=yaw;const b=n.obj.userData.body;
+  n.obj.position.set(n.x,n.y,n.z);n.obj.rotation.y=yaw;litSprite(n.obj,WD.reg,n.x,n.y+1.2,n.z,tt);const b=n.obj.userData.body;
   b.position.y=moving?Math.abs(Math.sin(ph))*.035:0;b.rotation.z=moving?Math.sin(ph)*.025:Math.sin(tt*.8+n.hx)*.008;
  }
  for(const d of DYN){const vis=d.reg===WD.reg&&d.when()&&d.spr;
@@ -246,6 +248,10 @@ function updSprites(dt){
  const nr=WD.near&&worldLive()?WD.near:null;G.ring.visible=!!nr;
  if(nr){G.ring.position.set(nr.x,(nr.y||0)+.03,nr.z);const s=1+Math.sin(tt*5)*.08;G.ring.scale.set(s,1,s);G.ring.material.opacity=.55+Math.sin(tt*5)*.25}
 }
+/* with baked lighting there are no realtime lights: a cut-out's glow is set from the lights around it instead */
+const _pr={r:0,g:0,b:0};
+function litSprite(o,reg,x,y,z,tt){if(!G.baked)return;const u=o.userData;if(u.lt!==undefined&&tt-u.lt<.25&&Math.abs(u.lx-x)+Math.abs(u.lz-z)<.3)return;u.lt=tt;u.lx=x;u.lz=z;
+ probeAt(reg,x,y,z,_pr);const m=u.body.material,k=1/Math.PI;m.emissive.setRGB(.05+_pr.r*k,.05+_pr.g*k,.06+_pr.b*k);m.emissiveIntensity=1}
 /* gate visuals: velvet rope on chrome posts, or a closed door with a card reader */
 function gateObj(g){
  const T=G.T,grp=new T.Group();G.gm=G.gm||{post:new T.MeshStandardMaterial({color:0xc8ccd6,metalness:.9,roughness:.25}),rope:new T.MeshStandardMaterial({color:0x8a1e3a,roughness:.7}),door:new T.MeshStandardMaterial({map:soloTex('door'),roughness:.6}),red:new T.MeshBasicMaterial({color:new T.Color(3,.4,.5)})};
@@ -257,7 +263,7 @@ function gateObj(g){
   if(f){w=f.w-.02;h=f.h-.01;cx=f.cx;cz=f.cz;y=f.y;a=f.o==='h'?0:-Math.PI/2}
   const d=new T.Mesh(new T.BoxGeometry(w,h,.07),G.gm.door);d.position.set(cx,y+h/2,cz);d.rotation.y=a;grp.add(d);
   if(g.kind==='card'){const r=new T.Mesh(new T.BoxGeometry(.12,.18,.14),G.gm.red);r.position.set(cx,y+1.25,cz);r.rotation.y=a;r.translateX(w/2+.22);grp.add(r)}}
- grp.traverse(o=>{if(o.isMesh){o.castShadow=o.receiveShadow=true}});return grp}
+ return grp}
 /* find the doorway a gate stands in (from the level's door list) so the door fills it exactly, centred in the wall */
 function fitGate(g){
  const L=DOORS[g.reg]||[],hz=Math.abs(g.z1-g.z0)<.05,o=hz?'h':'v',at=hz?g.z0:g.x0,c0=hz?Math.min(g.x0,g.x1):Math.min(g.z0,g.z1),c1=hz?Math.max(g.x0,g.x1):Math.max(g.z0,g.z1);
@@ -310,7 +316,7 @@ let mmT=0,icT=0,perfAcc=0,perfN=0,perfT=0;
 function loop(t){
  requestAnimationFrame(loop);
  const dt=Math.min(.05,(t-(WD.t||t))/1000);WD.t=t;
- if(!S||!S.inWorld||!G.ok||$('gl').style.display==='none')return;
+ if(!S||!S.inWorld||!G.ok||G.baking||$('gl').style.display==='none')return;
  const live=worldLive();
  if(live)update(dt);
  // behind a conversation the world is blurred: a few frames a second is plenty
@@ -327,13 +333,19 @@ function loop(t){
 /* drop render resolution when frames get slow, raise it again when there's headroom */
 function adaptRes(dt){if(window.__noAdapt)return;perfAcc+=dt;perfN++;perfT+=dt;if(perfT<1.2)return;const avg=perfAcc/perfN;perfAcc=perfN=perfT=0;
  if(avg>1/42&&G.dprK>.6){G.dprK=Math.max(.6,G.dprK-.12)}else if(avg<1/57&&G.dprK<1){G.dprK=Math.min(1,G.dprK+.06)}}
-function initWorld(){
- if(G.inited)return G.ok;G.inited=true;
+function initWorld(cb){
+ if(G.inited){if(cb){if(G.ready)cb();else{(G.waiters=G.waiters||[]).push(cb);loadUI(true)}}return G.ok}
+ G.inited=true;G.waiters=cb?[cb]:[];
  try{
-  if(!glInit($('gl')))return false;
+  if(!glInit($('gl')))return finishInit(),false;
   paintTextures();buildLevels();placeWorld();finishRegions();
   setupInput();requestAnimationFrame(loop);
- }catch(e){console.error(e);G.ok=false}
+ }catch(e){console.error(e);G.ok=false;finishInit();return false}
+ // bake every light in the level into lightmaps (a few seconds, once per load)
+ G.baking=true;if(cb)loadUI(true);
+ bakeAll(f=>{G.bakeP=f;const b=$('loadBar');if(b)b.style.width=(f*100|0)+'%';const t=$('loadPct');if(t)t.textContent=(f*100|0)+'%'},ok=>{G.baking=false;G.baked=!!ok;if(ok)setQuality(G.q);finishInit()});
  return G.ok;
 }
+function finishInit(){G.ready=true;loadUI(false);const w=G.waiters||[];G.waiters=[];for(const f of w)f()}
+function loadUI(on){const e=$('loading');if(e)e.classList.toggle('on',!!on&&!G.ready)}
 try{document.fonts&&document.fonts.load('20px VT323')}catch(e){}

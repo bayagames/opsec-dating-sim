@@ -348,10 +348,11 @@ $('bGo').onclick=()=>{
 function startCh0(){
  // grab the mouse inside the "Begin" click, before the (slow) first build eats the browser's gesture window
  if(!WD.touch&&window.THREE)tryLock();
- initWorld();
+ initWorld(()=>{
  if(!G.ok){run(CH0ALL(),()=>{S.ch=1;S.resume='open';save();run(OPEN[1](),hub)});return}
  S.inWorld=1;teleportArea('flat');
  run(CH0(),()=>{S.f.ch0intro=1;save();run([{unlock:'move'}],hub)});
+ });
 }
 $('hIn').addEventListener('keydown',e=>{if(e.key==='Enter')$('bGo').click()});
 $('bCont').onclick=()=>{const s=readSlot('auto');if(s&&s.h)resumeGame(s)};
