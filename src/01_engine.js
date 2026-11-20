@@ -34,7 +34,7 @@ function por(id,x,full){
  if(st==='fluffy')o+=`<path d="M46 106 Q38 38 100 36 Q162 38 154 106 Q160 150 148 164 Q140 150 136 158 L64 158 Q60 150 52 164 Q40 150 46 106Z" fill="${hr}"/>`;
  if(st==='bun')o+=`<circle cx="100" cy="34" r="20" fill="${hr}"/><path d="M52 104 Q48 46 100 44 Q152 46 148 104 L146 130 L54 130Z" fill="${hr}"/>`;
  if(st==='slick')o+=`<path d="M54 98 Q52 44 100 42 Q148 44 146 98 L146 106 L54 106Z" fill="${hr}"/>`;
- const oc=c.oc;
+ const oc=c.oc;const HB=o;o='';
  if(!full){
  o+=`<path d="M22 262 Q26 198 100 188 Q174 198 178 262Z" fill="${oc}"/><path d="M22 262 Q26 198 100 188 Q60 204 52 262Z" fill="#000" opacity=".15"/>`;
  if(c.outfit==='hoodie')o+=`<path d="M62 198 Q100 220 138 198 Q130 184 100 182 Q70 184 62 198Z" fill="#000" opacity=".22"/><path d="M90 206 L88 236 M110 206 L112 236" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".8"/>`;
@@ -46,9 +46,11 @@ function por(id,x,full){
  if(c.outfit==='armor')o+=`<path d="M22 238 Q28 196 72 190 L78 226Z" fill="#2bf0ff" opacity=".75"/><path d="M178 238 Q172 196 128 190 L122 226Z" fill="#2bf0ff" opacity=".75"/><path d="M84 196 L100 214 L116 196 L112 262 L88 262Z" fill="#2a3450"/><path d="M100 214 L100 262" stroke="#ff5fb0" stroke-width="3"/>`;
  if(c.outfit==='vest')o+=`<path d="M48 262 L58 206 Q76 196 88 194 L100 238 L112 194 Q124 196 142 206 L152 262Z" fill="#17141c"/><path d="M94 196 L100 206 L106 196Z" fill="#7a1f2b"/>`;
  }
- o+=`<rect x="88" y="138" width="24" height="54" rx="6" fill="${sk}"/><rect x="88" y="150" width="24" height="12" fill="#000" opacity=".12"/>`;
+ const BD=o;o='';
+ const NK=`<rect x="88" y="138" width="24" height="45" rx="6" fill="${sk}"/><rect x="88" y="150" width="24" height="12" fill="#000" opacity=".12"/>`;
  if(!full&&c.outfit==='turtle')o+=`<rect x="82" y="164" width="36" height="32" rx="10" fill="${oc}"/><path d="M84 176 H116 M84 184 H116" stroke="#fff" stroke-opacity=".08" stroke-width="2"/>`;
  if(!full&&c.acc.includes('tie'))o+=`<path d="M96 192 L104 192 L106 230 L100 240 L94 230Z" fill="#8b1e2d"/>`;
+ const CL=o;o='';
  o+=`<ellipse cx="56" cy="114" rx="7" ry="10" fill="${sk}"/><ellipse cx="144" cy="114" rx="7" ry="10" fill="${sk}"/>`;
  o+=`<path d="M56 100 Q56 150 100 162 Q144 150 144 100 Q144 58 100 58 Q56 58 56 100Z" fill="${sk}"/>`;
  const eye=(cx,side)=>{
@@ -109,12 +111,16 @@ function por(id,x,full){
   if(a==='bandaid')o+=`<rect x="119" y="122" width="15" height="6" rx="3" fill="#f7c59f" transform="rotate(-15 126 125)"/><path d="M125 123 v4" stroke="#d89a70" stroke-width="1" transform="rotate(-15 126 125)"/>`;
   if(a==='visor')o+=`<rect x="56" y="74" width="88" height="11" rx="5.5" fill="#2bf0ff" opacity=".9"/><rect x="56" y="74" width="88" height="11" rx="5.5" fill="none" stroke="#fff" stroke-opacity=".6"/>`;
  }
- return PC[key]=`<svg viewBox="0 0 200 262" xmlns="http://www.w3.org/2000/svg" aria-label="${c.name}">${o}</svg>`;
+ return PC[key]=`<svg viewBox="0 0 200 262" xmlns="http://www.w3.org/2000/svg" aria-label="${c.name}"><g transform="translate(0 9)">${HB}</g>${BD}<g transform="translate(0 9)">${NK}</g>${CL}<g transform="translate(0 9)">${o}</g></svg>`;
 }
-const head=(id,x)=>por(id,x).replace('viewBox="0 0 200 262"','viewBox="34 14 132 150"');
+const head=(id,x)=>por(id,x).replace('viewBox="0 0 200 262"','viewBox="34 21 132 150"');
 
 /* ============ STATE ============ */
 let S;
+/* device-wide settings (volume, graphics, look speed), separate from save files */
+const SETTINGS=(()=>{const d={vol:{master:.85,music:.6,amb:.75,sfx:.8},gfx:null,sens:1,fast:false};try{const o=JSON.parse(localStorage.getItem('opsec_settings')||'{}');return Object.assign(d,o,{vol:Object.assign(d.vol,o.vol||{})})}catch(e){return d}})();
+const saveSettings=()=>{try{localStorage.setItem('opsec_settings',JSON.stringify(SETTINGS))}catch(e){}};
+let CURBG=null;
 const fresh=h=>{const z={};ROM.concat(['dave']).forEach(g=>z[g]=0);return{h,ch:0,skill:10,clout:10,exp:5,cred:20,aff:{...z},stage:{...z},hang:{},gifted:{},inv:{},f:{},clues:[],msgs:[],log:[],unl:{},talk:{},room:{},fast:false,ending:null}};
 const CHAP=[['Hello, World','Two weeks before the con'],['Badge In','CTRL+ALT+CON · Day 1'],['Capture the Flag','Day 2'],['Exposure','Day 3'],['Responsible Disclosure','Day 4 · final day'],['Keynote','Day 4 · 4:00 PM'],['0xFF','The afterparty']];
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -136,7 +142,7 @@ function fx(e){
    let g=v;
    if(k==='priya'&&g>0&&S.exp>=70)g=Math.ceil(g/2);
    S.aff[k]=clamp(S.aff[k]+g,0,100);
-   if(S.unl.aff&&k!=='dave')toast(`${CH[k].name} ${g>=0?'♥ +'+g:'♥ '+g}`,CH[k].col);
+   if(S.unl.aff&&k!=='dave'){toast(`${CH[k].name} ${g>=0?'♥ +'+g:'♥ '+g}`,CH[k].col);if(typeof sfx==='function')sfx(g>=0?'heartUp':'heartDown')}
   }
   else if(k==='exp'){
    let g=v;
@@ -167,22 +173,29 @@ function hud(){
  $('phoneBtn').style.display='block';
  $('phoneBtn').innerHTML='Phone<span class="kn" style="margin:0 0 0 6px">P</span>'+(S.msgs.some(m=>!m.r)?'<span class="dot"></span>':'');
 }
-function show(id){document.body.classList.toggle('inworld',id==='world');document.querySelectorAll('.scr').forEach(s=>s.classList.toggle('on',s.id===id));$('hud').style.display=id==='title'?'none':'flex';$('gl').style.display=(id!=='title'&&S&&S.inWorld&&G.ok)?'block':'none';if(id!=='world'){WD.active=false;if(document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}}}
+function show(id){document.body.classList.toggle('inworld',id==='world');setTimeout(updBlur,0);document.querySelectorAll('.scr').forEach(s=>s.classList.toggle('on',s.id===id));$('hud').style.display=id==='title'?'none':'flex';$('gl').style.display=(id!=='title'&&S&&S.inWorld&&G.ok)?'block':'none';if(id!=='world'){WD.active=false;if(document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}}}
 
 /* ============ VN ENGINE ============ */
 let Q=[],onDone=null,typing=null,full='',waiting=false;
 const BG={con:'CTRL+ALT+CON',lock:'LOCKPICK VILLAGE',ctf:'CTF ROOM · SCOREBOARD LIVE',soc:'BLUE TEAM VILLAGE',stream:'● LIVE · CYBERJUNO',hotel:'ROOM 1337',roof:'ROOFTOP',dawn:'ROOFTOP · 5:52 AM',stage:'MAIN STAGE',keynote:'CLOSING KEYNOTE',vendor:'VENDOR HALL',party:'0xFF AFTERPARTY',void:'█████',flat:'YOUR FLAT',bakery:'PROOF · BAKERY',office:'BRINDLE & CO · IT HELPDESK',train:'TRAIN · PLATFORM 4',cos:'COSPLAY HALL',chill:'CHILL-OUT LOUNGE',bar:'THE HOTEL BAR',lobby:'HOTEL LOBBY'};
-function setBG(k){$('bg').className='bg '+(typeof worldBG==='function'&&worldBG(k)?'bg-dim':'bg-'+k);$('sign').textContent=BG[k]||'';$('sign').style.display=BG[k]?'block':'none'}
-function run(steps,done){closeOv();$('por').innerHTML='';show('vn');hud();Q=steps.slice();onDone=done;next()}
+function setBG(k){const w=typeof worldBG==='function'&&worldBG(k);const cls='bg '+(w?'bg-dim':'bg-'+k);if($('bg').className!==cls){$('bg').className=cls;$('bg').classList.add('bgin')}CURBG=k;$('sign').textContent=BG[k]||'';$('sign').style.display=BG[k]?'block':'none';if(w&&G.ok)G.forceFrame=true}
+/* does switching to this background move us somewhere else? (then fade through black) */
+function bgChanges(k){if(k===CURBG||!$('vn').classList.contains('on'))return false;
+ if(S&&S.inWorld&&G.ok&&typeof BG2AREA!=='undefined'&&BG2AREA[k]){const cur=WD.area;return !(cur&&(AREAS[cur].bg===k||BG2AREA[k]===cur))}
+ return !!$('txt').textContent}
+function fadeScene(fn){const f=$('fade');if(typeof sfx==='function')sfx('whoosh');f.classList.add('on');setTimeout(()=>{fn();setTimeout(()=>f.classList.remove('on'),90)},300)}
+function updBlur(){const vn=$('vn').classList.contains('on'),o=$('ov').classList.contains('on');document.body.classList.toggle('talking',!!(S&&S.inWorld&&G.ok&&(vn||o)));document.body.classList.toggle('busyov',o&&!$('ov').classList.contains('phoneov'))}
+function run(steps,done){closeOv();clearPor();$('txt').textContent='';$('who').textContent='';show('vn');hud();Q=steps.slice();onDone=done;next()}
 function next(){
  $('chs').innerHTML='';
  if(S.exp>=100&&!S.ending&&!S.f.doxxing){S.f.doxxing=1;Q=ENDS.doxxed();onDone=null}
  if(!Q.length){const d=onDone;onDone=null;if(d)d();return}
  const st=Q.shift();
  if(typeof st==='function'){const r=st();if(Array.isArray(r))Q.unshift(...r);return next()}
+ if(st.bg&&!st._f&&bgChanges(st.bg)){const s2=Object.assign({},st,{_f:1});fadeScene(()=>{Q.unshift(s2);next()});return}
  if(st.bg){setBG(st.bg);if(st.t===undefined&&st.n===undefined)return next()}
  if(st.fx){fx(st.fx);if(st.t===undefined&&st.n===undefined)return next()}
- if(st.hide){$('por').innerHTML='';return next()}
+ if(st.hide){clearPor();return next()}
  if(st.msg){addMsg(st.msg[0],st.msg[1]);return next()}
  if(st.tp){if(G.ok&&S.inWorld)teleportArea(st.tp);return next()}
  if(st.unlock)return unlock(st.unlock,next);
@@ -195,12 +208,16 @@ function next(){
 function say(st){
  const who=st.w,box=$('txt');
  box.className='';
- if(who&&CH[who]){if(!st.keep)$('por').innerHTML=por(who,st.x);$('who').textContent=st.as||CH[who].name;$('who').style.background=CH[who].col}
- else if(who==='whisper'){$('por').innerHTML='';$('who').textContent='WHISPER';$('who').style.background='var(--coral)';box.className='whisper'}
+ const pw=$('who').textContent;
+ if(who&&CH[who]){if(!st.keep)setPor(who,st.x);$('who').textContent=st.as||CH[who].name;$('who').style.background=CH[who].col}
+ else if(who==='whisper'){clearPor();$('who').textContent='WHISPER';$('who').style.background='var(--coral)';box.className='whisper'}
  else if(who==='me'){$('who').textContent=S.h;$('who').style.background='var(--butter)'}
  else if(who==='sms'){$('who').textContent=st.from;$('who').style.background='var(--mint)';box.className='sms'}
- else if(who){if(st.np)$('por').innerHTML='';$('who').textContent=who;$('who').style.background='var(--dim)'}
+ else if(who){if(st.np)clearPor();$('who').textContent=who;$('who').style.background='var(--dim)'}
  else{$('who').textContent='';box.className='narr'}
+ $('por').classList.toggle('dim',!(who&&CH[who]));
+ if($('who').textContent!==pw){const w=$('who');w.classList.remove('pop');void w.offsetWidth;w.classList.add('pop')}
+ const bx=$('box');if(!bx.classList.contains('up')){bx.classList.add('up')}
  full=sub(st.t!==undefined?st.t:st.n);box.textContent='';waiting=true;$('nexti').style.visibility='hidden';
  S.log.push([$('who').textContent,full]);if(S.log.length>120)S.log.shift();
  if(S.fast){box.textContent=full;return doneTyping()}
@@ -212,15 +229,19 @@ $('phoneBtn').onclick=e=>{e.stopPropagation();if(S)phone()};
 function tapBox(){
  if($('chs').children.length||$('ov').classList.contains('on')||$('card').classList.contains('on'))return;
  if(typing){doneTyping();return}
- if(waiting){waiting=false;next()}
+ if(waiting){waiting=false;if(typeof sfx==='function')sfx('advance');next()}
 }
+/* portraits: a new speaker slides in, an expression change just swaps */
+function setPor(id,x){const P=$('por'),html=por(id,x);if(P.dataset.id===id&&P.firstElementChild){P.firstElementChild.outerHTML=html;return}
+ P.dataset.id=id;P.innerHTML=html;const el=P.firstElementChild;if(el){el.classList.add('enter')}}
+function clearPor(){const P=$('por');P.dataset.id='';const el=P.firstElementChild;if(!el){return}P.innerHTML=''}
 $('box').addEventListener('click',tapBox);
 $('box').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();tapBox()}});
 function choose(opts){
  waiting=false;
  const list=opts.filter(o=>!o.if||o.if());
  $('nexti').style.visibility='hidden';
- $('chs').innerHTML=list.map((o,i)=>`<button class="ch" data-i="${i}"><span class="kn">${i+1}</span>${esc(sub(o.t))}${o.hint?`<small>${esc(o.hint)}</small>`:''}</button>`).join('');
+ $('chs').innerHTML=list.map((o,i)=>`<button class="ch" style="--i:${i}" data-i="${i}"><span class="kn">${i+1}</span>${esc(sub(o.t))}${o.hint?`<small>${esc(o.hint)}</small>`:''}</button>`).join('');
  $('chs').querySelectorAll('.ch').forEach(b=>b.onclick=e=>{
   e.stopPropagation();const o=list[+b.dataset.i];
   $('chs').innerHTML='';
@@ -234,8 +255,10 @@ const N=t=>({n:t}),L=(w,x,t)=>({w,x,t}),W=t=>({w:'whisper',t}),ME=t=>({w:'me',t}
 const CHAT=t=>({w:'Chat',t});
 
 /* ============ OVERLAYS / SYSTEMS ============ */
-function ov(html){const o=$('ov');o.innerHTML=html;o.classList.add('on');o.scrollTop=0;return o}
-function closeOv(){$('ov').classList.remove('on');$('ov').innerHTML=''}
+/* NB: the overlay is shared by minigames, tutorials and the phone. Any click handler the phone puts on the
+   backdrop must not survive into a minigame, or clicking beside the card closes the game mid-story. */
+function ov(html){const o=$('ov');o.onclick=null;o.innerHTML=html;o.classList.add('on');o.scrollTop=0;updBlur();return o}
+function closeOv(){const o=$('ov');o.onclick=null;o.classList.remove('on');o.innerHTML='';updBlur()}
 const TUT={
  aff:['Affection','Your choices change how people feel about you. Hearts float up when they do. Some scenes only open once someone likes you enough.'],
  skill:['Skill','Real knowledge. You earn it by learning, by answering honestly and by doing the work. Experts can tell.'],
@@ -243,7 +266,7 @@ const TUT={
  exp:['Exposure','How findable you are. Oversharing, bad clicks and leaked details all add to it. Keep it low. At 100, anyone can find you, and the story ends badly.'],
  phone:['Phone','Your phone holds everything: Messages, a Log of past dialogue and Settings. More apps unlock as you go. A red dot means something new. Tap Phone at the top, or press P.'],
  notes:['More apps','Your phone now has Stats, Hearts (everyone you\'ve met and how close you are), Goals and Map. Tap Phone at the top, or press P.'],
- move:['Walking around','Walk with WASD or the arrow keys, or drag the left side of the screen. Look with the mouse (click to capture it) or drag the right side. When something can be used, a prompt appears: press E or tap it. Hold Shift (or push the stick all the way) to run.'],
+ move:['Walking around','Walk with WASD or the arrow keys, or drag the stick on the left. Look with the mouse, or drag anywhere else on a touch screen. When something can be used, a prompt appears: press E or tap it. Hold Shift (or push the stick all the way) to run. Esc or P opens your phone and frees the mouse.'],
  map:['The con','It\'s huge, and there\'s no clock. Walk anywhere, in any order. A yellow ! means someone has a new scene for you. The minimap shows them as yellow dots, and your story goal as a green star. Once you\'ve visited a place, you can fast travel back from the Map app. When you\'re ready to move the story on, go to the goal.'],
  hang:['Hanging out','Once per chapter you can talk shop with each person you\'ve met. Real answers impress the experts. Some people prefer the hype.'],
  cred:['Credits','You earn credits from minigames, bug bounties and inbox triage. Spend them in the Vendor Hall on gear and gifts. Each person has one gift they\'ll love.'],
@@ -254,12 +277,13 @@ function unlock(k,cb){
  if(S.unl[k]){cb();return}
  S.unl[k]=1;hud();
  const t=TUT[k];
+ if(typeof sfx==='function')sfx('unlock');
  ov(`<div class="card tut"><div class="k">NEW MECHANIC</div><h3>${t[0]}</h3><p>${t[1]}</p><div class="row"><button class="btn pri" id="tutok">Got it</button></div></div>`);
  $('tutok').onclick=()=>{closeOv();cb()};
 }
 function chapterCard(n,cb){
  const c=$('card');c.innerHTML=`<div><div class="k">${n<=5?'CHAPTER '+n:'EPILOGUE'}</div><h2>${CHAP[n][0]}</h2><p>${CHAP[n][1]}</p><div class="tap">tap to continue</div></div>`;
- c.classList.add('on');$('por').innerHTML='';
+ c.classList.add('on');clearPor();if(typeof sfx==='function')sfx('chapter');
  c.onclick=()=>{c.classList.remove('on');c.onclick=null;cb()};
 }
-function addMsg(from,t){S.msgs.push({f:from,t:sub(t),c:S.ch,r:0});if(S.unl.phone)toast('New message · '+(CH[from]?CH[from].name:from),'var(--mint)');hud()}
+function addMsg(from,t){S.msgs.push({f:from,t:sub(t),c:S.ch,r:0});if(S.unl.phone){toast('New message · '+(CH[from]?CH[from].name:from),'var(--mint)');if(typeof sfx==='function')sfx('notify')}hud()}

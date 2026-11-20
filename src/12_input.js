@@ -12,6 +12,8 @@ addEventListener('keydown',e=>{
   if(!ovOn){e.preventDefault();phone();return}
  }
  if(k==='Escape'&&isPhone){e.preventDefault();if(phApp){if(phThread)phThread=null;else phApp=null;drawPhone()}else closePhone();return}
+ // Esc opens the phone (in the world the browser also uses Esc to release the mouse, which opens it too)
+ if(k==='Escape'&&!ovOn&&!$('title').classList.contains('on')&&!$('card').classList.contains('on')){e.preventDefault();phone();return}
  if($('card').classList.contains('on')&&(k===' '||k==='Enter')){e.preventDefault();$('card').click();return}
  if(ovOn&&!isPhone){
   const ans=[...$('ov').querySelectorAll('.ans .ch:not([disabled])')];

@@ -17,11 +17,15 @@ const PTIME=['07:12','10:31','11:04','09:47','13:22','16:02','23:48'];
 let phApp=null,phThread=null,phReg=null;
 function phone(app){
  if(!S)return;
+ // never open over a minigame, tutorial or chapter card: they own the overlay until they finish
+ const o=$('ov');if((o.classList.contains('on')&&!o.classList.contains('phoneov'))||$('card').classList.contains('on'))return;
+ const opening=!o.classList.contains('phoneov');
  if(document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}
  WD.active=false;
  phApp=app||null;phThread=null;phReg=null;drawPhone();
+ if(opening){const ph=$('ov').querySelector('.phone');if(ph)ph.classList.add('opening');if(typeof sfx==='function')sfx('phoneOpen')}
 }
-function closePhone(){closeOv();$('ov').classList.remove('phoneov');if($('vn').classList.contains('on'))return;if(G.ok&&S.inWorld)hub();else if($('hub').classList.contains('on'))hub()}
+function closePhone(){if($('ov').classList.contains('phoneov')&&typeof sfx==='function')sfx('phoneClose');closeOv();$('ov').classList.remove('phoneov');if($('vn').classList.contains('on'))return;if(G.ok&&S.inWorld)hub();else if($('hub').classList.contains('on'))hub()}
 function drawPhone(){
  const apps=Object.keys(APPN).filter(a=>!APPU[a]||S.unl[APPU[a]]);
  const unread=S.msgs.filter(m=>!m.r).length,nn=S.ch>0&&G.ok?newScenes().length:0;
@@ -33,7 +37,7 @@ function drawPhone(){
   body=APPS[phApp]();
  }
  ov(`<div class="phone"><div class="pbar"><span>${S.ch>0?'CTRL+ALT+NET':'HOME-WIFI'}</span><span>${PTIME[S.ch]||''}</span><span class="bat"><b style="width:${Math.max(8,92-S.ch*13)}%"></b></span></div>${phApp?`<div class="ptop"><button class="pback" id="pback" aria-label="Back">‹</button><b>${phThread?esc(CH[phThread]?CH[phThread].name:phThread):title}</b></div>`:''}<div class="pbody">${body}</div><button class="phome" id="phome" aria-label="Close phone"></button></div>`);
- $('ov').classList.add('phoneov');
+ $('ov').classList.add('phoneov');updBlur();
  $('ov').onclick=e=>{if(e.target===$('ov'))closePhone()};
  $('phome').onclick=closePhone;
  if($('pback'))$('pback').onclick=()=>{if(phThread){phThread=null}else phApp=null;drawPhone()};
@@ -77,8 +81,13 @@ const APPS={
  bag(){const e=Object.entries(S.inv);return (e.length?e.map(([k,v])=>{const it=ITEMS[k];return`<div class="item"><div><b>${it.n}${v>1?' ×'+v:''}</b><small>${it.d}${it.g?` Give it to ${CH[it.g].name} when you hang out.`:''}</small></div></div>`}).join(''):'<p class="small">Empty. The Con Store in the Vendor Hall sells gear and gifts.</p>')},
  saves(){return '<div id="spanel"></div>'},
  log(){return S.log.slice(-80).reverse().map(l=>`<div class="logl">${l[0]?`<b>${esc(l[0])}</b> `:''}${esc(l[1])}</div>`).join('')||'<p class="small">Nothing yet.</p>'},
- settings(){return `<div class="row"><button class="btn" id="stf">Text: ${S.fast?'instant':'typewriter'}</button><button class="btn" id="sts">Look speed: ${({0.6:'slow',1:'normal',1.6:'fast'})[S.sens||1]||'normal'}</button><button class="btn" id="sti">Invert look: ${S.inv?'on':'off'}</button><button class="btn" id="stm">Footsteps: ${S.mute?'off':'on'}</button><button class="btn" id="stt">Touch look: ${S.tcam?'drag the camera':'drag the world'}</button></div>
-  <p style="margin-top:14px"><b>Controls</b></p><p class="small">Keyboard: WASD or arrows to walk, Shift to run, mouse to look (click the world to capture the mouse, Esc to release), E to interact, P for phone, M for map.<br>Touch: drag the left side to walk, drag the right side to look, tap the prompt to interact. Push the stick all the way to run. If looking feels backwards, switch Touch look above.</p>
+ settings(){const vol=[['master','Master'],['music','Music'],['amb','Ambience'],['sfx','Effects']];
+  return `<div class="set"><h4>Sound</h4>${vol.map(([k,n])=>`<label class="sl"><span>${n}</span><input type="range" min="0" max="100" step="1" value="${Math.round(SETTINGS.vol[k]*100)}" data-v="${k}" style="--p:${Math.round(SETTINGS.vol[k]*100)}%"><b>${Math.round(SETTINGS.vol[k]*100)}</b></label>`).join('')}
+  <h4>Graphics</h4><div class="seg" id="gq">${['low','medium','high'].map(q=>`<button data-q="${q}" class="${(G.q||'high')===q?'on':''}">${q[0].toUpperCase()+q.slice(1)}</button>`).join('')}</div>
+  <p class="small">${G.q==='low'?'Simpler lighting, no glow. Best for older phones.':G.q==='medium'?'Full lighting and glow, lower resolution.':'Everything on, with antialiasing. The resolution drops automatically if frames get slow.'}</p>
+  <h4>Controls</h4><label class="sl"><span>Look speed</span><input type="range" min="30" max="250" step="5" value="${Math.round(SETTINGS.sens*100)}" id="sens" style="--p:${Math.round((SETTINGS.sens*100-30)/220*100)}%"><b>${SETTINGS.sens.toFixed(2)}×</b></label>
+  <div class="row" style="margin-top:6px"><button class="btn" id="stf">Text: ${S.fast?'instant':'typewriter'}</button></div>
+  <p class="small" style="margin-top:12px">Keyboard: WASD or arrows to walk, Shift to run, mouse to look, E to interact, M for map. <b>Esc</b> or <b>P</b> opens this phone and frees the mouse; close it to step back in.<br>Touch: drag the left stick to walk, drag anywhere else to look, tap the prompt to interact. Push the stick all the way to run.</p></div>
   <p class="small">The game autosaves while you explore. Use the Saves app for save slots and export.</p><div class="row"><button class="btn" id="stq">Quit to title (autosaves)</button></div>`}
 };
 const APPS_AFTER={
@@ -86,5 +95,8 @@ const APPS_AFTER={
  messages(){$('ov').querySelectorAll('.chat').forEach(b=>b.onclick=()=>{phThread=b.dataset.f;drawPhone()})},
  map(){const c=$('pmap');if(!c)return;const key=phReg||('home:'+levelOf('home',WD.y));const[rg,lv]=key.split(':');drawMapCanvas(c,rg,{level:+lv});$('ov').querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{phReg=b.dataset.r;drawPhone()});
   $('ov').querySelectorAll('.ft .btn').forEach(b=>b.onclick=()=>{const k=b.dataset.k;closePhone();fadeTp(()=>teleportArea(k))})},
- settings(){$('stf').onclick=()=>{S.fast=!S.fast;drawPhone()};$('sts').onclick=()=>{const o=[.6,1,1.6];S.sens=o[(o.indexOf(S.sens||1)+1)%3];drawPhone()};$('sti').onclick=()=>{S.inv=!S.inv;drawPhone()};$('stm').onclick=()=>{S.mute=!S.mute;drawPhone()};$('stt').onclick=()=>{S.tcam=!S.tcam;drawPhone()};$('stq').onclick=()=>{S.pos=[WD.reg,WD.x,WD.z,WD.yaw,WD.y];save();closeOv();$('ov').classList.remove('phoneov');WD.active=false;titleScreen()}}
+ settings(){$('stf').onclick=()=>{S.fast=!S.fast;drawPhone()};
+  $('ov').querySelectorAll('input[data-v]').forEach(r=>{r.oninput=()=>{const k=r.dataset.v;SETTINGS.vol[k]=r.value/100;r.style.setProperty('--p',r.value+'%');r.nextElementSibling.textContent=r.value;if(typeof applyVolumes==='function')applyVolumes()};r.onchange=()=>{saveSettings();if(r.dataset.v==='sfx'||r.dataset.v==='master')sfx('notify')}});
+  const sn=$('sens');sn.oninput=()=>{SETTINGS.sens=sn.value/100;sn.style.setProperty('--p',((sn.value-30)/220*100)+'%');sn.nextElementSibling.textContent=SETTINGS.sens.toFixed(2)+'×'};sn.onchange=saveSettings;
+  $('gq').querySelectorAll('button').forEach(b=>b.onclick=()=>{SETTINGS.gfx=b.dataset.q;saveSettings();if(G.ok)setQuality(b.dataset.q);else G.q=b.dataset.q;drawPhone()});$('stq').onclick=()=>{S.pos=[WD.reg,WD.x,WD.z,WD.yaw,WD.y];save();closeOv();$('ov').classList.remove('phoneov');WD.active=false;titleScreen()}}
 };
