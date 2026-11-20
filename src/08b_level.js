@@ -1,6 +1,6 @@
 /* ============ LEVEL HELPERS ============ */
 const DOORS={},MAPR={},AREAS={},INTS=[],WCH=[],DYN=[];
-const LEVELS={home:[[0,'Bakery'],[3.4,'Flat']],con:[[0,'Ground floor'],[5.2,'Mezzanine']],f13:[[0,'13th floor'],[3.6,'Rooftop']]};
+const LEVELS={home:[[0,'Bakery'],[3.4,'Flat']],con:[[0,'Ground floor'],[5.2,'Upper level']],f13:[[0,'13th floor'],[3.6,'Rooftop']]};
 function door(o,at,c,w,h,y){(DOORS[BR]=DOORS[BR]||[]).push({o,at,c,w,h:h||2.7,y:y||0})}
 function wallLine(o,fixed,a0,a1,Y,H,m,inward,frame){
  const ds=(DOORS[BR]||[]).filter(d=>d.o===o&&Math.abs(d.at-fixed)<.6&&d.c>a0&&d.c<a1&&d.y>=Y-.1&&d.y<Y+H-.5).sort((p,q)=>p.c-q.c);
@@ -34,17 +34,18 @@ function room(o){
 function area(k,n,reg,r,sp,bg,o){AREAS[k]=Object.assign({k,n,reg,r,sp,bg,y0:-2,y1:4.9},o||{})}
 function table(x,z,w,d,m,h,y){y=y||0;h=h||.76;box(x-w/2,y+h-.06,z-d/2,x+w/2,y+h,z+d/2,m,{col:false});const lg=MT.plain('#2a2530');for(const[sx,sz]of[[-1,-1],[1,-1],[-1,1],[1,1]])box(x+sx*(w/2-.08)-.03,y,z+sz*(d/2-.08)-.03,x+sx*(w/2-.08)+.03,y+h-.06,z+sz*(d/2-.08)+.03,lg,{col:false,nt:1});colBox(x-w/2,z-d/2,x+w/2,z+d/2,y,y+h)}
 function chair(x,z,dir,m,y){y=y||0;const s=.22;box(x-s,y+.42,z-s,x+s,y+.48,z+s,m,{col:false});const bx={n:[x-s,z-s,x+s,z-s+.06],s:[x-s,z+s-.06,x+s,z+s],e:[x+s-.06,z-s,x+s,z+s],w:[x-s,z-s,x-s+.06,z+s]}[dir];box(bx[0],y+.48,bx[1],bx[2],y+.95,bx[3],m,{col:false});box(x-.03,y,z-.03,x+.03,y+.42,z+.03,MT.plain('#222'),{col:false,nt:1})}
-function plant(x,z,s,y){s=s||1;y=y||0;box(x-.25*s,y,z-.25*s,x+.25*s,y+.5*s,z+.25*s,MT.plain('#b0603a'));cross(x,y+.4*s,z,1.1*s,1.4*s,MT.leaves)}
-function tree(x,z,y){y=y||0;box(x-.18,y,z-.18,x+.18,y+2.2,z+.18,MT.plain('#5a3a22'));cross(x,y+1.6,z,3.2,3.6,MT.leaves);cross(x,y+2.6,z,2.2,2.4,MT.leaves)}
+function card(x,y,z,w,h,a,m){const c=Math.cos(a)*w/2,d=Math.sin(a)*w/2;quad([x-c,y,z-d],[x+c,y,z+d],[x+c,y+h,z+d],[x-c,y+h,z-d],m,1,1);quad([x+c,y,z+d],[x-c,y,z-d],[x-c,y+h,z-d],[x+c,y+h,z+d],m,1,1)}
+function plant(x,z,s,y){s=s||1;y=y||0;box(x-.25*s,y,z-.25*s,x+.25*s,y+.5*s,z+.25*s,MT.gloss('#b0603a'));box(x-.22*s,y+.5*s,z-.22*s,x+.22*s,y+.52*s,z+.22*s,MT.plain('#3a2418'),{col:false});for(let i=0;i<3;i++)card(x,y+.38*s,z,1.1*s,1.4*s,i*Math.PI/3,MT.leaves)}
+function tree(x,z,y){y=y||0;box(x-.16,y,z-.16,x+.16,y+2.4,z+.16,MT.plain('#4a3020'));const a0=rnd()*3;for(let i=0;i<4;i++)card(x,y+1.5,z,3.4,3.4,a0+i*Math.PI/4,MT.leaves);for(let i=0;i<3;i++)card(x,y+2.7,z,2.4,2.4,a0+.4+i*Math.PI/3,MT.leaves)}
 function sofa(x,z,w,dir,c,y){y=y||0;const m=MT.fabric(c),d=.9;const hz=dir==='n'||dir==='s';const X0=hz?x-w/2:x-d/2,X1=hz?x+w/2:x+d/2,Z0=hz?z-d/2:z-w/2,Z1=hz?z+d/2:z+w/2;box(X0,y,Z0,X1,y+.45,Z1,m);const b={n:[X0,Z0,X1,Z0+.22],s:[X0,Z1-.22,X1,Z1],w:[X0,Z0,X0+.22,Z1],e:[X1-.22,Z0,X1,Z1]}[dir];box(b[0],y+.45,b[1],b[2],y+.9,b[3],m,{col:false})}
-function lightPanel(x,y,z,w,d,col,rng,int){box(x-w/2,y-.06,z-d/2,x+w/2,y,z+d/2,MT.glow(col||'#fff4e0'),{col:false,b:1,nt:1});addLight(x,y-.4,z,hx(col||'#fff4e0'),rng||10,int||.8)}
+function lightPanel(x,y,z,w,d,col,rng,int){box(x-w/2-.05,y-.03,z-d/2-.05,x+w/2+.05,y,z+d/2+.05,MT.plain('#2a2a30'),{col:false,nt:1});box(x-w/2,y-.07,z-d/2,x+w/2,y-.03,z+d/2,MT.glow(col||'#fff4e0'),{col:false,b:1,nt:1});addLight(x,y-.4,z,hx(col||'#fff4e0'),rng||10,int||.8)}
 function pendant(x,y,z,col,rng){box(x-.01,y-.9,z-.01,x+.01,y,z+.01,MT.plain('#222'),{col:false});box(x-.2,y-1.1,z-.2,x+.2,y-.9,z+.2,MT.glow(col||'#ffd98a'),{col:false,b:1});addLight(x,y-1.3,z,hx(col||'#ffd98a'),rng||6,.9)}
 function lamp(x,z,y,col){y=y||0;box(x-.06,y,z-.06,x+.06,y+3.6,z+.06,MT.plain('#2a2a30'));box(x-.25,y+3.6,z-.25,x+.25,y+3.9,z+.25,MT.glow(col||'#ffd98a'),{col:false,b:1});addLight(x,y+3.3,z,hx(col||'#ffd98a'),9,.9)}
 function screen(x,y,z,w,h,dir,m){panel(x,y,z,w,h,dir,m)}
 function int(reg,x,z,label,act,o){INTS.push(Object.assign({reg,x,z,y:0,label,act,r:2.2},o||{}))}
 const doorSign=(x,y,z,dir,t,fg)=>panel(x,y,z,Math.min(6,t.length*.3+1),.65,dir,sign(t,fg||'#ffd166'));
-function skyBox(cx,cz,s,y0,y1){const x0=cx-s,x1=cx+s,z0=cz-s,z1=cz+s,m=MT.sky;quad([x0,y0,z0],[x1,y0,z0],[x1,y1,z0],[x0,y1,z0],m,1,1);quad([x1,y0,z1],[x0,y0,z1],[x0,y1,z1],[x1,y1,z1],m,1,1);quad([x0,y0,z1],[x0,y0,z0],[x0,y1,z0],[x0,y1,z1],m,1,1);quad([x1,y0,z0],[x1,y0,z1],[x1,y1,z1],[x1,y1,z0],m,1,1);quad([x0,y1,z0],[x1,y1,z0],[x1,y1,z1],[x0,y1,z1],m,1,1)}
-function skyline(cx,cz,r0,r1,n,yb){for(let i=0;i<n;i++){const a=i/n*Math.PI*2+rnd()*.1,R=r0+rnd()*(r1-r0),x=cx+Math.cos(a)*R,z=cz+Math.sin(a)*R,w=8+rnd()*14,h=yb+20+rnd()*90;box(x-w/2,yb,z-w/2,x+w/2,h,z+w/2,{side:MT.facade,top:MT.plain('#1a1826')},{col:false});if(rnd()<.3)box(x-.3,h,z-.3,x+.3,h+6,z+.3,MT.glow('#ff5d73'),{col:false})}}
+function skyBox(cx,cz,s,y0,y1){return;/* replaced by the sky dome */const x0=cx-s,x1=cx+s,z0=cz-s,z1=cz+s,m=MT.sky;quad([x0,y0,z0],[x1,y0,z0],[x1,y1,z0],[x0,y1,z0],m,1,1);quad([x1,y0,z1],[x0,y0,z1],[x0,y1,z1],[x1,y1,z1],m,1,1);quad([x0,y0,z1],[x0,y0,z0],[x0,y1,z0],[x0,y1,z1],m,1,1);quad([x1,y0,z0],[x1,y0,z1],[x1,y1,z1],[x1,y1,z0],m,1,1);quad([x0,y1,z0],[x1,y1,z0],[x1,y1,z1],[x0,y1,z1],m,1,1)}
+function skyline(cx,cz,r0,r1,n,yb){for(let i=0;i<n;i++){const a=i/n*Math.PI*2+rnd()*.1,R=r0+rnd()*(r1-r0),x=cx+Math.cos(a)*R,z=cz+Math.sin(a)*R,w=8+rnd()*14,h=yb+20+rnd()*90;box(x-w/2,yb,z-w/2,x+w/2,h,z+w/2,{side:MT.facade,top:MT.plain('#1a1826')},{col:false});if(rnd()<.35){box(x-.15,h,z-.15,x+.15,h+6,z+.15,MT.plain('#2a2a30'),{col:false});box(x-.35,h+6,z-.35,x+.35,h+6.5,z+.35,MT.glow('#ff5d73',3),{col:false,b:1})}}}
 
 /* ============ LEVELS ============ */
 function buildLevels(){
@@ -88,8 +89,9 @@ function buildLevels(){
  region('con',{fog:[.07,.04,.1],fr:[14,75]});G.regions.con.amb=[.3,.27,.36];
  door('h',-6,-24,5,3.4);door('h',-6,8,5,3.4);door('h',-6,34,4,3.2);
  door('h',6,-27,8,3.6);door('h',6,-6,3);door('h',6,9,3);door('h',6,23,3);door('h',6,37,3);door('v',44,0,4,3.4);
+ door('h',6,-36.5,2.4,2.8,5.2);door('h',6,-2,3,2.9,5.2);door('h',6,27,3,2.9,5.2);
  door('h',-42,-38.5,2,2.4);door('v',-40,26,3,3);door('v',-40,14,2.4,2.8,5.2);door('h',32,-27,6,3.6);door('v',-6,42,4,3.2);
- room({x0:-40,z0:-6,x1:44,z1:6,h:6,fl:MT.carpetCon,wa:MT.wallCon,ce:MT.ceilDark,n:'Concourse',mc:'#5a2a4a'});
+ room({x0:-40,z0:-6,x1:44,z1:6,h:10.5,fl:MT.carpetCon,wa:MT.wallCon,ce:MT.ceilDark,n:'Concourse',mc:'#5a2a4a'});
  room({x0:-40,z0:-42,x1:-8,z1:-6,h:10,fl:MT.carpetDark,wa:MT.panel,ce:MT.ceilDark,n:'Hall A',mc:'#3a2a5a'});
  room({x0:-40,z0:-52,x1:-26,z1:-42,h:3.4,fl:MT.carpetGrey,wa:MT.wallPale,n:'Green room',mc:'#4a4a5a'});
  room({x0:-8,z0:-36,x1:24,z1:-6,h:7,fl:MT.concrete,wa:MT.wallPale,ce:MT.ceilDark,n:'Vendor Hall',mc:'#5a4a2a'});
@@ -98,25 +100,42 @@ function buildLevels(){
  room({x0:2,z0:6,x1:16,z1:22,h:4.5,fl:MT.carpetDark,wa:MT.panel,ce:MT.ceilDark,n:'CTF',mc:'#1a4a3a'});
  room({x0:16,z0:6,x1:30,z1:22,h:4.5,fl:MT.carpetGrey,wa:MT.wallPale,n:'Blue Team',mc:'#1a3a5a'});
  room({x0:30,z0:6,x1:44,z1:20,h:4,fl:MT.carpetDark,wa:MT.panel,ce:MT.ceilDark,n:'Lounge',mc:'#3a2a5a'});
+ door('v',10,18,2,2.6,5.2);
+ room({x0:-14,z0:6,x1:10,z1:22,y:5.2,h:4,fl:MT.carpetGrey,wa:MT.wallPale,n:'Workshop B',mc:'#2a3a5a'});
+ room({x0:10,z0:6,x1:44,z1:22,y:5.2,h:4,fl:MT.carpetCon,wa:MT.panel,ce:MT.ceilDark,n:'Retro Arcade',mc:'#4a1a4a'});
+ for(const[x,w]of[[-36.5,2.4],[-2,3],[27,3]])slab(x-w/2,5.7,x+w/2,6.3,5.2,.3,MT.carpetGallery,MT.plain('#2a1f36'));
+ slab(9.7,17,10.3,19,5.2,.3,MT.carpetGrey);
  room({x0:-40,z0:6,x1:-14,z1:32,h:11,fl:MT.marble,wa:MT.wallHotel,n:'Hotel Lobby',mc:'#5a4a3a'});
  room({x0:-62,z0:12,x1:-40,z1:32,h:4.5,fl:MT.woodDark,wa:MT.wallWarm,ce:MT.ceilDark,n:'Bar',mc:'#5a3a2a'});
  room({x0:-62,z0:6,x1:-40,z1:32,y:5.2,h:4,fl:MT.concrete,wa:MT.panel,ce:MT.ceilDark,n:'Hardware Village',mc:'#2a4a3a'});
- room({x0:-46,z0:32,x1:-6,z1:56,h:5,fl:MT.tile,wa:MT.brick,open:1,frame:false,n:'Plaza',mc:'#3a3a4a'});
+ room({x0:-46,z0:32,x1:-6,z1:56,h:5,fl:MT.pavers,wa:MT.brick,open:1,frame:false,n:'Plaza',mc:'#3a3a4a'});
  room({x0:-6,z0:34,x1:16,z1:56,h:5,fl:MT.tile,wa:MT.wallWarm,n:'Food Court',mc:'#5a3a2a'});
  room({x0:44,z0:-18,x1:74,z1:22,h:4.5,fl:MT.grass,wa:MT.brick,open:1,nofloor:1,frame:false,n:'Garden',mc:'#2a4a2a'});
  /* concourse */
- for(let x=-34;x<44;x+=9)lightPanel(x,6,0,3,1.2,'#ffe8f0',13,.75);
- for(let x=-30;x<44;x+=14)box(x-.35,0,-.35,x+.35,6,.35,MT.wallCon);
+ for(let x=-34;x<44;x+=9)lightPanel(x,10.5,-1.2,3,1.2,'#ffe8f0',15,.8);
+ for(let x=-30;x<44;x+=14){box(x-.35,0,-.35,x+.35,10.5,.35,MT.wallCon);box(x-.42,0,-.42,x+.42,.15,.42,MT.chrome,{col:false});box(x-.4,3.2,-.4,x+.4,3.3,.4,MT.glow('#ff5d73',1.8),{col:false,b:1})}
+ /* gallery: upper walkway along the south side, reached from the lobby mezzanine or the stairs */
+ slab(-39.8,3.2,43.8,5.8,5.2,.35,MT.carpetGallery,MT.plain('#2a1f36'));
+ railing(-39.8,3.2,10,3.2,5.2,{m:MT.chrome,glass:MT.glass});railing(12,3.2,43.8,3.2,5.2,{m:MT.chrome,glass:MT.glass});
+ for(let x=-36;x<44;x+=8){box(x-.25,4.78,4.3,x+.25,4.85,4.8,MT.glow('#fff1dc'),{col:false,b:1});addLight(x,4.4,4.5,[1,.9,.8],7,.55)}
+ for(let x=-38;x<44;x+=10)box(x-.08,5.2,3.32,x+.08,5.25,5.6,MT.glow('#8affc1',1.6),{col:false});
+ slab(10,.8,12,3.2,5.2,.35,MT.carpetGallery,MT.plain('#2a1f36'));box(10.05,0,.85,11.95,4.85,3.15,MT.wallCon);
+ stairs(12,.8,20,3.2,0,5.2,'x-',MT.carpetGallery,{nose:MT.chrome});
+ railing(12,.8,20,.8,5.2,{y2:0,m:MT.chrome});railing(10,.8,12,.8,5.2,{m:MT.chrome,glass:MT.glass});railing(10,.8,10,3.2,5.2,{m:MT.chrome,glass:MT.glass});
+ box(12,0,3.15,20,4.85,3.25,MT.wallCon);
+ doorSign(-2,8.2,5.78,'n','WORKSHOP B','#7cc4ff');doorSign(27,8.2,5.78,'n','RETRO ARCADE','#ff8fc8');doorSign(16,2.6,.78,'s','↑ GALLERY · WORKSHOPS · ARCADE','#8affc1');
+ /* hanging banners in the atrium */
+ for(const[x,c]of[[-27,'#ff5d73'],[-5,'#8affc1'],[19,'#ffd166'],[35,'#7cc4ff']]){box(x-.02,9.2,-2.6,x+.02,10.5,-2.4,MT.plain('#222'),{col:false});box(x-.9,5.6,-2.56,x+.9,9.2,-2.44,MT.fabric(c),{col:false})}
  doorSign(-24,3.6,-5.78,'s','HALL A · MAIN STAGE');doorSign(8,3.6,-5.78,'s','VENDOR HALL');doorSign(34,3.4,-5.78,'s','COSPLAY HALL','#2bf0ff');
  doorSign(-27,3.8,5.78,'n','HOTEL LOBBY','#ffe0a0');doorSign(-6,3.2,5.78,'n','LOCKPICK VILLAGE');doorSign(9,3.2,5.78,'n','CTF','#8affc1');doorSign(23,3.2,5.78,'n','BLUE TEAM VILLAGE','#7cc4ff');doorSign(37,3.2,5.78,'n','CHILL-OUT','#c9b6ff');doorSign(43.78,3.6,0,'w','GARDEN','#8affc1');
- panel(-10,3.6,-.01,10,2.5,'s',MT.lumenbanner);panel(-10,3.6,.01,10,2.5,'n',MT.lumenbanner);
+ panel(-10,6.4,-.01,12,3,'s',MT.lumenbanner);panel(-10,6.4,.01,12,3,'n',MT.lumenbanner);box(-16,9.4,-.03,-15.96,10.5,.03,MT.plain('#222'),{col:false});box(-4.04,9.4,-.03,-4,10.5,.03,MT.plain('#222'),{col:false});
  box(-20,0,-2.6,-12,1.05,-1.4,{side:MT.plain('#ff5d73'),top:MT.plain('#f6eefc')});panel(-16,1.4,-5.79,7,1,'s',sign('REGISTRATION · BADGE PICKUP','#1b1026','#ffd166'));
  for(let i=0;i<6;i++)box(-19.5+i*1.3,1.05,-2.3,-19.1+i*1.3,1.12,-1.7,MT.plain(['#ffd166','#8affc1','#ff5d73'][i%3]),{col:false});
  box(-4,0,-5.8,6,3.4,-5.4,MT.plain('#0d1830'));panel(1,1.2,-5.39,9,2.2,'s',MT.lumen);box(-2,0,-4.2,4,1,-3.4,MT.plain('#0d1830'));panel(1,.2,-3.39,5,.6,'s',sign('FREE PRIVACY! INSTALL SAFESPHERE','#5ab4ff','#0d1830'));addLight(1,3,-3,[.4,.7,1],8,1);
  box(26,0,1.5,34,.25,5.8,MT.plain('#3a1a40'),{walk:1,col:false});panel(30,.3,5.79,8,4.5,'n',MT.stream);box(29,.25,2.2,31,.85,2.8,MT.plain('#ffffff'));
  for(const x of[26.6,33.4]){box(x-.05,.25,2,x+.05,1.8,2.1,MT.plain('#222'),{col:false});box(x-.4,1.8,2,x+.4,2.6,2.08,MT.glow('#fff6fb'),{col:false});addLight(x,2.2,1.4,[1,.7,.9],6,1)}
  for(let i=0;i<5;i++)box(27+i*1.5,.25,5.2,27.6+i*1.5,.85,5.7,MT.plain(['#ff8fc8','#c9b6ff','#ffd166','#8affc1','#ff5d73'][i]),{col:false});
- for(const x of[-34,-6,18,40])box(x-1.2,0,-.5,x+1.2,.45,.5,MT.woodDark);
+ for(const x of[-34,-6,4,40])box(x-1.2,0,-.5,x+1.2,.45,.5,MT.woodDark);
  for(const x of[-38,-30,-2,16,30,42])plant(x,-5,1);
  panel(-38,1.2,-5.79,.9,1.2,'s',MT.poster(4));panel(20,1.2,-5.79,.9,1.2,'s',MT.poster(2));panel(42,1.2,5.79,.9,1.2,'n',MT.poster(3));panel(-39.79,2,0,4,2.3,'e',MT.keyscreen);
  /* Hall A: walkable stage, AV platform */
@@ -194,8 +213,7 @@ function buildLevels(){
  floorQ(-46,46,-6,56,.01,MT.road);floorQ(-46,45.6,-6,46,.02,MT.plain('#888'));
  box(-46,4.9,32,-6,40,32.25,MT.facade,{col:false});box(-40,3.6,32,-14,3.9,36,MT.plain('#3a2a2a'),{col:false,b:1});for(const x of[-36,-27,-18])addLight(x,3.4,34,[1,.85,.6],7,1);
  box(-46.2,4.9,32,-46,40,56,MT.facade,{col:false});box(-6,4.9,32,-5.8,40,56,MT.facade,{col:false});box(-46,0,56,-6,40,56.2,MT.facade,{col:false});
- ceilQ(-46,32,-6,56,40,MT.sky);
- for(const[x,z,c]of[[-38,50,'#ffd166'],[-24,52.5,'#ff5d73'],[-13,50,'#ffd166']]){box(x-2.2,0,z-1,x+2.2,1.2,z+1,MT.plain(c));box(x-1.4,1.2,z-.9,x+1.2,1.9,z+.9,MT.plain('#2a2a34'));box(x-.3,1.9,z-.25,x+.3,2.1,z+.25,MT.glow('#fff'),{col:false})}
+  for(const[x,z,c]of[[-38,50,'#ffd166'],[-24,52.5,'#ff5d73'],[-13,50,'#ffd166']]){box(x-2.2,0,z-1,x+2.2,1.2,z+1,MT.plain(c));box(x-1.4,1.2,z-.9,x+1.2,1.9,z+.9,MT.plain('#2a2a34'));box(x-.3,1.9,z-.25,x+.3,2.1,z+.25,MT.glow('#fff'),{col:false})}
  box(-40,0,38,-30,1.8,38.4,MT.plain('#1b1026'));panel(-35,.1,38.41,10,1.6,'s',sign('CTRL+ALT+CON','#ff5d73','#1b1026',512,96));panel(-35,.1,37.99,10,1.6,'n',sign('CTRL+ALT+CON','#ff5d73','#1b1026',512,96));addLight(-35,1.4,40,[1,.4,.5],8,1.2);
  for(const x of[-44,-34,-20,-10])lamp(x,45,0);for(const x of[-42,-12])tree(x,38);
  for(let x=-44;x<-6;x+=3)box(x-.12,0,45.2,x+.12,.8,45.44,MT.plain('#3a3a44'));
@@ -216,10 +234,30 @@ function buildLevels(){
  for(const[x,z]of[[48,-14],[70,-14],[48,18],[70,18],[47,1],[71,1],[59,-14],[59,18]])tree(x,z);
  for(const x of[48,54,64,70])lamp(x,-9,0,'#ffd98a');for(const x of[48,54,64,70])lamp(x,12,0,'#ffd98a');
  for(const[x,z]of[[50,-16],[68,-16],[50,20],[68,20]])box(x-1,0,z-.35,x+1,.45,z+.35,MT.woodDark);
- box(44,4.4,-18,74,40,-17.8,MT.facade,{col:false});box(44,4.4,21.8,74,40,22,MT.facade,{col:false});box(73.8,4.4,-18,74,40,22,MT.facade,{col:false});box(44,6,-18,44.2,40,22,MT.facade,{col:false});ceilQ(44,-18,74,22,40,MT.sky);
+ box(44,4.4,-18,74,40,-17.8,MT.facade,{col:false});box(44,4.4,21.8,74,40,22,MT.facade,{col:false});box(73.8,4.4,-18,74,40,22,MT.facade,{col:false});box(44,9.3,-18,44.2,40,22,MT.facade,{col:false});
  panel(44.21,2.5,-3.5,2.6,.5,'e',sign('← CONCOURSE','#8affc1','#1a2a1a',256,64));
  (MAPR.con=MAPR.con||[]).push({x0:-40,z0:6,x1:-33,z1:32,y:5.2,n:'Mezzanine',c:'#5a4a3a'},{x0:-33,z0:6,x1:-14,z1:32,y:5.2,n:'',c:'#1a1222'});
+ /* workshop B (upper level) */
+ {const y=5.2;panel(-2,y+.9,21.79,8,3,'n',MT.slides);box(-6.2,y+.75,21.6,2.2,y+.9,21.8,MT.plain('#2a2a34'),{col:false});addLight(-2,y+2.6,19,[.9,.95,1],9,.9);
+  box(-2.6,y,19.6,-1.4,y+1.1,20.2,MT.woodDark);box(-2.7,y+1.1,19.5,-1.3,y+1.16,20.3,MT.woodDark,{col:false});
+  for(let r=0;r<5;r++){const z=10+r*1.7;for(let x=-12.4;x<9;x+=.9){if(Math.abs(x+2)<1)continue;chair(x,z,'n',MT.plain(r%2?'#3f526a':'#4a6080'),y)}colBox(-12.8,z-.3,-3,z+.3,y,y+1);colBox(-1,z-.3,9.2,z+.3,y,y+1)}
+  for(const x of[-9,-2,5])for(const z of[9,15])lightPanel(x,y+4,z,2.4,1,'#f4f8ff',10,.6);
+  panel(-13.79,y+.9,13,4,1.8,'e',mt(signTex('THREAT MODEL ALL THE THINGS','#1b1026','#f6eefc',512,128),0,1,1,{k:1}));
+  panel(9.79,y+1.1,10,.8,1.05,'w',MT.poster(2));box(-13.6,y,7,-12.4,y+.9,9,MT.plain('#e9e3da'));box(-13.4,y+.9,7.3,-12.6,y+1.25,7.7,MT.chrome,{col:false});
+  plant(-13.2,21.2,.9,y);plant(9.2,21.2,.9,y)}
+ /* retro arcade (upper level) */
+ {const y=5.2,cab=(x,z,dir,scr)=>{const d=dir==='n'?-1:1;box(x-.38,y,z-.34,x+.38,y+1.85,z+.34,MT.gloss('#1a1424'));panel(x,y+1.05,z+d*.345,.62,.5,dir,scr);box(x-.38,y+1.72,z+d*.34-.04,x+.38,y+1.9,z+d*.34+.04,MT.glow(['#ff5fb0','#2bf0ff','#ffd166','#8affc1'][Math.abs(Math.round(x*3))%4],2),{col:false});box(x-.36,y+.82,z+d*.35-.12,x+.36,y+.88,z+d*.35+.12,MT.plain('#2a2a34'),{col:false})};
+  for(let x=12;x<43;x+=1.25){if(Math.abs(x-27)<1.6)continue;cab(x,21.3,'n',(Math.round(x*4))%2?MT.arcade:MT.arcade2)}
+  for(let x=15;x<40;x+=1.25){if(Math.abs(x-27)<1.2)continue;cab(x,13.15,'n',(Math.round(x*4))%2?MT.arcade2:MT.arcade);cab(x,14.55,'s',(Math.round(x*4))%2?MT.arcade:MT.arcade2)}
+  box(42.4,y,7,43.8,y+2.1,8.4,MT.gloss('#1a2a5a'));panel(42.39,y+.1,7.7,1.3,2,'w',MT.vend);
+  for(let x=10.5;x<44;x+=5){box(x,y+3.1,6.22,x+3.5,y+3.16,6.28,MT.glow(x%10<5?'#ff5fb0':'#2bf0ff',2.2),{col:false});box(x,y+3.1,21.72,x+3.5,y+3.16,21.78,MT.glow(x%10<5?'#2bf0ff':'#ff5fb0',2.2),{col:false})}
+  for(const[x,z,c]of[[16,10,[1,.4,.8]],[26,10,[.3,.9,1]],[36,10,[1,.4,.8]],[16,18,[.3,.9,1]],[26,18,[1,.8,.4]],[36,18,[.3,.9,1]]])addLight(x,y+3.2,z,c,9,.85);
+  panel(10.21,y+1.1,10,.8,1.05,'e',MT.poster(5));panel(43.79,y+1.2,14,4,1,'w',sign('HIGH SCORES','#ffd166','#120a1c',256,64));panel(43.79,y+.4,14,3.4,.7,'w',mt(signTex('1. KERNEL  99,999   2. r00tbeer  81,200   3. dave_hax  12','#8affc1','#120a1c',512,64),0,1,1,{k:1.2}))}
+ (MAPR.con=MAPR.con||[]).push({x0:-40,z0:3.2,x1:44,z1:6,y:5.2,n:'Gallery',c:'#3a2a4a'});
  /* areas */
+ area('gallery','Concourse Gallery','con',[-40,.8,44,6],[-30,4.6,Math.PI/2,5.2],'con',{y0:4,y1:9.5,sub:1});
+ area('workshop','Workshop B','con',[-14,6,10,22],[-2,7.5,Math.PI,5.2],'con',{y0:4,y1:9.5});
+ area('arcade','Retro Arcade','con',[10,6,44,22],[27,7.5,Math.PI,5.2],'con',{y0:4,y1:9.5});
  area('stream','Stream Booth','con',[26,0,34,6],[30,.3,Math.PI,0],'stream',{sub:1});
  area('concourse','Concourse','con',[-40,-6,44,6],[-16,1.5,0,0],'con');
  area('hallA','Hall A · Main Stage','con',[-40,-42,-8,-6],[-24,-7.2,0,0],'stage',{y1:9});
