@@ -173,6 +173,9 @@ function buildSite(){
   slab(-22,-38,12,-35,L1,.3,MT.carpetDark,MT.plain('#1a1428'));railing(-22,-60,-22,-38,0,{y2:L1,m:MT.chrome});railing(12,-60,12,-38,0,{y2:L1,m:MT.chrome})}
  for(let i=0;i<8;i++){const x=-22+i*5,c=['#ff5d73','#8affc1','#7cc4ff','#ffd166'][i%4];box(x-.3,13.4,-66,x+.3,13.8,-65.4,MT.glow(c),{col:false,b:1});addLight(x,10,-74,hx(c),14,.7)}
  box(-26,13.8,-66.2,16,14,-65.8,MT.metal,{col:false});box(-26,13.8,-52.2,16,14,-51.8,MT.metal,{col:false});
+ // house lights: warm wall washes down both sides and a soft key on the stage, so the hall reads as a theatre, not a void
+ for(const z of[-74,-64,-54,-44]){for(const x of[-29.2,19.2]){box(x-.15,6,z-.6,x+.15,6.25,z+.6,MT.glow('#ffcf9a',.9),{col:false,b:1});addLight(x+(x<0?1.2:-1.2),5.2,z,[1,.78,.55],11,.72)}}
+ addLight(-5,7,-70,[1,.9,.85],18,1.05);addLight(-5,9,-50,[.85,.75,1],20,.55);
  lightPanel(-5,16,-55,8,3,'#fff0f8',26,.6);lightPanel(-5,16,-42,8,3,'#fff0f8',22,.5);lightPanel(-26,16,-58,2,6,'#fff0f8',16,.5);lightPanel(16,16,-58,2,6,'#fff0f8',16,.5);
  for(let i=0;i<2;i++){table(15.5+i*2.4,-69,2,.7,MT.plain('#22222c'),.8);screen(15+i*2.4,.85,-69.3,.9,.55,'s',i?MT.code:MT.dash);screen(16+i*2.4,.85,-69.3,.9,.55,'s',MT.scope)}
  panel(17.5,2.2,-70.2,3,.5,'s',sign('AV DESK','#7cc4ff','#1a1a24',256,64));addLight(17.5,3,-68,[.5,.7,1],6,.9);

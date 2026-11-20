@@ -12,7 +12,7 @@ Source lives in `src/`. To rebuild `index.html` after editing:
 
 `build.py` concatenates `src/*.js` (in filename order) into `src/template.html`.
 
-`vendor/three.bundle.js` is three.js r170 plus the post-processing addons the game uses, bundled from `tools/three-entry.js`:
+`vendor/three.bundle.js` is three.js r170 plus the post-processing addons the game uses (bloom, GTAO ambient occlusion, FXAA, output), bundled from `tools/three-entry.js`:
 
     npm i three@0.170.0 esbuild@0.24.0
     npx esbuild tools/three-entry.js --bundle --minify --format=iife --target=es2019 --legal-comments=none --outfile=vendor/three.bundle.js
@@ -24,7 +24,7 @@ Source lives in `src/`. To rebuild `index.html` after editing:
 - `04_routes_a.js` Nyx, Ada, Priya, Juno routes
 - `05_routes_b.js` Kit, Rin, Bea, Ellie, Mira routes + Dave
 - `06_hub_finale.js` hangouts, shop, keynote, endings, title
-- `07_gl.js`       three.js renderer: level builder API, chunked geometry, glass, light pool, bloom, sky
+- `07_gl.js`       three.js renderer: level builder API, chunked geometry, glass, light pool, per-region environment maps, AO, bloom, colour grade, sky. `LOOK` holds every lighting knob in one place
 - `07b_chars.js`   full-body character and crowd art
 - `08_level.js`    textures and materials
 - `08b_level.js`   level helpers + home (flat and bakery)
@@ -37,7 +37,7 @@ Source lives in `src/`. To rebuild `index.html` after editing:
 - `11_saves.js`    save slots, export/import
 - `12_input.js`    keyboard + device detection
 - `12b_cursor.js`  virtual cursor, so the mouse stays captured through conversations
-- `13_audio.js`    procedural music, ambience and UI sounds
+- `13_audio.js`    procedural music, ambience, UI sounds and surface-aware footsteps (carpet, marble, wood, metal, concrete, grass, gravel)
 - `99_boot.js`     startup
 
 ## Map
@@ -50,7 +50,7 @@ Level 1 (gallery, workshops, hardware hacking, Creator Corner, Retro Arcade, Con
 Areas open as the story needs them (`GATES` in `09a_place.js`).
 
 ## Controls
-Desktop: WASD/arrows to walk, Shift to run, mouse to look, E to interact, M for map. The mouse stays captured in the 3D world, including during conversations (a drawn cursor appears for choices). Esc or P opens the phone and frees the mouse; closing it steps you straight back in.
+Desktop: WASD/arrows to walk, Shift to run, mouse to look, E to interact, M for map. The mouse is captured from the moment you press Begin/Continue and stays captured in the 3D world, including during conversations (a drawn cursor appears for choices). Esc or P opens the phone and frees the mouse; closing it steps you straight back in.
 Touch: left stick to walk, drag anywhere else to look, tap the prompt to interact.
 
 ## Deploy to GitHub Pages

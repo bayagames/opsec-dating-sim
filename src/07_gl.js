@@ -3,7 +3,7 @@
    per region, per 32 m chunk and per material, then turned into merged BufferGeometries so the scene is a
    few hundred draw calls with frustum culling. Lighting is real time: a hemisphere fill per area plus a
    pool of point lights that follows the player and picks the nearest level lights. */
-const G={LK:6,HK:5.5,ok:false,regions:{},boxes:{},walls:{},lights:{},surf:{},tx:{},mats:{},rects:{},chars:[],q:'high'};
+const G={LK:7.6,HK:5.5,ok:false,regions:{},boxes:{},walls:{},lights:{},surf:{},tx:{},mats:{},rects:{},chars:[],q:'high'};
 const lin=c=>c<=.04045?c/12.92:Math.pow((c+.055)/1.055,2.4);
 const QUALITY={
  low:{dpr:1,lights:6,bloom:false,msaa:0,std:false,shadowBlobs:true},
@@ -12,7 +12,7 @@ const QUALITY={
 };
 /* the look, in one place: emissive gain is compressed above 1 so signs and fixtures read as lit without
    blooming into fog; bloom only catches what is genuinely bright */
-const LOOK={exposure:1.18,hemi:3.4,env:{home:.75,con:.62,f13:.7,office:.85,station:.8},bloomStr:.26,bloomRad:.62,bloomThr:1.05,ao:.82,sat:1.08,con:1.05,vig:.12};
+const LOOK={exposure:1.12,hemi:3.2,fill:.5,env:{home:.6,con:.5,f13:.55,office:.7,station:.7},bloomStr:.26,bloomRad:.62,bloomThr:1.05,ao:.85,sat:1.12,con:1.07,vig:.12,light:7.6,reach:1.3};
 /* ---- textures: every texture gets its own canvas; small non-repeating ones are packed into atlases later ---- */
 function tex(key,w,h,paint){
  if(G.tx[key])return key;
@@ -118,7 +118,7 @@ function glInit(cv){
  const T=THREE;
  let r=null;try{r=new T.WebGLRenderer({canvas:cv,antialias:true,powerPreference:'high-performance',stencil:false})}catch(e){console.warn(e)}
  if(!r||!r.capabilities)return false;
- r.outputColorSpace=T.SRGBColorSpace;r.toneMapping=T.AgXToneMapping||T.NeutralToneMapping;r.toneMappingExposure=LOOK.exposure;
+ r.outputColorSpace=T.SRGBColorSpace;r.toneMapping=T.NeutralToneMapping||T.ACESFilmicToneMapping;r.toneMappingExposure=LOOK.exposure;
  G.r=r;G.cv=cv;G.T=T;
  // the level was lit with a bounded (1-d/R)^2 falloff; keep that look instead of inverse-square,
  // which blows out ceilings that sit right next to their lights
@@ -265,7 +265,7 @@ function updLights(dt,force){
   for(const p of P){const u=p.userData;if(u.src>=0&&want.has(u.src)&&!instant){u.tk=1;have.add(u.src)}else{u.tk=0;if(instant){u.k=0;u.src=-1}}}
   const free=P.filter(p=>p.userData.src<0||(p.userData.k<=.01&&p.userData.tk===0));
   for(const i of want){if(have.has(i))continue;const p=free.shift();if(!p)break;const l=L[i],u=p.userData;u.src=i;u.k=instant?1:0;u.tk=1;have.add(i);
-   p.position.set(l[0],l[1],l[2]);p.color.setRGB(lin(l[3]),lin(l[4]),lin(l[5]));p.distance=l[6]*1.15;u.base=l[7]*G.LK}
+   p.position.set(l[0],l[1],l[2]);p.color.setRGB(lin(l[3]),lin(l[4]),lin(l[5]));p.distance=l[6]*LOOK.reach;u.base=l[7]*G.LK}
  }
  for(const p of P){const u=p.userData;if(u.src<0){p.intensity=0;continue}u.k+=(u.tk-u.k)*Math.min(1,dt*5);if(u.tk===0&&u.k<.01){u.k=0;u.src=-1}
   p.intensity=u.base*u.k}
