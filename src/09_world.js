@@ -1,156 +1,18 @@
 /* ============ WORLD ============ */
 const WD={x:0,y:0,z:0,yaw:0,pit:0,vx:0,vz:0,vy:0,eye:1.62,ground:true,reg:'home',area:null,active:false,keys:{},joy:null,look:null,near:null,t:0,lastSave:0,npcs:[],touch:false,bob:0,stepPh:0,fovk:0};
-const BG2AREA={con:'concourse',lock:'lockpick',ctf:'ctf',soc:'soc',stream:'stream',hotel:'room1337',roof:'roof',stage:'hallA',keynote:'hallA',vendor:'vendor',flat:'flat',bakery:'bakery',cos:'cosplay',chill:'lounge',bar:'bar',lobby:'lobby'};
-const FAR={home:70,con:180,f13:460};
-const HANDLES=['xX_r00t_Xx','null_byte','packet_pam','sudo_sam','lord_of_logs','0xDEADBEEF','grep_grrl','cron_job','bitflip','yak_shaver','tcp_tina','salt_n_hash','mitm_mike','captcha_carl','ssh_sasha','vimlord','emacs_emma','port_80','buffer_bob','kernel_kev','dns_dana','wifi_wendy','phreak','byte_me','404_found','hexadecimal_hal','proxy_pete','zero_cool_ish','ping_pong','cookie_monster','segfault_sue','race_condition','heap_hannah','stack_smash','the_doorman'];
-const NPCLINES={
- any:['First con? Pro tip: drink water. Club-Mate is not water.','I\'ve been awake for 31 hours. I can see sounds.','Have you seen the badge? It has a hidden game on it. I\'ve found nothing. For six hours.','Someone said there\'s free pizza somewhere. There is never free pizza.','My talk got rejected. I\'m giving it in the corridor anyway.','Don\'t connect to the Wi-Fi. Either of them.','I\'m not a hacker, I\'m a "security researcher". The difference is a lawyer.','I lost my laptop charger and with it, my will to live.','Is that a SafeSphere tote? Bold choice.','I just watched a man pick a handcuff lock with a hairpin. I need to lie down.','Tabs. Obviously tabs. Fight me.','I came for the talks. I stayed for the stickers.','Somebody\'s been rickrolling every TV in the hotel. Respect.','My mum thinks I\'m at a "computer party". She\'s not wrong.','I brought three phones. One for me, one burner, one to look cool.'],
- lobby:['The lobby piano is a MIDI device. Someone\'s been playing it over Bluetooth.','The concierge asked if I was "with the hackers". I said no. I was wearing four lanyards.'],
- mezz:['Best view in the hotel. You can watch everyone forget their badges.','I come up here to think. And to judge people\'s laptop stickers from a height.'],
- hwv:['I soldered my thumb to a badge. It\'s fine. It\'s part of the badge now.','That LED wall is running Game of Life. Someone made a glider that spells "HELP".','Want to see my toaster? It runs Linux. Its uptime beats my sleep schedule.'],
- vendor:['I bought a USB cable that might be a keylogger. For science.','The lanyard guy only sells lanyards. I respect his focus.','My laptop lid has no lid left. It\'s all stickers.'],
- bar:['Bea makes a cocktail called "Segfault". It crashes you.','Don\'t ask Bea about blockchain. A man did. He\'s still outside.'],
- plaza:['Taxi driver asked if I was "one of the hacker lot". I said no. He said "sure".','The big CTRL+ALT+CON sign was sponsored by Lumen. Someone put a sticker over the logo. Iconic.'],
- garden:['Fresh air. I forgot this existed.','Somebody threw a phone in the fountain. It was a burner. I think.','Sitting on the steps here is the only quiet place in the building.'],
- food:['The pizza place says NO PINEAPPLE. They seem to have strong reasons.','Noodles are the official food of incident response.'],
- hallA:['Saving seats for the keynote. Yes, all of these.','The AV team here are wizards. Respect the AV team.','I got up on stage just to see what it\'s like. It\'s terrifying. Do not recommend.'],
- lockpick:['I opened my first lock! It was the practice one. I still feel like a god.'],
- ctf:['We\'re 40th. But we\'re having fun. That\'s what we tell ourselves.','The crypto challenge is just a picture of a duck. Why is it a duck.'],
- soc:['Seventeen people here have their home address as their Wi-Fi name. Priya\'s keeping count.'],
- lounge:['Shh. I\'m recompiling my soul.','These bean bags have seen things.'],
- cosplay:['My armour is ninety per cent hot glue. The other ten is pain.','Neon Ronin\'s wings this year. Unreal.','I walked the runway. My knees are still shaking.'],
- corridor:['Room 1336 has been ordering room service for six hours. Somebody\'s fine.'],
- roof:['How did you get up here? ...Same way as me, I suppose.','Best signal in the building. Worst opsec in the building.'],
- gallery:['Best people-watching in the building. That man has dropped his badge three times.','From up here the con looks almost organised. Almost.','I timed it: you can get from the lobby to the arcade without touching the concourse. Very important research.'],
- workshop:['The workshop said "bring a laptop". I brought a typewriter. It was a statement.','Threat modelling is just being anxious, but with a spreadsheet.','I asked "what\'s my threat model?" and the speaker said "your group chat". Fair.'],
- arcade:['KERNEL holds every high score in here. Every. Single. One.','The claw machine is rigged. I checked the firmware.','I\'ve spent forty credits on this racing game. I regret nothing.','Someone found a buffer overflow in the pinball table. They got infinite balls.']
-};
-const CHLINES={2:['Did you see what WHISPER did to MegaHax? Brutal.','Everyone\'s checking their posts. I deleted four years of tweets this morning.'],3:['WHISPER hit the Lumen CEO! On the main screens!','Lumen security asked to scan my badge. I said no. They asked again.','I uninstalled SafeSphere. Just in case. Just... vibes.'],4:['Rumour is something big\'s happening at the keynote.','Hall A at four. Everyone\'s going. EVERYONE.']};
-function genCrowd(){
- const st=['bob','long','ponytail','twin','short','wavy','pixie','fluffy','bun','slick','puffs','short','short'],skins=['#f3d2bc','#e8c7ad','#c98f6e','#a8704e','#7a4a32','#5a3424','#f6dfd0','#d9a98a'],hairs=['#1d1726','#3a2418','#7a4a2c','#c2532b','#e3c07a','#2bd9e8','#ff8fc8','#8affc1','#d4d4d4','#5a3a6a','#141018'],ocs=['#2a2530','#3a7d44','#ff5d73','#3f526a','#ffd166','#6b4f8a','#1c2133','#7cc4ff','#efeaff','#ff8a3d','#444'],outs=['hoodie','hoodie','tee','jacket','blazer','tee'],accs=[[],[],['glasses'],['phones'],['earring'],['freckles'],['glasses','earring'],['shades']];
- const lows=[{t:'pants',c:'#2a3a5a',s:'#fff'},{t:'pants',c:'#1a1a22',s:'#222'},{t:'pants',c:'#5a5a46',s:'#2a2a2a',boot:1},{t:'shorts',c:'#3a4a6a',s:'#fff'},{t:'skirt',c:'#1a1520',l:'#2a2030',s:'#111'},{t:'skirt',c:'#ff8fc8',l:'#ffffff',thigh:1,s:'#fff'},{t:'long',c:'#2a2a3a',s:'#111'},{t:'pants',c:'#6b4f8a',s:'#ffd166'}];
- const spots={concourse:[[-30,3],[-8,2.5],[14,-3],[22,3],[38,-2],[-36,-3],[5,3.5],[-22,2],[30,-3]],hallA:[[-24,-16],[-30,-24.15],[-17,-20.25],[-26,-9],[-20,-32.5],[-30,-38,1.2,1]],vendor:[[-4,-27],[9,-21],[18,-26],[4,-15],[14,-18],[-5,-11],[11,-31]],cosplay:[[30,-21],[38,-18],[27,-10],[40,-10],[36,-26,.6,1]],lockpick:[[-11,12.5,0,1],[-1,16.5,0,1],[-9,17.5]],ctf:[[4,15.5,0,1],[14,19],[11,8.5]],soc:[[18,17],[28,10]],lounge:[[33,17,0,1],[36,10.5]],lobby:[[-30,25],[-19,12],[-17,8],[-29,9],[-36,22]],mezz:[[-36,15,5.2],[-36,25,5.2,1]],hwv:[[-53,13,5.2,1],[-45,20,5.2],[-57,23,5.2,1],[-48,29,5.2]],bar:[[-47,21],[-56,18.2,0,1],[-44,26],[-59,24]],plaza:[[-27,34.6,0,1],[-32,42],[-18,43],[-10,36]],food:[[3,47],[8,41],[13,52],[-2,37]],garden:[[50,-5],[68,8],[59,-5.4,-.4,1],[62,9.5],[48,15]],corridor:[[220,.5],[232,-.6]],roof:[[244,-14.6,3.6,1],[276,0,3.6]],gallery:[[-22,4.5,5.2,1],[4,4.4,5.2],[32,4.6,5.2,1]],workshop:[[-9,10,5.2,1],[4.6,13.4,5.2,1],[-11,16.8,5.2,1],[6,19,5.2]],arcade:[[14,20.2,5.2,1],[22,12.1,5.2,1],[33,20.2,5.2,1],[30,16,5.2],[40,9,5.2]]};
- let i=0;
- for(const a in spots)for(const p of spots[a]){
-  const door=a==='plaza'&&p[3];
-  WD.npcs.push({id:'n'+i,v:i%8,role:door?'Doorman':null,reg:AREAS[a].reg,x:p[0],z:p[1],y:p[2]||0,hx:p[0],hz:p[1],ar:a,tx:p[0],tz:p[1],wait:rnd()*5,still:!!p[3]});
-  i++;
- }
-}
-function placeWorld(){
- BR='con';table(-24,12.2,2.6,1,MT.plain('#f4efe6'));box(-25.1,.76,11.9,-22.9,.92,12.5,MT.bread,{col:false});
- const ch=()=>S?S.ch:0;
- const C=(id,reg,x,z,when,o)=>WCH.push(Object.assign({id,reg,x,z,y:0,when},o||{}));
- C('ellie','home',-295.5,2.2,()=>ch()===0);
- C('ellie','con',-24,11.3,()=>ch()>=3&&ch()<5);
- C('nyx','con',-8.2,12.6,()=>ch()>=1);
- C('ada','con',9,11.8,()=>ch()>=1);
- C('priya','con',23,12,()=>ch()>=1);
- C('juno','con',30,3.4,()=>ch()>=1,{y:.25});
- C('kit','con',31,-16.6,()=>ch()>=1,{spr:()=>(S.stage.kit<1||S.ch===3)?'kitc':'kit'});
- C('rin','con',42.4,12,()=>ch()>=2);
- C('bea','con',-53,14.7,()=>ch()>=1);
- C('mira','f13',284,-8.5,()=>ch()>=3&&S.f.roof_open,{y:5.2});
- C('dave','con',4.5,-1.6,()=>ch()===1);
- C('dave','con',-2,-32.2,()=>ch()>=2&&ch()<5,{spr:()=>'davex'});
- C('marge','con',-16,-3.4,()=>ch()>=1&&ch()<4);
- C('marge','con',-24,-36.6,()=>ch()===4,{y:1.2});
- C('victor','con',1,-4.8,()=>ch()>=1&&ch()<3);
- C('victor','con',-45,28.6,()=>ch()===3);
- DYN.push({reg:'f13',b:[259.6,-.8,260.4,.8,3.6,6.2],when:()=>!S.f.roof_open,spr:[259.7,0,3.6]});
- genCrowd();
- const N1=t=>()=>run([N(t)],hub);
- // home
- int('home',-293.2,-6.4,()=>'Look at your monitor',N1('Your forum post from 3 AM: "honestly most firewalls are a joke if you know what you\'re doing." Fourteen upvotes. One reply: "source?" You never answered.'),{y:3.4});
- int('home',-292.8,1.2,()=>'Water the plant',N1('It\'s plastic. You water it anyway. It\'s a ritual now.'),{y:3.4});
- int('home',-298,.6,()=>'Check the pizza boxes',N1('Three boxes. Two empty. One contains a single crust you\'re saving for reasons you can\'t explain.'),{y:3.4});
- int('home',-297,-7.2,()=>'Look out of the window',N1('Morning. The street below. The smell of bread rising up from Proof like a summons.'),{y:3.4});
- int('home',-296.5,-6,()=>'Look at the ovens',N1('Three ovens, already roaring. Ellie gets up at 4 AM every day. You get up at 4 AM sometimes, but from the other direction.'));
- int('home',-301.1,9.6,()=>'Read the chalkboard',N1('Today\'s special: "cinnamon knot (ask the computer guy, he\'s had 400)". You have had 400.'));
- int('home',-295.5,11.2,()=>S.ch!==0?null:S.f.ch0b?'Head out to work':'Leave for work',()=>{if(!S.f.ch0b)return run([N('Breakfast first. You can smell the cinnamon from here. Ellie\'s at the counter.')],hub);run(CH0C(),()=>{S.ch=1;S.resume='open';save();teleportArea('plaza');run(OPEN[1](),()=>{teleportArea('concourse');hub()})})});
- // convention
- int('con',-16,-.9,()=>'Read the schedule board',N1('Today: lockpicking 101, "Your Fridge Is a Botnet", a CTF that runs all weekend, a cosplay contest on Day 3, and the closing keynote in Hall A. Sponsored by Lumen, in letters slightly too large.'));
- int('con',1,-2.9,()=>S.ch>=1&&S.ch<4?'Take a SafeSphere flyer':null,()=>run([N('"SafeSphere: your privacy, protected. Free forever!" On the back, in 4-point type: "By installing you agree to share insights with trusted partners."'),N(S.ch>=3?'You bin it. Three other people do the same while you watch.':'You fold it into a very small square.')],hub));
- int('con',-14,-1.2,()=>'Look up at the ceiling',()=>run([N(S.clues.includes('evil_twin')?'The tile Nyx pointed out. Behind it, a small box with a Lumen asset tag blinks away, pretending to be the con\'s Wi-Fi.':'One ceiling tile above the registration desk is slightly askew. A tiny green light blinks behind it. Probably nothing. Probably.')],hub));
- int('con',-24,-14.5,()=>'Sit down for a talk',()=>go('stage'));
- int('con',-24,-35,()=>'Step up to the podium',N1('You grip the podium and look out at the empty seats. Your heart rate doubles. Imagine doing this for real.'),{y:1.2});
- int('con',-36,-10.4,()=>'Look at the AV desk',N1('Four screens, a mixing desk and an AV tech eating a sandwich with the calm of someone who has seen every possible failure. "Don\'t touch anything," she says, without looking up.'),{y:1.4});
- int('con',-30,-46,()=>'Raid the speakers\' snacks',N1('Grapes, crisps and a bowl of only green M&Ms. You take one grape. You feel like a criminal.'));
- int('con',17,-8.7,()=>'Shop at the Con Store',()=>{if(S.ch<2)return run([N('"Opening tomorrow!" says a sign. The shopkeeper waves a price gun at you menacingly.')],hub);if(!S.unl.cred)return run([{unlock:'cred'}],()=>shop());shop()});
- [['STICKERS','A sticker that says "I\'m not a hacker, I just read the logs." You feel seen.'],['LOCK PICKS','Tension wrenches, rakes, a lock shaped like a heart. The vendor winks. You don\'t know why.'],['LEDs & BADGES','A badge that plays Snake. A badge that plays Doom. A badge that is just a very bright light.'],['SUSPICIOUS USB CABLES','"Totally normal cables," says the sign. The vendor is wearing sunglasses. You keep walking.'],['LANYARDS ONLY','He sells lanyards. Only lanyards. He seems at peace.'],['T-SHIRTS','"There\'s no place like 127.0.0.1." You\'ve seen four people wearing it already.'],['KEYBOARDS','Someone types on a keyboard so loud it sounds like popcorn. They look extremely happy.'],['BOOKS & ZINES','A zine titled "So You Got Doxxed". It\'s selling very well this weekend.'],['RETRO COMPUTERS','A beige machine from 1989 boots up with a noise like a jet engine. A crowd gathers in reverence.']].forEach((s,i)=>{const cx=-2+(i%3)*9,cz=-31+Math.floor(i/3)*7;if(i!==0)int('con',cx,cz+.9,()=>'Browse: '+s[0].toLowerCase(),N1(s[1]))});
- int('con',34,-25,()=>'Strike a pose on the runway',N1('You stand at the end of the runway and pose. Nobody is watching. It still feels amazing. A tape mark on the floor says "WINGS NEED 3M CLEARANCE".'),{y:.6});
- int('con',-6,19.1,()=>'Practise on the pegboard locks',()=>{const k='peg'+S.ch;if(S.room[k])return run([N('Your fingers are sore. Maybe next chapter.')],hub);S.room[k]=1;run([N('You pick a padlock off the pegboard and get to work.'),{game:'timing',kind:'pins',n:3}],hub)});
- int('con',9,21,()=>'Read the scoreboard',N1('KERNEL (ada) is third. A team called "dave_hax" has forty points and a very aggressive logo.'));
- int('con',23,21,()=>'Watch the dashboards',N1('Graphs, alerts, a map of every Wi-Fi network in the building. One flashes red: ROGUE AP: "CTRLALTCON". It\'s been flashing for days.'));
- int('con',37,13.6,()=>'Stare into a lava lamp',N1('The blob rises. The blob falls. You lose four minutes and gain inner peace.'));
- int('con',-34.8,12.5,()=>'Talk to reception',N1('"Room 1337? Ah. Thirteenth floor. You\'re the third person to ask if we did that on purpose." They don\'t answer the question.'));
- int('con',-14.9,24,()=>'Call the lift',()=>liftMenu());int('con',-14.9,28,()=>'Call the lift',()=>liftMenu());
- int('con',-61.2,22,()=>'Watch the bar TV',()=>run([N(S.ch>=3?'Breaking news ticker: "Questions grow over popular privacy app." The whole bar goes quiet to read it.':'A muted football match. Somebody has changed the subtitles to Linux error messages.')],hub));
- int('con',-57,12.9,()=>'Solder practice station',()=>{const k='sol'+S.ch;if(S.room[k])return run([N('The volunteer shakes her head. "Let the iron cool. Come back later."')],hub);S.room[k]=1;run([T('Volunteer','Free solder lesson! Make a little LED badge. Mind your fingers.'),{game:'timing',kind:'solder',n:3}],hub)},{y:5.2});
- int('con',-51,7.2,()=>'Watch the LED wall',N1('Thousands of LEDs cycling through Conway\'s Game of Life. Someone has built a glider gun that spells "BE EXCELLENT".'),{y:5.2});
- int('con',-41,26,()=>'Badge hacking table',N1('Tables of con badges with their guts out. A teenager has made hers play the con\'s theme tune in eight-bit. You clap. She bows.'),{y:5.2});
- int('con',-35,39.2,()=>'Look at the big sign',N1('CTRL+ALT+CON, in letters taller than you. Somebody has stuck a tiny sticker over the Lumen logo at the bottom. It says "no".'));
- int('con',-24,51,()=>'Hail a taxi',N1('The driver leans out. "Leaving already?" You think about it. No. Not yet. Not with everything going on.'));
- int('con',59,-.6,()=>'Toss a credit in the fountain',()=>run([N(S.cred>0?'You toss a con credit in. You wish for a good keynote. A pigeon watches, judgementally.':'You don\'t have any credits. You wish anyway.'),...(S.cred>0?[FX({cred:-1})]:[])],hub),{y:-1.2});
- int('con',-1,53,()=>'Order noodles',N1('Noodles in a cardboard box. They\'re incredible. It might just be that you haven\'t eaten since yesterday.'));
- int('con',4,53,()=>'Order pizza',N1('"Any toppings?" "Not pineapple." "Correct answer. We\'ve had incidents."'));
- int('con',9,53,()=>'Order tacos',N1('Three tacos. One falls apart instantly. Classic.'));
- int('con',14,53,()=>'Buy a Club-Mate',N1('Cold, fizzy, faintly bitter. You can feel your neurons applauding.'));
- int('con',-2,18.6,()=>'Sit in on the workshop',()=>{const k='ws'+S.ch;if(S.room[k])return run([N('The speaker is answering a question that is really a forty-minute statement. You slip back out.')],hub);S.room[k]=1;run([N(pick(['"Threat Modelling for People Who Hate Meetings." Step one: who wants your stuff? Step two: what happens if they get it? You take notes.','A live demo: the speaker finds four people\'s home towns from one holiday photo. The room goes very quiet.','"Your password manager is the one egg basket worth having." Somebody in the front row applauds alone.'])),FX({skill:2})],hub)},{y:5.2});
- int('con',-13,8,()=>'Grab a free coffee',N1('Free coffee from a vacuum flask. It tastes like the inside of a server rack. You drink all of it.'),{y:5.2});
- int('con',30.6,12.4,()=>'Play OUTRUN.EXE',()=>{const k='arc'+S.ch;if(S.room[k])return run([N('You put your last coin in. You crash on the first corner. The machine plays a sad little tune.')],hub);S.room[k]=1;run([N('You grip the wheel. Neon palm trees. A synth soundtrack that sounds like 1987 dreaming of the future. You take first place and a little ticket printer chatters.'),FX({cred:3})],hub)},{y:5.2});
- int('con',20,20.4,()=>'Watch the high-score screen',N1('KERNEL. KERNEL. KERNEL. KERNEL. One entry, all the way at the bottom: "dave_hax, 12 points". It\'s been there for three years.'),{y:5.2});
- int('con',42.6,7.7,()=>'Buy a drink from the vending machine',()=>run([N(S.cred>0?'The machine thinks about it, then drops a Club-Mate with a clunk. One credit well spent.':'You pat your pockets. No credits. The machine glows at you, unbothered.'),...(S.cred>0?[FX({cred:-1})]:[])],hub),{y:5.2});
- int('con',16,1.6,()=>'Look down at the concourse',N1('From halfway up the stairs you can see the whole con: lanyards, laptops, a man carrying eleven pizza boxes and walking like he\'s defusing them.'),{y:2.6});
- // hotel
- int('f13',201.4,0,()=>'Call the lift',()=>liftMenu());
- int('f13',259.2,0,()=>S.f.roof_open?null:'Roof door',N1('Locked, and taped off: STAFF ONLY. The handle\'s been oiled recently, though. Interesting.'),{y:3.6});
- int('f13',214.7,-1,()=>'Ice machine',N1('It makes a noise like a dial-up modem, then dispenses one ice cube. You treasure it.'));
- int('f13',244.6,8.2,()=>'Use your laptop',()=>room());
- int('f13',238.6,7,()=>S.ch===2?'Go to bed (end Day 2)':S.ch===3?'Get ready: everyone\'s coming over (Night 3)':'Lie on the bed',()=>{if(S.ch===2||S.ch===3)return advance();run([N('The bed crunches. You stare at the ceiling for a bit. It\'s weirdly restful.')],hub)});
- int('f13',241.5,11,()=>'Look out of the window',N1('The city glitters. Somewhere out there, Proof is closed for the night, and a tiny person in a cape is drawn on a stack of empty bags.'));
- int('f13',244.5,10.85,()=>'Open the minibar',N1('£9 for a Toblerone. You close the minibar with respect.'));
- int('f13',243.2,3,()=>'Look at the bathtub',()=>run([N(S.ch>=4?'Still full of everyone\'s phones from last night. Priya\'s bathtub Faraday zone. It\'s a monument now.':'A bathtub. Clean. Suspiciously crunchy towel.')],hub));
- int('f13',299,0,()=>'Look over the edge',N1('Thirteen floors down, the street glows. Up here the wind is loud enough that nobody could listen in. That\'s probably the point.'),{y:3.6});
- int('f13',214.5,7,()=>'Look through the telescope',N1('Pointed at the sky, it shows stars. Pointed at the office tower across the road, it shows a man eating cereal at his desk at midnight. You point it back at the stars.'),{y:3.6});
- int('f13',261,1.6,()=>S.clues.includes('device')?'The spot where the sniffer was':null,N1('Just tape marks now, under the door frame. Someone took the box. Someone with silver hair, probably.'),{y:3.6});
- int('f13',244,-14.6,()=>'Sit on a lounger',N1('You lie back. The city hums. For a minute, there is no con, no Lumen, no WHISPER. Just sky.'),{y:3.6});
-}
-function liftMenu(){
- const here=WD.reg;
- run([{hide:1},N('The lift arrives with a soft ding. Muzak. A mirror. You look tired, but in a cool way.'),C(
-  {t:'Ground floor · Lobby',if:()=>here!=='con',then:()=>{fadeTp(()=>teleport('con',-16.2,26,Math.PI/2,0));return[]}},
-  {t:'13th floor · Room 1337',if:()=>here!=='f13',then:()=>{fadeTp(()=>teleport('f13',202,0,-Math.PI/2,0));return[]}},
-  {t:'Stay here',then:[]})],hub);
-}
-function fadeTp(fn){const f=$('fade');sfx('whoosh');f.classList.add('on');setTimeout(()=>{fn();WD.area=null;setTimeout(()=>f.classList.remove('on'),120)},260)}
-/* ---------- characters ---------- */
-function charAct(c){
- const id=c.id;
- if(id==='bea'&&S.ch===1)return advance();
- if(id==='marge'){if(S.ch===4)return advance();return run([L('marge','n',pick(['Be excellent to each other. And hydrate.','If you see Lumen people in the ceiling, tell me. I\'m only half joking.','Twenty years of this con. It still makes me cry at the closing.','Don\'t trust the Wi-Fi. I\'ve told everyone. Nobody listens.']))],hub)}
- if(id==='victor')return run([L('victor',S.ch>=3?'a':'s',pick(S.ch>=3?['Not now.','I don\'t talk to "researchers" without legal present.','You\'re one of Marge\'s little friends, aren\'t you?']:['Have you installed SafeSphere? It\'s free. Privacy should be free.','Lumen is proud to support the community. Truly.','Do you know who I am? Good. Then you know I\'m busy.']))],hub);
- if(id==='dave'){
-  if(daveReady())return run([...DAVE[S.stage.dave].sc(),()=>{S.stage.dave++;return[]}],hub);
-  return run([L(S.ch>=2?'davex':'dave',S.ch>=2?'n':'h',pick(S.ch<2?['Bro. Ten million downloads. Ten. Million.','Want a stress ball? It has a QR code. Don\'t scan it. Or do. I don\'t know what it does.']:S.f.dave_helped?['Two-factor on everything now, bro. I\'m basically Priya.','I deleted all my boarding passes. I feel naked. In a good way.']:['I\'m hiding. From pizza delivery drivers.','Bro, everything in my inbox looks like a scam now.']))],hub);
- }
- if(id==='ellie'&&S.ch===0){if(!S.f.ch0b)return run(CH0B(),()=>{S.f.ch0b=1;hub()});return run([L('ellie','h',pick(['Go to work! You\'ll be late. Again.','Go on. Shoo. Fix some printers.']))],hub)}
- if(ROM.includes(id)){
-  if(sceneReady(id)){const R=ROUTES[id];return run(R.scenes[S.stage[id]](),()=>{if(S.f.hold){delete S.f.hold}else S.stage[id]++;hub()})}
-  const a=areaAt(c.reg,c.x,c.z,c.y);return hang(id,a?AREAS[a].bg:'con');
- }
-}
 /* ---------- areas ---------- */
-function areaAt(reg,x,z,y){let best=null;for(const k in AREAS){const a=AREAS[k];if(a.reg!==reg)continue;const r=a.r;if(x>=r[0]&&x<=r[2]&&z>=r[1]&&z<=r[3]&&y>=a.y0&&y<=a.y1){if(a.sub)return k;if(!best)best=k}}return best}
+/* the most specific area wins: 'sub' areas first, then the smallest rectangle (a café inside a lobby, a food court inside the courtyard) */
+function areaAt(reg,x,z,y){let best=null,bs=1e18;for(const k in AREAS){const a=AREAS[k];if(a.reg!==reg)continue;const r=a.r;if(x>=r[0]&&x<=r[2]&&z>=r[1]&&z<=r[3]&&y>=a.y0&&y<=a.y1){const sz=(r[2]-r[0])*(r[3]-r[1])/(a.sub?1e6:1);if(sz<bs){bs=sz;best=k}}}return best}
 function teleport(reg,x,z,yaw,y){G.poolReg=null;G.atmoInit=false;WD.reg=reg;WD.x=x;WD.z=z;WD.yaw=yaw;WD.pit=0;WD.y=y||0;WD.vy=0;WD.vx=WD.vz=0;WD.eye=WD.y+1.62}
 function teleportArea(k){const a=AREAS[k];if(!a)return;teleport(a.reg,a.sp[0],a.sp[1],a.sp[2],a.sp[3]||0)}
-function worldBG(k){if(!(S&&S.inWorld&&G.ok)||!BG2AREA[k])return false;const cur=WD.area;if(!(cur&&(AREAS[cur].bg===k||BG2AREA[k]===cur)))teleportArea(BG2AREA[k]);return true}
+function worldBG(k){if(!(S&&S.inWorld&&G.ok)||!BG2AREA[k])return false;const cur=areaAt(WD.reg,WD.x,WD.z,WD.y);if(!(cur&&(AREAS[cur].bg===k||BG2AREA[k]===cur)))teleportArea(BG2AREA[k]);return true}
 /* ---------- physics ---------- */
 function heightAt(reg,x,z,cy){const L=G.regions[reg].shash[Math.floor(x/4)+','+Math.floor(z/4)]||[];let best=-1e9;
  for(const s of L){if(x<s.x0||x>s.x1||z<s.z0||z>s.z1)continue;let h=s.y;if(h===undefined){const t=s.ax==='x'?(x-s.x0)/(s.x1-s.x0):(z-s.z0)/(s.z1-s.z0);h=s.ya+(s.yb-s.ya)*t}if(h<=cy+.62&&h>best)best=h}
  return best>-1e9?best:null}
 function blockedAt(reg,x,z,y,r){const H=G.regions[reg].hash,a=y+.4,b=y+1.75;
  for(let gx=Math.floor((x-r)/4);gx<=Math.floor((x+r)/4);gx++)for(let gz=Math.floor((z-r)/4);gz<=Math.floor((z+r)/4);gz++){const L=H[gx+','+gz];if(!L)continue;for(const q of L){if(x+r>q[0]&&x-r<q[2]&&z+r>q[1]&&z-r<q[3]&&q[5]>a&&q[4]<b)return true}}
+ if(gateClosedAt(reg,x,z,y,r))return true;
  for(const d of DYN){if(d.reg!==reg||!d.when())continue;const q=d.b;if(x+r>q[0]&&x-r<q[2]&&z+r>q[1]&&z-r<q[3]&&q[5]>a&&q[4]<b)return true}
  const h=heightAt(reg,x,z,y);if(h===null)return true;
  return false}
@@ -168,20 +30,22 @@ function setupInput(){
  addEventListener('blur',()=>{WD.keys={}});
  document.addEventListener('pointerlockerror',()=>{if(!WD.clickLock)return;WD.clickLock=false;WD.lockFails=(WD.lockFails||0)+1;if(WD.lockFails>=3&&!WD.everLocked){WD.noLock=true;$('lockHint').innerHTML='<b>Drag</b> to look around'}});
  document.addEventListener('pointerlockchange',()=>{
-  WD.locked=document.pointerLockElement===tz;
+  WD.locked=document.pointerLockElement===lockEl();
   if(WD.locked){WD.everLocked=true;WD.lockFails=0;return}
   const self=WD.selfUnlock;WD.selfUnlock=false;
   // Esc released the mouse: that's the "open phone" key
-  if(!self&&S&&S.inWorld&&worldLive())phone();
+  if(!self&&S&&S.inWorld&&(worldLive()||$('vn').classList.contains('on')))phone();
  });
  // only explicit clicks count towards the 'pointer lock is impossible here' fallback (e.g. a sandboxed iframe)
  tz.addEventListener('click',()=>{if(WD.touch||!worldLive())return;WD.clickLock=true;tryLock()});
- $('lockHint').addEventListener('click',()=>{if(!WD.touch&&worldLive()){WD.clickLock=true;tryLock()}});
+ // step back in automatically: any click or key in the world re-captures the mouse (no "click to play" prompt)
+ addEventListener('mousedown',()=>{if(S&&S.inWorld&&!WD.touch&&!locked()&&(worldLive()||$('vn').classList.contains('on'))&&!$('ov').classList.contains('phoneov'))tryLock()},true);
+ addEventListener('keydown',e=>{if(e.key==='Escape'||e.key==='p'||e.key==='P'||e.key==='Tab')return;if(S&&S.inWorld&&!WD.touch&&!locked()&&worldLive())tryLock()},true);
  let drag=null;
  tz.addEventListener('mousedown',e=>{if(WD.noLock)drag=[e.clientX,e.clientY]});
  addEventListener('mouseup',()=>drag=null);
  addEventListener('mousemove',e=>{if(!worldLive()||WD.touch)return;
-  if(document.pointerLockElement===tz)look(e.movementX,e.movementY,.0022);
+  if(locked())look(e.movementX,e.movementY,.0022);
   else if(drag&&WD.noLock){look(e.clientX-drag[0],e.clientY-drag[1],.0045);drag=[e.clientX,e.clientY]}});
  const joyCenter=()=>{const r=$('joy').getBoundingClientRect();return[r.left+r.width/2,r.top+r.height/2,r.width/2]};
  const tStart=e=>{setTouch(true);for(const t of e.changedTouches){
@@ -195,7 +59,7 @@ function setupInput(){
  tz.addEventListener('touchstart',tStart,{passive:false});tz.addEventListener('touchmove',tMove,{passive:false});tz.addEventListener('touchend',tEnd);tz.addEventListener('touchcancel',tEnd);
  $('actBtn').addEventListener('click',e=>{e.stopPropagation();doInteract()});
 }
-function tryLock(){if(WD.touch||WD.noLock)return;const tz=$('tzone');if(document.pointerLockElement===tz)return;try{const p=tz.requestPointerLock&&tz.requestPointerLock();if(p&&p.catch)p.catch(()=>{})}catch(e){}}
+function tryLock(){if(WD.touch||WD.noLock)return;const el=lockEl();if(document.pointerLockElement===el)return;try{const p=el.requestPointerLock&&el.requestPointerLock();if(p&&p.catch)p.catch(()=>{})}catch(e){}}
 function setTouch(on){WD.touch=on;document.body.classList.toggle('touchui',on);document.body.classList.toggle('desk',!on)}
 /* dx>0 (mouse/finger moves right) turns right; dy<0 (moves up) looks up. Never inverted. */
 function look(dx,dy,k){const s=lookSens();WD.yaw-=dx*k*s;WD.pit=clamp(WD.pit-dy*k*s,-1.25,1.25)}
@@ -209,7 +73,7 @@ function update(dt){
  let run=K.shift;
  if(WD.joy){const R=52,d=Math.hypot(WD.joy.dx,WD.joy.dy);if(d>7){const mag=Math.min(1,(d-7)/(R-7)),c=mag*mag*.35+mag*.65;f=-WD.joy.dy/d*c;r=WD.joy.dx/d*c;if(d>R*.92)run=true}}
  const m=Math.hypot(f,r);if(m>1){f/=m;r/=m}
- const spd=run?5.4:3.1;
+ const spd=run?6.6:3.9;
  const fx=-Math.sin(WD.yaw),fz=-Math.cos(WD.yaw),rx=Math.cos(WD.yaw),rz=-Math.sin(WD.yaw);
  const tvx=(fx*f+rx*r)*spd,tvz=(fz*f+rz*r)*spd;
  const acc=Math.min(1,dt*(WD.ground?11:2.5));WD.vx+=(tvx-WD.vx)*acc;WD.vz+=(tvz-WD.vz)*acc;
@@ -245,11 +109,13 @@ function visibleChars(){return WCH.filter(c=>c.reg===WD.reg&&c.when())}
 function candidates(){
  const L=[];
  for(const c of visibleChars()){const story=(c.id==='bea'&&S.ch===1)||(c.id==='marge'&&S.ch===4);const nm=CH[c.spr?c.spr():c.id].name;
-  let lbl=story?(c.id==='bea'?'End Day 1: order a drink from Bea':'Tell Marge you\'re ready for the keynote'):(ROM.includes(c.id)&&!S.f['met_'+c.id]?'Talk to the '+({nyx:'woman picking locks',ada:'person at the CTF table',priya:'woman by the dashboards',juno:'streamer',kit:'cosplayer',mira:'woman on the air-con unit'}[c.id]||'stranger'):'Talk to '+nm);
+  let lbl=story?(c.id==='bea'?'End Day 1: order a drink from Bea':'Tell Marge you\'re ready for the keynote'):(ROM.includes(c.id)&&c.id!=='ellie'&&!S.f['met_'+c.id]?'Talk to the '+({nyx:'woman picking locks',ada:'person at the CTF table',priya:'woman by the dashboards',juno:'streamer',kit:'cosplayer',mira:'woman on the air-con unit'}[c.id]||'stranger'):'Talk to '+nm);
   if(c.id==='dave'&&daveReady())lbl='Talk to Dave';
   L.push({x:c.x,z:c.z,y:c.y||0,label:lbl,act:()=>charAct(c),r:2.4,col:CH[c.id].col,kind:'talk'})}
- for(const n of WD.npcs)if(n.reg===WD.reg)L.push({x:n.x,z:n.z,y:n.y,label:n.role==='Doorman'?'Chat with the doorman':'Chat with an attendee',act:()=>npcTalk(n),r:2,kind:'talk',col:'#9a98a6'});
+ for(const n of WD.npcs)if(n.reg===WD.reg)L.push({x:n.x,z:n.z,y:n.y,label:n.role?({Doorman:'Chat with the doorman',Volunteer:'Talk to a volunteer',Info:'Ask at the info desk',Receptionist:'Talk to the receptionist',Barista:'Talk to the barista',Security:'Talk to the guard',Engineer:'Talk to an engineer',Commuter:'Chat with a commuter',Coworker:'Chat with a coworker',Partygoer:'Talk to a partygoer'})[n.role]||'Talk':(n.reg==='office'?'Chat with a coworker':n.reg==='station'?'Chat with a commuter':'Chat with an attendee'),act:()=>npcTalk(n),r:2,kind:'talk',col:'#9a98a6'});
  for(const i of INTS)if(i.reg===WD.reg){const lb=i.label();if(lb)L.push({x:i.x,z:i.z,y:i.y,label:lb,act:i.act,r:i.r})}
+ // closed gates: the point on the gate nearest to you
+ for(const g of GATES)if(g.reg===WD.reg&&!g.open()){const dx=g.x1-g.x0,dz=g.z1-g.z0,l2=dx*dx+dz*dz||1,t=clamp(((WD.x-g.x0)*dx+(WD.z-g.z0)*dz)/l2,0,1);L.push({x:g.x0+dx*t,z:g.z0+dz*t,y:g.y,label:g.label,act:()=>gateAct(g),r:2.2,col:'#ff5d73'})}
  return L;
 }
 function interactCheck(){
@@ -259,20 +125,41 @@ function interactCheck(){
  $('world').classList.toggle('near',!!best);
  if(best){p.style.display='flex';$('promptT').textContent=best.label;p.style.borderColor=best.col||'var(--butter)';$('actBtn').style.borderColor=best.col||'var(--butter)';$('actL').textContent=best.kind==='talk'?'Talk':'Use';$('cross').classList.add('hot')}else{p.style.display='none';$('cross').classList.remove('hot')}
 }
-function doInteract(){if(!worldLive()||!WD.near)return;if(document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}const a=WD.near.act;WD.near=null;$('prompt').style.display='none';WD.active=false;WD.keys={};WD.vx=WD.vz=0;a()}
-function npcTalk(n){const pool=n.role==='Doorman'?['Welcome to the hotel. Please don\'t hack the revolving door. Somebody tried yesterday.','Taxis to the left, hackers to the right. Mostly hackers.','I\'ve worked twenty cons. This lot are the politest. And the strangest.']:(NPCLINES[n.ar]||[]).concat(NPCLINES.any,CHLINES[S.ch]||[],CHLINES[S.ch]||[]);run([{w:n.role||'Attendee',np:1,t:pick(pool)}],hub)}
+function doInteract(){if(!worldLive()||!WD.near)return;const a=WD.near.act;WD.near=null;$('prompt').style.display='none';WD.active=false;WD.keys={};WD.vx=WD.vz=0;a()}
+function npcTalk(n){const pool=n.role&&ROLELINES[n.role]?ROLELINES[n.role]:(NPCLINES[n.ar]||[]).concat(n.reg==='con'||n.reg==='f13'?NPCLINES.any.concat(CHLINES[S.ch]||[],CHLINES[S.ch]||[]):[]);run([{w:n.role==='Info'?'Info desk':(n.role||(n.reg==='office'?'Coworker':n.reg==='station'?'Commuter':'Attendee')),np:1,t:pick(pool.length?pool:NPCLINES.any)}],hub)}
 /* ---------- objective ---------- */
 function objective(){
  if(!S)return null;
- if(S.ch===0)return S.f.ch0b?{t:'Head out to work: the bakery\'s front door.',reg:'home',x:-295.5,z:11.2,y:0}:{t:'Go downstairs to Proof for breakfast.',reg:'home',x:-295.5,z:2.2,y:0};
- return{1:{t:'Explore the con. When you\'re ready, end the day at the Hotel Bar.',reg:'con',x:-53,z:14.7,y:0},2:{t:'When you\'re done, head up to Room 1337 for the night.',reg:'f13',x:238.6,z:7,y:0},3:{t:'When you\'re ready: Room 1337. Everyone\'s coming over.',reg:'f13',x:238.6,z:7,y:0},4:{t:'Finish what you started. Then find Marge on the Hall A stage.',reg:'con',x:-24,z:-36.6,y:1.2}}[S.ch]||null;
+ let o=null;
+ if(S.ch===0){
+  if(!S.f.ch0b)o={t:'Go downstairs to Proof for breakfast.',reg:'home',x:-295.5,z:2.2,y:0};
+  else if(!S.f.ch0_work)o=WD.reg==='office'?{t:'Clear the helpdesk queue at your desk.',reg:'office',x:528,z:4.3,y:0}:{t:'Head out to work: the bakery\'s front door.',reg:'home',x:-295.5,z:11.2,y:0};
+  else if(!S.f.ch0_gary)o={t:'Gary from Accounts wants a word.',reg:'office',x:520.6,z:8.6,y:0};
+  else if(!S.f.ch0_eve)o={t:'Head home for the evening: the lifts.',reg:'office',x:516,z:20.9,y:0};
+  else o={t:'Platform 4: board the train to the con.',reg:'station',x:736,z:7,y:0};
+ }else if(S.ch===1){
+  if(!S.f.d1_badge)o={t:'Pick up your badge at Registration.',reg:'con',x:-38.6,z:31,y:0};
+  else if(!S.f.d1_open)o={t:'The opening ceremony is starting. Find a seat in Hall A (north side of the Ring).',reg:'con',x:-5,z:-49.5,y:2.75};
+  else if(!S.f.d1_checkin)o={t:'Check in at the Halcyon Hotel: reception, through the big gap in the Foyer.',reg:'con',x:-80.4,z:7,y:0};
+  else if(!S.f.d1_room)o={t:'Drop your bag in Room 1337 (lifts → 13th floor).',reg:'f13',x:273.6,z:14.2,y:0};
+  else o={t:'Explore the con. When you\'re ready, end the day at the Hotel Bar.',reg:'con',x:-65,z:-35.6,y:0};
+ }else o={2:{t:'When you\'re done, head up to Room 1337 for the night.',reg:'f13',x:273.6,z:14.2,y:0},3:{t:'When you\'re ready: Room 1337. Everyone\'s coming over.',reg:'f13',x:273.6,z:14.2,y:0},4:{t:'Finish what you started. Then find Marge on the Hall A stage.',reg:'con',x:-5,z:-76,y:1.3}}[S.ch]||null;
+ // different building? point at the way there
+ if(o&&o.reg!==WD.reg){
+  if(o.reg==='f13'&&WD.reg==='con')o=Object.assign({},o,{reg:'con',x:-78,z:27.6,y:0});
+  else if(o.reg==='con'&&WD.reg==='f13')o=Object.assign({},o,{reg:'f13',x:243,z:-9.4,y:0});
+  else if(o.reg==='con'&&WD.reg==='station')o=Object.assign({},o,{reg:'station',x:736,z:7,y:0});
+ }
+ return o;
 }
-function newScenes(){const L=[];for(const c of WCH){if(ROM.includes(c.id)&&c.when()&&sceneReady(c.id))L.push({id:c.id,reg:c.reg,x:c.x,z:c.z,y:c.y||0,a:areaAt(c.reg,c.x,c.z,c.y||0)})}if(daveReady()){const c=WCH.find(c=>c.id==='dave'&&c.when());if(c)L.push({id:'dave',reg:c.reg,x:c.x,z:c.z,y:0,a:areaAt(c.reg,c.x,c.z,0)})}return L}
+function newScenes(){if(!S||S.ch<1||!d1('open'))return[];const L=[];for(const c of WCH){if(ROM.includes(c.id)&&c.when()&&sceneReady(c.id))L.push({id:c.id,reg:c.reg,x:c.x,z:c.z,y:c.y||0,a:areaAt(c.reg,c.x,c.z,c.y||0)})}if(daveReady()){const c=WCH.find(c=>c.id==='dave'&&c.when());if(c)L.push({id:'dave',reg:c.reg,x:c.x,z:c.z,y:c.y||0,a:areaAt(c.reg,c.x,c.z,c.y||0)})}return L}
 function updObjective(){const o=objective();const n=S.ch>0?newScenes().length:0;$('objT').textContent=o?o.t:'';$('objN').textContent=n?`${n} new scene${n>1?'s':''} waiting (yellow on the minimap)`:'';$('obj').style.display=o?'block':'none'}
 /* ---------- render ---------- */
 const _c1={r:0,g:0,b:0};
 function storyMark(c){return (c.id==='bea'&&S.ch===1)||(c.id==='marge'&&S.ch===4)||(c.id==='ellie'&&S.ch===0&&!S.f.ch0b)}
-function charSVGKey(c){return c.spr?c.spr():c.id}
+/* how a character currently looks in the world (so hangout portraits match the outfit you just saw) */
+function worldLook(id){if(!S||!G.ok)return id;const c=WCH.find(c=>c.id===id&&c.reg===WD.reg&&c.when());return c?charSVGKey(c):id}
+function charSVGKey(c){if(!c.spr)return c.id;S.look=S.look||{};const k=WCH.indexOf(c)+':'+S.ch;if(!S.look[k])S.look[k]=c.spr();return S.look[k]}
 function render(dt){
  const T=G.T,r=G.r,cv=G.cv,cam=G.cam;
  // resolution (adaptive)
@@ -294,7 +181,7 @@ function render(dt){
  const asp=w/h,vf=clamp(2*Math.atan(Math.tan(.75+WD.fovk*.06)/asp),1.05,1.8);
  cam.fov=vf*180/Math.PI;cam.far=(FAR[WD.reg]||180)+40;cam.updateProjectionMatrix();
  cam.position.set(WD.x+Math.cos(WD.yaw)*sway,WD.eye+bob,WD.z-Math.sin(WD.yaw)*sway);cam.rotation.set(WD.pit,WD.yaw,Math.sin(WD.bob)*.004*Math.min(1,sp/3));
- G.sky.position.copy(cam.position);G.sky.material.uniforms.hz.value.copy(G.fog.color);G.sky.material.uniforms.t.value=performance.now()/1000;
+ G.sky.position.copy(cam.position);const su=G.sky.material.uniforms;su.hz.value.copy(G.fog.color);su.t.value=performance.now()/1000;if(R.day){su.zn.value.setRGB(.12,.3,.75);su.st.value=0}else{su.zn.value.setRGB(.012,.012,.05);su.st.value=1}
  updLights(dt);
  updSprites(dt);
  if(G.composer)G.composer.render(dt);else r.render(G.scene,cam);
@@ -322,10 +209,21 @@ function updSprites(dt){
  for(const d of DYN){const vis=d.reg===WD.reg&&d.when()&&d.spr;
   if(!d.obj){if(!vis)continue;d.obj=cutout(tapeTex(),1.3,2.4,{noShadow:1,glow:.3});G.scene.add(d.obj)}
   d.obj.visible=!!vis;if(vis){d.obj.position.set(d.spr[0],d.spr[2],d.spr[1]);d.obj.rotation.y=yaw}}
+ for(const g of GATES){const vis=g.reg===WD.reg&&!g.open();if(!g.obj){if(!vis)continue;g.obj=gateObj(g);G.scene.add(g.obj)}g.obj.visible=vis}
  if(!G.ring){G.ring=ringObj();G.scene.add(G.ring)}
  const nr=WD.near&&worldLive()?WD.near:null;G.ring.visible=!!nr;
  if(nr){G.ring.position.set(nr.x,(nr.y||0)+.03,nr.z);const s=1+Math.sin(tt*5)*.08;G.ring.scale.set(s,1,s);G.ring.material.opacity=.55+Math.sin(tt*5)*.25}
 }
+/* gate visuals: velvet rope on chrome posts, or a closed door with a card reader */
+function gateObj(g){
+ const T=G.T,grp=new T.Group();G.gm=G.gm||{post:new T.MeshStandardMaterial({color:0xc8ccd6,metalness:.9,roughness:.25}),rope:new T.MeshStandardMaterial({color:0x8a1e3a,roughness:.7}),door:new T.MeshStandardMaterial({map:texObj('door'),roughness:.6}),red:new T.MeshBasicMaterial({color:new T.Color(3,.4,.5)})};
+ const dx=g.x1-g.x0,dz=g.z1-g.z0,L=Math.hypot(dx,dz)||.01,ang=Math.atan2(dz,dx);
+ if(g.kind==='rope'){const n=Math.max(1,Math.round(L/2.4));
+  for(let i=0;i<=n;i++){const t=i/n,p=new T.Mesh(new T.CylinderGeometry(.045,.06,1,10),G.gm.post);p.position.set(g.x0+dx*t,g.y+.5,g.z0+dz*t);grp.add(p);const b=new T.Mesh(new T.CylinderGeometry(.16,.18,.04,14),G.gm.post);b.position.set(p.position.x,g.y+.02,p.position.z);grp.add(b)}
+  for(let i=0;i<n;i++){const t=(i+.5)/n,seg=L/n,r=new T.Mesh(new T.BoxGeometry(seg,.05,.05),G.gm.rope);r.position.set(g.x0+dx*t,g.y+.86,g.z0+dz*t);r.rotation.y=-ang;grp.add(r)}}
+ else{const h=g.kind==='card'||g.label==='The bar'?2.6:2.4,d=new T.Mesh(new T.BoxGeometry(L,h,.08),G.gm.door);d.position.set((g.x0+g.x1)/2,g.y+h/2,(g.z0+g.z1)/2);d.rotation.y=-ang;grp.add(d);
+  if(g.kind==='card'){const r=new T.Mesh(new T.BoxGeometry(.12,.18,.14),G.gm.red);r.position.set(d.position.x,g.y+1.25,d.position.z);r.rotation.y=-ang;r.translateX(L/2+.15);grp.add(r)}}
+ return grp}
 function tapeTex(){if(G.tape)return G.tape;const c=document.createElement('canvas');c.width=128;c.height=256;const x=c.getContext('2d');for(let i=0;i<3;i++){x.save();x.translate(64,70+i*50);x.rotate(i%2?.18:-.18);x.fillStyle='#ffd166';x.fillRect(-64,-12,128,24);x.fillStyle='#1b1026';x.font='bold 15px sans-serif';x.textAlign='center';x.fillText('STAFF ONLY',0,6);x.restore()}const t=new G.T.CanvasTexture(c);t.colorSpace=G.T.SRGBColorSpace;return G.tape=t}
 /* ---------- maps ---------- */
 function levelOf(reg,y){const L=LEVELS[reg]||[[0,'']];let b=L[0][0];for(const l of L)if(l[0]<=y+1.2)b=l[0];return b}
@@ -378,7 +276,7 @@ function loop(t){
  if(!window.__nr&&(!behind||G.skip%4===0||G.forceFrame)){G.forceFrame=false;render(behind?dt*4:dt)}
  if(live){adaptRes(dt);}
  $('mini').style.display=S.unl.map?'block':'none';
- document.body.classList.toggle('unlocked',live&&!WD.touch&&!WD.locked);
+ vcShow(vcActive());
  if(live){if(t-icT>66){icT=t;interactCheck()}if(t-mmT>90&&S.unl.map){mmT=t;drawMapCanvas($('mini'),WD.reg,{mini:1,sc:3})}}
  if(typeof audioTick==='function')audioTick(dt);
 }

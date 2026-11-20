@@ -82,13 +82,14 @@ function hang(g,k){
  const key=S.ch+g;
  opts.push({t:'Talk shop',hint:S.hang[key]?'Already did that this chapter':'Quiz · once per chapter',if:()=>!S.hang[key],then:()=>{S.hang[key]=1;return[{unlock:'hang'},{game:'quiz',who:g,n:3}]}});
  const gi=Object.keys(ITEMS).find(i=>ITEMS[i].g===g);
- if(gi&&S.inv[gi]&&!S.gifted[g])opts.push({t:'Give the '+ITEMS[gi].n,then:()=>{S.inv[gi]--;if(!S.inv[gi])delete S.inv[gi];S.gifted[g]=1;return[FX({[g]:15}),L(g,'b',GIFTLINE[g])]}});
- opts.push({t:'Just hang out for a bit',then:()=>[L(g,'h',pick(CHAT_IDLE[g]))]});
+ if(gi&&S.inv[gi]&&!S.gifted[g])opts.push({t:'Give the '+ITEMS[gi].n,then:()=>{S.inv[gi]--;if(!S.inv[gi])delete S.inv[gi];S.gifted[g]=1;return[FX({[g]:15}),L(pg,'b',GIFTLINE[g])]}});
+ const pg=typeof worldLook==='function'?worldLook(g):g;
+ opts.push({t:'Just hang out for a bit',then:()=>[L(pg,'h',pick(CHAT_IDLE[g]))]});
  opts.push({t:'Leave',then:[]});
  let note='';
  if(st<R.scenes.length){if(S.ch<R.req[st])note=' (Their story continues in a later chapter.)';else note=` (Their next scene opens at ♥ ${R.aff[st]}. You\'re at ${S.aff[g]}.)`}
  else note=' (You\'ve seen all their scenes.)';
- run([{bg:k},L(g,'n',R.idle[1]),N(R.idle[0]+note),C(...opts)],hub);
+ run([{bg:k},L(pg,'n',R.idle[1]),N(R.idle[0]+note),C(...opts)],hub);
 }
 const GIFTLINE={ellie:'A proofing basket! A real rattan one! I\'m going to cry into my sourdough.',nyx:'A clear practice set... for me? I\'m going to pretend this isn\'t the best present I\'ve had in years.',ada:'An ESC keycap. The most important key. You understand me on a molecular level.',priya:'A privacy screen. Nobody has ever given me something this thoughtful. Shoulder surfers, beware.',juno:'Holo stickers! My laptop lid has one empty spot and it\'s YOURS.',kit:'A whole reel of addressable LEDs?! Do you know what I can BUILD with this?',rin:'A metre-long gummy worm. You\'ve reverse-engineered my heart. That\'s a crime, by the way.',bea:'A hacker zine. With drawings. You... noticed I draw. Thank you.',mira:'A cipher wheel. Analogue. Unhackable. You pay attention.'};
 const CHAT_IDLE={
@@ -347,7 +348,7 @@ function startCh0(){
  initWorld();
  if(!G.ok){run(CH0ALL(),()=>{S.ch=1;S.resume='open';save();run(OPEN[1](),hub)});return}
  S.inWorld=1;teleportArea('flat');
- run(CH0(),()=>{save();run([{unlock:'move'}],hub)});
+ run(CH0(),()=>{S.f.ch0intro=1;save();run([{unlock:'move'}],hub)});
 }
 $('hIn').addEventListener('keydown',e=>{if(e.key==='Enter')$('bGo').click()});
 $('bCont').onclick=()=>{const s=readSlot('auto');if(s&&s.h)resumeGame(s)};

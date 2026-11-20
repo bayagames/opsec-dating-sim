@@ -42,10 +42,13 @@ function savesScreen(){
 function resumeGame(s){
  S=s;closeOv();$('ov').classList.remove('phoneov');
  if(!S.msgs)S.msgs=[];if(!S.log)S.log=[];
- if(S.resume==='ch0'||S.ch===0&&!G.ok){const h=S.h;S=fresh(h);S.resume='ch0';startCh0();return}
+ // saves from before the map rebuild: positions point at the old layout, and Day 1 was a cutscene
+ if(S.mapv!==2){S.pos=null;if(S.ch>=1&&S.resume!=='open')for(const k of['badge','open','checkin','room'])S.f['d1_'+k]=1;if(S.ch===0)S.resume='ch0';S.mapv=2}
+ if(S.ch===0&&(!G.ok||!S.f.ch0intro)){const h=S.h;S=fresh(h);S.resume='ch0';startCh0();return}
  initWorld();
- if(S.pos&&G.ok&&G.regions[S.pos[0]])teleport(S.pos[0],S.pos[1],S.pos[2],S.pos[3],S.pos[4]||0);else if(G.ok)teleportArea(S.ch===0?'flat':'concourse');
+ if(S.pos&&G.ok&&G.regions[S.pos[0]])teleport(S.pos[0],S.pos[1],S.pos[2],S.pos[3],S.pos[4]||0);else if(G.ok)teleportArea(S.ch===0?'flat':S.ch===1&&!S.f.d1_badge?'vestibule':'foyer');
  WD.area=null;save();
  if(S.resume==='open'){run(OPEN[S.ch](),hub);return}
  hub();
 }
+

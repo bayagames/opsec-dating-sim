@@ -9,9 +9,10 @@ const ICON={
  bag:['#ffb347','<path d="M8 12h16l-1.5 14h-13z" fill="#1b1026"/><path d="M12 12a4 4 0 0 1 8 0" fill="none" stroke="#1b1026" stroke-width="2.4"/>'],
  saves:['#8affc1','<path d="M8 6h13l4 4v16H8z" fill="none" stroke="#1b1026" stroke-width="2.4" stroke-linejoin="round"/><path d="M11 6v6h9V6M11 26v-7h10v7" fill="none" stroke="#1b1026" stroke-width="2.2"/>'],
  log:['#bba8cf','<path d="M8 7h16v18H8z" fill="none" stroke="#1b1026" stroke-width="2.4"/><path d="M11 12h10M11 16h10M11 20h6" stroke="#1b1026" stroke-width="2"/>'],
+ quit:['#ff5d73','<path d="M16 6v9" stroke="#1b1026" stroke-width="3" stroke-linecap="round"/><path d="M10.5 9.5a8.5 8.5 0 1 0 11 0" fill="none" stroke="#1b1026" stroke-width="2.8" stroke-linecap="round"/>'],
  settings:['#d9d4cc','<circle cx="16" cy="16" r="4.5" fill="none" stroke="#1b1026" stroke-width="2.6"/><path d="M16 5v4M16 23v4M5 16h4M23 16h4M8.2 8.2l2.8 2.8M21 21l2.8 2.8M8.2 23.8l2.8-2.8M21 11l2.8-2.8" stroke="#1b1026" stroke-width="2.6" stroke-linecap="round"/>']
 };
-const APPN={messages:'Messages',map:'Map',goals:'Goals',hearts:'Hearts',stats:'Stats',evidence:'Evidence',bag:'Bag',saves:'Saves',log:'Log',settings:'Settings'};
+const APPN={messages:'Messages',map:'Map',goals:'Goals',hearts:'Hearts',stats:'Stats',evidence:'Evidence',bag:'Bag',saves:'Saves',log:'Log',settings:'Settings',quit:'Quit'};
 const APPU={messages:'phone',map:'map',goals:'map',hearts:'aff',stats:'skill',evidence:'clues',bag:'cred'};
 const PTIME=['07:12','10:31','11:04','09:47','13:22','16:02','23:48'];
 let phApp=null,phThread=null,phReg=null;
@@ -53,10 +54,12 @@ const APPS={
   return ks.length?ks.map(k=>`<button class="chat" data-f="${esc(k)}">${CH[k]?`<span class="hd">${head(k==='dave'?'davex':k,'n')}</span>`:'<span class="hd"></span>'}<span><b>${esc(CH[k]?CH[k].name:k)}</b><small>${esc(by[k].t)}</small></span></button>`).join(''):'<p class="small">No messages yet.</p>';
  },
  map(){
-  if(S.ch===0)return `<div class="tabs">${LEVELS.home.map(l=>`<button class="${'home:'+l[0]===(phReg||'home:'+levelOf('home',WD.y))?'on':''}" data-r="home:${l[0]}">${l[1]}</button>`).join('')}</div><canvas id="pmap" width="560" height="480"></canvas><p class="small">Home: your flat upstairs, Proof downstairs. No fast travel needed.</p>`;
-  const tabs=[];for(const r of['con','f13'])for(const l of LEVELS[r]){if(r==='f13'&&l[0]>0&&!S.f.roof_open)continue;tabs.push([r+':'+l[0],l[1]])}
-  phReg=phReg||((WD.reg==='home'?'con':WD.reg)+':'+levelOf(WD.reg==='home'?'con':WD.reg,WD.y));
-  const vis=Object.values(AREAS).filter(a=>a.reg!=='home'&&!a.hide&&S.visited&&S.visited[a.k]);
+  const V=k=>S.visited&&S.visited[k];
+  if(S.ch===0||WD.reg==='home'||WD.reg==='office'||WD.reg==='station'&&S.ch===0){phReg=phReg||WD.reg+':'+levelOf(WD.reg,WD.y);return `<div class="tabs">${LEVELS[WD.reg].map(l=>`<button class="${WD.reg+':'+l[0]===phReg?'on':''}" data-r="${WD.reg}:${l[0]}">${l[1]}</button>`).join('')}</div><canvas id="pmap" width="560" height="480"></canvas><p class="small">${{home:'Home: your flat upstairs, Proof downstairs.',office:'Brindle & Co. Your desk is the one with the red stapler.',station:'Central Station. Platform 4 is behind the ticket barriers.'}[WD.reg]}</p>`}
+  const tabs=[];for(const r of['con','f13'])for(const l of LEVELS[r]){if(r==='con'&&l[0]<0&&!(S.ch>=2&&(V('carpark')||V('basement')||V('noc')||V('plant'))))continue;if(r==='con'&&l[0]>10&&!V('conroof'))continue;if(r==='f13'&&l[0]>0&&!(V('roof')||V('plantdeck')))continue;tabs.push([r+':'+l[0],(r==='f13'&&!l[0]?'Hotel · ':'')+l[1]])}
+  if(WD.reg==='station')tabs.unshift(['station:0','Station']);
+  phReg=phReg||(WD.reg+':'+levelOf(WD.reg,WD.y));
+  const vis=Object.values(AREAS).filter(a=>a.reg!=='home'&&a.reg!=='office'&&!a.hide&&S.visited&&S.visited[a.k]);
   const can=!$('vn').classList.contains('on');
   return `<div class="tabs">${tabs.map(r=>`<button class="${r[0]===phReg?'on':''}" data-r="${r[0]}">${r[1]}</button>`).join('')}</div><canvas id="pmap" width="560" height="480"></canvas>
   <p class="small">Red arrow: you. Yellow dots: new scenes. Green star: your goal (an arrow means it's on another level). Unvisited rooms show "?".</p>
@@ -88,7 +91,8 @@ const APPS={
   <h4>Controls</h4><label class="sl"><span>Look speed</span><input type="range" min="30" max="250" step="5" value="${Math.round(SETTINGS.sens*100)}" id="sens" style="--p:${Math.round((SETTINGS.sens*100-30)/220*100)}%"><b>${SETTINGS.sens.toFixed(2)}×</b></label>
   <div class="row" style="margin-top:6px"><button class="btn" id="stf">Text: ${S.fast?'instant':'typewriter'}</button></div>
   <p class="small" style="margin-top:12px">Keyboard: WASD or arrows to walk, Shift to run, mouse to look, E to interact, M for map. <b>Esc</b> or <b>P</b> opens this phone and frees the mouse; close it to step back in.<br>Touch: drag the left stick to walk, drag anywhere else to look, tap the prompt to interact. Push the stick all the way to run.</p></div>
-  <p class="small">The game autosaves while you explore. Use the Saves app for save slots and export.</p><div class="row"><button class="btn" id="stq">Quit to title (autosaves)</button></div>`}
+  <p class="small">The game autosaves while you explore. Use the Saves app for save slots and export.</p>`},
+ quit(){return `<div class="set"><h4>Quit to title?</h4><p class="small">Your game autosaves right now, where you're standing. You can pick it up again with Continue.</p><div class="row"><button class="btn pri" id="stq">Quit to title</button><button class="btn" id="stqn">Not yet</button></div></div>`}
 };
 const APPS_AFTER={
  saves(){savesPanel($('spanel'),'phone',drawPhone)},
@@ -98,5 +102,6 @@ const APPS_AFTER={
  settings(){$('stf').onclick=()=>{S.fast=!S.fast;drawPhone()};
   $('ov').querySelectorAll('input[data-v]').forEach(r=>{r.oninput=()=>{const k=r.dataset.v;SETTINGS.vol[k]=r.value/100;r.style.setProperty('--p',r.value+'%');r.nextElementSibling.textContent=r.value;if(typeof applyVolumes==='function')applyVolumes()};r.onchange=()=>{saveSettings();if(r.dataset.v==='sfx'||r.dataset.v==='master')sfx('notify')}});
   const sn=$('sens');sn.oninput=()=>{SETTINGS.sens=sn.value/100;sn.style.setProperty('--p',((sn.value-30)/220*100)+'%');sn.nextElementSibling.textContent=SETTINGS.sens.toFixed(2)+'×'};sn.onchange=saveSettings;
-  $('gq').querySelectorAll('button').forEach(b=>b.onclick=()=>{SETTINGS.gfx=b.dataset.q;saveSettings();if(G.ok)setQuality(b.dataset.q);else G.q=b.dataset.q;drawPhone()});$('stq').onclick=()=>{S.pos=[WD.reg,WD.x,WD.z,WD.yaw,WD.y];save();closeOv();$('ov').classList.remove('phoneov');WD.active=false;titleScreen()}}
+  $('gq').querySelectorAll('button').forEach(b=>b.onclick=()=>{SETTINGS.gfx=b.dataset.q;saveSettings();if(G.ok)setQuality(b.dataset.q);else G.q=b.dataset.q;drawPhone()})},
+ quit(){$('stq').onclick=()=>{S.pos=[WD.reg,WD.x,WD.z,WD.yaw,WD.y];save();closeOv();$('ov').classList.remove('phoneov');WD.active=false;if(document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}titleScreen()};$('stqn').onclick=()=>{phApp=null;drawPhone()}}
 };

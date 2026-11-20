@@ -75,6 +75,8 @@ function paintTextures(){
  tex('slides',512,256,(c,w,h)=>{c.fillStyle='#f6eefc';c.fillRect(0,0,w,h);c.fillStyle='#1b1026';c.font='bold 30px sans-serif';c.fillText('Threat Modelling for',28,56);c.fillText('People Who Hate Meetings',28,92);c.fillStyle='#ff5d73';c.fillRect(28,108,140,6);c.font='18px sans-serif';c.fillStyle='#3a2a4a';['• Who wants your stuff?','• What happens if they get it?','• What will you actually do about it?'].forEach((t,i)=>c.fillText(t,36,150+i*30))});
  tex('vend',128,256,(c,w,h)=>{c.fillStyle='#1a2a5a';c.fillRect(0,0,w,h);c.fillStyle='#0a0f22';c.fillRect(10,16,80,200);for(let y=0;y<6;y++)for(let x=0;x<4;x++){c.fillStyle=['#ffd166','#ff5d73','#8affc1','#7cc4ff','#c9b6ff'][(x+y)%5];c.fillRect(16+x*19,24+y*32,12,22)}c.fillStyle='#ffd166';c.fillRect(96,60,22,12);c.fillStyle='#333';c.fillRect(96,90,22,40)});
  tex('glass',64,64,(c,w,h)=>{c.fillStyle='#9fc4e0';c.fillRect(0,0,w,h);c.fillStyle='#ffffff40';c.fillRect(0,0,w,3)});
+ tex('board',512,64,(c,w,h)=>{c.fillStyle='#07080e';c.fillRect(0,0,w,h);c.font='bold 11px monospace';c.fillStyle='#ffd166';[['09:12','CONFERENCE QUARTER · HALCYON','4','ON TIME'],['09:20','AIRPORT','2','DELAYED'],['09:31','THE COAST','7','ON TIME']].forEach((r,i)=>{c.fillStyle=i?'#ffb347':'#ffd166';c.fillText(r[0],8,18+i*17);c.fillText(r[1],60,18+i*17);c.fillText('PLAT '+r[2],330,18+i*17);c.fillStyle=r[3]==='DELAYED'?'#ff5d73':'#8affc1';c.fillText(r[3],420,18+i*17)})});
+ tex('trainside',512,128,(c,w,h)=>{c.fillStyle='#d9dde6';c.fillRect(0,0,w,h);c.fillStyle='#2a4a8a';c.fillRect(0,92,w,14);c.fillStyle='#ff5d73';c.fillRect(0,106,w,4);for(let x=10;x<w;x+=42){const g=c.createLinearGradient(0,26,0,70);g.addColorStop(0,'#3a4a6a');g.addColorStop(1,'#1a2034');c.fillStyle=g;c.fillRect(x,26,30,44);c.fillStyle='#ffffff30';c.fillRect(x+2,28,8,40)}});
  tex('dark',16,16,(c,w,h)=>{c.fillStyle='#14101a';c.fillRect(0,0,w,h)});
  tex('black',16,16,(c,w,h)=>{c.fillStyle='#000';c.fillRect(0,0,w,h)});
 }
@@ -90,12 +92,12 @@ function mats(){MT={
  wallCon:mt('wallCon',0,.35,0,{r:.85}),wallHotel:mt('wallHotel',0,.5,0,{r:.8}),wallWarm:mt('wallWarm',0,.5,0,{r:.85}),wallPale:mt('wallPale',0,.5,0,{r:.85}),panel:mt('panel',0,.4,0,{r:.6}),ceil:mt('ceil',0,.4,0,{r:.9}),ceilDark:mt('panel','#777777',.4,0,{r:.8}),
  metal:mt('metal',0,.5,0,{r:.35,m:.6}),concrete:mt('concrete',0,.5,0,{r:.9}),grass:mt('grass',0,.4,0,{r:1}),gravel:mt('gravel',0,.5,0,{r:1}),brick:mt('brick',0,.6,0,{r:.9}),pavers:mt('pavers',0,.4,0,{r:.7}),
  linen:mt('linen',0,.5,0,{r:.95}),fabric:c=>mt('fabric',c,.5,0,{r:.95}),plain:c=>mt('white',c),gloss:c=>mt('white',c,.5,0,{r:.3}),glow:(c,k)=>mt('white',c,.5,1,k!==undefined?{k}:{}),
- brass:mt('white','#c9a46a',.5,0,{r:.3,m:.8}),chrome:mt('white','#c8ccd6',.5,0,{r:.2,m:.9}),glass:mt('white','#9fc4e0',.5,1,{k:.22}),
+ brass:mt('white','#c9a46a',.5,0,{r:.3,m:.8}),chrome:mt('white','#c8ccd6',.5,0,{r:.2,m:.9}),glass:mt('white','#bfe0f4',.5,0,{glass:1}),
  water:mt('water',0,.4,1,{k:.85}),leaves:mt('leaves',0,1,0,{cut:1,r:.9}),facade:mt('facade',0,.08,1,{k:.55}),sky:mt('sky',0,.02,1),
  lava:mt('lava',0,1,1,{k:1.6}),bread:mt('bread',0,1,0,{r:.7}),bottles:mt('bottles',0,1,1,{k:.9}),pegs:mt('pegs',0,.6,0,{r:.7}),door:mt('door',0,1,0,{r:.6}),elev:mt('elev',0,1,0,{r:.25,m:.7}),rug:mt('rug',0,.4,0,{r:1}),fan:mt('fan',0,1,0,{r:.6,m:.4}),
  cityview:mt('cityview',0,1,1,{k:.95}),morning:mt('morning',0,1,1,{k:1.15}),code:mt('code',0,1,1,{k:1.3}),dash:mt('dash',0,1,1,{k:1.3}),score:mt('score',0,1,1,{k:1.3}),stream:mt('stream',0,1,1,{k:1.25}),lumen:mt('lumen',0,1,1,{k:1.2}),lumenbanner:mt('lumenbanner',0,1,1,{k:1.15}),keyscreen:mt('keyscreen',0,1,1,{k:1.3}),chalk:mt('chalk',0,1,0,{r:.9}),
  poster:i=>mt('poster'+i,0,1,0,{r:.7}),road:mt('road',0,.25,0,{r:.75}),ledwall:mt('ledwall',0,1,1,{k:1.5}),oven:mt('oven',0,1,1,{k:1.1}),scope:mt('scope',0,1,1,{k:1.3}),
- arcade:mt('arcade',0,1,1,{k:1.4}),arcade2:mt('arcade2',0,1,1,{k:1.4}),slides:mt('slides',0,1,1,{k:1.05}),vend:mt('vend',0,1,1,{k:1.1}),
+ board:mt('board',0,1,1,{k:1.4}),trainside:mt('trainside',0,.5,0,{r:.4}),arcade:mt('arcade',0,1,1,{k:1.4}),arcade2:mt('arcade2',0,1,1,{k:1.4}),slides:mt('slides',0,1,1,{k:1.05}),vend:mt('vend',0,1,1,{k:1.1}),
  frame:mt('white','#2a2026',.5,0,{r:.5}),skirt:mt('white','#1e1724',.5,0,{r:.5}),dark:mt('dark'),black:mt('black',0,1,1)
 }}
 const sign=(text,fg,bg,w,h)=>mt(signTex(text,fg||'#ffd166',bg||'#1b1026',w,h),0,1,1,{k:1.25});

@@ -13,6 +13,8 @@ const CH={
  dave:{name:'Dave',col:'#9be36b',skin:'#f0c8a8',hair:'#8a5a2b',style:'short',eye:'#555',outfit:'hoodie',oc:'#3a7d44',acc:['shades']},
  davex:{name:'Dave',col:'#9be36b',skin:'#f0c8a8',hair:'#8a5a2b',style:'short',eye:'#5a6a3a',outfit:'hoodie',oc:'#3a7d44',acc:[]},
  victor:{name:'Victor Hale',col:'#b0b6c3',skin:'#e8c7ad',hair:'#9aa0aa',style:'slick',eye:'#3a4a5a',outfit:'suit',oc:'#2c3140',acc:['stubble','tie']},
+ linda:{name:'Linda',col:'#d9d4cc',skin:'#e8c7ad',hair:'#5a3a2a',style:'bob',streak:'#5a3a2a',eye:'#3a4a5a',outfit:'blazer',oc:'#4a5a7a',acc:['glasses']},
+ gary:{name:'Gary',col:'#9be36b',skin:'#f0c8a8',hair:'#c2532b',style:'short',eye:'#4a6a3a',outfit:'tee',oc:'#6a7a5a',acc:['freckles']},
  marge:{name:'Marge',col:'#ffd166',skin:'#c98f6e',hair:'#d4d4d4',style:'bun',eye:'#4a3a2a',outfit:'hoodie',oc:'#6b4f8a',acc:['glasses','earring']}
 };
 const ROM=['ellie','nyx','ada','priya','juno','kit','rin','bea','mira'];
@@ -98,8 +100,8 @@ function por(id,x,full){
  o+=`<path d="M70 64 Q100 54 130 64" stroke="#fff" stroke-opacity="${st==='long'?.5:.22}" stroke-width="4" fill="none" stroke-linecap="round"/>`;
  for(const a of c.acc){
   if(a==='glasses')o+=`<g stroke="#2b1d12" stroke-width="2.6" fill="#fff" fill-opacity=".1"><circle cx="82" cy="112" r="15"/><circle cx="118" cy="112" r="15"/></g><path d="M97 111 Q100 107 103 111" stroke="#2b1d12" stroke-width="2.6" fill="none"/>`;
-  if(a==='choker')o+=`<rect x="87" y="154" width="26" height="7" rx="2" fill="#111"/><circle cx="100" cy="164" r="3" fill="#ff3fa4"/>`;
-  if(a==='choker2')o+=`<rect x="87" y="154" width="26" height="6" rx="2" fill="#f6b6d6"/><circle cx="100" cy="164" r="4" fill="#ffd166"/><path d="M97 164 h6" stroke="#b8860b" stroke-width="1"/>`;
+  if(a==='choker')o+=`<rect x="89" y="164" width="22" height="6" rx="2" fill="#111"/><circle cx="100" cy="173" r="2.6" fill="#ff3fa4"/>`;
+  if(a==='choker2')o+=`<rect x="89" y="164" width="22" height="5" rx="2" fill="#f6b6d6"/><circle cx="100" cy="172" r="3.4" fill="#ffd166"/><path d="M97.4 172 h5.2" stroke="#b8860b" stroke-width="1"/>`;
   if(a==='phones')o+=`<path d="M68 180 Q100 200 132 180" stroke="#20242c" stroke-width="6" fill="none"/><rect x="58" y="168" width="18" height="24" rx="7" fill="#2a2f3a"/><rect x="124" y="168" width="18" height="24" rx="7" fill="#2a2f3a"/><circle cx="67" cy="180" r="3" fill="#7cc4ff"/><circle cx="133" cy="180" r="3" fill="#7cc4ff"/>`;
   if(a==='catears')o+=`<path d="M50 96 Q100 22 150 96" stroke="#f4f0ff" stroke-width="7" fill="none"/><path d="M60 62 L50 18 L86 44Z M140 62 L150 18 L114 44Z" fill="#f4f0ff"/><path d="M62 54 L56 30 L76 44Z M138 54 L144 30 L124 44Z" fill="#ff5fb0"/><circle cx="54" cy="112" r="11" fill="#f4f0ff"/><circle cx="54" cy="112" r="5" fill="#ff5fb0"/><circle cx="146" cy="112" r="11" fill="#f4f0ff"/><circle cx="146" cy="112" r="5" fill="#ff5fb0"/>`;
   if(a==='clip')o+=`<rect x="124" y="70" width="20" height="5" rx="2" fill="#8affc1" transform="rotate(-25 134 72)"/><rect x="122" y="80" width="16" height="4" rx="2" fill="#8affc1" opacity=".7" transform="rotate(-25 130 82)"/>`;
@@ -121,7 +123,7 @@ let S;
 const SETTINGS=(()=>{const d={vol:{master:.85,music:.6,amb:.75,sfx:.8},gfx:null,sens:1,fast:false};try{const o=JSON.parse(localStorage.getItem('opsec_settings')||'{}');return Object.assign(d,o,{vol:Object.assign(d.vol,o.vol||{})})}catch(e){return d}})();
 const saveSettings=()=>{try{localStorage.setItem('opsec_settings',JSON.stringify(SETTINGS))}catch(e){}};
 let CURBG=null;
-const fresh=h=>{const z={};ROM.concat(['dave']).forEach(g=>z[g]=0);return{h,ch:0,skill:10,clout:10,exp:5,cred:20,aff:{...z},stage:{...z},hang:{},gifted:{},inv:{},f:{},clues:[],msgs:[],log:[],unl:{},talk:{},room:{},fast:false,ending:null}};
+const fresh=h=>{const z={};ROM.concat(['dave']).forEach(g=>z[g]=0);return{h,ch:0,skill:10,clout:10,exp:5,cred:20,mapv:2,aff:{...z},stage:{...z},hang:{},gifted:{},inv:{},f:{},clues:[],msgs:[],log:[],unl:{},talk:{},room:{},fast:false,ending:null}};
 const CHAP=[['Hello, World','Two weeks before the con'],['Badge In','CTRL+ALT+CON · Day 1'],['Capture the Flag','Day 2'],['Exposure','Day 3'],['Responsible Disclosure','Day 4 · final day'],['Keynote','Day 4 · 4:00 PM'],['0xFF','The afterparty']];
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const LS={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
@@ -173,7 +175,7 @@ function hud(){
  $('phoneBtn').style.display='block';
  $('phoneBtn').innerHTML='Phone<span class="kn" style="margin:0 0 0 6px">P</span>'+(S.msgs.some(m=>!m.r)?'<span class="dot"></span>':'');
 }
-function show(id){document.body.classList.toggle('inworld',id==='world');setTimeout(updBlur,0);document.querySelectorAll('.scr').forEach(s=>s.classList.toggle('on',s.id===id));$('hud').style.display=id==='title'?'none':'flex';$('gl').style.display=(id!=='title'&&S&&S.inWorld&&G.ok)?'block':'none';if(id!=='world'){WD.active=false;if(document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}}}
+function show(id){document.body.classList.toggle('inworld',id==='world');if(id==='title'&&typeof vcShow==='function')vcShow(false);setTimeout(updBlur,0);document.querySelectorAll('.scr').forEach(s=>s.classList.toggle('on',s.id===id));$('hud').style.display=id==='title'?'none':'flex';$('gl').style.display=(id!=='title'&&S&&S.inWorld&&G.ok)?'block':'none';if(id!=='world'){WD.active=false;if((id==='title'||id==='hub')&&document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}}}
 
 /* ============ VN ENGINE ============ */
 let Q=[],onDone=null,typing=null,full='',waiting=false;
@@ -181,7 +183,7 @@ const BG={con:'CTRL+ALT+CON',lock:'LOCKPICK VILLAGE',ctf:'CTF ROOM · SCOREBOARD
 function setBG(k){const w=typeof worldBG==='function'&&worldBG(k);const cls='bg '+(w?'bg-dim':'bg-'+k);if($('bg').className!==cls){$('bg').className=cls;$('bg').classList.add('bgin')}CURBG=k;$('sign').textContent=BG[k]||'';$('sign').style.display=BG[k]?'block':'none';if(w&&G.ok)G.forceFrame=true}
 /* does switching to this background move us somewhere else? (then fade through black) */
 function bgChanges(k){if(k===CURBG||!$('vn').classList.contains('on'))return false;
- if(S&&S.inWorld&&G.ok&&typeof BG2AREA!=='undefined'&&BG2AREA[k]){const cur=WD.area;return !(cur&&(AREAS[cur].bg===k||BG2AREA[k]===cur))}
+ if(S&&S.inWorld&&G.ok&&typeof BG2AREA!=='undefined'&&BG2AREA[k]){const cur=areaAt(WD.reg,WD.x,WD.z,WD.y);return !(cur&&(AREAS[cur].bg===k||BG2AREA[k]===cur))}
  return !!$('txt').textContent}
 function fadeScene(fn){const f=$('fade');if(typeof sfx==='function')sfx('whoosh');f.classList.add('on');setTimeout(()=>{fn();setTimeout(()=>f.classList.remove('on'),90)},300)}
 function updBlur(){const vn=$('vn').classList.contains('on'),o=$('ov').classList.contains('on');document.body.classList.toggle('talking',!!(S&&S.inWorld&&G.ok&&(vn||o)));document.body.classList.toggle('busyov',o&&!$('ov').classList.contains('phoneov'))}
@@ -232,9 +234,9 @@ function tapBox(){
  if(waiting){waiting=false;if(typeof sfx==='function')sfx('advance');next()}
 }
 /* portraits: a new speaker slides in, an expression change just swaps */
-function setPor(id,x){const P=$('por'),html=por(id,x);if(P.dataset.id===id&&P.firstElementChild){P.firstElementChild.outerHTML=html;return}
+function setPor(id,x){const P=$('por'),html=por(id,x);$('vn').classList.add('haspor');if(P.dataset.id===id&&P.firstElementChild){P.firstElementChild.outerHTML=html;return}
  P.dataset.id=id;P.innerHTML=html;const el=P.firstElementChild;if(el){el.classList.add('enter')}}
-function clearPor(){const P=$('por');P.dataset.id='';const el=P.firstElementChild;if(!el){return}P.innerHTML=''}
+function clearPor(){const P=$('por');P.dataset.id='';$('vn').classList.remove('haspor');const el=P.firstElementChild;if(!el){return}P.innerHTML=''}
 $('box').addEventListener('click',tapBox);
 $('box').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();tapBox()}});
 function choose(opts){
@@ -284,6 +286,8 @@ function unlock(k,cb){
 function chapterCard(n,cb){
  const c=$('card');c.innerHTML=`<div><div class="k">${n<=5?'CHAPTER '+n:'EPILOGUE'}</div><h2>${CHAP[n][0]}</h2><p>${CHAP[n][1]}</p><div class="tap">tap to continue</div></div>`;
  c.classList.add('on');clearPor();if(typeof sfx==='function')sfx('chapter');
- c.onclick=()=>{c.classList.remove('on');c.onclick=null;cb()};
+ c.onclick=()=>{c.onclick=null;const f=$('fade');f.style.transition='none';f.classList.add('on');void f.offsetWidth;c.classList.remove('on');cb();
+  if(typeof G!=='undefined'&&G.ok)G.forceFrame=true;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(()=>{f.style.transition='';f.classList.remove('on')},60)))};
 }
 function addMsg(from,t){S.msgs.push({f:from,t:sub(t),c:S.ch,r:0});if(S.unl.phone){toast('New message · '+(CH[from]?CH[from].name:from),'var(--mint)');if(typeof sfx==='function')sfx('notify')}hud()}
