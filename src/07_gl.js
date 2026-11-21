@@ -3,7 +3,7 @@
    per region, per 32 m chunk and per material, then turned into merged BufferGeometries so the scene is a
    few hundred draw calls with frustum culling. Lighting is real time: a hemisphere fill per area plus a
    pool of point lights that follows the player and picks the nearest level lights. */
-const G={qd:{},LK:7.6,HK:5.5,ok:false,regions:{},boxes:{},walls:{},lights:{},surf:{},tx:{},mats:{},rects:{},chars:[],q:'high'};
+const G={qd:{},sun:{},lmK:1,LK:7.6,HK:5.5,ok:false,regions:{},boxes:{},walls:{},lights:{},surf:{},tx:{},mats:{},rects:{},chars:[],q:'high'};
 const lin=c=>c<=.04045?c/12.92:Math.pow((c+.055)/1.055,2.4);
 const QUALITY={
  low:{dpr:1,lights:6,bloom:false,msaa:0,std:false,shadowBlobs:true},
@@ -53,7 +53,7 @@ function quad(a,b,c,d,m,uw,vh){
  const P=(s,t)=>[a[0]+e1[0]*s+e2[0]*t,a[1]+e1[1]*s+e2[1]*t,a[2]+e1[2]*s+e2[2]*t];
  const ao=y=>vert?(.62+.38*Math.min(1,Math.max(0,(y-G.ao)/1.1))):1;
  // every lit quad gets its own patch in the region's lightmap (packed later); (s,t) place each vertex inside it
- const lmq=!m.e&&!m.glass&&!m.cut?(G.qd[BR]||(G.qd[BR]=[])).push({w:Math.hypot(e1[0],e1[1],e1[2]),h:Math.hypot(e2[0],e2[1],e2[2])})-1:-1;
+ const lmq=!m.e&&!m.glass&&!m.cut?(G.qd[BR]||(G.qd[BR]=[])).push({w:Math.hypot(e1[0],e1[1],e1[2])*G.lmK,h:Math.hypot(e2[0],e2[1],e2[2])*G.lmK})-1:-1;
  const push=(s,t)=>{const p=P(s,t),k=ao(p[1]);g.p.push(p[0],p[1],p[2]);g.n.push(nx,ny,nz);g.u.push(uw*s,vh*t);g.c.push(lc[0]*k,lc[1]*k,lc[2]*k);g.l.push(s,t);g.q.push(lmq)};
  for(let i=0;i<ss.length-1;i++)for(let j=0;j<ts.length-1;j++){const s0=ss[i],s1=ss[i+1],t0=ts[j],t1=ts[j+1];push(s0,t0);push(s1,t0);push(s1,t1);push(s0,t0);push(s1,t1);push(s0,t1)}
 }

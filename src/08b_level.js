@@ -1,6 +1,6 @@
 /* ============ LEVEL HELPERS ============ */
 const DOORS={},MAPR={},AREAS={},INTS=[],WCH=[],DYN=[];
-const LEVELS={home:[[0,'Bakery'],[3.4,'Flat']],office:[[0,'3rd floor']],station:[[0,'Concourse']],con:[[-4.5,'Basement'],[0,'Ground floor'],[5.5,'Level 1'],[12,'Con roof']],f13:[[0,'13th floor'],[3.6,'Hotel roof']]};
+const LEVELS={home:[[0,'Bakery'],[3.9,'Flat 1A'],[7.1,'Second floor'],[10.3,'Third floor'],[13.5,'Roof']],office:[[0,'3rd floor']],station:[[0,'Concourse']],con:[[-4.5,'Basement'],[0,'Ground floor'],[5.5,'Level 1'],[12,'Con roof']],f13:[[0,'13th floor'],[3.6,'Hotel roof']]};
 function door(o,at,c,w,h,y,nf){(DOORS[BR]=DOORS[BR]||[]).push({o,at,c,w,h:h||2.7,y:y||0,nf})}
 /* a wide opening between two spaces: a door with no frame */
 const gap=(o,at,c,w,h,y)=>door(o,at,c,w,h,y,1);
@@ -74,40 +74,6 @@ function skyline(cx,cz,r0,r1,n,yb,ex){for(let i=0;i<n;i++){const a=i/n*Math.PI*2
 /* ============ LEVELS ============ */
 function buildLevels(){
  mats();
- /* ================= HOME: flat above the bakery ================= */
- region('home',{fog:[.12,.09,.08],fr:[6,34]});G.regions.home.amb=[.4,.36,.34];
- door('v',-302,6,1.2,2.3,0);door('v',-302,-6,1.1,2.3,3.4);
- room({x0:-302,z0:-8,x1:-288,z1:12,y:0,h:3.2,fl:MT.wood,wa:MT.wallWarm,n:'Proof bakery',mc:'#6a4a2a'});
- room({x0:-306,z0:-8,x1:-302,z1:8,y:0,h:6.8,fl:MT.wood,wa:MT.wallPale,n:'Stairs',mc:'#4a4a5a'});
- room({x0:-302,z0:-8,x1:-292,z1:2,y:3.4,h:2.8,fl:MT.carpetGrey,wa:MT.wallPale,n:'Your flat',mc:'#4a4a5a'});
- slab(-305.8,-7.8,-302.2,-4,3.4,.3,MT.wood,MT.wallPale);
- stairs(-305.8,-4,-302.2,4,0,3.4,'z-',MT.wood);
- panel(-302.21,1.2,7,1.1,.35,'w',sign('↑ FLAT 1A','#ffd9a0','#4a2e22',256,64));panel(-302.21,4.6,-5,1.1,.35,'w',sign('↓ PROOF','#ffd9a0','#4a2e22',256,64));
- addLight(-304,2.6,6,[1,.85,.7],6,.8);addLight(-304,6.2,-6,[1,.85,.7],6,.8);addLight(-304,4.5,0,[1,.85,.7],8,.9);addLight(-304,2.4,3,[1,.85,.7],5,.7);
- // flat
- const fy=3.4;
- addLight(-297,fy+2.4,-5,[.9,.95,1],7,.8);addLight(-295,fy+2.4,0,[1,.9,.8],6,.6);
- table(-293.2,-7.2,1.8,.9,MT.woodDark,.76,fy);box(-294,fy+.76,-7.6,-292.4,fy+1.35,-7.55,MT.black,{col:false});
- screen(-293.6,fy+.82,-7.54,.62,.45,'s',MT.code);screen(-292.85,fy+.82,-7.54,.62,.45,'s',mt(signTex('firewalls r a joke','#8affc1','#07110d',256,128),0,1,1));
- chair(-293.2,-6.3,'s',MT.plain('#c0304a'),fy);
- box(-301.8,fy,-1.6,-299.4,fy+.5,1.8,MT.linen);box(-301.8,fy,1.6,-299.4,fy+1,1.8,MT.woodDark);box(-301.4,fy+.5,1,-299.8,fy+.62,1.6,MT.plain('#7cc4ff'),{col:false});
- panel(-297,fy+1,-7.79,2.6,1.3,'s',MT.morning);panel(-292.21,fy+1,-3,2.4,1.2,'w',MT.morning);plant(-292.8,1.4,.7,fy);
- box(-298.6,fy,.2,-297.4,fy+.2,1.4,MT.plain('#d8a050'));box(-298.5,fy+.2,.3,-297.5,fy+.3,1.3,MT.plain('#c88a40'),{col:false});
- panel(-301.79,fy+1.1,-2.6,.8,1.05,'e',MT.poster(1));panel(-292.21,fy+1.1,-.4,.8,1.05,'w',MT.poster(4));
- sofa(-295.5,-1.6,2,'s','#6a5a8a',fy);table(-295.5,-3.4,1.2,.6,MT.woodDark,.4,fy);box(-296.6,fy,-7.7,-295.4,fy+1.8,-7.3,MT.woodDark);
- // bakery
- addLight(-296,2.8,6,[1,.8,.55],9,1);addLight(-292,2.8,9,[1,.8,.55],8,.9);addLight(-299,2.8,9,[1,.8,.55],7,.8);addLight(-295,2.8,-2,[1,.75,.5],9,.9);
- for(const x of[-299,-295.5,-292])pendant(x,3.2,7.5,'#ffd98a',5);
- box(-300,0,3,-291,1.05,4,{side:MT.woodDark,top:MT.plain('#e9e3da')});box(-300,1.05,3.05,-295.6,1.5,3.95,MT.bread,{col:false});
- for(const x of[-300,-296,-292])box(x,0,-7.8,x+3,1.6,-6.6,MT.oven);for(const x of[-300,-296,-292])panel(x+1.5,.2,-6.59,2.6,1.3,'s',MT.oven);
- for(let i=0;i<4;i++)box(-289.6,0,-6+i*1.2,-288.4,.6+rnd()*.2,-5+i*1.2,MT.plain('#e9dcc5'));
- box(-301.8,0,-4,-300.6,2.2,0,MT.metal);panel(-300.59,.2,-2,3.6,1.8,'e',MT.bread);
- panel(-301.79,1.2,9.6,2.2,1.4,'e',MT.chalk);panel(-295.5,2.4,3.02,4,.5,'s',sign('PROOF · since 2019','#ffd9a0','#4a2e22'));
- table(-299.5,9.5,1,1,MT.woodDark);chair(-299.5,10.3,'n',MT.plain('#c9a46a'));table(-291,9.5,1,1,MT.woodDark);chair(-291,10.3,'n',MT.plain('#c9a46a'));table(-295.5,8.5,1,1,MT.woodDark);chair(-294.7,8.5,'w',MT.plain('#c9a46a'));
- panel(-295.5,1,11.79,7,1.7,'n',MT.morning);panel(-295.5,0,11.78,1.2,2.2,'n',MT.door);plant(-301.4,11.4,.8);plant(-288.6,11.4,.8);
- area('flat','Your flat','home',[-302,-8,-292,2],[-296.5,-4,Math.PI/2,3.4],'flat',{y0:3,y1:7});
- area('stairs','Stairs','home',[-306,-8,-302,8],[-304,6,0,0],'flat',{y0:-1,y1:7,hide:1});
- area('bakery','Proof bakery','home',[-302,-8,-288,12],[-299,7,-Math.PI/2,0],'bakery',{y0:-1,y1:3});
-
+ buildHome();
   buildOffice();buildStation();buildSite();buildTower();
 }

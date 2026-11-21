@@ -20,7 +20,7 @@ function audioOn(){
 function applyVolumes(){if(!AU)return;const v=SETTINGS.vol,c=x=>x*x,t=AC.currentTime;
  AU.master.gain.setTargetAtTime(c(v.master),t,.05);AU.music.gain.setTargetAtTime(c(v.music)*.55,t,.05);AU.amb.gain.setTargetAtTime(c(v.amb)*.8,t,.05);AU.sfx.gain.setTargetAtTime(c(v.sfx),t,.05)}
 /* ---------- scene → loops ---------- */
-const AREA_AUD={flat:['home','home'],stairs:['home','home'],bakery:['home','bakery'],office:['hotel','office'],lindaoffice:['hotel','office'],station:['home','station'],platform:['home','station'],
+const AREA_AUD={flat:['home','home'],stairs:['home','home'],bakery:['home','bakery'],bakehouse:['home','bakery'],livingroom:['home','home'],kitchen:['home','home'],bathroom:['home','home'],boxroom:['home','home'],bedroom:['home','home'],hometerrace:['home','street'],office:['hotel','office'],lindaoffice:['hotel','office'],station:['home','station'],platform:['home','station'],
  plaza:['night','street'],vestibule:['con','hum'],foyer:['con','hum'],lobby:['hotel','lobby'],cafe:['hotel','lobby'],luggage:['hotel','hotel'],backstairs:['hotel','hotel'],bar:['bar','bar'],terrace:['bar','garden'],
  walkway:['con','hum'],ringN:['con','hum'],ringE:['con','hum'],ringS:['con','hum'],courtyard:['night','garden'],hallA:['hall','hall'],backstage:['hall','room'],hallB:['hall','room'],vendor:['con','hum'],villagerow:['con','hum'],
  lockpick:['con','room'],ctf:['con','room'],soc:['con','room'],carhack:['con','room'],ics:['con','room'],soceng:['con','room'],food:['con','hum'],cosplay:['con','hum'],lounge:['night','room'],naps:['night','hotel'],

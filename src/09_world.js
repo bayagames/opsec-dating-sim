@@ -159,8 +159,8 @@ function objective(){
  if(!S)return null;
  let o=null;
  if(S.ch===0){
-  if(!S.f.ch0b)o={t:'Go downstairs to Proof for breakfast.',reg:'home',x:-295.5,z:2.2,y:0};
-  else if(!S.f.ch0_work)o=WD.reg==='office'?{t:'Clear the helpdesk queue at your desk.',reg:'office',x:528,z:4.3,y:0}:{t:'Head out to work: the bakery\'s front door.',reg:'home',x:-295.5,z:11.2,y:0};
+  if(!S.f.ch0b)o={t:'Go downstairs to Proof for breakfast.',reg:'home',x:-299,z:3.7,y:0};
+  else if(!S.f.ch0_work)o=WD.reg==='office'?{t:'Clear the helpdesk queue at your desk.',reg:'office',x:528,z:4.3,y:0}:{t:'Head out to work: the bakery\'s front door.',reg:'home',x:-302.6,z:11.2,y:0};
   else if(!S.f.ch0_gary)o={t:'Gary from Accounts wants a word.',reg:'office',x:520.6,z:8.6,y:0};
   else if(!S.f.ch0_eve)o={t:'Head home for the evening: the lifts.',reg:'office',x:516,z:20.9,y:0};
   else o={t:'Platform 4: board the train to the con.',reg:'station',x:736,z:7,y:0};
