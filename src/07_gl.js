@@ -3,7 +3,7 @@
    per region, per 32 m chunk and per material, then turned into merged BufferGeometries so the scene is a
    few hundred draw calls with frustum culling. Lighting is real time: a hemisphere fill per area plus a
    pool of point lights that follows the player and picks the nearest level lights. */
-const G={qd:{},sun:{},lmK:1,LK:7.6,HK:5.5,ok:false,regions:{},boxes:{},walls:{},lights:{},surf:{},tx:{},mats:{},rects:{},chars:[],q:'high'};
+const G={qlog:window.__qlog?[]:null,qd:{},sun:{},lmK:1,LK:7.6,HK:5.5,ok:false,regions:{},boxes:{},walls:{},lights:{},surf:{},tx:{},mats:{},rects:{},chars:[],q:'high'};
 const lin=c=>c<=.04045?c/12.92:Math.pow((c+.055)/1.055,2.4);
 const QUALITY={
  low:{dpr:1,lights:6,bloom:false,msaa:0,std:false,shadowBlobs:true},
@@ -53,7 +53,8 @@ function quad(a,b,c,d,m,uw,vh){
  const P=(s,t)=>[a[0]+e1[0]*s+e2[0]*t,a[1]+e1[1]*s+e2[1]*t,a[2]+e1[2]*s+e2[2]*t];
  const ao=y=>vert?(.62+.38*Math.min(1,Math.max(0,(y-G.ao)/1.1))):1;
  // every lit quad gets its own patch in the region's lightmap (packed later); (s,t) place each vertex inside it
- const lmq=!m.e&&!m.glass&&!m.cut?(G.qd[BR]||(G.qd[BR]=[])).push({w:Math.hypot(e1[0],e1[1],e1[2])*G.lmK,h:Math.hypot(e2[0],e2[1],e2[2])*G.lmK})-1:-1;
+ if(G.qlog)G.qlog.push([BR,nx,ny,nz,nx*a[0]+ny*a[1]+nz*a[2],Math.min(a[0],b[0],c[0],d[0]),Math.min(a[1],b[1],c[1],d[1]),Math.min(a[2],b[2],c[2],d[2]),Math.max(a[0],b[0],c[0],d[0]),Math.max(a[1],b[1],c[1],d[1]),Math.max(a[2],b[2],c[2],d[2]),(m.t||'white')+(m.e?'*':'')+(m.glass?'g':'')+(m.cut?'c':'')+(m.c?m.c.join(','):'')]);
+ const lmq=!m.e&&!m.glass?(G.qd[BR]||(G.qd[BR]=[])).push({w:Math.hypot(e1[0],e1[1],e1[2])*G.lmK,h:Math.hypot(e2[0],e2[1],e2[2])*G.lmK})-1:-1;
  const push=(s,t)=>{const p=P(s,t),k=ao(p[1]);g.p.push(p[0],p[1],p[2]);g.n.push(nx,ny,nz);g.u.push(uw*s,vh*t);g.c.push(lc[0]*k,lc[1]*k,lc[2]*k);g.l.push(s,t);g.q.push(lmq)};
  for(let i=0;i<ss.length-1;i++)for(let j=0;j<ts.length-1;j++){const s0=ss[i],s1=ss[i+1],t0=ts[j],t1=ts[j+1];push(s0,t0);push(s1,t0);push(s1,t1);push(s0,t0);push(s1,t1);push(s0,t1)}
 }
@@ -234,9 +235,9 @@ function buildAtlases(){
 }
 /* ---- lightmap packing: each lit quad is a rectangle of texels (its real size x density), shelf-packed onto square pages.
    Density is chosen per region so the whole region fits the page budget; a 1-texel gutter stops neighbours bleeding. */
-function packLM(Q){
- const S=2048,maxP={high:4,medium:3,low:2}[G.q]||3;let area=0;for(const q of Q)area+=(q.w+.25)*(q.h+.25);
- let D=Math.min(9,Math.max(1.5,Math.sqrt(maxP*S*S*.62/Math.max(1,area))));
+function packLM(Q,reg){
+ const R=G.regions[reg]||{},S=2048,maxP=(R.lmPages||{high:4,medium:3,low:2})[G.q]||3;let area=0;for(const q of Q)area+=(q.w+.25)*(q.h+.25);
+ let D=Math.min(R.lmCap||9,Math.max(1.5,Math.sqrt(maxP*S*S*.62/Math.max(1,area))));
  const order=Q.map((q,i)=>i);
  for(let tries=0;tries<12;tries++){
   for(const q of Q){q.cw=Math.max(2,Math.ceil(q.w*D));q.ch=Math.max(2,Math.ceil(q.h*D))}
@@ -251,7 +252,7 @@ function finishRegions(){
  const T=G.T;buildAtlases();
  for(const k in G.regions){const R=G.regions[k];const root=new T.Group();root.visible=false;
   // merge groups that now share an atlas texture
-  const merged={},LM=R.lm=packLM(G.qd[k]||[]),QD=G.qd[k]||[];
+  const merged={},LM=R.lm=packLM(G.qd[k]||[],k),QD=G.qd[k]||[];
   for(const gk in R.groups){const g=R.groups[gk],X=G.tx[g.t];let tk=g.t;
    if(X&&X.atlas!==undefined){const r=X.rect;for(let i=0;i<g.u.length;i+=2){const u=Math.min(1,Math.max(0,g.u[i])),v=Math.min(1,Math.max(0,g.u[i+1]));g.u[i]=r[0]+u*r[2];g.u[i+1]=r[1]+v*r[3]}tk='@atlas'+X.atlas}
    const mk=tk+'|'+g.kind+'|'+g.prof;
@@ -264,7 +265,7 @@ function finishRegions(){
   for(const ck in merged){const M=merged[ck];if(!M.p.length)continue;
    if(M.mk.startsWith('@atlas')){const n=+M.mk.split('|')[0].slice(6);const ak='@atlas'+n;if(!G.tx[ak])G.tx[ak]={atlas:n,used:true}}
    const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(M.p,3));g.setAttribute('normal',new T.Float32BufferAttribute(M.n,3));g.setAttribute('uv',new T.Float32BufferAttribute(M.u,2));g.setAttribute('color',new T.Float32BufferAttribute(M.c,3));if(M.pg>=0){const a=new T.Float32BufferAttribute(M.l,2);g.setAttribute('uv1',a);g.setAttribute('lmuv',a)}g.computeBoundingSphere();
-   const mesh=new T.Mesh(g,null);mesh.userData.mk=M.mk;mesh.userData.pg=M.pg;mesh.userData.reg=k;const kd=M.mk.split('|')[1];if(kd==='glass')mesh.userData.noAO=1;mesh.matrixAutoUpdate=false;root.add(mesh)}
+   const mesh=new T.Mesh(g,null);mesh.userData.mk=M.mk;mesh.userData.pg=M.pg;mesh.userData.reg=k;const kd=M.mk.split('|')[1];if(kd==='glass'||kd==='cut')mesh.userData.noAO=1;mesh.matrixAutoUpdate=false;root.add(mesh)}
   R.groups=null;R.obj=root;G.scene.add(root);
   const H={},SH={};
   const put=(Tb,b,x0,z0,x1,z1)=>{for(let x=Math.floor(x0/4);x<=Math.floor(x1/4);x++)for(let z=Math.floor(z0/4);z<=Math.floor(z1/4);z++)(Tb[x+','+z]=Tb[x+','+z]||[]).push(b)};

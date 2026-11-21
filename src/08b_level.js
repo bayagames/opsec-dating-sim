@@ -48,7 +48,7 @@ function seatRow(x0,x1,z,y,dir,col){const m=MT.fabric(col),d=dir==='n'?-1:1,k=MT
 function car(x,z,ax,col,o){o=o||{};const L=4.4,W=1.9,b=MT.gloss(col),dk=MT.plain('#14121a'),gl=MT.gloss('#2a3444'),Y=o.y||0;
  const R=(a0,a1,c0,c1,y0,y1,m,op)=>ax==='x'?box(x+a0,Y+y0,z+c0,x+a1,Y+y1,z+c1,m,op):box(x+c0,Y+y0,z+a0,x+c1,Y+y1,z+a1,m,op);
  R(-L/2,L/2,-W/2,W/2,.3,.95,b);R(-1.1,1.2,-W/2+.1,W/2-.1,.95,1.5,gl,{col:false});R(-1,1.1,-W/2+.15,W/2-.15,1.5,1.55,b,{col:false});
- for(const a of[-1.4,1.4])for(const c of[-W/2,W/2-.24])R(a-.36,a+.36,c,c+.24,0,.68,dk,{col:false});
+ for(const a of[-1.4,1.4])for(const c of[-W/2-.03,W/2-.21])R(a-.36,a+.36,c,c+.24,0,.68,dk,{col:false});
  R(L/2-.02,L/2+.02,-W/2+.15,-W/2+.5,.62,.8,MT.glow('#fff4d8',2.4),{col:false});R(L/2-.02,L/2+.02,W/2-.5,W/2-.15,.62,.8,MT.glow('#fff4d8',2.4),{col:false});
  R(-L/2-.02,-L/2+.02,-W/2+.15,-W/2+.5,.62,.8,MT.glow('#ff2a3a',2),{col:false});R(-L/2-.02,-L/2+.02,W/2-.5,W/2-.15,.62,.8,MT.glow('#ff2a3a',2),{col:false});
  if(o.bonnet)R(L/2-1.3,L/2-.1,-W/2+.05,W/2-.05,1.55,1.6,b,{col:false});

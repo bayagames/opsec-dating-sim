@@ -108,3 +108,5 @@ function mats(){MT={
  frame:mt('white','#2a2026',.5,0,{r:.5}),skirt:mt('white','#1e1724',.5,0,{r:.5}),dark:mt('dark'),black:mt('black',0,1,1)
 }}
 const sign=(text,fg,bg,w,h)=>mt(signTex(text,fg||'#ffd166',bg||'#1b1026',w,h),0,1,1,{k:1.25});
+/* a sign sized in metres: the texture takes the sign's own proportions, so lettering is never stretched */
+const signM=(text,fg,bg,wm,hm,lit)=>{let W=Math.round(wm*180),H=Math.round(hm*180);const k=Math.min(1,1024/Math.max(W,H));W=Math.max(32,Math.round(W*k));H=Math.max(24,Math.round(H*k));return mt(signTex(text,fg||'#ffd166',bg||'#1b1026',W,H),0,1,lit===false?0:1,lit===false?{r:.7}:{k:1.1})};
