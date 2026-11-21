@@ -33,7 +33,18 @@ function bakeMats(){
    if(c.a<.5){vec3 a=vec3(0.);float n=0.;for(int y=-2;y<=2;y++)for(int x=-2;x<=2;x++){vec4 s=texture2D(src,v+vec2(float(x),float(y))*px);if(s.a>.5){a+=s.rgb;n+=1.;}}if(n>0.)c.rgb=a/n;}
    vec3 h=max(c.rgb,0.);float m=clamp(max(max(h.r,h.g),max(h.b,1e-6))/M,1./255.,1.);m=ceil(m*255.)/255.;gl_FragColor=vec4(clamp(h/(m*M),0.,1.),m);}`,
   depthTest:false,depthWrite:false,blending:T.NoBlending});
- return G.bk={cov,light,dist,fin};
+ // the sun: one directional light with an orthographic shadow map over the area that matters (G.sun[reg])
+ const sun=new T.ShaderMaterial({uniforms:{sd:{value:new T.Vector3()},lc:{value:new T.Vector3()},cp:{value:new T.Vector3()},far:{value:1},smat:{value:new T.Matrix4()},smap:{value:null},tx:{value:1}},
+  vertexShader:vs,
+  fragmentShader:PD12+`uniform vec3 sd,lc,cp;uniform float far,tx;uniform mat4 smat;uniform sampler2D smap;varying vec3 wp;varying vec3 wn;
+  void main(){vec3 n=normalize(wn);float ndl=dot(n,sd);if(ndl<=0.)discard;vec3 p=wp+n*.04;vec4 c=smat*vec4(p,1.);vec2 uv=c.xy/c.w*.5+.5;float sh=1.;
+   if(uv.x>0.&&uv.x<1.&&uv.y>0.&&uv.y<1.){float d=dot(cp-p,sd),s=0.;for(int i=0;i<12;i++){float z=texture2D(smap,uv+PD[i]*tx*1.6).r*far;s+=z>d-.05?1.:0.;}sh=s/12.;}
+   gl_FragColor=vec4(lc*ndl*sh,0.);}`,
+  side:T.DoubleSide,depthTest:false,depthWrite:false,blending:T.CustomBlending,blendEquation:T.AddEquation,blendSrc:T.OneFactor,blendDst:T.OneFactor,blendSrcAlpha:T.ZeroFactor,blendDstAlpha:T.OneFactor});
+ const sdep=new T.ShaderMaterial({uniforms:{cp:{value:new T.Vector3()},sd:{value:new T.Vector3()},far:{value:1}},
+  vertexShader:'varying vec3 wp;void main(){wp=(modelMatrix*vec4(position,1.)).xyz;gl_Position=projectionMatrix*viewMatrix*vec4(wp,1.);}',
+  fragmentShader:'uniform vec3 cp,sd;uniform float far;varying vec3 wp;void main(){gl_FragColor=vec4(dot(cp-wp,sd)/far,0.,0.,1.);}',side:T.DoubleSide});
+ return G.bk={cov,light,dist,fin,sun,sdep};
 }
 /* prepare one region: float accumulation pages, the flattened bake scenes, and a shadow-caster scene */
 function bakeSetup(reg){
@@ -64,6 +75,22 @@ function bakeLight(reg,i){
   if(!any)continue;r.setRenderTarget(R.bk.rt[p]);r.render(R.bk.scn[p],R.bk.cam)}
  r.setRenderTarget(null);r.autoClear=ac;r.setClearColor(cc,ca);
 }
+/* the sun: render depth along its direction over the area of interest, then add sunlight (N·L, soft shadow) to every page */
+function bakeSun(reg){
+ const T=G.T,r=G.r,R=G.regions[reg],S=G.sun[reg],BK=bakeMats();
+ const sd=new T.Vector3(...S.d).normalize(),c=new T.Vector3(...S.c0),D=S.half*2.5,far=D*2,cp=c.clone().addScaledVector(sd,D);
+ const ft=r.extensions.has('EXT_color_buffer_float')?T.FloatType:T.HalfFloatType,res=S.res||4096;
+ const rt=new T.WebGLRenderTarget(res,res,{type:ft,format:T.RGBAFormat,minFilter:T.NearestFilter,magFilter:T.NearestFilter,generateMipmaps:false});
+ const cam=new T.OrthographicCamera(-S.half,S.half,S.half,-S.half,.1,far);cam.position.copy(cp);cam.up.set(0,1,0);if(Math.abs(sd.y)>.95)cam.up.set(0,0,1);cam.lookAt(c);cam.updateMatrixWorld(true);cam.updateProjectionMatrix();
+ BK.sdep.uniforms.cp.value.copy(cp);BK.sdep.uniforms.sd.value.copy(sd);BK.sdep.uniforms.far.value=far;
+ const ac=r.autoClear,cc=r.getClearColor(new T.Color()),ca=r.getClearAlpha();
+ R.bk.sh.overrideMaterial=BK.sdep;r.setRenderTarget(rt);r.setClearColor(0xffffff,1);r.autoClear=true;r.clear();r.render(R.bk.sh,cam);R.bk.sh.overrideMaterial=null;
+ const u=BK.sun.uniforms;u.sd.value.copy(sd);u.cp.value.copy(cp);u.far.value=far;u.smap.value=rt.texture;u.tx.value=1/res;u.lc.value.set(lin(S.c[0]),lin(S.c[1]),lin(S.c[2])).multiplyScalar(S.k);
+ u.smat.value.multiplyMatrices(cam.projectionMatrix,cam.matrixWorldInverse);
+ r.autoClear=false;
+ for(let p=0;p<R.bk.rt.length;p++){for(const b of R.bk.scn[p].children)b.visible=true;R.bk.scn[p].overrideMaterial=BK.sun;r.setRenderTarget(R.bk.rt[p]);r.render(R.bk.scn[p],R.bk.cam);R.bk.scn[p].overrideMaterial=null}
+ r.setRenderTarget(null);r.autoClear=ac;r.setClearColor(cc,ca);rt.dispose();
+}
 /* dilate gutters, pack to RGBM, hand the pages to the materials, free the float targets */
 function bakeFinish(reg){
  const T=G.T,r=G.r,R=G.regions[reg],LM=R.lm,BK=bakeMats();
@@ -85,8 +112,8 @@ const LMDB={db:null,open(){return new Promise(res=>{try{const q=indexedDB.open('
  get(k){return new Promise(res=>{if(!LMDB.db)return res(null);try{const q=LMDB.db.transaction('lm').objectStore('lm').get(k);q.onsuccess=()=>res(q.result||null);q.onerror=()=>res(null)}catch(e){res(null)}})},
  put(k,v){if(!LMDB.db)return;try{const t=LMDB.db.transaction('lm','readwrite');t.objectStore('lm').put(v,k)}catch(e){}}};
 function lmKey(reg){const R=G.regions[reg],L=G.lights[reg]||[];let h=0;const add=v=>{h=(h*31+Math.round(v*100))|0};
- for(const l of L)l.forEach(add);let verts=0;R.obj.traverse(o=>{if(o.isMesh&&o.userData.pg>=0){verts+=o.geometry.attributes.position.count;const a=o.geometry.attributes.lmuv.array;for(let i=0;i<a.length;i+=97)add(a[i]*1e4)}});
- return['v3',reg,R.lm.S,R.lm.pages,R.lm.D.toFixed(3),verts,h,G.LK,LOOK.reach,BAKE.fill,BAKE.soft,BAKE.cube].join('|')}
+ for(const l of L)l.forEach(add);const SU=G.sun&&G.sun[reg];if(SU)[...SU.d,...SU.c,SU.k,SU.half,...SU.c0].forEach(add);let verts=0;R.obj.traverse(o=>{if(o.isMesh&&o.userData.pg>=0){verts+=o.geometry.attributes.position.count;const a=o.geometry.attributes.lmuv.array;for(let i=0;i<a.length;i+=97)add(a[i]*1e4)}});
+ return['v4',reg,R.lm.S,R.lm.pages,R.lm.D.toFixed(3),verts,h,G.LK,LOOK.reach,BAKE.fill,BAKE.soft,BAKE.cube].join('|')}
 function lmApply(reg,pages){const T=G.T,R=G.regions[reg],S=R.lm.S;R.lmTex=pages.map(px=>{const t=new T.DataTexture(px,S,S,T.RGBAFormat,T.UnsignedByteType);t.minFilter=t.magFilter=T.LinearFilter;t.generateMipmaps=false;t.channel=1;t.colorSpace=T.NoColorSpace;t.needsUpdate=true;return t});
  R.obj.traverse(o=>{if(o.isMesh&&o.userData.mk&&o.userData.pg>=0){o.userData.lmk=reg+':'+o.userData.pg;o.material=getMat(o.userData.mk,o.userData.lmk)}})}
 /* bake everything, a few lights per frame so the loading bar moves; cb(ok) when done */
@@ -95,7 +122,7 @@ async function bakeAll(prog,cb){
  await LMDB.open();
  const only=window.__bakeOnly,regs=Object.keys(G.regions).filter(r=>!only||only.includes(r));
  const todo=[];let total=0,done=0;
- for(const reg of regs){const key=lmKey(reg),hit=window.__noLMCache?null:await LMDB.get(key);if(hit&&hit.length===G.regions[reg].lm.pages){lmApply(reg,hit);continue}todo.push([reg,key]);total+=G.lights[reg].length||1}
+ for(const reg of regs){const key=lmKey(reg),hit=window.__noLMCache?null:await LMDB.get(key);if(hit&&hit.length===G.regions[reg].lm.pages){lmApply(reg,hit);continue}todo.push([reg,key]);total+=(G.lights[reg].length||1)+(G.sun&&G.sun[reg]?1:0)}
  const n=Math.max(1,total);
  for(const[reg,key]of todo){
   try{bakeSetup(reg)}catch(e){console.error('bake failed',e);cb(false);return}
@@ -105,6 +132,7 @@ async function bakeAll(prog,cb){
    // wait for the GPU to really finish this batch (reading one pixel forces it): honest progress, no piled-up work
    bakeSync();prog(done/n);if(i<L.length)setTimeout(step,0);else res()};setTimeout(step,0)});
   if(!L.length)done++;
+  if(G.sun&&G.sun[reg]){try{bakeSun(reg)}catch(e){console.error('sun bake failed',e)}bakeSync();done++;prog(done/n)}
   const px=bakeFinish(reg);LMDB.put(key,px);
  }
  if(G.bkCubeRT){G.bkCubeRT.dispose();G.bkCube=null}
