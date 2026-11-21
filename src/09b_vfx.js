@@ -24,7 +24,7 @@ function vfxPoints(n,mode,o){
  else if(mode==='smoke')body=`float k=fract(t*.05*sp+seed.w);p=b0+vec3((seed.x-.5)*.4+k*k*3.,k*9.*size,(seed.z-.5)*.4+k*1.2);a=smoothstep(0.,.1,k)*(1.-k)*.8;vs=vec3(1.+k*5.);`;
  else body=`float ang=t*.12*sp+seed.w*6.2831,rad=mix(length(b1-b0)*.25,length(b1-b0)*.5,seed.x);vec3 c=(b0+b1)*.5;p=c+vec3(cos(ang)*rad,sin(t*.4+seed.y*6.)*2.+seed.z*4.,sin(ang)*rad*.7);a=1.;vs=vec3(1.,sin(t*14.+seed.y*40.),0.);`;
  const vs=VFX_VS_PTS+body+`va=a;vec4 mv=modelViewMatrix*vec4(p,1.);gl_PointSize=size*(mode_SIZE)*vs.x/-mv.z;gl_Position=projectionMatrix*mv;}`;
- const ps={dust:'26.',steam:'90.',smoke:'160.',birds:'40.'}[mode];
+ const ps={dust:'8.',steam:'90.',smoke:'160.',birds:'40.'}[mode];
  const fs={
   dust:`uniform vec3 col;uniform float op;varying float va;varying vec3 vs;void main(){vec2 q=gl_PointCoord-.5;float d=length(q);if(d>.5)discard;gl_FragColor=vec4(col*va*op*(1.-d*2.),1.);}`,
   steam:`uniform vec3 col;uniform float op;varying float va;varying vec3 vs;void main(){vec2 q=gl_PointCoord-.5;float d=length(q);if(d>.5)discard;gl_FragColor=vec4(col,va*op*(1.-d*2.)*(1.-d*2.));}`,
