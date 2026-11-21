@@ -11,7 +11,7 @@ function vfxBuild(){
  for(const reg in G.vfxDef){const root=new T.Group();root.visible=false;G.scene.add(root);G.vfxRoot[reg]=root;
   for(const e of G.vfxDef[reg]){const o=vfxMake(e);if(o){o.userData.noAO=1;o.frustumCulled=false;root.add(o)}}}
 }
-const VFX_VS_PTS=`attribute vec4 seed;uniform float t,size;uniform vec3 b0,b1;varying float va;varying vec3 vs;
+const VFX_VS_PTS=`attribute vec4 seed;uniform float t,size,sp;uniform vec3 b0,b1;varying float va;varying vec3 vs;
  void main(){vec3 p;float a;`;
 function vfxPoints(n,mode,o){
  const T=G.T,g=new T.BufferGeometry(),pos=new Float32Array(n*3),sd=new Float32Array(n*4);

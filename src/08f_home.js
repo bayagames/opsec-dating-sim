@@ -9,6 +9,7 @@
    opposite, Linden Square across Mill Lane, the backs of Albion Road behind, a railway viaduct, and the city. */
 const HY=[0,3.9,7.1,10.3,13.5],HX0=-310,HX1=-290,HZ0=-12,HZ1=12,SXE=-306;
 function homeTextures(){
+ tex('plasterF',256,256,(c,w,h)=>{c.fillStyle='#ece8e1';c.fillRect(0,0,w,h);blotch(c,w,h,10,'#e2ddd4',.35,40,110);noise(c,w,h,5000,'#8a8478',.06);noise(c,w,h,3000,'#ffffff',.08);grain(c,w,h,5)});
  tex('checker',256,256,(c,w,h)=>{for(let y=0;y<4;y++)for(let x=0;x<4;x++){c.fillStyle=(x+y)%2?'#2a2a30':'#ece6d8';c.fillRect(x*64,y*64,64,64)}c.strokeStyle='#00000022';c.lineWidth=1;for(let i=0;i<=4;i++){c.beginPath();c.moveTo(i*64,0);c.lineTo(i*64,h);c.moveTo(0,i*64);c.lineTo(w,i*64);c.stroke()}noise(c,w,h,1400,'#000',.08);grain(c,w,h,10)});
  tex('metro',256,256,(c,w,h)=>{c.fillStyle='#b8b4ae';c.fillRect(0,0,w,h);for(let y=0;y<8;y++)for(let x=-1;x<5;x++){const ox=(y%2)*32,v=236+rnd()*12|0;const g=c.createLinearGradient(0,y*32,0,y*32+32);g.addColorStop(0,`rgb(${v},${v},${v-6})`);g.addColorStop(1,`rgb(${v-14},${v-14},${v-18})`);c.fillStyle=g;c.fillRect(x*64+ox+2,y*32+2,60,28)}grain(c,w,h,6)});
  tex('books',256,256,(c,w,h)=>{c.fillStyle='#3a2418';c.fillRect(0,0,w,h);const cols=['#7a1f2b','#2a4a8a','#d8c8a0','#1f5a3a','#c9a46a','#4a2a5a','#e9e3da','#8a3a1a','#2a2a30','#5ab4ff','#ff5d73','#ffd166'];
@@ -39,8 +40,8 @@ function buildHome(){
  homeTextures();
  region('home',{fog:[.86,.76,.68],fr:[80,360],day:1});const RG=G.regions.home;RG.amb=[.6,.58,.6];RG.lmCap=20;RG.lmPages={high:4,medium:3,low:2};
  // morning sun from the east-south-east, low and warm, over Linden Square and in through the Mill Lane windows
- const SUN=[.86,.42,.3];G.sun.home={d:SUN,c:[1,.86,.7],k:3.1,c0:[-298,6,0],half:58,res:4096};
- const M={brick:mt('brick',0,.7,0,{r:.9}),plaster:mt('wallWarm','#f2ece2',.5,0,{r:.9}),paint:mt('wallPale','#ece8e2',.5,0,{r:.9}),green:MT.gloss('#24493a'),
+ const SUN=[.86,.42,.3];G.sun.home={d:SUN,c:[1,.86,.7],k:2.5,c0:[-298,6,0],half:58,res:4096};
+ const M={brick:mt('brick',0,.7,0,{r:.9}),plaster:mt('plasterF','#fbf2e4',.35,0,{r:.9}),paint:mt('plasterF',0,.35,0,{r:.9}),green:MT.gloss('#24493a'),
   stone:mt('concrete','#d8d0c0',.5,0,{r:.8}),sash:MT.plain('#f4f0e8'),metro:mt('metro',0,.9,0,{r:.35}),checker:mt('checker',0,.45,0,{r:.4}),oak:mt('wood','#d8b890',.6,0,{r:.5}),
   steel:mt('metal','#d8dce4',.5,0,{r:.3,m:.7}),deck:mt('decking',0,.5,0,{r:.8}),slate:mt('slate',0,.35,0,{r:.8}),lead:MT.plain('#5a5e66'),tileB:mt('tile','#eef4f6',.8,0,{r:.25}),
   rugA:mt('rug','#c9b6ff',.4,0,{r:1}),rugB:mt('rug','#ffd9a0',.4,0,{r:1}),sack:mt('sack',0,1.4,0,{r:.95}),black:MT.plain('#16161c'),walnut:MT.woodDark};
@@ -171,10 +172,10 @@ function buildHome(){
  box(-290.8,1.0,3.6,-290.2,1.05,10.4,{side:M.walnut,top:M.oak});colBox(-290.8,3.6,-290.2,10.4,0,1.05);
  for(const z of[4.2,5.3,8.7,9.8]){box(-291.35,0,z-.03,-291.29,.72,z+.03,M.black,{col:false});box(-291.5,0,z-.16,-291.14,.03,z+.16,M.black,{col:false});box(-291.52,.72,z-.19,-291.12,.78,z+.19,M.green,{col:false})}
  panel(-305.99,1.2,8.6,2.2,1.4,'e',MT.chalk);potPlant(-305.5,11.1,1);potPlant(-291.1,11.1,1);
- for(const x of[-303,-299.5,-296])pendant(x,3.6,5,'#ffd98a',6);for(const[x,z]of[[-301.5,8.6],[-296.6,7.8]])pendant(x,3.6,z,'#ffd98a',5);
+ for(const x of[-303,-299.5,-296])pendant(x,3.6,5,'#ffd98a',5);for(const[x,z]of[[-301.5,8.6],[-296.6,7.8]])pendant(x,3.6,z,'#ffd98a',4.5);
  vfx('dust',{b0:[-305.5,.4,3],b1:[-290.6,3.3,11.5],n:140,size:1,col:[1,.9,.7],op:.5});
  // --- the bakehouse: two deck ovens, proving cabinet, steel benches with dough, mixer, cooling racks, sacks, sink, hood, clock
- {for(const x of[-305.8,-302.2]){box(x,0,-7.8,x+3.4,2.1,-6.5,MT.chrome);tq(x+1.7,.25,-6.49,3,.65,'s',MT.oven,1.5,.65);tq(x+1.7,1.1,-6.49,3,.65,'s',MT.oven,1.5,.65);box(x+.2,1.88,-6.48,x+3.2,1.95,-6.44,MT.glow('#ff9a5c',.9),{col:false});addLight(x+1.7,.9,-5.7,[1,.55,.25],4.5,.85);
+ {for(const x of[-305.8,-302.2]){box(x,0,-7.8,x+3.4,2.1,-6.5,MT.chrome);tq(x+1.7,.25,-6.49,3,.65,'s',MT.oven,1.5,.65);tq(x+1.7,1.1,-6.49,3,.65,'s',MT.oven,1.5,.65);box(x+.2,1.88,-6.48,x+3.2,1.95,-6.44,MT.glow('#ff9a5c',.9),{col:false});addLight(x+1.7,.9,-5.7,[1,.55,.25],4,.55);
    vfx('steam',{b0:[x+1.7,2.15,-6.7],n:14,size:1.1,col:[1,.95,.9],op:.15,sp:.7})}
   box(-298.4,0,-7.8,-296.6,2.1,-6.9,MT.chrome);box(-298.3,.2,-6.89,-296.7,2,-6.87,MT.glass,{col:false});for(let i=0;i<6;i++){box(-298.2,.35+i*.28,-7.6,-296.8,.37+i*.28,-7,M.steel,{col:false});for(let k=0;k<4;k++)box(-298.1+k*.33,.37+i*.28,-7.4,-297.85+k*.33,.45+i*.28,-7.15,MT.plain('#f0e4cc'),{col:false})}
   box(-305.8,2.4,-7.8,-298.6,2.5,-6.2,MT.chrome,{col:false});box(-305.6,2.5,-7.6,-298.8,3.6,-7.2,MT.chrome,{col:false});
