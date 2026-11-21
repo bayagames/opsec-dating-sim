@@ -217,7 +217,7 @@ function render(dt){
  cam.position.set(WD.x,WD.eye+bob,WD.z);cam.rotation.set(WD.pit,WD.yaw,0);
  G.sky.position.copy(cam.position);const su=G.sky.material.uniforms;su.hz.value.copy(G.fog.color);su.t.value=performance.now()/1000;if(R.day){su.zn.value.setRGB(.12,.3,.75);su.st.value=0}else{su.zn.value.setRGB(.012,.012,.05);su.st.value=1}
  updLights(dt);
- updSprites(dt);
+ updSprites(dt);vfxTick();
  if(G.composer)G.composer.render(dt);else r.render(G.scene,cam);
 }
 function updSprites(dt){
@@ -338,7 +338,7 @@ function initWorld(cb){
  G.inited=true;G.waiters=cb?[cb]:[];
  try{
   if(!glInit($('gl')))return finishInit(),false;
-  paintTextures();buildLevels();placeWorld();finishRegions();
+  paintTextures();buildLevels();placeWorld();finishRegions();vfxBuild();
   setupInput();requestAnimationFrame(loop);
  }catch(e){console.error(e);G.ok=false;finishInit();return false}
  // bake every light in the level into lightmaps (a few seconds, once per load)

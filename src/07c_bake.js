@@ -46,6 +46,10 @@ function bakeMats(){
   fragmentShader:'uniform vec3 cp,sd;uniform float far;varying vec3 wp;void main(){gl_FragColor=vec4(dot(cp-wp,sd)/far,0.,0.,1.);}',side:T.DoubleSide});
  return G.bk={cov,light,dist,fin,sun,sdep};
 }
+/* a shadow material that cuts holes where a texture is transparent (leaves), sharing the light's uniforms */
+function cutMat(base,map){const T=G.T,u=Object.assign({},base.uniforms,{map:{value:map}});
+ return new T.ShaderMaterial({uniforms:u,vertexShader:'varying vec3 wp;varying vec2 vu;void main(){vu=uv;wp=(modelMatrix*vec4(position,1.)).xyz;gl_Position=projectionMatrix*viewMatrix*vec4(wp,1.);}',
+  fragmentShader:base.fragmentShader.replace('varying vec3 wp;','varying vec3 wp;varying vec2 vu;uniform sampler2D map;').replace('void main(){','void main(){if(texture2D(map,vu).a<.5)discard;'),side:T.DoubleSide})}
 /* prepare one region: float accumulation pages, the flattened bake scenes, and a shadow-caster scene */
 function bakeSetup(reg){
  const T=G.T,r=G.r,R=G.regions[reg],LM=R.lm,BK=bakeMats();
@@ -54,7 +58,9 @@ function bakeSetup(reg){
  for(let p=0;p<LM.pages;p++){R.bk.rt.push(new T.WebGLRenderTarget(LM.S,LM.S,opt));R.bk.scn.push(new T.Scene())}
  for(const m of R.obj.children){if(!m.isMesh)continue;const pg=m.userData.pg,kd=m.userData.mk.split('|')[1];
   if(pg>=0){const b=new T.Mesh(m.geometry,BK.light);b.frustumCulled=false;b.userData.bs=m.geometry.boundingSphere;R.bk.scn[pg].add(b)}
-  if(kd==='lit'){const s=new T.Mesh(m.geometry,BK.dist);s.matrixAutoUpdate=false;R.bk.sh.add(s)}}
+  if(kd==='lit'||kd==='cut'){const s=new T.Mesh(m.geometry,BK.dist);s.matrixAutoUpdate=false;
+   if(kd==='cut'){const map=texObj(m.userData.mk.split('|')[0]);s.userData.dm=cutMat(BK.dist,map);s.userData.sm=cutMat(BK.sdep,map);s.material=s.userData.dm}else{s.userData.dm=BK.dist;s.userData.sm=BK.sdep}
+   R.bk.sh.add(s)}}
  const ac=r.autoClear,cc=r.getClearColor(new T.Color()),ca=r.getClearAlpha();
  for(let p=0;p<LM.pages;p++){r.setRenderTarget(R.bk.rt[p]);r.setClearColor(0x000000,0);r.clear();R.bk.scn[p].overrideMaterial=BK.cov;r.render(R.bk.scn[p],R.bk.cam);R.bk.scn[p].overrideMaterial=null}
  r.setRenderTarget(null);r.setClearColor(cc,ca);r.autoClear=ac;
@@ -84,7 +90,7 @@ function bakeSun(reg){
  const cam=new T.OrthographicCamera(-S.half,S.half,S.half,-S.half,.1,far);cam.position.copy(cp);cam.up.set(0,1,0);if(Math.abs(sd.y)>.95)cam.up.set(0,0,1);cam.lookAt(c);cam.updateMatrixWorld(true);cam.updateProjectionMatrix();
  BK.sdep.uniforms.cp.value.copy(cp);BK.sdep.uniforms.sd.value.copy(sd);BK.sdep.uniforms.far.value=far;
  const ac=r.autoClear,cc=r.getClearColor(new T.Color()),ca=r.getClearAlpha();
- R.bk.sh.overrideMaterial=BK.sdep;r.setRenderTarget(rt);r.setClearColor(0xffffff,1);r.autoClear=true;r.clear();r.render(R.bk.sh,cam);R.bk.sh.overrideMaterial=null;
+ for(const o of R.bk.sh.children)o.material=o.userData.sm;r.setRenderTarget(rt);r.setClearColor(0xffffff,1);r.autoClear=true;r.clear();r.render(R.bk.sh,cam);for(const o of R.bk.sh.children)o.material=o.userData.dm;
  const u=BK.sun.uniforms;u.sd.value.copy(sd);u.cp.value.copy(cp);u.far.value=far;u.smap.value=rt.texture;u.tx.value=1/res;u.lc.value.set(lin(S.c[0]),lin(S.c[1]),lin(S.c[2])).multiplyScalar(S.k);
  u.smat.value.multiplyMatrices(cam.projectionMatrix,cam.matrixWorldInverse);
  r.autoClear=false;
@@ -113,7 +119,7 @@ const LMDB={db:null,open(){return new Promise(res=>{try{const q=indexedDB.open('
  put(k,v){if(!LMDB.db)return;try{const t=LMDB.db.transaction('lm','readwrite');t.objectStore('lm').put(v,k)}catch(e){}}};
 function lmKey(reg){const R=G.regions[reg],L=G.lights[reg]||[];let h=0;const add=v=>{h=(h*31+Math.round(v*100))|0};
  for(const l of L)l.forEach(add);const SU=G.sun&&G.sun[reg];if(SU)[...SU.d,...SU.c,SU.k,SU.half,...SU.c0].forEach(add);let verts=0;R.obj.traverse(o=>{if(o.isMesh&&o.userData.pg>=0){verts+=o.geometry.attributes.position.count;const a=o.geometry.attributes.lmuv.array;for(let i=0;i<a.length;i+=97)add(a[i]*1e4)}});
- return['v4',reg,R.lm.S,R.lm.pages,R.lm.D.toFixed(3),verts,h,G.LK,LOOK.reach,BAKE.fill,BAKE.soft,BAKE.cube].join('|')}
+ return['v5',reg,R.lm.S,R.lm.pages,R.lm.D.toFixed(3),verts,h,G.LK,LOOK.reach,BAKE.fill,BAKE.soft,BAKE.cube].join('|')}
 function lmApply(reg,pages){const T=G.T,R=G.regions[reg],S=R.lm.S;R.lmTex=pages.map(px=>{const t=new T.DataTexture(px,S,S,T.RGBAFormat,T.UnsignedByteType);t.minFilter=t.magFilter=T.LinearFilter;t.generateMipmaps=false;t.channel=1;t.colorSpace=T.NoColorSpace;t.needsUpdate=true;return t});
  R.obj.traverse(o=>{if(o.isMesh&&o.userData.mk&&o.userData.pg>=0){o.userData.lmk=reg+':'+o.userData.pg;o.material=getMat(o.userData.mk,o.userData.lmk)}})}
 /* bake everything, a few lights per frame so the loading bar moves; cb(ok) when done */
