@@ -32,6 +32,7 @@ Source lives in `src/`. To rebuild `index.html` after editing:
 - `08c_site.js`    the Halcyon Hotel + Convention Centre: Foyer, Ring, courtyard, halls, Village Row, back of house, Level 1, basement, con roof
 - `08d_tower.js`   hotel 13th floor + hotel roof
 - `08e_places.js`  Brindle & Co (office) + Central Station
+- `08f_home.js`    Proof: a five-level corner building (bakery, Flat 1A, two locked floors, roof terrace) on Linden Street, with the street, square, rear terraces, viaduct and city around it; morning sun baked through real windows
 - `09_world.js`    movement, collision, interaction, sprites, minimap, main loop
 - `09a_place.js`   who stands where, interactions, crowd, story gates, lifts, train and taxi
 - `10_phone.js`    phone UI and apps (Settings, Quit)
