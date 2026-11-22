@@ -23,7 +23,7 @@ let phApp=null,phThread=null,phReg=null;const PH={case:null,pick:[],ans:null,hea
 function phone(app){
  if(!S)return;
  const o=$('ov');if((o.classList.contains('on')&&!o.classList.contains('phoneov'))||$('card').classList.contains('on'))return;
- const opening=!o.classList.contains('phoneov');
+ const opening=!o.classList.contains('phoneov');if(opening)PH.day=null;
  if(document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}
  WD.active=false;phThread=null;
  if(app){openApp(app,false);return}
@@ -70,9 +70,8 @@ const APPS={
   return`<div class="msgs ${phThread?'open':''}"><div class="mlist">${list||'<p class="small" style="padding:12px">No messages yet.</p>'}</div><div class="mview2">${innerWidth<=760&&phThread?'<button class="btn" id="mback">‹ All conversations</button>':''}${th}</div></div>`},
  /* ---- Calendar: the week, today in detail, what you can do now ---- */
  calendar(){
-  if(S.day===0)return'<div class="abody"><p class="small">Two weeks to go. The con is circled on every calendar you own.</p></div>';
-  const d=PH.day||S.day;
-  const week=`<div class="cweek">${[1,2,3,4,5,6,7].map(i=>`<button class="cday ${i===d?'on':''} ${i<S.day?'past':''} ${i===S.day?'now':''}" data-d="${i}"><b>${DAYN[i].slice(0,3)}</b><small>Day ${i}</small>${i===7?'<em>Keynote</em>':''}</button>`).join('')}</div>`;
+  const d=PH.day!=null&&PH.day<=7?PH.day:S.day;
+  const week=`<div class="cweek">${[0,1,2,3,4,5,6,7].map(i=>`<button class="cday ${i===d?'on':''} ${i<S.day?'past':''} ${i===S.day?'now':''}" data-d="${i}"><b>${i?DAYN[i].slice(0,3):'Before'}</b><small>${i?'Day '+i:'2 weeks out'}</small>${i===7?'<em>Keynote</em>':''}</button>`).join('')}</div>`;
   const rows=SLOTN.map((n,i)=>{let b=(DAYS[d]||[])[i];if(typeof b==='function')b=(d===S.day&&i===S.slot)?b():null;const B=b&&BEATS[b];
    const past=d<S.day||d===S.day&&i<S.slot,cur=d===S.day&&i===S.slot,log=(S.slog&&S.slog[d+':'+i])||[];
    let what='';if(B)what=past||S.done[b]?'✓ '+B.t:(d>S.day?'Story':B.t);
@@ -88,7 +87,7 @@ const APPS={
     ${eventsNow().length?`<div class="small"><b>On now</b></div><div class="cppl">${eventsNow().map(e=>`<button class="chip" data-ev="${e.id}">${esc(e.n)}<small>${esc(AREAS[e.w]?AREAS[e.w].n:'')}</small></button>`).join('')}</div>`:''}
     ${leads.length?`<div class="small"><b>Open leads</b></div><div class="cppl">${leads.map(k=>`<button class="chip" data-lead="${k}">${esc(LEADS[k].n)}<small>${esc(AREAS[LEADS[k].w]?AREAS[LEADS[k].w].n:'')}</small></button>`).join('')}</div>`:''}
     <div class="row"><button class="btn" id="cwait">${S.slot===5?'Call it a night':'Let the '+SLOTN[S.slot].toLowerCase()+' go by'}</button></div></div>`}}
-  return`<div class="abody">${week}<div class="cgrid"><div class="cday2"><h3>Day ${d} · ${DAYN[d]}${d===7?' · Closing keynote':''}</h3>${rows}</div>${now?`<div class="cside">${now}</div>`:''}</div></div>`},
+  return`<div class="abody">${week}<div class="cgrid"><div class="cday2"><h3>${d?'Day '+d+' · '+DAYN[d]:'Two weeks before the con'}${d===7?' · Closing keynote':''}</h3>${rows}</div>${now?`<div class="cside">${now}</div>`:''}</div></div>`},
  /* ---- Hearts: everyone, and a full file on whoever you pick ---- */
  hearts(){
   const sel=PH.heart&&ROM.includes(PH.heart)?PH.heart:null;

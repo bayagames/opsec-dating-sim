@@ -66,7 +66,7 @@ function buildSouth(){
   for(let i=0;i<6;i++){const x=52.5+i*4.6;box(x-1.4,0,66,x+1.4,1.4,71.8,MT.gloss('#e9eef5'));box(x-1.1,.4,65.95,x+1.1,1.2,66,MT.glow('#c9b6ff',.9),{col:false})}for(let i=0;i<3;i++){const z=58+i*3;box(78.2,0,z-1.2,79.8,1.4,z+1.2,MT.gloss('#e9eef5'))}
   addLight(64,2.6,60,[.7,.6,1],9,.6);mr(50,56,80,72,0,'Nap pods','#2a2a4a');
   sFloor(50,34,80,56,L1,MT.carpetGrey);ceilQ(50,34,80,56,L2-.45,MT.ceil);W('v',50,34,56,L1,L2-L1,MT.wallWarm,1);W('h',56,50,80,L1,L2-L1,MT.wallWarm,-1);W('v',80,34,56,L1,L2-L1,MT.wallWarm,-1);
-  sofa(58,48,3,'n',  '#6a5a8a',L1);sofa(72,42,3,'s','#6a5a8a',L1);sofa(64,52,3,'s','#6a5a8a',L1);for(const[x,z]of[[51.5,54.5],[78.5,54.5],[78.5,36]])kPlant(x,z,1.2,L1,'#e9e3da');kOnWall('h',55.8,-1,65,6,L1+1,2.4,MT.morning);
+  sofa(58,48,3,'n',  '#6a5a8a',L1);sofa(72,42,3,'s','#6a5a8a',L1);sofa(64,52,3,'s','#6a5a8a',L1);for(const[x,z]of[[51.5,54.5],[78.5,54.5],[78.5,36]])kPlant(x,z,1.2,L1,'#e9e3da');todWindow(65,L1+1,55.79,6,2.4,'n');
   for(const z of[40,50])addLight(65,L1+3,z,[1,.9,.75],9,.6);mr(50,34,80,56,L1,'Quiet room','#3a3a4a')}
  // the chill-out's west wall is the cosplay hall's east wall (x 50); the nap pods' west wall stands at x 50 too
  buildPlaza();

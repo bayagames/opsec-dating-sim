@@ -15,7 +15,7 @@ function buildTower(){
  mr({x0:212,z0:8,x1:276,z1:12,h:3,fl:MT.carpetHotel,wa:MT.wallHotel,sides:'swe',n:'',mc:'#5a2a3a'});
  mr({x0:220,z0:-8,x1:224,z1:8,h:3,fl:MT.carpetHotel,wa:MT.wallHotel,sides:'',n:'',mc:'#5a2a3a'});
  mr({x0:264,z0:-8,x1:268,z1:8,h:3,fl:MT.carpetHotel,wa:MT.wallHotel,sides:'',n:'',mc:'#5a2a3a'});
- for(const[z,d]of[[-10,'e'],[10,'e']]){panel(212.21,.9,z,3,1.5,'e',MT.cityview);panel(275.79,.9,z,3,1.5,'w',MT.cityview)}
+ for(const[z,d]of[[-10,'e'],[10,'e']]){todWindow(212.22,.9,z,3,1.5,'e');todWindow(275.78,.9,z,3,1.5,'w')}
  // the lift core
  box(224,0,-8,264,3,8,{side:MT.wallHotel,top:MT.plain('#3a2a2a')});
  for(let i=0;i<4;i++){const x=239+i*2.4;panel(x,0,-8.02,1.5,2.3,'n',MT.elev);panel(x,0,8.02,1.5,2.3,'s',MT.elev);box(x+.8,1.2,-8.06,x+.9,1.35,-8.01,MT.glow('#ffd166',2),{col:false})}
@@ -48,7 +48,7 @@ function buildTower(){
  const hx0=nb(11);mr({x0:hx0,z0:-22,x1:276,z1:-12,h:7.6,nofloor:1,fl:MT.concrete,wa:MT.wallPale,n:'Housekeeping',mc:'#3a3a44'});
  floorQ(hx0,-22,276,-21,0,MT.concrete);surf(hx0,-22,276,-21,0);floorQ(hx0,-21,272,-12,0,MT.concrete);surf(hx0,-21,272,-12,0);floorQ(272,-15,276,-12,0,MT.concrete);surf(272,-15,276,-12,0);
  stairs(272,-21,275.8,-15,0,TOP,'z+',MT.concrete);slab(hx0+.2,-15,275.8,-12.2,TOP,.3,MT.concrete);railing(272,-21,272,-15,0,{y2:TOP,m:MT.metal});
- for(let i=0;i<3;i++)box(hx0+.3,0,-21.7+i*1.6,hx0+1,1.9,-20.4+i*1.6,MT.plain('#e9e3da'));box(hx0+1.2,0,-14,hx0+2.4,1.1,-12.6,MT.plain('#5a7a9a'));addLight(273,2.6,-17,[1,.95,.9],7,.9);addLight(273,6.4,-13,[1,.95,.9],6,.9);
+ for(let i=0;i<3;i++)box(hx0+.05,0,-20.6+i*1.6,hx0+.4,1.9,-19.3+i*1.6,MT.plain('#e9e3da'));box(274.5,0,-14.2,275.7,1.1,-13,MT.plain('#5a7a9a'));addLight(273,2.6,-17,[1,.95,.9],7,.9);addLight(273,6.4,-13,[1,.95,.9],6,.9);
  // 1336: the party that never stops
  mr({x0:sb(9),z0:12,x1:264,z1:22,h:3,fl:MT.carpetGrey,wa:MT.wallHotel,n:'1336',mc:'#4a1a4a'});
  box(sb(9)+.3,0,18,263.7,.55,21.8,MT.linen);box(sb(9)+.2,0,13,sb(9)+1.4,.8,15,MT.plain('#2a2a30'));for(let i=0;i<6;i++)box(sb(9)+.4+i*.3,.8,13.3,sb(9)+.6+i*.3,1.1,13.5,MT.plain(['#ffd166','#8affc1','#ff5d73'][i%3]),{col:false});
@@ -56,7 +56,7 @@ function buildTower(){
  box(263.7,1,15,263.79,2,17,MT.glow('#ff5fb0',1.6),{col:false});
  // ROOM 1337: corner room, two windows, bathroom, seating area for Night 3
  mr({x0:264,z0:12,x1:276,z1:22,h:3,fl:MT.carpetGrey,wa:MT.wallHotel,n:'Room 1337',mc:'#5a4a3a'});
- panel(275.79,.8,17,5,1.8,'w',MT.cityview);panel(271,.8,21.79,5,1.8,'n',MT.cityview);
+ todWindow(275.78,.8,17,5,1.8,'w');todWindow(271,.8,21.78,5,1.8,'n');
  box(271.6,0,12.4,275.8,.55,15.8,MT.linen);box(275.6,0,12.3,275.8,1.2,15.9,MT.woodDark);box(274.4,.55,12.7,275.5,.68,15.5,MT.plain('#ffffff'),{col:false});
  box(275.2,0,16,275.8,.55,16.6,MT.woodDark);box(275.4,.55,16.2,275.6,.75,16.4,MT.glow('#ffd98a'),{col:false});
  box(264.2,0,17,268,3,17.15,MT.wallPale);box(267.85,0,17,268,3,20.3,MT.wallPale);floorQ(264.2,17.15,267.85,21.8,.01,MT.tile);

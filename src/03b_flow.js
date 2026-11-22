@@ -6,6 +6,7 @@ function route(g,o){const req=o.req.map(r=>Object.assign({d:1,a:0},r));ROUTES[g]
 const sceneReq=g=>{const R=ROUTES[g];return R?R.req[scn(g)]:null};
 function sceneWhy(g){const R=ROUTES[g],i=scn(g);if(!R||i>=R.n)return null;const r=R.req[i];
  if(SC[g+i]===undefined)return'their story moves on in the main plot';
+ {const sa=typeof sceneArea==='function'&&sceneArea(g+i);if(sa&&AREAS[sa]&&typeof areaLock==='function'&&areaLock(sa))return'it happens in the '+AREAS[sa].n+', which isn\'t open yet'}
  if(day()<r.d)return'their story continues on Day '+r.d;
  if(aff(g)<r.a)return'needs ♥ '+r.a+' (you have '+aff(g)+')';
  if(r.sk&&rank('skill')<r.sk)return'needs Skill rank '+r.sk+' ('+RANKS.skill[r.sk]+')';
@@ -60,13 +61,20 @@ const stepGo=()=>startBeat(curBeat());
 function beatTarget(b0){const b=beatStep(b0);if(b.manual)return b.tg||null;if(b.int&&INTPOS[b.int]){const p=INTPOS[b.int];return{reg:p[0],x:p[1],z:p[2],y:p[3]}}if(b.who){const c=WCH.find(c=>c.id===b.who&&c.on);return c?{reg:c.reg,x:c.x,z:c.z,y:c.y||0}:null}if(b.auto)return null;if(b.pos)return{reg:b.pos[0],x:b.pos[1],z:b.pos[2],y:b.pos[3]||0};const A=AREAS[b.w];if(!A)return null;return{reg:A.reg,x:A.sp[0],z:A.sp[1],y:A.sp[3]||0}}
 /* ---- free time: what you can do with a part of the day ---- */
 function freeCheck(what){if(!S||S.day<1)return false;if(curBeat()){run([N(blockedMsg()+'. It\'s waiting where the green light is.')],hub);return false}if(!isFree()){run([N('Not right now.')],hub);return false}return true}
+/* a scene that belongs somewhere else: they ask to meet you there instead of whisking you off */
+function elsewhere(g,id){if(!(S&&S.inWorld&&typeof G!=='undefined'&&G.ok))return false;const sa=typeof sceneArea==='function'&&sceneArea(id);if(!sa||!AREAS[sa]||nearArea(sa,6))return false;
+ const A=AREAS[sa];S.wp={reg:A.reg,x:A.sp[0],z:A.sp[1],y:A.sp[3]||0,t:CH[g].name+': '+A.n};
+ run([L(typeof worldLook==='function'?worldLook(g):g,'n',pick(['Not here. Meet me at the '+A.n+'?','Can we do this somewhere else? The '+A.n+'. I\'ll see you there.','Too many people. '+A.n+', in a bit?'])),N('Pinned on your map: '+A.n+'.')],hub);return true}
 function hangMenu(g,bgk){
  const R=ROUTES[g],pg=typeof worldLook==='function'?worldLook(g):g;
- if(!met(g)){meet(g);adv(g,0);return run([{bg:bgk},...scr(g+'0')],hub)}
+ // the menu itself happens right where you're standing
+ if(typeof areaAt==='function'&&S.inWorld&&typeof G!=='undefined'&&G.ok){const here=areaAt(WD.reg,WD.x,WD.z,WD.y);if(here)bgk=here}
+ if(!met(g)){if(elsewhere(g,g+'0'))return;meet(g);adv(g,0);return run([{bg:bgk},...scr(g+'0')],hub)}
  const opts=[],why=sceneWhy(g),i=scn(g),free=isFree();
  if(i<R.n)opts.push({t:i===R.n-1?'Spend time together: the last one':'Spend time together',hint:why?('Locked: '+why):curBeat()?blockedMsg():!free?'Not now':'Uses the '+SLOTN[S.slot].toLowerCase()+(i===R.n-1?' · this is the end of their story':''),if:()=>true,then:()=>{
    if(why)return[N(CH[g].name+'\'s story '+(why.startsWith('their')?'continues later: ':'needs more: ')+why+'.')];
    if(!freeCheck())return[];
+   if(elsewhere(g,g+i))return[];
    return[...scr(g+i),()=>{adv(g,i);addSum(R.sum?R.sum[i]||'':'');if(S.slot===5)ach('night_owl');ach('first_hang');spend('hang');return[]}]}});
  const tk=g+':'+S.day;
  opts.push({t:'Talk shop',hint:S.hang[tk]?'Already did that today':'Free · once a day',if:()=>!S.hang[tk],then:()=>{S.hang[tk]=1;return[{unlock:'hang'},{game:'quiz',who:g,n:3}]}});

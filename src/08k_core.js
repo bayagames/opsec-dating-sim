@@ -155,6 +155,8 @@ function buildRing(){
  const lv=[[0,L1],[L1,L2-L1],[L2,16.5-L2]];
  for(const[y,h]of lv){W('h',-64,-64,56,y,h,WC,1);W('h',34,-64,56,y,h,WC,-1)}
  W('v',56,-54,20,0,L1,WC,-1);for(const y of[L1,L2]){W('v',56,-54,20,y,1,WC,-1);W('v',56,-54,20,y+1,(y===L1?L2:16.5)-y-1,GL,-1)}
+ // Level 2 has no south-east concourse beyond it: the ring's end wall there, glazed above like the rest
+ W('v',56,20,34,L2,1,WC,-1);W('v',56,20,34,L2+1,16.5-L2-1,GL,-1);
  // inner glass to the courtyard, both storeys
  for(const[y,h]of[[0,L2],[L2,16.5-L2]]){gwall('h',-50,-50,40,y,h,-1);gwall('h',20,-50,40,y,h,1);gwall('v',-50,-50,20,y,h,-1);gwall('v',40,-50,20,y,h,1)}
  // Level 1 balcony along the outer walls, and the L2 floor over the whole ring (its underside is the ring's ceiling)

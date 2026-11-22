@@ -49,8 +49,28 @@ function vfxBeam(e){
   transparent:true,depthWrite:false,side:T.DoubleSide,blending:T.AdditiveBlending});
  const mesh=new T.Mesh(g,m);mesh.renderOrder=4;return mesh;
 }
+/* a window that shows the real time of day: sky, skyline, stars and lit windows at night, drawn by a shader
+   that reads the same palette as the sky dome (TODU, updated every frame from the clock) */
+const TODU={hz:null,zn:null,st:{value:0}};
+function todWindow(x,y,z,w,h,dir,o){vfx('window',Object.assign({x:x+(G.ox||0),y,z,w,h,dir},o||{}))}
+function vfxWindow(e){
+ const T=G.T;if(!TODU.hz){TODU.hz={value:new T.Color(.7,.75,.85)};TODU.zn={value:new T.Color(.25,.45,.85)}}
+ const g=new T.PlaneGeometry(e.w,e.h);const m=new T.ShaderMaterial({uniforms:{hz:TODU.hz,zn:TODU.zn,st:TODU.st,t:VFXU.t,sd:{value:(e.x*.37+e.z*.11)%1},asp:{value:e.w/e.h},mul:{value:e.mul||2}},
+  vertexShader:'varying vec2 v;void main(){v=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+  fragmentShader:`uniform vec3 hz,zn;uniform float st,t,sd,asp,mul;varying vec2 v;
+   float h1(float n){return fract(sin(n*127.1+sd*311.7)*43758.5453);}
+   void main(){vec2 p=vec2(v.x*asp,v.y);vec3 c=mix(hz,zn,smoothstep(.15,1.,v.y));
+    float sx=floor(p.x*40.);float s=h1(sx)*fract(sin(dot(floor(p*vec2(40.,60.)),vec2(12.9,78.2))+sd)*4375.5);c+=vec3(step(.985,s)*st*.9);
+    float bw=floor(p.x*7.+sd*3.);float bh=.12+.3*h1(bw);float bld=step(v.y,bh);
+    vec3 bc=mix(vec3(.16,.17,.22)*(1.-.75*st)+hz*.18,vec3(.03,.025,.05),st);
+    vec2 cell=floor(vec2(p.x*60.,v.y*70.));float lit=step(.62,h1(cell.x*7.31+cell.y*1.7))*step(.25,fract(p.x*60.))*step(.3,fract(v.y*70.));
+    bc+=lit*vec3(1.,.82,.5)*(.08+.9*st);c=mix(c,bc,bld);
+    float fr=step(.035,v.x)*step(v.x,.965)*step(.04,v.y)*step(v.y,.96)*(1.-step(abs(v.x-.5),.012));
+    c=mix(vec3(.12,.11,.14),c,fr);gl_FragColor=vec4(c*mul,1.);}`});
+ const me=new T.Mesh(g,m);me.position.set(e.x,e.y+e.h/2,e.z);me.rotation.y={s:0,n:Math.PI,e:Math.PI/2,w:-Math.PI/2}[e.dir];return me}
 function vfxMake(e){
+ if(e.type==='window')return vfxWindow(e);
  if(e.type==='beam')return vfxBeam(e);
  return vfxPoints(e.n||40,e.type,e);
 }
-function vfxTick(){if(!G.vfxRoot)return;VFXU.t.value=performance.now()/1000;for(const k in G.vfxRoot)G.vfxRoot[k].visible=k===WD.reg}
+function vfxTick(){if(!G.vfxRoot)return;VFXU.t.value=performance.now()/1000;if(TODU.hz&&S){const P=TODP[clamp(S.slot||0,0,5)];TODU.hz.value.setRGB(...P.hz);TODU.zn.value.setRGB(...P.zn);TODU.st.value=P.st}for(const k in G.vfxRoot)G.vfxRoot[k].visible=k===WD.reg}

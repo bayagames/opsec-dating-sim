@@ -68,7 +68,7 @@ async function dbgJump(id){
  if(G.ok&&S.inWorld!==1){S.inWorld=1}
  S.day=0;S.slot=0;S.wakeAt='flat';if(G.ok){S.inWorld=1;teleportArea('flat')}hub();
  await autoplay(()=>id!=='__end'&&curBeat()&&curBeat().id===id&&!beatBusy&&!$('vn').classList.contains('on'),{hang});
- closeOv();if(S.ending)return;
+ if(S.ending)return;closeOv();
  // land where the beat is waiting
  const b=curBeat(),tg=b&&beatTarget(b);if(G.ok&&tg){const A=b.w&&AREAS[b.w];if(A)teleportArea(b.w);else teleport(tg.reg,tg.x,tg.z+2,0,tg.y)}
  save();hub();toast('Jumped: '+(b?b.t:'done'),'var(--mint)')}
