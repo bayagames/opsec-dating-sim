@@ -51,8 +51,9 @@ function fx(e){
    if(g>0&&S.inv.faraday)g=Math.ceil(g*.6);
    if(g>0&&e.phish&&S.inv.yubi){S.inv.yubi--;if(!S.inv.yubi)delete S.inv.yubi;toast('Security key blocked it','var(--mint)');continue}
    S.exp=clamp(S.exp+g,0,100);if(S.unl.exp&&g)toast(`Exposure ${g>=0?'+':''}${g}`,'var(--coral)');
+   S.expPeak=S.expPeak||{};S.expPeak[S.day]=Math.max(S.expPeak[S.day]||0,S.exp);
   }
-  else if(k==='foot'){S.foot=clamp(S.foot+v,0,60);S.exp=clamp(S.exp+v,0,100);if(S.unl.exp&&v)toast(`Footprint ${v>=0?'+':''}${v} (permanent)`,'var(--coral)')}
+  else if(k==='foot'){(S.footLog=S.footLog||[]).push({d:S.day,s:S.slot,v,w:S.inBeat?(BEATS[S.inBeat]||{}).t||S.inBeat:((S.log[S.log.length-1]||[])[1]||'').slice(0,90)});S.foot=clamp(S.foot+v,0,60);S.exp=clamp(S.exp+v,0,100);if(S.unl.exp&&v)toast(`Footprint ${v>=0?'+':''}${v} (permanent)`,'var(--coral)')}
   else if(k==='skill'||k==='clout'){
    const r0=rankOf(S[k]);S[k]=Math.max(0,S[k]+v);const r1=rankOf(S[k]);
    if(S.unl[k]&&v)toast(`${k==='skill'?'Skill':'Clout'} ${v>=0?'+':''}${v}`,k==='skill'?'var(--mint)':'var(--butter)');

@@ -2,20 +2,20 @@
 /* where the "use something" steps are, for the goal light */
 const INTPOS={door:['home',-302.6,10.9,0],desk:['office',526.6,21,0],lift:['office',497.7,12,0],train:['station',734,4.4,0],reg:['con',-105.2,53.4,0],seat:['con',-5,-79.5,2.75],reception:['con',-218.4,22.5,0],bed:['f13',273.6,14.2,0]};
 /* Day 1: Monday. Home, work, the train, the con */
-beat('d1_home',{t:'Morning',steps:[
+beat('d1_home',{adv:1,t:'Morning',steps:[
  {auto:1,sc:'d1_wake',t:'Pack for the con'},
  {who:'ellie',sc:'d1_ellie',t:'Say goodbye to Ellie at Proof, downstairs',lbl:'Say goodbye to Ellie'},
  {int:'door',sc:'d1_leave',t:'Off to work: the bakery\'s front door',lbl:'Head to work'}]});
-beat('d1_office',{t:'Your last half-day',steps:[
+beat('d1_office',{adv:1,t:'Your last half-day',steps:[
  {auto:1,sc:'d1_office',t:'Work'},
  {int:'desk',sc:'d1_queue',t:'Clear the helpdesk queue at your desk'},
  {who:'gary',sc:'d1_gary',t:'Gary from Accounts is waving at you',lbl:'See what Gary wants'},
  {int:'lift',sc:'d1_out',t:'Leave for the station: the lifts',lbl:'Leave for the con'}]});
-beat('d1_station',{t:'Central Station',steps:[
+beat('d1_station',{adv:1,t:'Central Station',steps:[
  {auto:1,sc:'d1_concourse',t:'Central Station'},
  {who:'pia',sc:'d1_pia',t:'Someone is playing the violin on the concourse',lbl:'Listen to the violinist'},
  {int:'train',sc:'d1_train',t:'Board the 16:12 at Platform 4'}]});
-beat('d1_arrival',{t:'Arrival',steps:[
+beat('d1_arrival',{adv:1,t:'Arrival',steps:[
  {w:'vestibule',ws:['vestibule','foyer'],sc:'d1_doors',t:'Go into the convention centre'},
  {int:'reg',sc:'d1_badge',t:'Pick up your badge at Registration, on the Foyer\'s west wall'},
  {int:'seat',sc:'d1_ceremony',t:'The opening ceremony: your seat in Hall A is lit up'},
@@ -27,7 +27,7 @@ beat('d2_ctf',{t:'CTF 101 in Hall C',w:'hallC',sc:'d2_ctf'});
 beat('d2_rin',{t:'Somewhere quiet: the Chill-out Lounge',w:'lounge',sc:'d2_rin'});
 beat('d2_badge',{t:'Your badge is acting strange: the Badge Lab',w:'badgelab',sc:'d2_badge'});
 beat('d2_reception',{t:'Lumen\'s sponsor reception: the Lumen Lounge, hotel mezzanine',w:'lumenlounge',sc:'d2_reception'});
-beat('d2_late',{t:'Back to Room 1337',steps:[{int:'bed',sc:'d2_late',t:'Back to Room 1337 for the night',lbl:'Go to bed'}]});
+beat('d2_late',{adv:'day',t:'Back to Room 1337',steps:[{int:'bed',sc:'d2_late',t:'Back to Room 1337 for the night',lbl:'Go to bed'}]});
 /* Day 3: Wednesday */
 beat('d3_ellie',{t:'Ellie\'s train gets in: meet her in the hotel lobby',w:'lobby',sc:'d3_ellie'});
 beat('d3_whispers',{t:'The midday keynote in Hall A',w:'hallA',sc:'d3_whispers'});
@@ -35,20 +35,20 @@ beat('d3_roof',{t:'Follow the silver hair: the hotel roof, up the 13th floor fir
 /* Day 4: Thursday */
 beat('d4_noc',{t:'The con network is down',steps:[{auto:1,sc:'d4_call',t:'Your phone'},{w:'noc',sc:'d4_noc',t:'The con network is down: the NOC, under the con (lifts to B, or the car park)'}]});
 beat('d4_gathering',{t:'Everyone is meeting in Room 1337',w:'room1337',sc:'d4_gathering'});
-beat('d4_burglary',{t:'Your phone',auto:1,sc:'d4_burglary'});
+beat('d4_burglary',{adv:1,t:'Your phone',auto:1,sc:'d4_burglary'});
 /* Day 5: Friday */
-beat('d5_home',{t:'Ellie needs to go home: meet her in the hotel lobby',w:'lobby',sc:'d5_home'});
-beat('d5_framed',{t:'Your phone',auto:1,sc:'d5_framed'});
+beat('d5_home',{adv:1,t:'Ellie needs to go home: meet her in the hotel lobby',w:'lobby',sc:'d5_home'});
+beat('d5_framed',{adv:1,t:'Your phone',auto:1,sc:'d5_framed'});
 beat('d5_offer',{t:'Victor Hale has asked you to dinner: The Grill, in the hotel',w:'grill',sc:'d5_offer'});
 /* Day 6: Saturday */
 beat('d6_finals',{t:'The CTF finals: Hall A',w:'hallA',sc:'d6_finals'});
 beat('d6_raid',{t:'Back to Room 1337',w:'room1337',sc:'d6_raid'});
-beat('d6_council',{t:'The war council: the hotel library, after hours',w:'library',sc:'d6_council'});
+beat('d6_council',{adv:1,t:'The war council: the hotel library, after hours',w:'library',sc:'d6_council'});
 /* Day 7: Sunday */
-beat('d7_positions',{t:'Positions',auto:1,sc:'d7_positions'});
-beat('d7_krall',{t:'Something is wrong in the Foyer',w:'foyer',ws:['foyer','foyerG','link','hallC'],sc:'d7_krall'});
-beat('d7_keynote',{t:'The closing keynote: Hall A, 4 PM',w:'hallA',ws:['hallA','backstage'],sc:'d7_keynote'});
-beat('d7_roof',{t:'The thirteenth floor',w:'corridor',ws:['corridor','roof','plantdeck','stairwell'],sc:'d7_roof'});
+beat('d7_positions',{adv:1,t:'Positions',auto:1,sc:'d7_positions'});
+beat('d7_krall',{adv:1,t:'Something is wrong in the Foyer',w:'foyer',ws:['foyer','foyerG','link','hallC'],sc:'d7_krall'});
+beat('d7_keynote',{adv:1,t:'The closing keynote: Hall A, 4 PM',w:'hallA',ws:['hallA','backstage'],sc:'d7_keynote'});
+beat('d7_roof',{adv:1,t:'The thirteenth floor',w:'corridor',ws:['corridor','roof','plantdeck','stairwell'],sc:'d7_roof'});
 beat('d7_party',{t:'The 0xFF afterparty: the Grand Ballroom',w:'ballroom',sc:'d7_party'});
 DAYS[1]=['d1_home','d1_office','d1_station','d1_arrival','d1_bar',null];
 DAYS[2]=['d2_ctf','d2_rin','d2_badge','d2_reception',null,'d2_late'];

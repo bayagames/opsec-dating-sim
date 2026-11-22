@@ -332,4 +332,6 @@ function chapterCard(n,cb){
   if(typeof G!=='undefined'&&G.ok)G.forceFrame=true;
   requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(()=>{f.style.transition='';f.classList.remove('on')},60)))};
 }
+/* a text that wants an answer: TEXTQ[key] = {t, replies:[{t, fx, a (their reply)}]}. Answer it in Messages. */
+function textQ(from,key){const q=TEXTQ[key];if(!q||S.f['tq_'+key])return;S.f['tq_'+key]=1;S.msgs.push({f:from,t:sub(q.t),c:S.day,s:S.slot,r:0,q:key});if(S.unl.phone){toast('New message · '+(CH[from]?CH[from].name:from)+' (wants a reply)','var(--mint)');if(typeof sfx==='function')sfx('notify')}hud()}
 function addMsg(from,t){S.msgs.push({f:from,t:sub(t),c:S.day,s:S.slot,r:0});if(S.unl.phone){toast('New message · '+(CH[from]?CH[from].name:from),'var(--mint)');if(typeof sfx==='function')sfx('notify')}hud()}

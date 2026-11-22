@@ -59,6 +59,7 @@ function scCmd(n,ctx){const a=n.a;
   case'unflag':return[()=>{a.split(/\s+/).forEach(f=>delete S.f[f])}];
   case'clue':return[()=>{a.split(/\s+/).forEach(c=>addClue(c))}];
   case'item':return[{fx:{item:a}}];
+  case'text':{const sp=a.indexOf(' ');return[()=>{textQ(a.slice(0,sp),a.slice(sp+1))}]}
   case'msg':{const sp=a.indexOf(' ');return[{msg:[a.slice(0,sp),a.slice(sp+1)]}]}
   case'game':{const sp=a.indexOf(' ');const o=scArgs(sp<0?'':a.slice(sp+1));const g=Object.assign({game:sp<0?a:a.slice(0,sp)},o);if(typeof o.res==='string'){const fn=o.res;g.res=(...r)=>ev(fn)(...r)}return[g]}
   case'sum':return[()=>{addSum(sub(a))}];

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>OPSEC Dating Simulator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=VT323&display=swap" rel="stylesheet">
@@ -15,6 +15,7 @@
 :root{color-scheme:dark;--bg:#1b1026;--panel:#2a1a3a;--panel2:#352349;--ink:#f6eefc;--dim:#bba8cf;--coral:#ff5d73;--mint:#8affc1;--butter:#ffd166;--line:#4d3566}
 *{box-sizing:border-box;min-width:0}
 html,body{height:100%}
+html,body{touch-action:manipulation;-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 'Chakra Petch',system-ui,sans-serif;overflow:hidden;-webkit-tap-highlight-color:transparent}
 button{font:inherit;color:inherit;cursor:pointer}
 button:focus-visible{outline:3px solid var(--butter);outline-offset:2px}
@@ -267,6 +268,58 @@ button:focus-visible{outline:3px solid var(--butter);outline-offset:2px}
 .sumd{margin-bottom:12px}.sumd p{margin:4px 0;font-size:14px}.sumd small{color:var(--mint)}
 #txt.think{font-style:italic;color:#d9c8ee}
 #txt.wh1{color:#ff4a5a;text-shadow:2px 0 #00e5ff55,-2px 0 #ff004455}
+.wpmark{position:absolute;left:0;top:0;z-index:6;display:none;flex-direction:column;align-items:center;gap:2px;pointer-events:none;margin:-10px 0 0 -10px}
+.wpmark i{display:block;width:14px;height:14px;background:var(--c);clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);opacity:.9;filter:drop-shadow(0 0 4px #000)}
+.wpmark.edge i{clip-path:polygon(0 15%,100% 50%,0 85%,25% 50%);width:18px;height:18px}
+.wpmark span{font:12px 'Chakra Petch',sans-serif;color:var(--c);text-shadow:0 1px 3px #000;white-space:nowrap}
+.bigapp{position:relative;width:100%;height:100dvh;display:flex;flex-direction:column;background:radial-gradient(120% 80% at 10% 0%,#2a1640,#0a0610 70%)}
+.bigapp .mtop{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:2px solid var(--line);flex:none}.bigapp .mtop b{font-size:20px}.bigapp .mtop .small{flex:1}
+.abody{flex:1;overflow:auto;padding:14px 16px 24px;min-height:0}
+.atabs{display:flex;gap:6px;padding:8px 14px;border-bottom:1px solid var(--line);flex:none;overflow-x:auto}.atabs button{flex:none;min-height:38px;padding:4px 14px;border-radius:999px;border:2px solid var(--line);background:var(--panel);color:var(--ink);font:inherit;font-size:14px}.atabs button.on{background:var(--butter);color:#1b1026;border-color:var(--butter)}
+.dbh{margin:14px 0 6px;font-weight:bold;color:var(--butter)}
+.dbl,.dbg2{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px}
+.dbi{display:flex;flex-direction:column;align-items:flex-start;text-align:left;padding:8px 12px;border-radius:10px;border:2px solid var(--line);background:var(--panel);color:var(--ink);font:inherit;min-height:44px}.dbi:hover{border-color:var(--mint)}.dbi small{color:var(--dim);font-size:12px}
+.nb{flex:none;min-width:20px;height:20px;border-radius:10px;background:var(--coral);color:#fff;font:bold 12px/20px sans-serif;text-align:center;padding:0 5px;font-style:normal}.nb.q{background:var(--mint);color:#1b1026}
+/* messages */
+.msgs{flex:1;display:flex;min-height:0}.mlist{width:320px;border-right:2px solid var(--line);overflow:auto}.mview2{flex:1;display:flex;flex-direction:column;min-width:0}
+.mthr{width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border:0;border-bottom:1px solid var(--line);background:none;color:var(--ink);font:inherit;text-align:left}.mthr.on{background:#8affc114}.mthr .hd{width:44px;height:44px;flex:none;border-radius:50%;overflow:hidden;background:var(--panel2)}.mthr .mt{flex:1;min-width:0}.mthr small{display:block;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}
+.mhead{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line)}.mhead .hd{width:40px;height:40px;border-radius:50%;overflow:hidden;background:var(--panel2)}.mhead small{color:var(--dim)}
+.mlog{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:8px}.mempty{padding:20px}
+.bub{max-width:76%;align-self:flex-start;background:var(--panel2);border-radius:16px 16px 16px 4px;padding:9px 13px;font-size:15px}.bub.me{align-self:flex-end;background:#3a2a5a;border-radius:16px 16px 4px 16px}.bub small{display:block;color:var(--dim);font-size:11px;margin-top:3px}
+.mreply{display:flex;flex-direction:column;gap:6px;align-self:flex-end;max-width:80%}.mreply .ch{font-size:14px}
+@media (max-width:760px){.mlist{width:100%}.msgs.open .mlist{display:none}.msgs:not(.open) .mview2{display:none}}
+/* calendar */
+.cweek{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:12px}.cday{display:flex;flex-direction:column;align-items:center;padding:8px 4px;border-radius:12px;border:2px solid var(--line);background:var(--panel);color:var(--ink);font:inherit}.cday small{color:var(--dim);font-size:11px}.cday em{font-size:10px;color:var(--coral);font-style:normal}.cday.on{border-color:var(--butter)}.cday.now{background:#ffd16622}.cday.past{opacity:.6}
+.cgrid{display:grid;grid-template-columns:1fr 340px;gap:14px}@media (max-width:860px){.cgrid{grid-template-columns:1fr}}
+.cslot{display:flex;gap:12px;padding:8px 10px;margin:5px 0;border-radius:10px;background:var(--panel)}.cslot.on{outline:2px solid var(--mint);background:#8affc112}.cslot.past{opacity:.55}.ct{width:90px;flex:none}.ct small{display:block;color:var(--dim)}.cc{flex:1;display:flex;flex-direction:column;gap:3px}
+.cbeat{color:var(--mint);font-weight:bold}.cbeat.done{color:var(--dim)}.clog{font-size:14px}.cfree{color:var(--dim);font-size:13px}
+.cnow{background:var(--panel2);border-radius:14px;padding:12px;border:2px solid var(--mint)}.cppl{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}.cppl .chip small{color:var(--dim);margin-left:4px;font-size:11px}
+/* hearts */
+.hgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:8px}
+.hcard{position:relative;display:flex;flex-direction:column;align-items:center;padding:8px 6px;border-radius:14px;border:2px solid var(--line);background:var(--panel);color:var(--ink);font:inherit;gap:2px}.hcard.on{border-color:var(--hc)}.hcard.love{box-shadow:0 0 0 2px var(--hc) inset}.hcard .hp{width:80px;height:80px;border-radius:50%;overflow:hidden;background:#0a0610;border:3px solid var(--hc)}.hcard.unk .hp{border-color:var(--line)}.sil{display:flex;width:100%;height:100%;align-items:center;justify-content:center;font:bold 34px sans-serif;color:var(--line)}.hcard small{color:var(--dim);font-size:12px}.hcard .bar{width:90%}.hcard .nb{position:absolute;top:6px;right:6px;background:var(--butter);color:#1b1026}
+.hsplit{display:grid;grid-template-columns:1fr 1.1fr;gap:16px}.hright #hclose{display:none}@media (max-width:860px){.hsplit{grid-template-columns:1fr}.hsplit .hleft{display:none}.hright #hclose{display:inline-flex;margin-bottom:8px}}
+.hfhead{display:flex;gap:14px;align-items:flex-start}.hbig{width:150px;flex:none}.hbig svg{width:100%}.aff-marks{position:relative;height:8px;margin-top:-4px}.aff-marks i{position:absolute;top:0;width:2px;height:8px;background:var(--ink);opacity:.5}
+.hsteps{margin-top:12px;display:flex;flex-direction:column;gap:6px}.hstep{padding:8px 12px;border-radius:10px;background:var(--panel);display:flex;flex-direction:column}.hstep.done{border-left:4px solid var(--mint)}.hstep.next{border-left:4px solid var(--butter)}.hstep span{font-size:14px;color:var(--dim)}.hstep.done span{color:var(--ink)}
+/* case board */
+.csplit{display:grid;grid-template-columns:240px 1fr;gap:14px}@media (max-width:860px){.csplit{grid-template-columns:1fr}}
+.clist{display:flex;flex-direction:column;gap:6px}.cmys{text-align:left;padding:9px 12px;border-radius:10px;border:2px solid var(--line);background:var(--panel);color:var(--ink);font:inherit}.cmys small{display:block;color:var(--dim);font-size:12px}.cmys.on{border-color:var(--butter)}.cmys.ok{border-left:6px solid var(--mint)}
+.corkboard{position:relative;height:min(64vh,620px);min-height:440px;border-radius:14px;background:#7a5636 repeating-radial-gradient(circle at 30% 40%,#8a6442 0 2px,#7a5636 2px 5px);box-shadow:inset 0 0 0 10px #4a2e1a,inset 0 0 40px #0008;overflow:hidden;margin:8px 0}
+.corkboard svg{position:absolute;inset:0;width:100%;height:100%}.corkboard line{stroke:#d22;stroke-width:.5;vector-effect:non-scaling-stroke;stroke-width:3}
+.qcard{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-1deg);width:min(260px,40%);background:#fffbe8;color:#1b1026;padding:12px;border-radius:4px;box-shadow:0 6px 16px #0008;text-align:center}.qcard small{display:block;font:bold 11px sans-serif;color:#a33;letter-spacing:1px}.qcard span{display:block;margin-top:6px;color:#0a6a3a;font-weight:bold}.qcard.ok{background:#e8fff0}
+.pin{position:absolute;transform:translate(-50%,-50%) rotate(var(--r,0deg));width:min(190px,28%);background:#fff;color:#1b1026;border:0;border-radius:3px;padding:8px 9px 9px;box-shadow:0 4px 10px #0007;text-align:left;font:13px/1.3 'Chakra Petch',sans-serif;max-height:40%;overflow:hidden}.pin b{display:block;font-size:13px;margin-bottom:2px}.pin span{font-size:11.5px;color:#333}.pin::before{content:'';position:absolute;top:-4px;left:50%;width:12px;height:12px;border-radius:50%;background:#d22;transform:translateX(-50%);box-shadow:0 2px 2px #0006}.pin.cl{cursor:pointer}.pin.on{outline:3px solid #d22;background:#fff0f0}
+.cork{display:flex;flex-wrap:wrap;gap:10px;padding:6px 0}.small-cork .pin,.cork .pin{position:relative;transform:none;width:240px;max-height:none}
+.sticky{width:240px;background:#ffe98a;color:#1b1026;padding:10px;border-radius:2px;box-shadow:0 4px 10px #0007;transform:rotate(-1deg);display:flex;flex-direction:column;gap:4px}.sticky.r2{background:#ffc78a}.sticky.r3{background:#ff9f8a}.sticky span{font-size:13px}.sticky small{color:#5a3a2a}.sticky .btn{min-height:32px;padding:2px 10px;align-self:flex-start;font-size:13px}
+.csolve{background:var(--panel2);border-radius:14px;padding:12px;margin:10px 0}
+/* stats */
+.sgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;align-content:start}.sbox{background:var(--panel);border-radius:14px;padding:12px 14px}.sbox h4{margin:0 0 8px}
+.ladder{display:flex;gap:4px;margin-bottom:8px}.rung{flex:1;padding:6px 4px;border-radius:8px;background:#0a0610;text-align:center;opacity:.5;display:flex;flex-direction:column}.rung.got{opacity:1}.rung.cur{outline:2px solid var(--butter)}.rung span{font-size:11px}.rung small{font-size:10px;color:var(--dim)}
+.echart{display:flex;gap:8px;align-items:flex-end;height:120px;margin:8px 0}.ecol{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;position:relative}.ecol i{display:block;width:70%;background:var(--coral);border-radius:4px 4px 0 0;min-height:2px}.ecol.now i{background:var(--butter)}.ecol small{font-size:11px;color:var(--dim)}.ecol em{position:absolute;top:0;font-size:11px;font-style:normal}
+.fl{display:flex;gap:10px;align-items:baseline;padding:4px 0;border-bottom:1px solid var(--line)}.fl b{color:var(--coral);width:34px}.fl.good b{color:var(--mint)}.fl span{flex:1;font-size:14px}.fl small{color:var(--dim);font-size:11px}
+.kv{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--line)}
+/* story, achievements, bag */
+.sview .sent{display:flex;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}.sview .sent small{width:84px;flex:none;color:var(--mint)}.sview .sent p{margin:0}
+.agrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:10px}.atile{padding:10px;border-radius:12px;background:var(--panel);opacity:.55;display:flex;flex-direction:column;gap:2px}.atile.on{opacity:1;border:2px solid var(--butter)}.aic{font-size:22px;color:var(--butter)}.atile small{color:var(--dim);font-size:12px}.atile em{font-size:11px;color:var(--dim);font-style:normal}
+.bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px}.bitem{padding:10px;border-radius:12px;background:var(--panel);display:flex;flex-direction:column;gap:4px}.bitem .hd{width:42px;height:42px;border-radius:50%;overflow:hidden}.bitem small{color:var(--dim)}
 .ft{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.ft .btn{min-height:40px;padding:6px 12px;font-size:13px}
 .goal{background:var(--panel2);border-left:4px solid var(--mint);border-radius:0 12px 12px 0;padding:10px 12px;margin-bottom:14px}
 .goal small{display:block;color:var(--dim);font:15px 'VT323',monospace}
@@ -835,6 +888,8 @@ function chapterCard(n,cb){
   if(typeof G!=='undefined'&&G.ok)G.forceFrame=true;
   requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(()=>{f.style.transition='';f.classList.remove('on')},60)))};
 }
+/* a text that wants an answer: TEXTQ[key] = {t, replies:[{t, fx, a (their reply)}]}. Answer it in Messages. */
+function textQ(from,key){const q=TEXTQ[key];if(!q||S.f['tq_'+key])return;S.f['tq_'+key]=1;S.msgs.push({f:from,t:sub(q.t),c:S.day,s:S.slot,r:0,q:key});if(S.unl.phone){toast('New message · '+(CH[from]?CH[from].name:from)+' (wants a reply)','var(--mint)');if(typeof sfx==='function')sfx('notify')}hud()}
 function addMsg(from,t){S.msgs.push({f:from,t:sub(t),c:S.day,s:S.slot,r:0});if(S.unl.phone){toast('New message · '+(CH[from]?CH[from].name:from),'var(--mint)');if(typeof sfx==='function')sfx('notify')}hud()}
 
 /* ============ CORE SYSTEMS: calendar, ranks, closeness, exposure, clues, summary, achievements, meta ============ */
@@ -890,8 +945,9 @@ function fx(e){
    if(g>0&&S.inv.faraday)g=Math.ceil(g*.6);
    if(g>0&&e.phish&&S.inv.yubi){S.inv.yubi--;if(!S.inv.yubi)delete S.inv.yubi;toast('Security key blocked it','var(--mint)');continue}
    S.exp=clamp(S.exp+g,0,100);if(S.unl.exp&&g)toast(`Exposure ${g>=0?'+':''}${g}`,'var(--coral)');
+   S.expPeak=S.expPeak||{};S.expPeak[S.day]=Math.max(S.expPeak[S.day]||0,S.exp);
   }
-  else if(k==='foot'){S.foot=clamp(S.foot+v,0,60);S.exp=clamp(S.exp+v,0,100);if(S.unl.exp&&v)toast(`Footprint ${v>=0?'+':''}${v} (permanent)`,'var(--coral)')}
+  else if(k==='foot'){(S.footLog=S.footLog||[]).push({d:S.day,s:S.slot,v,w:S.inBeat?(BEATS[S.inBeat]||{}).t||S.inBeat:((S.log[S.log.length-1]||[])[1]||'').slice(0,90)});S.foot=clamp(S.foot+v,0,60);S.exp=clamp(S.exp+v,0,100);if(S.unl.exp&&v)toast(`Footprint ${v>=0?'+':''}${v} (permanent)`,'var(--coral)')}
   else if(k==='skill'||k==='clout'){
    const r0=rankOf(S[k]);S[k]=Math.max(0,S[k]+v);const r1=rankOf(S[k]);
    if(S.unl[k]&&v)toast(`${k==='skill'?'Skill':'Clout'} ${v>=0?'+':''}${v}`,k==='skill'?'var(--mint)':'var(--butter)');
@@ -980,6 +1036,7 @@ function scCmd(n,ctx){const a=n.a;
   case'unflag':return[()=>{a.split(/\s+/).forEach(f=>delete S.f[f])}];
   case'clue':return[()=>{a.split(/\s+/).forEach(c=>addClue(c))}];
   case'item':return[{fx:{item:a}}];
+  case'text':{const sp=a.indexOf(' ');return[()=>{textQ(a.slice(0,sp),a.slice(sp+1))}]}
   case'msg':{const sp=a.indexOf(' ');return[{msg:[a.slice(0,sp),a.slice(sp+1)]}]}
   case'game':{const sp=a.indexOf(' ');const o=scArgs(sp<0?'':a.slice(sp+1));const g=Object.assign({game:sp<0?a:a.slice(0,sp)},o);if(typeof o.res==='string'){const fn=o.res;g.res=(...r)=>ev(fn)(...r)}return[g]}
   case'sum':return[()=>{addSum(sub(a))}];
@@ -1335,6 +1392,8 @@ const ITEMS={
  novel:{n:'Battered detective novel',d:'For someone who\'s read every one of these except this one.',p:15,g:'wren'},
  strings:{n:'Set of violin strings',d:'For someone who plays at Central Station in the cold.',p:20,g:'pia'}
 };
+/* texts that want an answer (Messages): filled in by the story */
+const TEXTQ={};
 const DAYCARD={0:['PROLOGUE','Hello, World','Two weeks before the con'],1:['DAY 1 · MONDAY','Badge In','CTRL+ALT+CON opens tonight'],2:['DAY 2 · TUESDAY','Capture the Flag','Six days to the closing keynote'],3:['DAY 3 · WEDNESDAY','Exposure','Five days to the closing keynote'],4:['DAY 4 · THURSDAY','Packet Loss','Four days to the closing keynote'],5:['DAY 5 · FRIDAY','Home','Three days to the closing keynote'],6:['DAY 6 · SATURDAY','Finals','The night before'],7:['DAY 7 · SUNDAY','Closing Keynote','Today']};
 /* endings: title, one line, and how it reads on the card */
 const ENDINFO={
@@ -1423,9 +1482,12 @@ const beatStep=b=>b&&b.steps?Object.assign({},b,b.steps[(S.bstep&&S.bstep[b.id])
 function startBeat(b0){if(beatBusy)return;beatBusy=true;const b=beatStep(b0);S.inBeat=b0.id;
  run(scr(b.sc),()=>{beatBusy=false;S.inBeat=null;if(S.failing)return;
   if(b0.steps){S.bstep=S.bstep||{};const k=(S.bstep[b0.id]||0)+1;if(k<b0.steps.length){S.bstep[b0.id]=k;save();hub();return}}
-  S.done[b0.id]=1;if(b0.after)b0.after();if(S.ending)return;if(S.noAdvance){delete S.noAdvance;save();hub();return}nextSlot()})}
+  S.done[b0.id]=1;addSlotLog(b0.t);if(b0.after)b0.after();if(S.ending)return;
+  // most story beats happen at the start of their part of the day and leave the rest of it free; travel and the big ones use it up
+  if(S.noAdvance||!b0.adv){delete S.noAdvance;save();hub();return}if(b0.adv==='day'){endDay();return}nextSlot()})}
+function addSlotLog(t){if(!S||!t)return;S.slog=S.slog||{};const k=S.day+':'+S.slot;(S.slog[k]=S.slog[k]||[]).push(t)}
 /* time moves only here */
-function spend(kind){S.acts=(S.acts||0)+1;
+function spend(kind,what){S.acts=(S.acts||0)+1;addSlotLog(what||({hang:'Time with someone',lead:'Worked a lead',talk:'A talk',ctf:'CTF practice',bounty:'Bug bounty',rest:'Rested',wait:'Let it go by'}[kind]||kind));
  if(S.restore&&!S.oc&&S.day>=1){S.oc=1;toast('Overclocked: one more thing this '+SLOTN[S.slot].toLowerCase(),'var(--mint)');save();hub();return}
  nextSlot()}
 function nextSlot(){S.oc=0;S.slot++;if(S.slot>5){endDay();return}save();toast(SLOTN[S.slot],'var(--dim)');if(typeof sfx==='function')sfx('advance');hub()}
@@ -1523,20 +1585,20 @@ const taskScore=(t,a)=>{let s=!a?(rank('skill')>=3?1:0):a===t.best?3:t.good.incl
 /* where the "use something" steps are, for the goal light */
 const INTPOS={door:['home',-302.6,10.9,0],desk:['office',526.6,21,0],lift:['office',497.7,12,0],train:['station',734,4.4,0],reg:['con',-105.2,53.4,0],seat:['con',-5,-79.5,2.75],reception:['con',-218.4,22.5,0],bed:['f13',273.6,14.2,0]};
 /* Day 1: Monday. Home, work, the train, the con */
-beat('d1_home',{t:'Morning',steps:[
+beat('d1_home',{adv:1,t:'Morning',steps:[
  {auto:1,sc:'d1_wake',t:'Pack for the con'},
  {who:'ellie',sc:'d1_ellie',t:'Say goodbye to Ellie at Proof, downstairs',lbl:'Say goodbye to Ellie'},
  {int:'door',sc:'d1_leave',t:'Off to work: the bakery\'s front door',lbl:'Head to work'}]});
-beat('d1_office',{t:'Your last half-day',steps:[
+beat('d1_office',{adv:1,t:'Your last half-day',steps:[
  {auto:1,sc:'d1_office',t:'Work'},
  {int:'desk',sc:'d1_queue',t:'Clear the helpdesk queue at your desk'},
  {who:'gary',sc:'d1_gary',t:'Gary from Accounts is waving at you',lbl:'See what Gary wants'},
  {int:'lift',sc:'d1_out',t:'Leave for the station: the lifts',lbl:'Leave for the con'}]});
-beat('d1_station',{t:'Central Station',steps:[
+beat('d1_station',{adv:1,t:'Central Station',steps:[
  {auto:1,sc:'d1_concourse',t:'Central Station'},
  {who:'pia',sc:'d1_pia',t:'Someone is playing the violin on the concourse',lbl:'Listen to the violinist'},
  {int:'train',sc:'d1_train',t:'Board the 16:12 at Platform 4'}]});
-beat('d1_arrival',{t:'Arrival',steps:[
+beat('d1_arrival',{adv:1,t:'Arrival',steps:[
  {w:'vestibule',ws:['vestibule','foyer'],sc:'d1_doors',t:'Go into the convention centre'},
  {int:'reg',sc:'d1_badge',t:'Pick up your badge at Registration, on the Foyer\'s west wall'},
  {int:'seat',sc:'d1_ceremony',t:'The opening ceremony: your seat in Hall A is lit up'},
@@ -1548,7 +1610,7 @@ beat('d2_ctf',{t:'CTF 101 in Hall C',w:'hallC',sc:'d2_ctf'});
 beat('d2_rin',{t:'Somewhere quiet: the Chill-out Lounge',w:'lounge',sc:'d2_rin'});
 beat('d2_badge',{t:'Your badge is acting strange: the Badge Lab',w:'badgelab',sc:'d2_badge'});
 beat('d2_reception',{t:'Lumen\'s sponsor reception: the Lumen Lounge, hotel mezzanine',w:'lumenlounge',sc:'d2_reception'});
-beat('d2_late',{t:'Back to Room 1337',steps:[{int:'bed',sc:'d2_late',t:'Back to Room 1337 for the night',lbl:'Go to bed'}]});
+beat('d2_late',{adv:'day',t:'Back to Room 1337',steps:[{int:'bed',sc:'d2_late',t:'Back to Room 1337 for the night',lbl:'Go to bed'}]});
 /* Day 3: Wednesday */
 beat('d3_ellie',{t:'Ellie\'s train gets in: meet her in the hotel lobby',w:'lobby',sc:'d3_ellie'});
 beat('d3_whispers',{t:'The midday keynote in Hall A',w:'hallA',sc:'d3_whispers'});
@@ -1556,20 +1618,20 @@ beat('d3_roof',{t:'Follow the silver hair: the hotel roof, up the 13th floor fir
 /* Day 4: Thursday */
 beat('d4_noc',{t:'The con network is down',steps:[{auto:1,sc:'d4_call',t:'Your phone'},{w:'noc',sc:'d4_noc',t:'The con network is down: the NOC, under the con (lifts to B, or the car park)'}]});
 beat('d4_gathering',{t:'Everyone is meeting in Room 1337',w:'room1337',sc:'d4_gathering'});
-beat('d4_burglary',{t:'Your phone',auto:1,sc:'d4_burglary'});
+beat('d4_burglary',{adv:1,t:'Your phone',auto:1,sc:'d4_burglary'});
 /* Day 5: Friday */
-beat('d5_home',{t:'Ellie needs to go home: meet her in the hotel lobby',w:'lobby',sc:'d5_home'});
-beat('d5_framed',{t:'Your phone',auto:1,sc:'d5_framed'});
+beat('d5_home',{adv:1,t:'Ellie needs to go home: meet her in the hotel lobby',w:'lobby',sc:'d5_home'});
+beat('d5_framed',{adv:1,t:'Your phone',auto:1,sc:'d5_framed'});
 beat('d5_offer',{t:'Victor Hale has asked you to dinner: The Grill, in the hotel',w:'grill',sc:'d5_offer'});
 /* Day 6: Saturday */
 beat('d6_finals',{t:'The CTF finals: Hall A',w:'hallA',sc:'d6_finals'});
 beat('d6_raid',{t:'Back to Room 1337',w:'room1337',sc:'d6_raid'});
-beat('d6_council',{t:'The war council: the hotel library, after hours',w:'library',sc:'d6_council'});
+beat('d6_council',{adv:1,t:'The war council: the hotel library, after hours',w:'library',sc:'d6_council'});
 /* Day 7: Sunday */
-beat('d7_positions',{t:'Positions',auto:1,sc:'d7_positions'});
-beat('d7_krall',{t:'Something is wrong in the Foyer',w:'foyer',ws:['foyer','foyerG','link','hallC'],sc:'d7_krall'});
-beat('d7_keynote',{t:'The closing keynote: Hall A, 4 PM',w:'hallA',ws:['hallA','backstage'],sc:'d7_keynote'});
-beat('d7_roof',{t:'The thirteenth floor',w:'corridor',ws:['corridor','roof','plantdeck','stairwell'],sc:'d7_roof'});
+beat('d7_positions',{adv:1,t:'Positions',auto:1,sc:'d7_positions'});
+beat('d7_krall',{adv:1,t:'Something is wrong in the Foyer',w:'foyer',ws:['foyer','foyerG','link','hallC'],sc:'d7_krall'});
+beat('d7_keynote',{adv:1,t:'The closing keynote: Hall A, 4 PM',w:'hallA',ws:['hallA','backstage'],sc:'d7_keynote'});
+beat('d7_roof',{adv:1,t:'The thirteenth floor',w:'corridor',ws:['corridor','roof','plantdeck','stairwell'],sc:'d7_roof'});
 beat('d7_party',{t:'The 0xFF afterparty: the Grand Ballroom',w:'ballroom',sc:'d7_party'});
 DAYS[1]=['d1_home','d1_office','d1_station','d1_arrival','d1_bar',null];
 DAYS[2]=['d2_ctf','d2_rin','d2_badge','d2_reception',null,'d2_late'];
@@ -3814,127 +3876,127 @@ SC.restore=`
 /* ============ THE TWENTY-ONE: who they are, when their scenes open, what they say in passing ============
    Scene 0 is meeting them; 1-5 each take part of a day; 5 is the last. Scene text lives in SC[id+n] (05a-05u). */
 route('ellie',{loc:'lobby',blurb:'The baker downstairs. Not a hacker. Does things properly.',
- req:[{},{},{d:3},{d:3,a:30},{d:5,a:45,c:()=>done('d5_home'),y:'after you\'ve been home with her'},{d:6,a:80}],
+ req:[{},{},{d:3},{d:3,a:12},{d:5,a:25,c:()=>done('d5_home'),y:'after you\'ve been home with her'},{d:6,a:55}],
  sum:['','','','You showed Ellie the con. She picked a lock, badly, and loved every minute.','You and Ellie put Proof back together, late at night, and she decided not to be scared.','Ellie told you how she feels. You told her too.'],
  gift:'A proofing basket! A real rattan one! I\'m going to cry into my sourdough. I\'m going to name it.',
  hello:['Hello, you! I saved you a cinnamon knot. Okay, I saved you three.','There he is. My computer person. Have you eaten? You haven\'t eaten.'],
  idle:['I sold a croissant for "one bitcoin". I don\'t think he was serious. I hope he wasn\'t serious.','Everyone here is so nice! Weird, but nice. Like a village of owls.','Someone asked what my threat model is. I said "pigeons".','A man tried to pay me with a QR code on his arm. A tattoo. I said cash or card, sir.']});
 route('nyx',{loc:'lockpick',blurb:'Red teamer. Breaks into buildings for a living. Hates larpers.',
- req:[{},{d:2,a:10},{d:3,a:25},{d:4,a:40},{d:5,a:55,c:()=>f('nyx_quit'),y:'after Nyx walks away from her contract'},{d:6,a:80}],
+ req:[{},{d:2,a:0},{d:3,a:10},{d:4,a:22},{d:5,a:35,c:()=>f('nyx_quit'),y:'after Nyx walks away from her contract'},{d:6,a:55}],
  sum:['','You and Nyx walked into the hotel\'s staff corridor with a stepladder, and found a sniffer under the roof door.','Nyx read her contract out loud: Lumen hired her to unmask WHISPER. She tore it up.','Nyx taught you how buildings really keep people out, and how they don\'t.','You and Nyx got close enough to Suite 1313 to hear it hum.','Nyx gave you something she\'d never given anyone: the key.'],
  gift:'A clear practice set... for me? I\'m going to pretend this isn\'t the best present I\'ve had in years. Don\'t tell anyone. I mean it.',
  hello:['You. Good. I was getting bored of people who say "in theory".','Back again. Either you like locks or you like me. Pick one. Don\'t pick one.'],
  idle:['Fun fact: most office doors open with a credit card and confidence.','I\'ve been here four hours and three people have told me how they\'d "theoretically" rob a bank.','You\'re standing like a pentester. Weight on the back foot. Ready to run. Good.']});
 route('ada',{loc:'ctf',blurb:'CTF prodigy. Compiles her own kernel. Thinks she\'s a fraud.',
- req:[{},{d:2,a:8},{d:3,a:22},{d:4,a:38,sk:2},{d:5,a:52},{d:6,a:78,c:()=>done('d6_finals'),y:'after the CTF finals'}],
+ req:[{},{d:2,a:0},{d:3,a:10},{d:4,a:22,sk:2},{d:5,a:35},{d:6,a:52,c:()=>done('d6_finals'),y:'after the CTF finals'}],
  sum:['','You and Ada stayed up in the CTF Arena until the scoreboard was the only light.','Ada found a challenge nobody wrote, signed "—M".','Ada told you she feels like a fraud every single day. You told her about packet_pam.','Ada reproduced Rin\'s findings from scratch, independently. It\'s real.','After the finals, on the con roof, Ada stopped compiling her thoughts and just said it.'],
  gift:'An ESC keycap. The most important key. You understand me on a molecular level. I\'m putting it on right now.',
  hello:['Oh! You. Hi. Sorry. I was in a for-loop. A mental one.','Do you want to see something cursed? I found something cursed.'],
  idle:['I renamed my Wi-Fi "Pretty Fly for a Wi-Fi". I regret nothing.','Did you know the scoreboard is written in Perl? I\'m going to be thinking about that all day.','Sorry, I was compiling. Not code. My thoughts.']});
 route('priya',{loc:'soc',blurb:'Blue team. Professionally paranoid. Has a reason.',
- req:[{},{d:2,a:10},{d:3,a:25},{d:4,a:40},{d:5,a:55},{d:6,a:80}],
+ req:[{},{d:2,a:0},{d:3,a:10},{d:4,a:22},{d:5,a:35},{d:6,a:55}],
  sum:['','Priya taught you threat modelling: what you\'re protecting, from whom, and how much effort it\'s worth.','You and Priya traced WHISPER\'s message to the hotel\'s top floor.','Priya told you why she\'s like this. Somebody once found her, and kept finding her.','You and Priya wrote the disclosure to the regulator together, line by line, with dates.','Priya turned her phone off. For you. For a whole hour.'],
  gift:'A privacy screen. Nobody has ever given me something this thoughtful. Shoulder surfers, beware. I\'m... wow. Thank you.',
  hello:['Have you updated your phone today? I\'ll wait.','Hey. You\'re one of the four people here I don\'t have to explain things to. Sit.'],
  idle:['Fourteen people here have their home address in their Wi-Fi name. Fourteen.','I don\'t do small talk. This is medium talk. Feel honoured.','Someone plugged a USB stick they found into a con laptop. I need a minute.']});
 route('juno',{loc:'creator',blurb:'Streamer. CyberJuno. Fifty thousand viewers, no real friends.',
- req:[{},{d:2,a:10},{d:3,a:25,cl:2},{d:4,a:40},{d:5,a:55},{d:6,a:80}],
+ req:[{},{d:2,a:0},{d:3,a:10,cl:2},{d:4,a:22},{d:5,a:35},{d:6,a:55}],
  sum:['','You went live on Juno\'s stream. Fifty thousand people. You were careful, or you weren\'t.','Juno showed you her Lumen sponsor contract, and the background of an old stream.','Juno told you her real name, off camera, in the arcade.','Juno dropped Lumen live, mid-stream, and didn\'t cry until afterwards.','Camera off. Ring light off. Juno, just Juno, in the Sky Garden.'],
  gift:'Holo stickers! My laptop lid has one empty spot and it\'s YOURS. Chat would go feral. Chat isn\'t here. Thank you.',
  hello:['Hiii! Okay I\'m not live, you can be normal. Be normal. You\'re not being normal.','Chat says hi! Chat isn\'t on. But in spirit, chat says hi.'],
  idle:['I learned what a port is today. I\'m telling everyone. I\'m insufferable.','Do you think I\'d look good in a hacker hood? Like, ironically. But also not.','Someone in chat asked if you\'re my boyfriend. I said "he\'s my technical advisor". Chat said "sure".']});
 route('kit',{loc:'cosplay',blurb:'Cosplayer and maker. A different person in the armour.',
- req:[{},{d:2,a:10},{d:3,a:25},{d:4,a:40},{d:5,a:55},{d:6,a:80}],
+ req:[{},{d:2,a:0},{d:3,a:10},{d:4,a:22},{d:5,a:35},{d:6,a:55}],
  sum:['','Kit taught you to solder. You burned yourself once. She burned herself twice, laughing.','Someone followed Kit home last year using the metadata in her photos. You helped her strip every one.','You helped Kit fix the armour, and she told you who she is when she isn\'t in it.','Kit and Tilly built something small and clever for Sunday.','On the cosplay stage after hours, Kit took the helmet off.'],
  gift:'A whole reel of addressable LEDs?! Do you know what I can BUILD with this? I\'m going to make you something. Don\'t look.',
  hello:['Oh! Hi! Mind the glue gun. It\'s armed.','You again! Good. I need someone to hold this exactly still for forty seconds.'],
  idle:['I\'ve burned myself on the glue gun six times today. A personal best. Or worst.','If you need anything foamed, I\'m your girl.','Static Bloom season three got announced and I screamed in the hall. Sorry to everyone.']});
 route('rin',{loc:'lounge',blurb:'Malware analyst at Bastion. Knows too much. Eats gummy worms.',
- req:[{},{d:3,a:10},{d:4,a:25},{d:4,a:40},{d:5,a:55},{d:6,a:80}],
+ req:[{},{d:3,a:0},{d:4,a:10},{d:4,a:22},{d:5,a:35},{d:6,a:55}],
  sum:['','Rin showed you how to take an app apart, and what Bastion invoiced Lumen.','Rin\'s boss called. Rin put the phone face down and showed you two audits that disagree on everything.','In Rin\'s room: a mirror, a skirt, a confession that wasn\'t about malware at all.','Rin decided to stand on a stage on Sunday. You held his hand while he decided.','In the nap pods, with a metre-long gummy worm, Rin said the bravest thing he\'s ever said.'],
  gift:'A metre-long gummy worm. You\'ve reverse-engineered my heart. That\'s a crime, by the way. I\'m not pressing charges.',
  hello:['Hi. Hi. Sit. Worm?','Oh good, it\'s you. I was about to analyse the lava lamp again.'],
  idle:['I\'ve analysed the lava lamp. It\'s not phoning home. Rare for this con.','Do you want a worm? You look like you need a worm.','I named my laptop "Gremlin". It earned it.']});
 route('bea',{loc:'bar',blurb:'Bartender. Sees everything. Draws all of it.',
- req:[{},{d:2,a:10},{d:3,a:25},{d:4,a:40},{d:5,a:55},{d:6,a:80}],
+ req:[{},{d:2,a:0},{d:3,a:10},{d:4,a:22},{d:5,a:35},{d:6,a:55}],
  sum:['','After closing, Bea drew you on a napkin and wouldn\'t let you see.','Bea told you what she hears at the end of the bar when Lumen think she isn\'t listening.','On the terrace, Bea showed you the sketchbook from the art school she left.','Lumen got Bea suspended. She got their run-sheet anyway.','The bar was closed. Bea painted you. Then she put the brush down.'],
  gift:'A hacker zine. With drawings. You... noticed I draw. Okay. Thank you. Shut up. Thank you.',
  hello:['Hoodie. The usual? You don\'t have a usual. I\'ve decided your usual.','Oh, it\'s you. Good. Everyone else is saying "blockchain".'],
  idle:['Someone just tried to pay with an NFT. I gave him a napkin.','Four hundred Club-Mates today. We\'ve run out. There may be a riot.','You\'re the only one who says thank you. Keep it up. It\'s noticed.']});
 route('mira',{loc:'plantdeck',blurb:'Silver hair. Talks in riddles. Is WHISPER.',
- req:[{},{d:4,a:10},{d:5,a:25},{d:5,a:40},{d:6,a:55},{d:6,a:80}],
+ req:[{},{d:4,a:0},{d:5,a:10},{d:5,a:22},{d:6,a:35},{d:6,a:55}],
  sum:['','Mira asked you a better question: would you show everyone how exposed they are, if it hurt them?','Mira told you why she became WHISPER. She built the thing in SafeSphere 2.','Mira is furious about the copycat. She told you whose floor it lives on.','Mira showed you the key she kept. Ten million phones, one command.','Mira told you her real name. Just once.'],
  gift:'A cipher wheel. Analogue. Unhackable. You pay attention. I hate how much I like that.',
  hello:['You came back. People rarely come back.','Ask me something worth answering.'],
  idle:['Look down there. Every lit window is someone telling an app where they are.','I like the wind up here. It can\'t be logged.','The Lumen logo. Round and round. It never blinks. Neither do I.']});
 route('saoirse',{loc:'press',blurb:'Investigative journalist, The Ledger. Burned once. Careful now.',
- req:[{},{d:3,a:10},{d:4,a:25,sk:2},{d:5,a:40},{d:5,a:55},{d:6,a:80}],
+ req:[{},{d:3,a:0},{d:4,a:10,sk:2},{d:5,a:22},{d:5,a:35},{d:6,a:55}],
  sum:['','Saoirse taught you how a newsroom checks a story, and how it protects a source.','Saoirse told you about Jonah Reyes: the story she ran, and the retraction she still dreams about.','Saoirse found out who paid off Owen Pryce\'s debts.','Saoirse asked you to be her source, and taught you how to be one safely.','On the plaza at midnight, Saoirse put her notebook away.'],
  gift:'A waterproof notebook. You have no idea how many notes I\'ve lost to rain. This one\'s for... nicer things.',
  hello:['On the record or off? I\'m joking. Mostly.','Sit. I\'ve got eleven minutes before my editor rings.'],
  idle:['Every story has three versions. What happened, what people say happened, and what you can prove.','Lumen\'s press office has called me six times today. That\'s how I know I\'m close.','I write in shorthand. It\'s not secure. It\'s just illegible.']});
 route('sunny',{loc:'noc',blurb:'Runs the con network. Hasn\'t slept since Monday.',
- req:[{},{d:4,a:10,sk:2},{d:5,a:25},{d:5,a:40},{d:6,a:55},{d:6,a:80}],
+ req:[{},{d:4,a:0,sk:2},{d:5,a:10},{d:5,a:22},{d:6,a:35},{d:6,a:55}],
  sum:['','You worked a night shift in the NOC with Sunny and followed LANTERN-01\'s cable to a Lumen server.','You made Sunny sleep. She was furious. She slept for four hours.','In the car park at 2 AM, Sunny told you where she learned to fix radios.','Sunny drew you the plan for cutting the uplink on a pizza box.','On the con roof, Sunny turned her radio off.'],
  gift:'Proper coffee beans. Oh, you absolute legend. The NOC coffee is a war crime. I\'d kiss you. I might.',
  hello:['Network\'s up. Don\'t jinx it. What do you need?','Talk fast, I\'ve got four thousand people\'s packets in my hands.'],
  idle:['Someone named their hotspot "FBI Surveillance Van 4". There are three others. Where are the others?','Uptime ninety-nine point nine. That point one is Gary from somewhere plugging a router into a router.','I sleep in shifts. The shifts are ten minutes long.']});
 route('tilly',{loc:'badgelab',blurb:'Designed the con badge. All four thousand, by hand.',
- req:[{},{d:2,a:10},{d:3,a:25},{d:4,a:40},{d:5,a:55},{d:6,a:80}],
+ req:[{},{d:2,a:0},{d:3,a:10},{d:4,a:22},{d:5,a:35},{d:6,a:55}],
  sum:['','Tilly showed you how the badge works: a coin cell, eight lights and a radio that says hello.','Tilly told you about the mentor the badge was made for.','Tilly found out who signed off the firmware she never wrote.','You and Tilly wrote the firmware that puts her badge back to how she made it.','Tilly gave you the badge she made just for you.'],
  gift:'Brass tips! The good ones! Oh, these will last forever. I\'ll think of you every time I tin one. That sounded weird. I mean it nicely.',
  hello:['Oh! Hello! Is your badge okay? Show me your badge.','Hi! Sorry, I\'m covered in flux. It\'s fine. It\'s rosin. It smells like pine trees.'],
  idle:['Four thousand badges. I soldered the first hundred myself. My eyebrows grew back.','Someone made their badge play the national anthem. On repeat. In Hall B.','If you ever hear one beeping in three short and one long, it wants a new battery.']});
 route('petra',{loc:'carhack',blurb:'Car hacker. Loud. Rebuilt her dad\'s car from scrap.',
- req:[{},{d:2,a:10},{d:3,a:25},{d:4,a:40},{d:5,a:55},{d:6,a:80}],
+ req:[{},{d:2,a:0},{d:3,a:10},{d:4,a:22},{d:5,a:35},{d:6,a:55}],
  sum:['','Petra showed you how a car talks to itself, and how anyone can listen in.','Petra found a SafeSphere library inside a car app. Your car is telling Lumen where you drive.','Petra took you for a drive round the Conference Quarter at night. With the windows down.','Petra spotted a car in the car park that shouldn\'t be there, and followed where it went.','On the top of the car park, engine off, Petra said something she\'d practised.'],
  gift:'A spark plug keyring! From an old Škoda! You... how did you know? My dad had this exact plug. I\'m not crying. It\'s oil.',
  hello:['Hey! Grab a spanner. Don\'t touch the red one. Touch the red one.','You again! Good. Hold this wire. Don\'t lick it.'],
  idle:['Cars are just computers with wheels and anxiety.','My car has three hundred thousand miles on it and one working speaker. It\'s perfect.','Someone asked if I can hack their Tesla. I said I can hack their attitude.']});
 route('astrid',{loc:'aero',blurb:'Listens to satellites. Would rather be in orbit.',
- req:[{},{d:2,a:10},{d:3,a:25},{d:4,a:40},{d:5,a:55},{d:6,a:80}],
+ req:[{},{d:2,a:0},{d:3,a:10},{d:4,a:22},{d:5,a:35},{d:6,a:55}],
  sum:['','Astrid taught you to listen to the sky with a radio cheaper than a pizza.','On the con roof, Astrid named the stars, and the satellites pretending to be stars.','Astrid told you why she left the space agency.','Astrid tracked a private jet from the sky\'s own announcements.','A meteor shower on the con roof. Astrid stopped counting them.'],
  gift:'A meteorite. A real one. It fell from space and now it\'s... in my hand. Because of you. Hello, little rock.',
  hello:['Shh. Listen. That\'s a satellite. Hello.','Oh! You came. The ISS passes over at 21:14. You should be here.'],
  idle:['There are eight thousand satellites up there. Most of them are listening to us. A few are singing.','Radio is just light you can\'t see. I think that\'s romantic. Nobody else does.','I can hear every plane in this city. Shouting where they are. Very honest, planes.']});
 route('yuki',{loc:'arcade',blurb:'Speedrunner. Glitch hunter. Fastest hands in the building.',
- req:[{},{d:2,a:10,sk:1},{d:3,a:25},{d:4,a:40},{d:5,a:55},{d:6,a:80}],
+ req:[{},{d:2,a:0,sk:1},{d:3,a:10},{d:4,a:22},{d:5,a:35},{d:6,a:55}],
  sum:['','Yuki taught you that a glitch is just a rule the designers forgot to write down.','Yuki found a glitch in Hall A\'s media server. Every screen, one cable.','Yuki told you about the record she lost on stage.','Yuki worked out the frame-perfect moment to take the screens on Sunday.','After hours, the arcade was yours, and Yuki let you win. She says she didn\'t.'],
  gift:'Boxed. MINT. You can\'t even buy these, they\'re all in museums. Okay. Okay. I\'m going to run it right now. Watch me.',
  hello:['Frame-perfect timing. Hi. Watch this.','You! Two-player. Now. I need someone to beat.'],
  idle:['Every game has a wall you can walk through if you hit it at the right angle. So does everything else.','Personal best, nine minutes forty. World record\'s nine thirty-eight. I hate those two seconds.','The cabinets here are all original boards. Someone loves this room.']});
 route('vesper',{loc:'lumenlounge',blurb:'Sings in the Lumen Lounge. Watches the room. Watches you.',
- req:[{},{d:3,a:12},{d:3,a:28},{d:4,a:42},{d:5,a:58},{d:6,a:82}],
+ req:[{},{d:3,a:0},{d:3,a:12},{d:4,a:24},{d:5,a:38},{d:6,a:58}],
  sum:['','By the pool in the morning, Vesper asked about WHISPER, very casually. Too casually.','After hours, Vesper sang for an empty room, and for you.','Vesper warned you about Krall. Her ring has a halberd on it.','Vesper told you who sent her, and why she chose you. Then she asked you to choose.','On the roof, no earpiece, Vesper sang one song for nobody but you.'],
  gift:'Nineteen fifty-nine. First pressing. Darling... nobody\'s given me anything that wasn\'t a test in years.',
  hello:['Darling. You came to hear me. Or you came to watch me. Which?','Sit. The second set is for people who stay.'],
  idle:['A room tells you everything if you sing quietly enough.','Every song is a confession if you sing it slowly.','The man with the scar never claps. I notice who never claps.']});
 route('delphine',{loc:'lumenlounge',blurb:'Lumen\'s VP of Communications. Writes Victor\'s words. Hates some of them.',
- req:[{},{d:3,a:10},{d:4,a:25,cl:2},{d:5,a:40},{d:5,a:55,c:()=>clue('tsfolder'),y:'after Delphine finds what\'s in Trust & Safety\'s folder'},{d:6,a:80}],
+ req:[{},{d:3,a:0},{d:4,a:10,cl:2},{d:5,a:22},{d:5,a:35,c:()=>clue('tsfolder'),y:'after Delphine finds what\'s in Trust & Safety\'s folder'},{d:6,a:55}],
  sum:['','Over coffee, Delphine tried to work out what you know. You tried to work out what she knows.','Delphine showed you a draft of Sunday\'s keynote, and the sentence she couldn\'t make herself write.','Delphine found WH1SPER\'s posts as drafts in Trust & Safety\'s shared folder, written days early.','Delphine decided. She asked you to stand next to her when she says it.','In the empty private dining room, Delphine took her hair down.'],
  gift:'Poetry. Second-hand. Someone underlined all the right lines. You know I write other people\'s words for a living? I don\'t get many of my own.',
  hello:['You again. I\'m beginning to think you\'re following me. That\'s my job.','I have nine minutes and a headache. Use them well.'],
  idle:['Never say data. Say insights. Never say tracking. Say personalisation. I wrote that slide. I regret that slide.','Victor rehearses his spontaneous jokes four times.','I can make anything sound like a gift. That\'s the problem with me.']});
 route('noor',{loc:'speakers',blurb:'Digital rights lawyer. Lost to Lumen once. Wants a rematch.',
- req:[{},{d:2,a:10},{d:3,a:25,sk:2},{d:4,a:40},{d:5,a:55},{d:6,a:80}],
+ req:[{},{d:2,a:0},{d:3,a:10,sk:2},{d:4,a:22},{d:5,a:35},{d:6,a:55}],
  sum:['','Noor told you what the law says about your data, and how little anyone enforces it.','In the library, you and Noor took Corvid Holdings apart, filing by filing.','Noor told you about the client she couldn\'t save: Jonah Reyes.','Noor drafted an injunction. It needs a witness from inside.','In the library at midnight, Noor closed the last case file.'],
  gift:'A fountain pen. A proper one. I\'ll sign the injunction with it. I\'ll sign everything with it, actually.',
  hello:['Ah. Our resident threat model. Sit.','I\'ve read four hundred pages of terms and conditions today. Distract me.'],
  idle:['Consent you can\'t refuse isn\'t consent. It\'s a toll booth.','Every app has a privacy policy. Lumen\'s is forty-one thousand words. I\'ve read it twice. It\'s a horror novel.','The law is slow. So is erosion. Both get there.']});
 route('fern',{loc:'garden',blurb:'The hotel gardener. Keeps bees on the roof. Notices everything.',
- req:[{},{d:2,a:10},{d:3,a:25},{d:4,a:40},{d:5,a:55},{d:6,a:80}],
+ req:[{},{d:2,a:0},{d:3,a:10},{d:4,a:22},{d:5,a:35},{d:6,a:55}],
  sum:['','Fern showed you the beehives on the hotel roof, and how bees know who belongs.','Fern dug a phone out of a planter. It was full of WH1SPER\'s drafts.','Fern showed you the hotel\'s back ways: the ones the guests never see.','Fern saw a silver-haired man arrive with a case that wasn\'t luggage.','In the garden at night, under the little lights, Fern let you in.'],
  gift:'Heirloom seeds! Purple beans! Oh, these are lovely. I\'ll plant them on the roof. You can visit them. You can visit me.',
  hello:['Mind the hose. Hello. You\'re very quiet for a hacker.','Oh, hello. The roses are being dramatic today.'],
  idle:['Bees can recognise faces. Not yours yet. Give it time.','The hotel pays me to make it look like nobody works here. Nobody sees me. I see everybody.','Someone keeps putting a coffee cup in the lavender. I will find them.']});
 route('wren',{loc:'pool',blurb:'Lifeguard. True-crime podcaster. Wants a real case.',
- req:[{},{d:2,a:10},{d:3,a:25},{d:4,a:40},{d:5,a:55},{d:6,a:80}],
+ req:[{},{d:2,a:0},{d:3,a:10},{d:4,a:22},{d:5,a:35},{d:6,a:55}],
  sum:['','Wren played you an episode of her podcast. Forty-one listeners. All of them very invested.','From the gym window, Wren showed you her stakeout of Suite 1313.','Wren told you why she became a lifeguard.','At 2 AM, Wren saw Owen Pryce let himself into 1313.','A night swim. The pool lights off. Wren stopped narrating.'],
  gift:'A detective novel! The only one I haven\'t read! It\'s got a coffee ring on it. Perfect. Clues already.',
  hello:['No running by the pool. That includes walking quickly. Hi!','Psst. Have you got a minute? I\'ve got a theory.'],
  idle:['Episode forty-two: The Case of the Missing Towels. It\'s a two-parter.','Everyone thinks lifeguards just sit there. We\'re watching. Constantly. It\'s basically surveillance, but nice.','There\'s a guest on thirteen who never checks out and never checks in.']});
 route('pia',{loc:'station',blurb:'Busks at Central Station. Looking for her brother.',
- req:[{},{d:3,a:10},{d:4,a:25},{d:5,a:40},{d:5,a:55},{d:6,a:80}],
+ req:[{},{d:3,a:0},{d:4,a:10},{d:5,a:22},{d:5,a:35},{d:6,a:55}],
  sum:['','Pia told you about her brother, Jonah, who went away and never wrote.','Pia played you the song she never plays for money.','Locker 44. Jonah\'s handwriting.','You met Jonah Reyes in a café by the station. He\'s alive.','On Platform 4, after the last train, Pia played one more song.'],
  gift:'Strings! The good gut ones! My E has been holding on by a thread. Literally. Thank you. I\'ll play you something.',
  hello:['Request something. Anything. Except that one.','You came back. Most people only come through.'],
@@ -9509,7 +9571,8 @@ function buildRing(){
  for(let x=-56;x<=50;x+=10)lightPanel(x,16.1,-57,2.6,1.2,'#f0f0ff',12,.65);for(let x=-56;x<=50;x+=10)lightPanel(x,16.1,27,2.6,1.2,'#f0f0ff',12,.65);for(let z=-44;z<=14;z+=10)lightPanel(48,16.1,z,1.2,2.6,'#f0f0ff',12,.65);for(let z=-48;z<=14;z+=10)lightPanel(-57,16.1,z,1.2,2.6,'#f0f0ff',12,.65);
  // banners hanging in the double height, door signs, posters, benches, plants, charging pillars
  for(const[x,z,c]of[[-40,-56,'#ff5d73'],[-14,-56,'#8affc1'],[8,-56,'#7cc4ff'],[32,-56,'#ffd166'],[44,-36,'#ff8fc8'],[44,14,'#c9b6ff'],[30,27,'#2bf0ff'],[0,27,'#ff9a5c'],[-30,27,'#9be36b']]){
-  box(x-.02,7.4,z-.02,x+.02,L2-.45,z+.02,MT.plain('#222'),{col:false});box(x-1.1,3.6,z-.05,x+1.1,7.4,z+.05,MT.fabric(c),{col:false});box(x-1.15,7.35,z-.08,x+1.15,7.45,z+.08,MT.metal,{col:false})}
+  // hung under the gallery, above head height: they used to run up through the Level 1 walkway, where you walked through them
+  box(x-1.1,2.75,z-.05,x+1.1,L1-.5,z+.05,MT.fabric(c),{col:false});box(x-1.15,L1-.52,z-.08,x+1.15,L1-.42,z+.08,MT.metal,{col:false})}
  const ds=(x,y,z,d,t,c)=>kSign(x,y,z,Math.min(7,t.length*.32+1.2),.7,d,t,c||'#ffd166','#1b1026');
  ds(-55,4.2,-63.78,'s','HALL A · FLOOR','#ff5d73');ds(45,4.2,-63.78,'s','HALL A · FLOOR','#ff5d73');ds(-5,L1+3.4,-63.78,'s','HALL A · LEVEL 1 SEATING','#ff5d73');ds(-5,L2+3.6,-63.78,'s','HALL A · BALCONY','#ff5d73');
  ds(55.78,5,-38,'w','EXPO HALL · VENDORS','#ffd166');ds(55.78,5,-8,'w','EXPO HALL · CON STORE','#ffd166');ds(-37,4.6,33.78,'n','FOOD COURT','#ffb347');ds(5,5.2,33.78,'n','COSPLAY HALL','#2bf0ff');ds(53,3.6,33.78,'n','CHILL-OUT','#c9b6ff');
@@ -9859,7 +9922,7 @@ function buildEast(){
  // Creator Corner: a streaming stage with a ring light and a desk, three studio pods
  vroom(168,-64,196,-40,L1,L2-.45-L1,MT.carpetDark,MT.panel,MT.ceilDark,'Creator Corner','#4a1a4a',-50,'e','CREATOR CORNER','#ff8fc8');
  {const y=L1;box(184,y,-62,194,y+.25,-52,MT.plain('#3a1a40'),{walk:1,col:false});kOnWall('v',195.8,-1,-57,9,y+.3,3,MT.stream);box(187.4,y+.25,-58,188,y+.85,-56,MT.plain('#ffffff'));
-  for(const z of[-61.2,-52.8]){box(186.9,y+.25,z-.05,187,y+1.8,z+.05,MT.plain('#222'),{col:false});box(186.9,y+1.8,z-.4,186.98,y+2.6,z+.4,MT.glow('#fff6fb'),{col:false});addLight(186.4,y+2.2,z,[1,.7,.9],6,1)}
+  for(const z of[-61.2,-52.8]){box(186.9,y+.25,z-.05,187,y+1.8,z+.05,MT.plain('#222'));box(186.9,y+1.8,z-.4,186.98,y+2.6,z+.4,MT.glow('#fff6fb'),{col:false});addLight(186.4,y+2.2,z,[1,.7,.9],6,1)}
   for(let i=0;i<5;i++)box(193.3,y+.25,-61+i*1.4,193.8,y+.85,-60.4+i*1.4,MT.plain(['#ff8fc8','#c9b6ff','#ffd166','#8affc1','#ff5d73'][i]),{col:false});
   for(let i=0;i<3;i++){const x=171+i*5;box(x,y,-49.8,x+.1,y+2.4,-44,MT.panel);table(x+2.4,-47,2,1,MT.plain('#2a2a34'),.76,y);box(x+.6,y+1.6,-47.3,x+.66,y+2.4,-46.7,MT.glow('#fff6fb',1.8),{col:false});addLight(x+2,y+2.4,-47,[1,.75,.9],4,.6)}
   box(186,y,-49.8,186.1,y+2.4,-44,MT.panel);lightPanel(176,L2-.45,-58,3,1,'#fff0fa',12,.8);lightPanel(189,L2-.45,-57,3,2,'#fff0fa',12,.9);lightPanel(178,L2-.45,-46,4,1,'#fff0fa',10,.7)}
@@ -10229,7 +10292,7 @@ function setupInput(){
  addEventListener('keydown',e=>{if(!S||!S.inWorld)return;const k=e.key.toLowerCase();WD.keys[k]=true;
   if(!worldLive())return;
   if(k==='e'||k==='enter'||k==='f'){e.preventDefault();doInteract()}
-  if(k==='m'&&S.unl.map){e.preventDefault();mapOpen()}});
+  if(k==='m'&&S.unl.map){e.preventDefault();mapOpen(false)}});
  addEventListener('keyup',e=>{WD.keys[e.key.toLowerCase()]=false;if(e.key==='Escape'){WD.escDown=false;if(WD.lockAfterEsc){WD.lockAfterEsc=false;setTimeout(tryLock,30)}}});
  addEventListener('keydown',e=>{if(e.key==='Escape')WD.escDown=true},true);
  addEventListener('blur',()=>{WD.keys={}});
@@ -10296,8 +10359,8 @@ function update(dt){
  const R=.3,reg=WD.reg;
  const nx=WD.x+WD.vx*dt,nz=WD.z+WD.vz*dt;
  if((WD.stuckT=(WD.stuckT||0)+dt)>.25){WD.stuckT=0;unstick()}
- if(Math.abs(WD.vx)>1e-4){if(!blockedAt(reg,nx,WD.z,WD.y,R))WD.x=nx;else WD.vx=0}
- if(Math.abs(WD.vz)>1e-4){if(!blockedAt(reg,WD.x,nz,WD.y,R))WD.z=nz;else WD.vz=0}
+ if(Math.abs(WD.vx)>1e-4){if(!blockedAt(reg,nx,WD.z,WD.y,R)&&!lockedAt(reg,nx,WD.z,WD.y))WD.x=nx;else WD.vx=0}
+ if(Math.abs(WD.vz)>1e-4){if(!blockedAt(reg,WD.x,nz,WD.y,R)&&!lockedAt(reg,WD.x,nz,WD.y))WD.z=nz;else WD.vz=0}
  // vertical
  const gh=heightAt(reg,WD.x,WD.z,WD.y);let gy=gh===null?WD.y:gh;if(WD.y>gy+.25){const pt=propTopAt(reg,WD.x,WD.z,WD.y,R*.7);if(pt!==null&&pt>gy)gy=pt}
  if(WD.vy>0||WD.y>gy+.02){WD.vy-=18*dt;WD.y+=WD.vy*dt;if(WD.y<=gy){if(WD.vy<-4){stepSound(.3,'land');WD.land=Math.min(.09,-WD.vy*.012)}WD.y=gy;WD.vy=0;WD.ground=true}else WD.ground=false}
@@ -10328,6 +10391,9 @@ function update(dt){
 }
 /* ---------- interaction ---------- */
 const ACTIV={ctf:['Practise a CTF challenge',()=>ctfPractice()],hallB:['Catch a talk in Hall B',()=>attendTalk()],hallC:['Catch a talk in Hall C',()=>attendTalk()],workshopA:['Join the workshop',()=>attendTalk()],workshop:['Join the workshop',()=>attendTalk()],lounge:['Take a breather',()=>restSlot()],naps:['Borrow a nap pod',()=>restSlot()],quiet:['Sit in the quiet for a while',()=>restSlot()]};
+/* stepping into an area that isn't open yet: you stop at its edge and are told why (never trapped: you can always leave) */
+function lockedAt(reg,x,z,y){const a=areaAt(reg,x,z,y);if(!a||a===WD.area)return false;const m=areaLock(a);if(!m)return false;
+ if(performance.now()-(WD.lockT||0)>2500){WD.lockT=performance.now();toast(m,'var(--coral)')}return true}
 function visibleChars(){return WCH.filter(c=>c.reg===WD.reg&&c.when())}
 function candidates(){
  const L=[];
@@ -10385,6 +10451,16 @@ function storyMark(c){return stepIs(c.id)}
 /* how a character currently looks in the world (so hangout portraits match the outfit you just saw) */
 function worldLook(id){if(!S||!G.ok)return id;const c=WCH.find(c=>c.id===id&&c.reg===WD.reg&&c.when());return c?charSVGKey(c):id}
 function charSVGKey(c){return lookOf(c.id)}
+/* time of day for the con, the hotel and the station: sky, the fog outdoors, and how much daylight reaches outside and
+   through the glass. Home and the office have their own baked morning. */
+const TODP=[
+ {hz:[.86,.74,.68],zn:[.32,.52,.86],st:0,fog:[.62,.6,.66],amb:[.62,.6,.64],sun:3.2,inside:1.25},
+ {hz:[.74,.82,.92],zn:[.22,.48,.9],st:0,fog:[.66,.72,.82],amb:[.7,.72,.78],sun:3.8,inside:1.35},
+ {hz:[.92,.78,.6],zn:[.28,.45,.82],st:0,fog:[.7,.62,.54],amb:[.68,.62,.56],sun:3.2,inside:1.25},
+ {hz:[.96,.5,.36],zn:[.2,.14,.38],st:.25,fog:[.42,.26,.3],amb:[.46,.32,.34],sun:1.8,inside:1.1},
+ {hz:[.1,.06,.16],zn:[.012,.012,.05],st:1,fog:[.1,.06,.16],amb:[.3,.3,.35],sun:1,inside:1},
+ {hz:[.06,.04,.1],zn:[.008,.008,.03],st:1,fog:[.06,.04,.1],amb:[.24,.24,.3],sun:.85,inside:.95}];
+function todNow(){if(!S||S.day<1||!['con','f13','station'].includes(WD.reg))return null;return TODP[clamp(S.slot,0,5)]}
 function render(dt){
  const T=G.T,r=G.r,cv=G.cv,cam=G.cam;
  // resolution (adaptive)
@@ -10393,7 +10469,7 @@ function render(dt){
  if(key!==G.sizeKey){G.sizeKey=key;r.setPixelRatio(dpr);r.setSize(w,h,false);if(G.composer){G.composer.setPixelRatio(dpr);G.composer.setSize(w,h)}if(G.fxaa)G.fxaa.material.uniforms.resolution.value.set(1/(w*dpr),1/(h*dpr));cam.aspect=w/h}
  for(const k in G.regions){const o=G.regions[k].obj;if(o)o.visible=k===WD.reg}
  // atmosphere: fog + hemisphere ease towards the current area's values
- const R=G.regions[WD.reg],A=WD.area&&AREAS[WD.area];const fog=(A&&A.fog)||R.fog,fr=(A&&A.fr)||R.fr,amb=(A&&A.amb)||R.amb||[.3,.3,.35];
+ const R=G.regions[WD.reg],A=WD.area&&AREAS[WD.area],TOD=todNow();const fog=(TOD&&A&&A.out)?TOD.fog:(A&&A.fog)||R.fog,fr=(A&&A.fr)||R.fr,amb=(TOD&&A&&A.out)?TOD.amb:(A&&A.amb)||R.amb||[.3,.3,.35];
  const ease=G.atmoInit?Math.min(1,dt*2.5):1;G.atmoInit=true;
  G.fogT=G.fogT||new T.Color();G.fogT.setRGB(fog[0],fog[1],fog[2],T.SRGBColorSpace);G.fog.color.lerp(G.fogT,ease);
  G.fog.near+=(fr[0]-G.fog.near)*ease;G.fog.far+=(fr[1]-G.fog.far)*ease;
@@ -10401,7 +10477,7 @@ function render(dt){
  G.gT=G.gT||new T.Color();G.gT.setRGB(amb[0]*.55,amb[1]*.5,amb[2]*.5,T.SRGBColorSpace);G.hemi.groundColor.lerp(G.gT,ease);
  // with baked light the sources do the work: only a faint fill remains (more outdoors and in daylight)
  const fillK=G.baked?(R.day?LOOK.bakeFill*1.2:A&&A.out?LOOK.bakeFill*1.8:LOOK.bakeFill):(QUALITY[G.q].env?LOOK.fill:1);
- G.hemi.intensity=(A&&A.out?1.2:1)*G.HK*fillK;
+ G.hemi.intensity=(A&&A.out?1.2*(TOD?TOD.sun:1):1)*G.HK*fillK*(TOD&&!(A&&A.out)?TOD.inside:1);
  // reflections + directional fill from the region's environment (medium/high); outdoors leans on the sky instead
  if(QUALITY[G.q].env){const env=buildEnv(WD.reg);if(G.scene.environment!==env)G.scene.environment=env;const ek=(LOOK.env[WD.reg]||.7)*(A&&A.out?.55:1)*(A&&A.envk||1)*(G.baked&&!R.day?LOOK.bakeEnv:1);
   G.scene.environmentIntensity=G.scene.environmentIntensity===undefined?ek:G.scene.environmentIntensity+(ek-G.scene.environmentIntensity)*ease}else G.scene.environment=null;
@@ -10413,26 +10489,52 @@ function render(dt){
  const asp=w/h,vf=clamp(2*Math.atan(Math.tan(.75+WD.fovk*.045)/asp),1.05,1.8);
  cam.fov=vf*180/Math.PI;cam.far=(FAR[WD.reg]||180)+40;cam.updateProjectionMatrix();
  cam.position.set(WD.x,WD.eye+bob,WD.z);cam.rotation.set(WD.pit,WD.yaw,0);zoneCull(WD.reg,WD.x,WD.eye,WD.z);
- G.sky.position.copy(cam.position);const su=G.sky.material.uniforms;su.hz.value.copy(G.fog.color);su.t.value=performance.now()/1000;if(R.day){su.zn.value.setRGB(.12,.3,.75);su.st.value=0}else{su.zn.value.setRGB(.012,.012,.05);su.st.value=1}
+ G.sky.position.copy(cam.position);const su=G.sky.material.uniforms;su.t.value=performance.now()/1000;
+ const tod=todNow();if(tod){su.hz.value.setRGB(...tod.hz);su.zn.value.setRGB(...tod.zn);su.st.value=tod.st}
+ else{su.hz.value.copy(G.fog.color);if(R.day){su.zn.value.setRGB(.12,.3,.75);su.st.value=0}else{su.zn.value.setRGB(.012,.012,.05);su.st.value=1}}
  updLights(dt);
  updSprites(dt);updBeacon();vfxTick();
  G.revZOn=G.revZ;try{if(G.composer)G.composer.render(dt);else r.render(G.scene,cam)}finally{G.revZOn=false}
 }
-/* the story goal, in the world: a soft column of light and a turning marker over where to go next (same building and
-   floor only; it fades as you arrive, so a seat or a door never hides behind it) */
-function updBeacon(){
- const T=G.T;if(!G.beacon){const g=new T.Group();
-  const cv=document.createElement('canvas');cv.width=8;cv.height=128;const x=cv.getContext('2d'),gr=x.createLinearGradient(0,0,0,128);gr.addColorStop(0,'rgba(138,255,193,0)');gr.addColorStop(.7,'rgba(138,255,193,.35)');gr.addColorStop(1,'rgba(138,255,193,.7)');x.fillStyle=gr;x.fillRect(0,0,8,128);
-  const tx=new T.CanvasTexture(cv);tx.colorSpace=T.SRGBColorSpace;
-  const col=new T.Mesh(new T.CylinderGeometry(.42,.42,6,20,1,true),new T.MeshBasicMaterial({map:tx,transparent:true,depthWrite:false,blending:T.AdditiveBlending,side:T.DoubleSide,fog:false}));col.position.y=3;col.userData.noAO=1;
-  const gem=new T.Mesh(new T.OctahedronGeometry(.22),new T.MeshBasicMaterial({color:0x8affc1,transparent:true,depthWrite:false,fog:false}));gem.scale.y=1.6;gem.userData.noAO=1;
-  const ring=new T.Mesh(new T.RingGeometry(.5,.62,40),new T.MeshBasicMaterial({color:0x8affc1,transparent:true,depthWrite:false,blending:T.AdditiveBlending,side:T.DoubleSide,fog:false}));ring.rotation.x=-Math.PI/2;ring.position.y=.04;ring.userData.noAO=1;
-  g.add(col,gem,ring);g.userData={col,gem,ring};G.scene.add(g);G.beacon=g}
- const b=G.beacon,o=S&&WD.active&&typeof objective==='function'?objective():null;
- if(!o||o.reg!==WD.reg||Math.abs((o.y||0)-WD.y)>2.6){b.visible=false;return}
- const d=Math.hypot(o.x-WD.x,o.z-WD.z),k=clamp((d-1.6)/4,0,1);if(k<=0){b.visible=false;return}
+/* the story goal, in the world: a faint column of light over a place, or a small turning marker over a person. It fades
+   as you arrive. A second, plain marker shows your own map pin. On screen, a small tag tracks whichever matters,
+   and slides to the edge of the screen with an arrow when it's behind you or out of view. */
+function goalTarget(){const o=S&&WD.active&&typeof objective==='function'?objective():null;if(o&&o.reg)return Object.assign({kind:'goal'},o);return null}
+function pinTarget(){const w=S&&S.wp;return w&&w.reg===WD.reg?{kind:'pin',reg:w.reg,x:w.x,z:w.z,y:w.y||0,t:'Your pin'}:null}
+function mkBeacon(col){const T=G.T,g=new T.Group();
+ const cv=document.createElement('canvas');cv.width=8;cv.height=128;const x=cv.getContext('2d'),gr=x.createLinearGradient(0,0,0,128);gr.addColorStop(0,'rgba(255,255,255,0)');gr.addColorStop(.75,'rgba(255,255,255,.22)');gr.addColorStop(1,'rgba(255,255,255,.45)');x.fillStyle=gr;x.fillRect(0,0,8,128);
+ const tx=new T.CanvasTexture(cv);tx.colorSpace=T.SRGBColorSpace;
+ const colM=new T.Mesh(new T.CylinderGeometry(.22,.22,5,16,1,true),new T.MeshBasicMaterial({map:tx,color:col,transparent:true,depthWrite:false,blending:T.AdditiveBlending,side:T.DoubleSide,fog:false}));colM.position.y=2.5;colM.userData.noAO=1;
+ const gem=new T.Mesh(new T.OctahedronGeometry(.13),new T.MeshBasicMaterial({color:col,transparent:true,depthWrite:false,fog:false}));gem.scale.y=1.5;gem.userData.noAO=1;
+ const ring=new T.Mesh(new T.RingGeometry(.34,.4,40),new T.MeshBasicMaterial({color:col,transparent:true,depthWrite:false,blending:T.AdditiveBlending,side:T.DoubleSide,fog:false}));ring.rotation.x=-Math.PI/2;ring.position.y=.04;ring.userData.noAO=1;
+ g.add(colM,gem,ring);g.userData={col:colM,gem,ring};G.scene.add(g);return g}
+function placeBeacon(b,o,person){if(!o||o.reg!==WD.reg||Math.abs((o.y||0)-WD.y)>2.6){b.visible=false;return 0}
+ const d=Math.hypot(o.x-WD.x,o.z-WD.z),k=clamp((d-1.6)/5,0,1);if(k<=0){b.visible=false;return 0}
  b.visible=true;b.position.set(o.x,o.y||0,o.z);const t=performance.now()/1000,u=b.userData;
- u.gem.position.y=2.2+Math.sin(t*2)*.12;u.gem.rotation.y=t*1.6;u.gem.material.opacity=.9*k;u.col.material.opacity=.55*k;u.ring.material.opacity=(.5+.3*Math.sin(t*3))*k;u.ring.scale.setScalar(1+.08*Math.sin(t*3))}
+ u.col.visible=!person;u.ring.visible=!person;u.gem.position.y=person?2.25+Math.sin(t*2)*.05:1.9+Math.sin(t*2)*.1;u.gem.rotation.y=t*1.6;
+ u.gem.material.opacity=.85*k;u.col.material.opacity=.5*k;u.ring.material.opacity=(.35+.2*Math.sin(t*3))*k;return d}
+function updBeacon(){
+ if(!G.beacon){G.beacon=mkBeacon(0x8affc1);G.pinB=mkBeacon(0xffd166)}
+ const o=goalTarget(),b0=beatStep(curBeat()),person=!!(b0&&b0.who)||(o&&WCH.some(c=>c.on&&c.reg===o.reg&&Math.hypot(c.x-o.x,c.z-o.z)<.6));
+ const dg=placeBeacon(G.beacon,o,person);
+ const pn=pinTarget();if(pn&&Math.hypot(pn.x-WD.x,pn.z-WD.z)<2.5&&Math.abs(pn.y-WD.y)<2.6){S.wp=null;toast('Reached your pin','var(--butter)')}
+ placeBeacon(G.pinB,pinTarget(),false);
+ hudMark('wpG',o,'#8affc1',person?2.4:1.6);hudMark('wpP',pinTarget(),'#ffd166',1.4);
+}
+/* the on-screen tag: projected into view, or an arrow on the edge pointing the way */
+function hudMark(id,o,col,h){let el=$(id);if(!el){el=document.createElement('div');el.id=id;el.className='wpmark';el.style.setProperty('--c',col);el.innerHTML='<i></i><span></span>';$('world').appendChild(el)}
+ if(!o||!o.reg||!WD.active||(o.far&&o.reg!==WD.reg)){el.style.display='none';return}
+ if(o.reg!==WD.reg){el.style.display='none';return}
+ const T=G.T,v=new T.Vector3(o.x,(o.y||0)+h,o.z);v.project(G.cam);const W=innerWidth,H=innerHeight;
+ const behind=v.z>1;let x=(v.x*.5+.5)*W,y=(-v.y*.5+.5)*H;const m=28,on=!behind&&x>m&&x<W-m&&y>m+40&&y<H-m;
+ const d=Math.hypot(o.x-WD.x,o.z-WD.z),dy=(o.y||0)-WD.y;
+ if(d<2.2&&Math.abs(dy)<2){el.style.display='none';return}
+ el.style.display='flex';el.classList.toggle('edge',!on);
+ if(!on){let dx=x-W/2,dz=y-H/2;if(behind){dx=-dx;dz=-dz;if(Math.abs(dz)<1)dz=H}const s=Math.min((W/2-m)/Math.abs(dx||1e-6),(H/2-m-30)/Math.abs(dz||1e-6));x=W/2+dx*s;y=H/2+dz*s;el.querySelector('i').style.transform=`rotate(${Math.atan2(dz,dx)}rad)`}
+ else el.querySelector('i').style.transform='';
+ el.style.transform=`translate(${x|0}px,${y|0}px)`;
+ el.querySelector('span').textContent=(Math.abs(dy)>2.6?(dy>0?'▲ ':'▼ '):'')+Math.round(Math.hypot(d,dy))+' m';
+}
 function updSprites(dt){
  const T=G.T,tt=performance.now()/1000,yaw=WD.yaw;
  G.newsT=(G.newsT||0)-dt;if(G.newsT<=0){G.newsT=.25;G.news=S.ch>0?new Set(newScenes().map(n=>n.id)):new Set()}
@@ -10532,6 +10634,7 @@ function drawMapCanvas(c,reg,o){
  if(o.mini)for(const n of WD.npcs)if(n.reg===reg&&onLv(n.y)){x.fillStyle='#bba8cf88';x.fillRect(X(n.x)-u,Z(n.z)-u,2*u,2*u)}
  const ob=objective();
  if(ob&&ob.reg===reg){let px=X(ob.x),pz=Z(ob.z);if(o.mini){const cx=Wd/2,cz=Hd/2,dx=px-cx,dz=pz-cz,m=Math.max(Math.abs(dx),Math.abs(dz)),lim=Wd/2-8*u;if(m>lim){px=cx+dx/m*lim;pz=cz+dz/m*lim}}star(x,px,pz,(o.mini?6:8)*u);if(!onLv(ob.y)){x.fillStyle='#8affc1';x.font=`bold ${11*u}px sans-serif`;x.textAlign='center';x.fillText(ob.y>lv?'▲':'▼',px,pz-9*u)}}
+ if(S.wp&&S.wp.reg===reg){let px=X(S.wp.x),pz=Z(S.wp.z);if(o.mini){const cx=Wd/2,cz=Hd/2,dx=px-cx,dz=pz-cz,m=Math.max(Math.abs(dx),Math.abs(dz)),lim=Wd/2-8*u;if(m>lim){px=cx+dx/m*lim;pz=cz+dz/m*lim}}const r=(o.mini?5:8)*u;x.fillStyle='#ffd166';x.beginPath();x.arc(px,pz-r,r*.75,Math.PI,0);x.lineTo(px,pz+r*.4);x.closePath();x.fill();x.strokeStyle='#1b1026';x.lineWidth=1.2*u;x.stroke();if(levelOf(reg,S.wp.y||0)!==lv){x.fillStyle='#ffd166';x.font=`bold ${10*u}px sans-serif`;x.textAlign='center';x.fillText((S.wp.y||0)>lv?'▲':'▼',px,pz-r*2)}}
  if(reg===WD.reg&&levelOf(reg,WD.y)===lv){const px=X(WD.x),pz=Z(WD.z);x.save();x.translate(px,pz);x.scale(u,u);x.rotate(-WD.yaw);x.fillStyle='#ff5d73';x.beginPath();x.moveTo(0,-8);x.lineTo(5.5,6);x.lineTo(0,3);x.lineTo(-5.5,6);x.closePath();x.fill();x.strokeStyle='#fff';x.lineWidth=1.2;x.stroke();x.restore()}
  if(o.mini){x.fillStyle='#f6eefc';x.font=`bold ${10*u}px sans-serif`;x.textAlign='center';x.fillText('N',Wd/2,11*u)}else if(o.view){x.fillStyle='#f6eefc';x.font='bold 18px sans-serif';x.textAlign='center';x.fillText('N ↑',30,26)}
 }
@@ -10679,6 +10782,26 @@ function genCrowd(){
  for(const[x,z]of[[260,17],[262.6,17.4],[260.2,17.2],[263,14.6]])R('Partygoer','f13',x,z,0,'room1336',(x*7|0)%7);
  R('Commuter','station',727,9,0,'platform',2);R('Commuter','station',744,13,0,'platform',5);R('Coworker','office',502.6,1.7,0,'office',4);
 }
+/* ---------------- what's open: the con and the hotel open up as the story needs them, so the first days stay small ----------------
+   Each entry: areas, when they open, what you're told if you try earlier. Areas not listed are always open. */
+const OPENS=[];
+const opens=(areas,cond,msg)=>OPENS.push({areas:areas.split(' '),cond,msg});
+const bdone=b=>!!(S&&(S.done[b]||S.day>+b[1]));
+opens('walkway ringN hallA',()=>S.day>1||f('d1_badge'),'Badge first. Registration is on the Foyer\'s west wall.');
+opens('link promenade lobby lifts cafe',()=>S.day>1||f('d1_open'),'The opening ceremony first: Hall A. The hotel will still be there afterwards.');
+opens('corridor room1337 room1336',()=>S.day>1||f('d1_checkin'),'You haven\'t checked in yet. Reception is on the Promenade.');
+opens('bar terrace garden',()=>S.day>1||f('d1_room'),'The bar opens tonight. Drop your bag in your room first.');
+opens('hallC badgelab foyerG',()=>S.day>=2,'Tomorrow. Tonight is for the bar and your bed.');
+opens('villagerow ctf lockpick soc hwv aero carhack soceng ics workshopA workshop ringE ringS gallery courtyard vendor constore demostage seconc',()=>S.day>2||bdone('d2_ctf'),'The villages open after the CTF kick-off in Hall C.');
+opens('lounge naps quiet food fcterrace',()=>S.day>2||bdone('d2_rin'),'Doors open at midday.');
+opens('vrL1 creator arcade tabletop film cosplay seconc1 skygarden ring2 foyerG2 neconc neconc2 speakers hallB hallBback',()=>S.day>2||bdone('d2_badge'),'Not open yet. Check the Calendar on your phone for what\'s on.');
+opens('mezz hotelL1 lumenlounge ballroom meeting stairwell',()=>S.day>2||S.day===2&&S.slot>=3,'The mezzanine opens for the evening reception.');
+opens('library hotelL2 gym pool spa grill boutique press roof plantdeck housekeeping',()=>S.day>=3,'Not today. There\'s plenty to do where you are.');
+opens('noc carpark basement',()=>S.day>4||S.day===4&&S.slot>=1,'Staff and parking only. You\'ve no reason to be down there yet.');
+opens('mdf conops stafffw staffc service security stores kitchenC breakroom dock backstage conroof backstairs luggage',()=>S.day>4||bdone('d4_noc'),'STAFF ONLY. A volunteer with a radio is watching the door.');
+opens('backoffice pdining hkitchen plant tunnel tunnelN',()=>S.day>=5,'Staff only. Not yet.');
+const OPENOF={};
+function areaLock(a){if(!S||window.__allOpen)return null;if(!Object.keys(OPENOF).length)for(const o of OPENS)for(const k of o.areas)OPENOF[k]=o;const o=OPENOF[a];return o&&!o.cond()?o.msg:null}
 /* ---------------- gates: ropes, locked doors and card readers that open with the story ---------------- */
 const GATES=[];
 function gate(reg,kind,x0,z0,x1,z1,y,open,msg,label){GATES.push({reg,kind,x0,z0,x1,z1,y:y||0,open,msg,label:label||(kind==='rope'?'Roped off':kind==='card'?'Staff door':'Locked door')})}
@@ -10985,9 +11108,13 @@ const WHERE={
 /* a story beat can hold someone in place, or hide them (S.hold = {id:[reg,x,z,y]|0}) */
 function placeChars(){if(!S)return;const d=S.day,sl=S.day===0?3:S.slot;
  for(const c of WCH){let p=S.hold&&S.hold[c.id]!==undefined?S.hold[c.id]:WHERE[c.id](d,sl);
+  // someone with a scene ready waits where that scene starts, so talking to them never whisks you somewhere else
+  if(p&&ROM.includes(c.id)&&S.day>=1&&sceneReady(c.id)){const sa=sceneArea(c.id+scn(c.id));if(sa&&AREAS[sa]&&!areaLock(sa))p=[sa,ROM.indexOf(c.id)%3]}
   if(Array.isArray(p)&&typeof p[0]==='string'&&!AREAS[p[0]]&&p.length>=3)p={reg:p[0],x:p[1],z:p[2],y:p[3]||0};
   else if(Array.isArray(p))p=spotIn(p[0],p[1]);
   if(!p){c.on=false;continue}c.on=true;c.reg=p.reg;c.x=p.x;c.z=p.z;c.y=p.y||0}}
+/* the area a scene opens in: its first [bg ...] */
+const SCAREA={};function sceneArea(id){if(SCAREA[id]!==undefined)return SCAREA[id];const m=SC[id]&&SC[id].match(/^\s*\[bg ([a-z0-9]+)\]/m);return SCAREA[id]=m?bgArea(m[1]):null}
 const UNMET={nyx:'the woman picking locks',ada:'the person at the CTF table',priya:'the woman by the dashboards',juno:'the streamer',kit:'the cosplayer',rin:'the person behind the bean bag',bea:'the bartender',mira:'the woman on the air-con unit',saoirse:'the woman with the notebook',sunny:'the woman in hi-vis',tilly:'the woman with the soldering iron',petra:'the mechanic',astrid:'the woman with the antenna',yuki:'the girl at the arcade cabinet',vesper:'the singer',delphine:'the woman in the navy suit',noor:'the woman with the case files',fern:'the gardener',wren:'the lifeguard',pia:'the violinist'};
 const ROLEIDLE={
  marge:['Be excellent to each other. And hydrate.','If you see Lumen people in the ceiling, tell me. I\'m only half joking.','Twenty years of this con. Every year I swear it\'s the last.'],
@@ -11085,102 +11212,174 @@ const ICON={
 };
 const APPN={messages:'Messages',calendar:'Calendar',map:'Map',hearts:'Hearts',cases:'Case board',stats:'Stats',story:'Story',achieve:'Achievements',bag:'Bag',saves:'Saves',log:'Log',settings:'Settings',quit:'Quit'};
 const APPU={messages:'phone',calendar:'notes',map:'map',hearts:'aff',cases:'clues',stats:'skill',story:'notes',achieve:'notes',bag:'cred'};
-let phApp=null,phThread=null,phReg=null,phCase=null,phPick=[],phAns=null;
+/* the phone: a home screen of apps; every app opens full screen. Back (or Esc) goes back to the home screen. */
+let phApp=null,phThread=null,phReg=null;const PH={case:null,pick:[],ans:null,heart:null,day:null,stab:'week',atab:'all',ctab:'board',sday:null};
 function phone(app){
  if(!S)return;
- // never open over a minigame, tutorial or chapter card: they own the overlay until they finish
  const o=$('ov');if((o.classList.contains('on')&&!o.classList.contains('phoneov'))||$('card').classList.contains('on'))return;
  const opening=!o.classList.contains('phoneov');
  if(document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}
- WD.active=false;
- phApp=app||null;phThread=null;phReg=null;drawPhone();
- if(opening){const ph=$('ov').querySelector('.phone');if(ph)ph.classList.add('opening');if(typeof sfx==='function')sfx('phoneOpen')}
+ WD.active=false;phThread=null;
+ if(app){openApp(app,false);return}
+ phApp=null;drawPhone();
+ if(opening){const ph=o.querySelector('.phone');if(ph)ph.classList.add('opening');if(typeof sfx==='function')sfx('phoneOpen')}
 }
-function closePhone(){if($('ov').classList.contains('phoneov')&&typeof sfx==='function')sfx('phoneClose');closeOv();$('ov').classList.remove('phoneov','mapov');if(G.ok&&S&&S.inWorld)relock();if($('vn').classList.contains('on'))return;if(G.ok&&S.inWorld)hub();else if($('hub').classList.contains('on'))hub()}
+function closePhone(){if($('ov').classList.contains('phoneov')&&typeof sfx==='function')sfx('phoneClose');const o=$('ov');delete o.dataset.app;delete o.dataset.from;closeOv();o.classList.remove('phoneov','mapov','appov');phApp=null;if(G.ok&&S&&S.inWorld)relock();if($('vn').classList.contains('on'))return;if(G.ok&&S.inWorld)hub();else if($('hub').classList.contains('on'))hub()}
+/* Esc / back: from an app you opened on the phone, back to the phone; otherwise close */
+function phoneBack(){const o=$('ov');if(o.dataset.app&&o.dataset.from==='phone'){phApp=null;phThread=null;drawPhone()}else closePhone()}
 function drawPhone(){
  const apps=Object.keys(APPN).filter(a=>!APPU[a]||S.unl[APPU[a]]);
  const unread=S.msgs.filter(m=>!m.r).length,nn=S.day>0?ROM.filter(sceneReady).length:0,nc=S.day>0?Object.keys(MYST).filter(m=>S.unl.clues&&canSolve(m)).length:0;
- let body='',title='';
- if(!phApp){
-  body=`<div class="home"><div class="clock">${S.day?SLOTT[S.slot]:'21:47'}</div><div class="date">${esc(clockLabel())}</div><div class="grid">${apps.map(a=>`<button class="app" data-a="${a}"><span class="ic" style="background:${ICON[a][0]}"><svg viewBox="0 0 32 32">${ICON[a][1]}</svg>${a==='messages'&&unread?`<i>${unread}</i>`:''}${a==='hearts'&&nn?`<i>${nn}</i>`:''}${a==='cases'&&nc?`<i>${nc}</i>`:''}</span><span class="nm">${APPN[a]}</span></button>`).join('')}</div></div>`;
- }else{
-  title=APPN[phApp];
-  body=APPS[phApp]();
- }
- ov(`<div class="phone"><div class="pbar"><span>${S.day>0&&WD.reg!=='home'&&WD.reg!=='office'?'CTRL+ALT+NET':'HOME-WIFI'}</span><span>${S.day?SLOTT[S.slot]:'21:47'}</span><span class="bat"><b style="width:${Math.max(8,96-S.slot*15)}%"></b></span></div>${phApp?`<div class="ptop"><button class="pback" id="pback" aria-label="Back">‹</button><b>${phThread?esc(CH[phThread]?CH[phThread].name:phThread):phCase?esc(MYST[phCase].n):title}</b></div>`:''}<div class="pbody">${body}</div><button class="phome" id="phome" aria-label="Close phone"></button></div>`);
- $('ov').classList.remove('mapov');$('ov').classList.add('phoneov');updBlur();
- $('ov').onclick=e=>{if(e.target===$('ov'))closePhone()};
+ const body=`<div class="home"><div class="clock">${S.day?SLOTT[S.slot]:'07:12'}</div><div class="date">${esc(clockLabel())}</div><div class="grid">${apps.map(a=>`<button class="app" data-a="${a}"><span class="ic" style="background:${ICON[a][0]}"><svg viewBox="0 0 32 32">${ICON[a][1]}</svg>${a==='messages'&&unread?`<i>${unread}</i>`:''}${a==='hearts'&&nn?`<i>${nn}</i>`:''}${a==='cases'&&nc?`<i>${nc}</i>`:''}</span><span class="nm">${APPN[a]}</span></button>`).join('')}</div></div>`;
+ ov(`<div class="phone"><div class="pbar"><span>${S.day>0&&WD.reg!=='home'&&WD.reg!=='office'?'CTRL+ALT+NET':'HOME-WIFI'}</span><span>${S.day?SLOTT[S.slot]:'07:12'}</span><span class="bat"><b style="width:${Math.max(8,96-S.slot*15)}%"></b></span></div><div class="pbody">${body}</div><button class="phome" id="phome" aria-label="Close phone"></button></div>`);
+ const o=$('ov');delete o.dataset.app;delete o.dataset.from;o.classList.remove('mapov','appov');o.classList.add('phoneov');updBlur();
+ o.onclick=e=>{if(e.target===o)closePhone()};
  $('phome').onclick=closePhone;
- if($('pback'))$('pback').onclick=()=>{if(phThread){phThread=null}else if(phCase){phCase=null}else phApp=null;drawPhone()};
- $('ov').querySelectorAll('.app').forEach(b=>b.onclick=()=>{if(b.dataset.a==='map'){mapOpen();return}phApp=b.dataset.a;drawPhone()});
- if(APPS_AFTER[phApp])APPS_AFTER[phApp]();
+ o.querySelectorAll('.app').forEach(b=>b.onclick=()=>openApp(b.dataset.a,true));
 }
-const bar=(v,c)=>`<div class="bar"><i style="width:${v}%;background:${c}"></i></div>`;
+function openApp(k,fromPhone){phApp=k;if(k==='map'){mapOpen(fromPhone);return}drawApp(fromPhone===undefined?($('ov').dataset.from==='phone'):fromPhone)}
+function drawApp(fromPhone){const k=phApp;
+ const html=APPS[k]();
+ ov(`<div class="bigapp app-${k}"><div class="mtop"><button class="pback" id="apb" aria-label="Back">${fromPhone?'‹':'✕'}</button><b>${APPN[k]}</b><span class="small">${esc(clockLabel())}</span><button class="pback" id="apx" aria-label="Close">✕</button></div>${html}</div>`);
+ const o=$('ov');o.dataset.app=k;o.dataset.from=fromPhone?'phone':'direct';o.classList.add('phoneov','mapov','appov');updBlur();
+ $('apb').onclick=phoneBack;$('apx').onclick=closePhone;
+ if(APPS_AFTER[k])APPS_AFTER[k]();
+}
+const redraw=()=>drawApp($('ov').dataset.from==='phone');
+const bar=(v,c)=>`<div class="bar"><i style="width:${clamp(v,0,100)}%;background:${c}"></i></div>`;
+const tabsH=(cur,list,attr)=>`<div class="atabs">${list.map(t=>`<button class="${cur===t[0]?'on':''}" data-${attr}="${t[0]}">${esc(t[1])}</button>`).join('')}</div>`;
+const whereNow=g=>{const c=WCH.find(c=>c.id===g);if(!c||!c.on)return null;const a=areaAt(c.reg,c.x,c.z,c.y);return a&&AREAS[a]?AREAS[a].n:null};
 const APPS={
+ /* ---- Messages: conversations, and texts you can answer ---- */
  messages(){
-  S.msgs.forEach(m=>{if(!phThread||m.f===phThread)m.r=1});hud();
-  if(phThread){const ms=S.msgs.filter(m=>m.f===phThread);return `<div class="thread">${ms.map(m=>`<div class="bub2">${esc(m.t)}<small>Ch.${m.c}</small></div>`).join('')}</div>`}
-  const by={};S.msgs.forEach(m=>{by[m.f]=m});const ks=Object.keys(by).sort((a,b)=>S.msgs.lastIndexOf(by[b])-S.msgs.lastIndexOf(by[a]));
-  return ks.length?ks.map(k=>`<button class="chat" data-f="${esc(k)}">${CH[k]?`<span class="hd">${head(k==='dave'?'davex':k,'n')}</span>`:'<span class="hd"></span>'}<span><b>${esc(CH[k]?CH[k].name:k)}</b><small>${esc(by[k].t)}</small></span></button>`).join(''):'<p class="small">No messages yet.</p>';
- },
+  const by={};S.msgs.forEach(m=>{(by[m.f]=by[m.f]||[]).push(m)});
+  const ks=Object.keys(by).sort((a,b)=>S.msgs.lastIndexOf(by[b][by[b].length-1])-S.msgs.lastIndexOf(by[a][by[a].length-1]));
+  if(!phThread&&ks.length&&innerWidth>760)phThread=ks[0];
+  const nm=k=>CH[k]?CH[k].name:k,av=k=>CH[k]?head(lookOf(k),'n'):'';
+  const list=ks.map(k=>{const L=by[k],last=L[L.length-1],un=L.filter(m=>!m.r).length,wait=L.some(m=>m.q&&!m.ans);return`<button class="mthr ${phThread===k?'on':''}" data-f="${esc(k)}"><span class="hd">${av(k)}</span><span class="mt"><b>${esc(nm(k))}</b><small>${last.me?'You: ':''}${esc(last.t)}</small></span>${un?`<i class="nb">${un}</i>`:wait?'<i class="nb q">?</i>':''}</button>`}).join('');
+  let th='<div class="mempty small">Pick a conversation.</div>';
+  if(phThread&&by[phThread]){by[phThread].forEach(m=>m.r=1);hud();
+   th=`<div class="mhead"><span class="hd">${av(phThread)}</span><b>${esc(nm(phThread))}</b>${CH[phThread]&&ROM.includes(phThread)?`<small>${met(phThread)?STAGEN[Math.max(0,Math.min(4,scn(phThread)-1))]+' · ♥ '+aff(phThread):''}</small>`:''}</div><div class="mlog">`+
+    by[phThread].map(m=>`<div class="bub ${m.me?'me':''}">${esc(m.t)}<small>${m.c?'Day '+m.c+' · '+SLOTN[m.s||0]:'Before the con'}</small></div>${m.q&&!m.ans&&TEXTQ[m.q]?`<div class="mreply">${TEXTQ[m.q].replies.map((r,i)=>`<button class="ch" data-q="${S.msgs.indexOf(m)}" data-i="${i}">${esc(sub(r.t))}</button>`).join('')}</div>`:''}`).join('')+'</div>'}
+  return`<div class="msgs ${phThread?'open':''}"><div class="mlist">${list||'<p class="small" style="padding:12px">No messages yet.</p>'}</div><div class="mview2">${innerWidth<=760&&phThread?'<button class="btn" id="mback">‹ All conversations</button>':''}${th}</div></div>`},
+ /* ---- Calendar: the week, today in detail, what you can do now ---- */
  calendar(){
-  if(S.day===0)return'<p class="small">Two weeks to go. The con is circled on every calendar you own.</p>';
-  const D=DAYS[S.day]||[];let h=`<div class="goal"><small>${esc(clockLabel())}</small><b>${esc(objective()?objective().t:'')}</b></div>`;
-  h+=`<div class="cal">${SLOTN.map((n,i)=>{let b=D[i];if(typeof b==='function')b=i===S.slot?b():null;const B=b&&BEATS[b];const past=i<S.slot,cur=i===S.slot;const st=D[i]===undefined?'—':B?(S.done[b]?'✓ '+B.t:(past?'':(cur?'▶ ':'')+B.t)):(past?'✓ Free time':cur?'▶ Free: yours to spend':'Free');
-   return`<div class="cs ${cur?'on':''} ${past?'past':''}"><b>${n}</b><span>${esc(st)}</span></div>`}).join('')}</div>`;
-  if(isFree()){h+=`<b>Spend the ${SLOTN[S.slot].toLowerCase()}</b><p class="small">Walk up to someone and choose Spend time, work a lead from the Case board, catch a talk in Hall A, Hall C or Hall B, practise in the CTF Arena or hunt bugs on your laptop in Room 1337.${S.restore?' Overclocked: two things per part of the day.':''}</p>`;
-   const ready=ROM.filter(sceneReady);if(ready.length)h+=`<p class="small">Ready for you: ${ready.map(g=>esc(CH[g].name)).join(', ')}.</p>`;
-   h+=`<div class="row"><button class="btn" id="cwait">${S.slot===5?'Call it a night':'Let the '+SLOTN[S.slot].toLowerCase()+' go by'}</button></div>`}
-  return h},
+  if(S.day===0)return'<div class="abody"><p class="small">Two weeks to go. The con is circled on every calendar you own.</p></div>';
+  const d=PH.day||S.day;
+  const week=`<div class="cweek">${[1,2,3,4,5,6,7].map(i=>`<button class="cday ${i===d?'on':''} ${i<S.day?'past':''} ${i===S.day?'now':''}" data-d="${i}"><b>${DAYN[i].slice(0,3)}</b><small>Day ${i}</small>${i===7?'<em>Keynote</em>':''}</button>`).join('')}</div>`;
+  const rows=SLOTN.map((n,i)=>{let b=(DAYS[d]||[])[i];if(typeof b==='function')b=(d===S.day&&i===S.slot)?b():null;const B=b&&BEATS[b];
+   const past=d<S.day||d===S.day&&i<S.slot,cur=d===S.day&&i===S.slot,log=(S.slog&&S.slog[d+':'+i])||[];
+   let what='';if(B)what=past||S.done[b]?'✓ '+B.t:(d>S.day?'Story':B.t);
+   const free=(DAYS[d]||[])[i]!==undefined;
+   return`<div class="cslot ${cur?'on':''} ${past?'past':''}"><div class="ct"><b>${n}</b><small>${SLOTT[i]}</small></div><div class="cc">${what?`<div class="cbeat ${S.done[b]?'done':''}">${esc(what)}</div>`:''}${log.filter(x=>!B||x!==B.t).map(x=>`<div class="clog">${esc(x)}</div>`).join('')}${!past&&free&&!B?'<div class="cfree">Free</div>':''}${!past&&B&&!S.done[b]&&!B.adv&&d===S.day?'<div class="cfree">then free</div>':''}${!free?'<div class="cfree">—</div>':''}</div></div>`}).join('');
+  let now='';
+  if(d===S.day){const b=curBeat();
+   if(b)now=`<div class="cnow"><b>Now: ${esc(beatStep(b).t||b.t)}</b><p class="small">The green light shows where. Free time comes after.</p><button class="btn" id="cpin">Point me there</button></div>`;
+   else if(isFree()){const ready=ROM.filter(sceneReady),leads=Object.keys(LEADS).filter(leadOpen);
+    now=`<div class="cnow"><b>The ${SLOTN[S.slot].toLowerCase()} is yours.</b><p class="small">One thing per part of the day${S.restore?' (two, overclocked)':''}. Walking, talking shop, gifts, shopping and your phone are free.</p>
+    ${ready.length?`<div class="small"><b>Ready for you</b></div><div class="cppl">${ready.map(g=>`<button class="chip" data-who="${g}"><span class="hd">${head(lookOf(g),'n')}</span>${CH[g].name}<small>${esc(whereNow(g)||'')}</small></button>`).join('')}</div>`:''}
+    ${leads.length?`<div class="small"><b>Open leads</b></div><div class="cppl">${leads.map(k=>`<button class="chip" data-lead="${k}">${esc(LEADS[k].n)}<small>${esc(AREAS[LEADS[k].w]?AREAS[LEADS[k].w].n:'')}</small></button>`).join('')}</div>`:''}
+    <div class="row"><button class="btn" id="cwait">${S.slot===5?'Call it a night':'Let the '+SLOTN[S.slot].toLowerCase()+' go by'}</button></div></div>`}}
+  return`<div class="abody">${week}<div class="cgrid"><div class="cday2"><h3>Day ${d} · ${DAYN[d]}${d===7?' · Closing keynote':''}</h3>${rows}</div>${now?`<div class="cside">${now}</div>`:''}</div></div>`},
+ /* ---- Hearts: everyone, and a full file on whoever you pick ---- */
  hearts(){
-  const met_=ROM.filter(met);
-  return met_.length?`<p class="small">${met_.length}/${ROM.length} met · ${ROM.filter(loved).length} in love</p>`+met_.map(g=>{const R=ROUTES[g],i=scn(g),why=sceneWhy(g),st=loved(g)?'In love':STAGEN[Math.max(0,Math.min(4,i-1))];
-   return`<div class="girl"><div class="hd">${head(lookOf(g),loved(g)?'h':'n')}</div><div class="i"><b>${CH[g].name}</b> <span class="dots">${'■'.repeat(Math.max(0,i-1))}${'□'.repeat(Math.max(0,R.n-1-Math.max(0,i-1)))}</span>${bar(aff(g),CH[g].col)}<span class="small">${st} · ♥ ${aff(g)} · ${esc(R.blurb)}<br>${loved(g)?'Their story is complete.':why?'Next: '+esc(why):'Next scene ready: find them'}${S.gifted[g]?' · gift given':''}</span></div></div>`}).join(''):'<p class="small">You haven\'t met anyone yet.</p>'},
+  const sel=PH.heart&&ROM.includes(PH.heart)?PH.heart:null;
+  const card=g=>{const m=met(g),i=scn(g),lv=loved(g);return`<button class="hcard ${m?'':'unk'} ${sel===g?'on':''} ${lv?'love':''}" data-g="${g}" style="--hc:${CH[g].col}"><span class="hp">${m?head(lookOf(g),lv?'h':'n'):'<span class="sil">?</span>'}</span><b>${m?CH[g].name:'???'}</b><small>${m?(lv?'In love':STAGEN[Math.max(0,Math.min(4,i-1))]):'Not met'}</small>${m?bar(aff(g),CH[g].col):''}${m&&sceneReady(g)?'<i class="nb">!</i>':''}</button>`};
+  const grid=`<div class="hgrid">${ROM.map(card).join('')}</div>`;
+  if(!sel)return`<div class="abody"><p class="small">${ROM.filter(met).length}/${ROM.length} met · ${ROM.filter(loved).length} in love · tap someone for their file</p>${grid}</div>`;
+  const g=sel,R=ROUTES[g],i=scn(g),m=met(g),why=sceneWhy(g),gi=Object.keys(ITEMS).find(k=>ITEMS[k].g===g),wn=whereNow(g);
+  let file;
+  if(!m)file=`<div class="hfile"><h3>???</h3><p>${esc(UNMET[g]?'Someone: '+UNMET[g]+'.':'Someone you haven\'t met.')}</p><p class="small">${esc(R.blurb)}</p>${wn?`<p class="small">Seen around: ${esc(wn)}</p>`:''}</div>`;
+  else{const steps=[];for(let k=1;k<R.n;k++){const done=i>k,next=i===k;steps.push(`<div class="hstep ${done?'done':''} ${next?'next':''}"><b>${k===R.n-1?'♥ Last scene':'Scene '+k}</b><span>${done?esc((R.sum&&R.sum[k])||'Seen'):next?(why?'Locked: '+esc(why):'Ready now'+(wn?' · '+esc(wn):'')):'???'}</span></div>`)}
+   file=`<div class="hfile"><div class="hfhead"><div class="hbig">${por(lookOf(g),loved(g)?'h':'n')}</div><div><h3 style="color:${CH[g].col}">${CH[g].name}</h3><p>${esc(R.blurb)}</p><p class="small">${loved(g)?'In love':STAGEN[Math.max(0,Math.min(4,i-1))]} · ♥ ${aff(g)}/100</p>${bar(aff(g),CH[g].col)}
+   <div class="aff-marks">${R.aff.slice(1).map((a,k)=>`<i style="left:${a}%" title="Scene ${k+1}"></i>`).join('')}</div>
+   <p class="small">${wn?'Right now: '+esc(wn):'Not around right now'}${S.hang[g+':'+S.day]?' · talked shop today':''}</p>
+   <p class="small">${gi?(S.gifted[g]?'Gift: '+esc(ITEMS[gi].n)+' (given)':'Would love: '+esc(ITEMS[gi].n)+(S.inv[gi]?' (in your bag)':' (Con Store, '+ITEMS[gi].p+'c)')):''}</p>
+   <div class="row">${wn?`<button class="btn" id="hpin">Pin their location</button>`:''}</div></div></div><div class="hsteps">${steps.join('')}</div></div>`}
+  return`<div class="abody hsplit"><div class="hleft">${grid}</div><div class="hright"><button class="btn" id="hclose">‹ Everyone</button>${file}</div></div>`},
+ /* ---- Case board: a corkboard of mysteries, clues on strings, leads as sticky notes ---- */
  cases(){
-  if(phCase){const M=MYST[phCase],cl=mystClues(phCase);
-   if(S.solved[phCase])return`<div class="goal"><small>SOLVED</small><b>${esc(M.n)}</b></div><p>${esc(M.q)}</p><p style="color:var(--mint)">${esc(M.opts[M.a])}</p>${cl.map(c=>`<div class="clue"><small>${esc(CLUE[c].s)}</small>${esc(CLUE[c].t)}</div>`).join('')}`;
-   const leads=Object.keys(LEADS).filter(k=>LEADS[k].m===phCase&&leadOpen(k));
-   return`<div class="goal"><small>MYSTERY</small><b>${esc(M.n)}</b></div><p>${esc(M.q)}</p>
-   <b>Clues (${cl.length})</b>${cl.length?cl.map(c=>`<button class="clue pick ${phPick.includes(c)?'on':''}" data-c="${c}"><small>${esc(CLUE[c].s)}</small>${esc(CLUE[c].t)}</button>`).join(''):'<p class="small">Nothing yet.</p>'}
-   ${cl.length>=3?`<b>Your answer</b><div class="ans">${M.opts.map((o,i)=>`<button class="ch ${phAns===i?'on':''}" data-a="${i}">${esc(o)}</button>`).join('')}</div><p class="small">Pick an answer and the three clues that prove it.</p><div class="row"><button class="btn pri" id="csolve" ${phAns!==null&&phPick.length===3?'':'disabled'}>Solve</button></div>`:'<p class="small">You need at least three clues before you can say anything.</p>'}
-   <b style="display:block;margin-top:12px">Leads</b>${leads.length?leads.map(k=>{const L=LEADS[k];return`<div class="lead"><b>${esc(L.n)}</b><small>${esc(L.d)}<br>Where: ${esc(AREAS[L.w]?AREAS[L.w].n:L.w)} · ${['Safe','Some risk','Risky','Very risky'][L.risk]}${L.need&&!L.need()?' · needs '+esc(L.needT):''} · takes part of a day</small></div>`}).join(''):'<p class="small">No open leads right now. People, and the story, will turn up more.</p>'}`}
   const ms=Object.keys(MYST).filter(m=>mystClues(m).length||Object.keys(LEADS).some(k=>LEADS[k].m===m&&leadOpen(k))||S.solved[m]||(S.restore&&META.solved[m]));
-  return ms.length?`<p class="small">${Object.keys(S.solved).length}/${Object.keys(MYST).length} solved · ${S.clues.length} clues. Tap a case.</p>`+ms.map(m=>{const n=mystClues(m).length,lo=Object.keys(LEADS).filter(k=>LEADS[k].m===m&&leadOpen(k)).length;
-   return`<button class="case ${S.solved[m]?'ok':''}" data-m="${m}"><b>${esc(MYST[m].n)}</b><small>${S.solved[m]?'Solved':esc(MYST[m].q)}<br>${n} clue${n===1?'':'s'}${lo?' · '+lo+' lead'+(lo>1?'s':''):''}${canSolve(m)?' · ready to solve':''}</small></button>`}).join(''):'<p class="small">Nothing on the board yet.</p>'},
- stats(){const rk=k=>{const v=S[k],r=rankOf(v),b=RANKXP[r+1];return`<div style="margin:8px 0 12px"><b>${k==='skill'?'Skill':'Clout'}</b> <span class="term" style="font-size:22px">${RANKS[k][r]}</span> <span class="small">rank ${r} · ${v} XP${b?' · '+(b-v)+' to '+RANKS[k][r+1]:''}</span>${bar(b?(v-RANKXP[r])/(b-RANKXP[r])*100:100,k==='skill'?'var(--mint)':'var(--butter)')}<span class="small">${TUT[k][1]}</span></div>`};
-  return(S.unl.skill?rk('skill'):'')+(S.unl.clout?rk('clout'):'')+(S.unl.exp?`<div style="margin:8px 0 12px"><b>Exposure</b> <span class="term" style="font-size:22px">${S.exp}/100</span>${bar(S.exp,'var(--coral)')}<span class="small">Footprint ${S.foot}: where Exposure starts each morning. ${S.fails?'Doxxed '+S.fails+' time'+(S.fails>1?'s':'')+' this run.':''}</span></div>`:'')+(S.unl.cred?`<p><b>Credits</b> <span class="term" style="font-size:22px;color:var(--butter)">${S.cred}</span></p>`:'')},
+  const tabs=tabsH(PH.ctab,[['board','Board'],['locker','Evidence locker'],['leads','All leads']],'ct');
+  if(PH.ctab==='locker'){const by={};S.clues.forEach(c=>{(by[CLUE[c].m[0]]=by[CLUE[c].m[0]]||[]).push(c)});
+   return tabs+`<div class="abody"><p class="small">${S.clues.length}/${Object.keys(CLUE).length} clues</p>${Object.keys(MYST).filter(m=>by[m]).map(m=>`<div class="dbh">${esc(MYST[m].n)}</div><div class="cork small-cork">${by[m].map(c=>`<div class="pin"><b>${esc(CLUE[c].s)}</b><span>${esc(CLUE[c].t)}</span></div>`).join('')}</div>`).join('')||'<p class="small">Nothing yet.</p>'}</div>`}
+  if(PH.ctab==='leads'){const L=Object.keys(LEADS).filter(leadOpen);const done=Object.keys(S.leads);
+   return tabs+`<div class="abody"><div class="cork">${L.map(k=>leadNote(k)).join('')||'<p class="small">No open leads.</p>'}</div>${done.length?`<div class="dbh">Worked</div><div class="small">${done.map(k=>esc(LEADS[k].n)).join(' · ')}</div>`:''}</div>`}
+  const sel=PH.case&&MYST[PH.case]?PH.case:ms[0];
+  const side=`<div class="clist">${ms.map(m=>`<button class="cmys ${m===sel?'on':''} ${S.solved[m]?'ok':''}" data-m="${m}"><b>${esc(MYST[m].n)}</b><small>${S.solved[m]?'SOLVED':mystClues(m).length+' clue'+(mystClues(m).length===1?'':'s')}${canSolve(m)?' · ready':''}</small></button>`).join('')||'<p class="small">Nothing on the board yet.</p>'}</div>`;
+  if(!sel)return tabs+`<div class="abody">${side}</div>`;
+  const M=MYST[sel],cl=mystClues(sel),n=cl.length,solvedM=S.solved[sel];
+  const pos=cl.map((c,k)=>{const a=-Math.PI/2+(k+.5)/Math.max(1,n)*Math.PI*2,rx=36,ry=33;return[50+Math.cos(a)*rx,50+Math.sin(a)*ry]});
+  const strings=cl.map((c,k)=>(PH.pick.includes(c)||solvedM&&M.ev.includes(c))?`<line x1="50" y1="50" x2="${pos[k][0]}" y2="${pos[k][1]}"/>`:'').join('');
+  const board=`<div class="corkboard"><svg viewBox="0 0 100 100" preserveAspectRatio="none">${strings}</svg><div class="qcard ${solvedM?'ok':''}"><small>${solvedM?'SOLVED':'THE QUESTION'}</small><b>${esc(M.q)}</b>${solvedM?`<span>${esc(M.opts[M.a])}</span>`:''}</div>
+   ${cl.map((c,k)=>`<button class="pin cl ${PH.pick.includes(c)?'on':''}" data-c="${c}" style="left:${pos[k][0]}%;top:${pos[k][1]}%;--r:${((k*37)%9)-4}deg"><b>${esc(CLUE[c].s)}</b><span>${esc(CLUE[c].t)}</span></button>`).join('')}</div>`;
+  const leads=Object.keys(LEADS).filter(k=>LEADS[k].m===sel&&leadOpen(k));
+  const solve=solvedM?'':n>=3?`<div class="csolve"><b>Your answer</b><div class="ans">${M.opts.map((o,i)=>`<button class="ch ${PH.ans===i?'on':''}" data-a="${i}">${esc(o)}</button>`).join('')}</div><p class="small">Pick an answer, and tap the three clues on the board that prove it (${PH.pick.length}/3).</p><button class="btn pri" id="csolve" ${PH.ans!==null&&PH.ans!==undefined&&PH.ans!==false&&PH.pick.length===3?'':'disabled'}>Solve</button></div>`:'<p class="small">You need at least three clues before you can say anything.</p>';
+  return tabs+`<div class="abody csplit">${side}<div class="cmain"><h3>${esc(M.n)}</h3>${board}${solve}${leads.length?`<div class="dbh">Leads</div><div class="cork">${leads.map(leadNote).join('')}</div>`:''}</div></div>`},
+ /* ---- Stats: ranks, exposure over the week, what's in your footprint, counters ---- */
+ stats(){
+  const ladder=k=>{const v=S[k],r=rankOf(v);return`<div class="sbox"><h4>${k==='skill'?'Skill':'Clout'} <span class="term">${RANKS[k][r]}</span></h4><div class="ladder">${RANKS[k].map((n,i)=>`<div class="rung ${i<=r?'got':''} ${i===r?'cur':''}"><b>${i}</b><span>${n}</span><small>${RANKXP[i]} XP</small></div>`).join('')}</div>${bar(RANKXP[r+1]?(v-RANKXP[r])/(RANKXP[r+1]-RANKXP[r])*100:100,k==='skill'?'var(--mint)':'var(--butter)')}<p class="small">${v} XP${RANKXP[r+1]?' · '+(RANKXP[r+1]-v)+' to '+RANKS[k][r+1]:' · top rank'}. ${esc(TUT[k][1])}</p></div>`};
+  const pk=S.expPeak||{};
+  const chart=`<div class="sbox"><h4>Exposure <span class="term">${S.exp}/100</span></h4>${bar(S.exp,'var(--coral)')}<p class="small">Resets each morning to your Footprint: ${S.foot}. ${S.fails?'Doxxed '+S.fails+' time'+(S.fails>1?'s':'')+'.':'Never doxxed this run.'}</p>
+   <div class="echart">${[1,2,3,4,5,6,7].map(d=>`<div class="ecol ${d===S.day?'now':''}"><i style="height:${pk[d]||0}%"></i><small>D${d}</small><em>${pk[d]!==undefined?pk[d]:''}</em></div>`).join('')}</div><p class="small">Highest Exposure each day.</p>
+   <h4 style="margin-top:12px">Your footprint</h4>${(S.footLog||[]).filter(x=>x.v).map(x=>`<div class="fl ${x.v<0?'good':''}"><b>${x.v>0?'+':''}${x.v}</b><span>${esc(x.w||'')}</span><small>${x.d?'Day '+x.d+' · '+SLOTN[x.s]:'Before the con'}</small></div>`).join('')||'<p class="small">Nothing yet.</p>'}</div>`;
+  const cnt=[['People met',ROM.filter(met).length+'/'+ROM.length],['In love',ROM.filter(loved).length],['Scenes seen',ROM.reduce((a,g)=>a+Math.max(0,scn(g)-1),0)],['Mysteries solved',Object.keys(S.solved).length+'/12'],['Clues',S.clues.length+'/'+Object.keys(CLUE).length],['Leads worked',Object.keys(S.leads).length],['Talks',S.talks||0],['Things done with your time',S.acts||0],['Credits',S.cred]];
+  return`<div class="abody sgrid">${S.unl.skill?ladder('skill'):''}${S.unl.clout?ladder('clout'):''}${S.unl.exp?chart:''}<div class="sbox"><h4>This run</h4>${cnt.map(c=>`<div class="kv"><span>${c[0]}</span><b>${c[1]}</b></div>`).join('')}</div></div>`},
+ /* ---- Story: your week so far ---- */
  story(){const by={};for(const e of S.sum)(by[e.d]=by[e.d]||[]).push(e);const ks=Object.keys(by).map(Number).sort((a,b)=>a-b);
-  return ks.length?ks.map(d=>`<div class="sumd"><b>${d===0?'Prologue':'Day '+d+' · '+DAYN[d]}</b>${by[d].map(e=>`<p>${d?`<small>${SLOTN[e.s]}</small> `:''}${esc(e.t)}</p>`).join('')}</div>`).join(''):'<p class="small">Your story so far will be written here.</p>'},
- achieve(){const ks=Object.keys(ACH),got=ks.filter(k=>META.ach[k]);
-  return`<p class="small">${got.length}/${ks.length} unlocked, across every run.</p>`+ks.map(k=>{const a=ACH[k],on=!!META.ach[k],hid=a[2]&&!on;return`<div class="achv ${on?'on':''}"><b>${hid?'???':esc(a[0])}</b><small>${hid?'Hidden':esc(a[1])}</small></div>`}).join('')},
- bag(){const e=Object.entries(S.inv);return (e.length?e.map(([k,v])=>{const it=ITEMS[k];return`<div class="item"><div><b>${it.n}${v>1?' ×'+v:''}</b><small>${it.d}${it.g?` Give it to ${CH[it.g].name}.`:''}</small></div></div>`}).join(''):'<p class="small">Empty. The Con Store in the Expo Hall sells gear and gifts.</p>')},
- saves(){return '<div id="spanel"></div>'},
- log(){return S.log.slice(-80).reverse().map(l=>`<div class="logl">${l[0]?`<b>${esc(l[0])}</b> `:''}${esc(l[1])}</div>`).join('')||'<p class="small">Nothing yet.</p>'},
+  const d=PH.sday!==null&&by[PH.sday]?PH.sday:ks[ks.length-1];
+  return ks.length?`<div class="atabs">${ks.map(k=>`<button class="${k===d?'on':''}" data-sd="${k}">${k===0?'Prologue':'Day '+k}</button>`).join('')}</div><div class="abody sview"><h3>${d===0?'Two weeks before':'Day '+d+' · '+DAYN[d]}</h3>${by[d].map(e=>`<div class="sent">${d?`<small>${SLOTN[e.s]}</small>`:''}<p>${esc(e.t)}</p></div>`).join('')}</div>`:'<div class="abody"><p class="small">Your story so far will be written here.</p></div>'},
+ /* ---- Achievements: across every run ---- */
+ achieve(){const cat=k=>k.startsWith('end_')?'end':k.startsWith('love_')?'love':k.startsWith('solve_')||k.includes('clue')||k.includes('solve')||k==='first_lead'?'myst':k.startsWith('skill_')||k.startsWith('clout_')?'rank':'other';
+  const ks=Object.keys(ACH).filter(k=>PH.atab==='all'||cat(k)===PH.atab),all=Object.keys(ACH),got=all.filter(k=>META.ach[k]).length;
+  return tabsH(PH.atab,[['all','All'],['end','Endings'],['love','Love'],['myst','Mysteries'],['rank','Ranks'],['other','Everything else']],'at')+`<div class="abody"><p class="small">${got}/${all.length} unlocked across every run</p>${bar(got/all.length*100,'var(--butter)')}<div class="agrid">${ks.map(k=>{const a=ACH[k],on=!!META.ach[k],hid=a[2]&&!on;return`<div class="atile ${on?'on':''}"><span class="aic">${on?'★':hid?'?':'☆'}</span><b>${hid?'???':esc(a[0])}</b><small>${hid?'Hidden':esc(a[1])}</small>${on?`<em>${new Date(META.ach[k]).toLocaleDateString()}</em>`:''}</div>`}).join('')}</div></div>`},
+ bag(){const e=Object.entries(S.inv);return`<div class="abody"><p class="small">${S.cred} credits. The Con Store is in the Expo Hall.</p><div class="bgrid">${e.length?e.map(([k,v])=>{const it=ITEMS[k];return`<div class="bitem">${it.g?`<span class="hd">${met(it.g)?head(lookOf(it.g),'h'):''}</span>`:''}<b>${it.n}${v>1?' ×'+v:''}</b><small>${it.d}${it.g?` Give it to ${met(it.g)?CH[it.g].name:'someone'} next time you see them.`:''}</small></div>`}).join(''):'<p class="small">Empty.</p>'}</div></div>`},
+ saves(){return '<div class="abody"><div id="spanel"></div></div>'},
+ log(){return`<div class="abody">`+(S.log.slice(-150).reverse().map(l=>`<div class="logl">${l[0]?`<b>${esc(l[0])}</b> `:''}${esc(l[1])}</div>`).join('')||'<p class="small">Nothing yet.</p>')+'</div>'},
  settings(){const vol=[['master','Master'],['music','Music'],['amb','Ambience'],['sfx','Effects']];
-  return `<div class="set"><h4>Sound</h4>${vol.map(([k,n])=>`<label class="sl"><span>${n}</span><input type="range" min="0" max="100" step="1" value="${Math.round(SETTINGS.vol[k]*100)}" data-v="${k}" style="--p:${Math.round(SETTINGS.vol[k]*100)}%"><b>${Math.round(SETTINGS.vol[k]*100)}</b></label>`).join('')}
+  return `<div class="abody"><div class="set"><h4>Sound</h4>${vol.map(([k,n])=>`<label class="sl"><span>${n}</span><input type="range" min="0" max="100" step="1" value="${Math.round(SETTINGS.vol[k]*100)}" data-v="${k}" style="--p:${Math.round(SETTINGS.vol[k]*100)}%"><b>${Math.round(SETTINGS.vol[k]*100)}</b></label>`).join('')}
   <h4>Graphics</h4><div class="seg" id="gq">${['low','medium','high'].map(q=>`<button data-q="${q}" class="${(G.q||'high')===q?'on':''}">${q[0].toUpperCase()+q.slice(1)}</button>`).join('')}</div>
   <p class="small">${G.q==='low'?'Simpler lighting, no glow. Best for older phones.':G.q==='medium'?'Full lighting and glow, lower resolution.':'Everything on, with antialiasing. The resolution drops automatically if frames get slow.'}</p>
   <h4>Controls</h4><label class="sl"><span>Look speed</span><input type="range" min="30" max="250" step="5" value="${Math.round(SETTINGS.sens*100)}" id="sens" style="--p:${Math.round((SETTINGS.sens*100-30)/220*100)}%"><b>${SETTINGS.sens.toFixed(2)}×</b></label>
-  <div class="row" style="margin-top:6px"><button class="btn" id="stf">Text: ${S.fast?'instant':'typewriter'}</button></div>
-  <p class="small" style="margin-top:12px">Keyboard: WASD or arrows to walk, Shift to run, mouse to look, E to interact, M for map. <b>Esc</b> or <b>P</b> opens this phone and frees the mouse; close it to step back in.<br>Touch: drag the left stick to walk, drag anywhere else to look, tap the prompt to interact. Push the stick all the way to run.</p></div>
-  <p class="small">The game autosaves while you explore. Use the Saves app for save slots and export.</p>`},
- quit(){return `<div class="set"><h4>Quit to title?</h4><p class="small">Your game autosaves right now, where you're standing. You can pick it up again with Continue.</p><div class="row"><button class="btn pri" id="stq">Quit to title</button><button class="btn" id="stqn">Not yet</button></div></div>`}
+  <div class="row" style="margin-top:6px"><button class="btn" id="stf">Text: ${S.fast?'instant':'typewriter'}</button><button class="btn" id="stdbg">Debug menu (F9)</button></div>
+  <p class="small" style="margin-top:12px">Keyboard: WASD or arrows to walk, Shift to run, mouse to look, E to interact with whatever you're pointing at, M for map. <b>Esc</b> or <b>P</b> opens this phone; Esc in an app goes back to the phone.<br>Touch: drag the left stick to walk, drag anywhere else to look, tap the prompt to interact.</p></div>
+  <p class="small">The game autosaves while you explore. Use the Saves app for save slots and export.</p></div>`},
+ quit(){return `<div class="abody"><div class="set"><h4>Quit to title?</h4><p class="small">Your game autosaves right now, where you're standing. You can pick it up again with Continue.</p><div class="row"><button class="btn pri" id="stq">Quit to title</button><button class="btn" id="stqn">Not yet</button></div></div></div>`}
 };
+function leadNote(k){const L=LEADS[k],ok=!L.need||L.need();return`<div class="sticky r${L.risk}"><b>${esc(L.n)}</b><span>${esc(L.d)}</span><small>${esc(AREAS[L.w]?AREAS[L.w].n:L.w)} · ${['Safe','Some risk','Risky','Very risky'][L.risk]}${ok?'':' · needs '+esc(L.needT)}</small>${AREAS[L.w]?`<button class="btn" data-pinlead="${k}">Pin it</button>`:''}</div>`}
+function pinArea(k){const A=AREAS[k];if(!A)return;S.wp={reg:A.reg,x:A.sp[0],z:A.sp[1],y:A.sp[3]||0};toast('Pinned: '+A.n,'var(--butter)')}
 const APPS_AFTER={
- calendar(){const w=$('cwait');if(w)w.onclick=()=>{closePhone();if(S.slot===5)return run([N('You call it a night.')],()=>endDay());run([N('You let the '+SLOTN[S.slot].toLowerCase()+' go by.')],()=>spend('wait'))}},
- cases(){$('ov').querySelectorAll('.case').forEach(b=>b.onclick=()=>{phCase=b.dataset.m;phPick=[];phAns=null;drawPhone()});
-  $('ov').querySelectorAll('.clue.pick').forEach(b=>b.onclick=()=>{const c=b.dataset.c;if(phPick.includes(c))phPick=phPick.filter(x=>x!==c);else if(phPick.length<3)phPick.push(c);drawPhone()});
-  $('ov').querySelectorAll('.ans .ch').forEach(b=>b.onclick=()=>{phAns=+b.dataset.a;drawPhone()});
-  const sv=$('csolve');if(sv)sv.onclick=()=>{const m=phCase;const ok=solveMyst(m,phAns,phPick.slice());phPick=[];phAns=null;
-   ov(`<div class="card"><h3>${ok?'Solved':'That doesn\'t hold up'}</h3><p>${ok?esc(MYST[m].n)+': '+esc(MYST[m].opts[MYST[m].a]):'The clues don\'t prove it, or the answer\'s wrong. You asked around while you were checking, and people noticed.'}</p><div class="row"><button class="btn pri" id="cok">OK</button></div></div>`);$('ov').classList.remove('phoneov');
-   $('cok').onclick=()=>{closeOv();if(ok&&SC['solved_'+m]!==undefined){closePhone();run(scr('solved_'+m),hub)}else{phApp='cases';drawPhone()}}}},
- saves(){savesPanel($('spanel'),'phone',drawPhone)},
- messages(){$('ov').querySelectorAll('.chat').forEach(b=>b.onclick=()=>{phThread=b.dataset.f;drawPhone()})},
- settings(){$('stf').onclick=()=>{S.fast=!S.fast;drawPhone()};
+ messages(){const o=$('ov');o.querySelectorAll('.mthr').forEach(b=>b.onclick=()=>{phThread=b.dataset.f;redraw()});
+  if($('mback'))$('mback').onclick=()=>{phThread=null;redraw()};
+  o.querySelectorAll('.mreply .ch').forEach(b=>b.onclick=()=>{const m=S.msgs[+b.dataset.q],r=TEXTQ[m.q].replies[+b.dataset.i];m.ans=+b.dataset.i;
+   S.msgs.push({f:m.f,me:1,t:sub(r.t),c:S.day,s:S.slot,r:1});if(r.fx)fx(r.fx);if(r.a)S.msgs.push({f:m.f,t:sub(r.a),c:S.day,s:S.slot,r:1});save();redraw();
+   const lg=o.querySelector('.mlog');if(lg)lg.scrollTop=1e6});
+  const lg=o.querySelector('.mlog');if(lg)lg.scrollTop=1e6},
+ calendar(){const o=$('ov');o.querySelectorAll('.cday').forEach(b=>b.onclick=()=>{PH.day=+b.dataset.d;redraw()});
+  const w=$('cwait');if(w)w.onclick=()=>{closePhone();if(S.slot===5)return run([N('You call it a night.')],()=>endDay());run([N('You let the '+SLOTN[S.slot].toLowerCase()+' go by.')],()=>spend('wait'))};
+  if($('cpin'))$('cpin').onclick=()=>{const t=beatTarget(curBeat());if(t){S.wp=null;toast('Follow the green light','var(--mint)')}closePhone()};
+  o.querySelectorAll('[data-who]').forEach(b=>b.onclick=()=>{const c=WCH.find(c=>c.id===b.dataset.who&&c.on);if(c){S.wp={reg:c.reg,x:c.x,z:c.z,y:c.y};toast('Pinned: '+CH[c.id].name,'var(--butter)')}closePhone()});
+  o.querySelectorAll('[data-lead]').forEach(b=>b.onclick=()=>{pinArea(LEADS[b.dataset.lead].w);closePhone()})},
+ hearts(){const o=$('ov');o.querySelectorAll('.hcard').forEach(b=>b.onclick=()=>{PH.heart=b.dataset.g;redraw()});if($('hclose'))$('hclose').onclick=()=>{PH.heart=null;redraw()};
+  if($('hpin'))$('hpin').onclick=()=>{const c=WCH.find(c=>c.id===PH.heart&&c.on);if(c){S.wp={reg:c.reg,x:c.x,z:c.z,y:c.y};toast('Pinned: '+CH[c.id].name,'var(--butter)')}closePhone()}},
+ cases(){const o=$('ov');
+  o.querySelectorAll('[data-ct]').forEach(b=>b.onclick=()=>{PH.ctab=b.dataset.ct;redraw()});
+  o.querySelectorAll('.cmys').forEach(b=>b.onclick=()=>{PH.case=b.dataset.m;PH.pick=[];PH.ans=null;redraw()});
+  o.querySelectorAll('.pin.cl').forEach(b=>b.onclick=()=>{const c=b.dataset.c;if(PH.pick.includes(c))PH.pick=PH.pick.filter(x=>x!==c);else if(PH.pick.length<3)PH.pick.push(c);redraw()});
+  o.querySelectorAll('.ans .ch').forEach(b=>b.onclick=()=>{PH.ans=+b.dataset.a;redraw()});
+  o.querySelectorAll('[data-pinlead]').forEach(b=>b.onclick=()=>{pinArea(LEADS[b.dataset.pinlead].w);closePhone()});
+  const sv=$('csolve');if(sv)sv.onclick=()=>{const m=PH.case||o.querySelector('.cmys.on').dataset.m;const ok=solveMyst(m,PH.ans,PH.pick.slice());PH.pick=[];PH.ans=null;
+   const from=$('ov').dataset.from;
+   ov(`<div class="card"><h3>${ok?'Solved':'That doesn\'t hold up'}</h3><p>${ok?esc(MYST[m].n)+': '+esc(MYST[m].opts[MYST[m].a]):'The clues don\'t prove it, or the answer\'s wrong. You asked around while you were checking, and people noticed.'}</p><div class="row"><button class="btn pri" id="cok">OK</button></div></div>`);$('ov').classList.remove('phoneov','mapov','appov');
+   $('cok').onclick=()=>{closeOv();if(ok&&SC['solved_'+m]!==undefined){closePhone();run(scr('solved_'+m),hub)}else{phApp='cases';drawApp(from==='phone')}}}},
+ story(){$('ov').querySelectorAll('[data-sd]').forEach(b=>b.onclick=()=>{PH.sday=+b.dataset.sd;redraw()})},
+ achieve(){$('ov').querySelectorAll('[data-at]').forEach(b=>b.onclick=()=>{PH.atab=b.dataset.at;redraw()})},
+ saves(){savesPanel($('spanel'),'phone',redraw)},
+ settings(){$('stf').onclick=()=>{S.fast=!S.fast;redraw()};$('stdbg').onclick=()=>{closeOv();dbgOpen()};
   $('ov').querySelectorAll('input[data-v]').forEach(r=>{r.oninput=()=>{const k=r.dataset.v;SETTINGS.vol[k]=r.value/100;r.style.setProperty('--p',r.value+'%');r.nextElementSibling.textContent=r.value;if(typeof applyVolumes==='function')applyVolumes()};r.onchange=()=>{saveSettings();if(r.dataset.v==='sfx'||r.dataset.v==='master')sfx('notify')}});
   const sn=$('sens');sn.oninput=()=>{SETTINGS.sens=sn.value/100;sn.style.setProperty('--p',((sn.value-30)/220*100)+'%');sn.nextElementSibling.textContent=SETTINGS.sens.toFixed(2)+'×'};sn.onchange=saveSettings;
-  $('gq').querySelectorAll('button').forEach(b=>b.onclick=()=>{SETTINGS.gfx=b.dataset.q;saveSettings();if(G.ok)setQuality(b.dataset.q);else G.q=b.dataset.q;drawPhone()})},
- quit(){$('stq').onclick=()=>{S.pos=[WD.reg,WD.x,WD.z,WD.yaw,WD.y];save();closeOv();$('ov').classList.remove('phoneov');WD.active=false;if(document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}titleScreen()};$('stqn').onclick=()=>{phApp=null;drawPhone()}}
+  $('gq').querySelectorAll('button').forEach(b=>b.onclick=()=>{SETTINGS.gfx=b.dataset.q;saveSettings();if(G.ok)setQuality(b.dataset.q);else G.q=b.dataset.q;redraw()})},
+ quit(){$('stq').onclick=()=>{S.pos=[WD.reg,WD.x,WD.z,WD.yaw,WD.y];save();closeOv();$('ov').classList.remove('phoneov','mapov','appov');WD.active=false;if(document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}titleScreen()};$('stqn').onclick=phoneBack}
 };
 
 /* ============ THE MAP: full screen, pan and zoom, fast travel grouped by building ============ */
@@ -11199,11 +11398,11 @@ function areaGroup(A){
 }
 const AGROUPS=['Convention Centre','Halcyon Hotel','Hotel · 13th floor','Hotel roof','Outside','Underground','Linden Street','Brindle & Co','Central Station'];
 function levelName(reg,y){const L=LEVELS[reg]||[];const v=levelOf(reg,y);const l=L.find(l=>l[0]===v);return l?l[1]:''}
-function ftList(){const net=MAPNET[WD.reg]||[WD.reg];return Object.values(AREAS).filter(a=>net.includes(a.reg)&&!a.hide&&S.visited&&S.visited[a.k])}
+function ftList(){const net=MAPNET[WD.reg]||[WD.reg];return Object.values(AREAS).filter(a=>net.includes(a.reg)&&!a.hide&&S.visited&&S.visited[a.k]&&!areaLock(a.k))}
 function canTravel(){return !$('vn').classList.contains('on')&&!(typeof ftBlocked==='function'&&ftBlocked())}
 function fastTravel(k){if(!AREAS[k])return;S.ftRecent=[k].concat((S.ftRecent||[]).filter(x=>x!==k)).slice(0,6);closePhone();fadeTp(()=>teleportArea(k))}
-function mapOpen(){
- if(!S)return;const o=$('ov');if((o.classList.contains('on')&&!o.classList.contains('phoneov'))||$('card').classList.contains('on'))return;
+function mapOpen(fromPhone){
+ if(!S)return;MAPV.from=fromPhone?'phone':'direct';const o=$('ov');if((o.classList.contains('on')&&!o.classList.contains('phoneov'))||$('card').classList.contains('on'))return;
  if(document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}
  WD.active=false;
  const reg=WD.reg;MAPV.reg=reg;MAPV.lv=levelOf(reg,WD.y);MAPV.sel=null;MAPV.q='';mapFit(true);
@@ -11224,19 +11423,19 @@ function drawMap(){
  const groups={};for(const a of list){if(q&&!a.n.toLowerCase().includes(q))continue;const g=areaGroup(a);(groups[g]=groups[g]||[]).push(a)}
  const here=areaAt(WD.reg,WD.x,WD.z,WD.y);
  const sec=AGROUPS.filter(g=>groups[g]).map(g=>{const op=q||MAPV.open[g]!==false;return`<div class="mgrp"><button class="mgh" data-g="${esc(g)}"><span>${op?'▾':'▸'} ${esc(g)}</span><small>${groups[g].length}</small></button>${op?`<div class="mgl">${groups[g].sort((x,y)=>(x.sp[3]||0)-(y.sp[3]||0)||x.n.localeCompare(y.n)).map(a=>`<button class="mft${a.k===here?' here':''}" data-k="${a.k}" ${can?'':'disabled'}><b>${esc(a.n)}</b><small>${esc(levelName(a.reg,a.sp[3]||0))}${a.k===here?' · you are here':''}</small></button>`).join('')}</div>`:''}</div>`}).join('');
- ov(`<div class="bigmap"><div class="mtop"><b>Map</b><span class="small">${esc(MAPREG[WD.reg]||'')}${typeof clockLabel==='function'?' · '+esc(clockLabel()):''}</span><button class="pback" id="mclose" aria-label="Close">✕</button></div>
+ ov(`<div class="bigmap"><div class="mtop">${MAPV.from==='phone'?'<button class="pback" id="mback2" aria-label="Back">‹</button>':''}<b>Map</b><span class="small">${esc(MAPREG[WD.reg]||'')}${typeof clockLabel==='function'?' · '+esc(clockLabel()):''}</span><button class="pback" id="mclose" aria-label="Close">✕</button></div>
  <div class="mbody"><div class="mview"><div class="tabs mtabs">${tabs.map(t=>`<button class="${t[0]===MAPV.reg&&t[1]===MAPV.lv?'on':''}" data-r="${t[0]}" data-l="${t[1]}">${esc(t[2])}</button>`).join('')}</div>
  <canvas id="bmap" width="900" height="620"></canvas>
  <div class="mzoom"><button id="mzi" aria-label="Zoom in">+</button><button id="mzo" aria-label="Zoom out">−</button><button id="mzme" aria-label="Centre on me">◎</button><button id="mzfit" aria-label="Whole level">▢</button></div>
- <div class="mleg small"><span style="color:#ff5d73">▲</span> you · <span style="color:#8affc1">★</span> story goal · <span style="color:#ffd166">●</span> someone with a scene · tap a room you've visited to travel there</div>
+ <div class="mleg small"><span style="color:#ff5d73">▲</span> you · <span style="color:#8affc1">★</span> story goal · <span style="color:#ffd166">●</span> someone with a scene · tap a room to travel there, or anywhere to drop a pin</div>
  <div id="msel"></div></div>
  <div class="mside"><b>Fast travel</b><p class="small">${can?'Anywhere you\'ve been, in this part of the city. Trains go further.':'Not available right now.'}</p>
  <input class="inp" id="mq" placeholder="Search places" value="${esc(MAPV.q)}" autocomplete="off">
  ${rec.length&&!q?`<div class="mrec"><small>Recent</small>${rec.map(k=>`<button class="chip mft" data-k="${k}" ${can?'':'disabled'}>${esc(AREAS[k].n)}</button>`).join('')}</div>`:''}
  <div class="mlist">${sec||'<p class="small">Nowhere yet. Explore.</p>'}</div></div></div></div>`);
- const o=$('ov');o.classList.add('phoneov','mapov');updBlur();
+ const o=$('ov');o.dataset.app='map';o.dataset.from=MAPV.from;o.classList.add('phoneov','mapov');updBlur();
  o.onclick=e=>{if(e.target===o)closePhone()};
- $('mclose').onclick=closePhone;
+ $('mclose').onclick=closePhone;if($('mback2'))$('mback2').onclick=phoneBack;
  o.querySelectorAll('.mtabs button').forEach(b=>b.onclick=()=>{MAPV.reg=b.dataset.r;MAPV.lv=+b.dataset.l;MAPV.sel=null;mapFit(MAPV.reg===WD.reg&&MAPV.lv===levelOf(WD.reg,WD.y));drawMap()});
  o.querySelectorAll('.mgh').forEach(b=>b.onclick=()=>{const g=b.dataset.g;MAPV.open[g]=MAPV.open[g]===false;drawMap()});
  o.querySelectorAll('.mft').forEach(b=>b.onclick=()=>fastTravel(b.dataset.k));
@@ -11248,9 +11447,11 @@ function drawMap(){
 }
 function mapSize(cv){const r=cv.getBoundingClientRect(),d=Math.min(2,devicePixelRatio||1),w=Math.max(200,r.width*d|0),h=Math.max(160,r.height*d|0);if(cv.width!==w||cv.height!==h){const k=w/cv.width;cv.width=w;cv.height=h;MAPV.sc*=k}}
 function paintMap(){const cv=$('bmap');if(!cv)return;mapSize(cv);MAPV.sc=clamp(MAPV.sc,cv.width/900,cv.width/12);drawMapCanvas(cv,MAPV.reg,{level:MAPV.lv,view:MAPV,labels:1});
- const s=$('msel');if(!s)return;const A=MAPV.sel&&AREAS[MAPV.sel];
- s.innerHTML=A?`<div class="msel"><b>${esc(A.n)}</b><small>${esc(areaGroup(A))} · ${esc(levelName(A.reg,A.sp[3]||0))}</small>${(MAPNET[WD.reg]||[]).includes(A.reg)&&S.visited[A.k]?`<button class="btn pri" id="mgo" ${canTravel()?'':'disabled'}>Travel here</button>`:'<small>Not visited yet</small>'}</div>`:'';
- if($('mgo'))$('mgo').onclick=()=>fastTravel(A.k)}
+ const s=$('msel');if(!s)return;const A=MAPV.sel&&AREAS[MAPV.sel],P=MAPV.pt;
+ s.innerHTML=A?`<div class="msel"><b>${esc(A.n)}</b><small>${esc(areaGroup(A))} · ${esc(levelName(A.reg,A.sp[3]||0))}</small>${(MAPNET[WD.reg]||[]).includes(A.reg)&&S.visited[A.k]?`<button class="btn pri" id="mgo" ${canTravel()?'':'disabled'}>Travel here</button>`:'<small>Not visited yet</small>'}${P?'<button class="btn" id="mpin">Put a pin here</button>':''}${S.wp?'<button class="btn" id="mclr">Remove my pin</button>':''}</div>`:(P||S.wp?`<div class="msel">${P?'<button class="btn" id="mpin">Put a pin here</button>':''}${S.wp?'<button class="btn" id="mclr">Remove my pin</button>':''}</div>`:'');
+ if($('mgo'))$('mgo').onclick=()=>fastTravel(A.k);
+ if($('mpin'))$('mpin').onclick=()=>{S.wp={reg:MAPV.reg,x:P.x,z:P.z,y:MAPV.lv};MAPV.pt=null;toast('Pin set: follow the yellow marker','var(--butter)');paintMap()};
+ if($('mclr'))$('mclr').onclick=()=>{S.wp=null;paintMap()}}
 /* drag to pan, wheel or pinch to zoom, tap a room to pick it */
 function mapWire(cv){
  const pts=new Map();let moved=0,pinch=0;
@@ -11264,10 +11465,86 @@ function mapWire(cv){
  const up=e=>{if(!pts.has(e.pointerId))return;pts.delete(e.pointerId);if(pts.size<2)pinch=0;
   if(moved<8&&pts.size===0){const[wx,wz]=toW(e.clientX,e.clientY);let best=null,bs=1e18;
    for(const A of Object.values(AREAS)){if(A.reg!==MAPV.reg||A.hide)continue;const r=A.r;if(wx<r[0]||wx>r[2]||wz<r[1]||wz>r[3])continue;if(levelOf(A.reg,A.sp[3]||0)!==MAPV.lv)continue;const s=(r[2]-r[0])*(r[3]-r[1]);if(s<bs){bs=s;best=A.k}}
-   MAPV.sel=best;paintMap()}};
+   MAPV.sel=best;MAPV.pt={x:wx,z:wz};paintMap()}};
  cv.onpointerup=up;cv.onpointercancel=up;
  cv.onwheel=e=>{e.preventDefault();const[wx,wz]=toW(e.clientX,e.clientY),f=Math.exp(-e.deltaY*.0015);MAPV.sc*=f;MAPV.ox=wx-(wx-MAPV.ox)/f;MAPV.oz=wz-(wz-MAPV.oz)/f;paintMap()};
 }
+
+/* ============ DEBUG MENU (F9, or ` ) : jump to any point of the story, teleport, give yourself things ============
+   "Jump" starts a fresh game and fast-plays it (careful choices, minigames skipped, instant text) until the chosen beat,
+   so everything before it really happened: flags, clues, people met. */
+const AUTOBAD=/sell|deal\.|walk away|bluff|stay\. let|military|seven proxies|nothing to hide|i'm a hacker|legal name|post a selfie|join "ctrlaltcon"|sure, free points|tell them your hometown/i;
+async function autoplay(until,o){o=o||{};const keepGames={};for(const k in GAMES){keepGames[k]=GAMES[k];GAMES[k]=(st,done)=>{try{if(st.res)st.res(4,5)}catch(e){}
+  if(k==='plan'){S.assign={};const al=ROM.concat(['dave']).filter(allyReady);for(const t of TASKS){const g=[t.best,...t.good].find(x=>al.includes(x)&&!Object.values(S.assign).includes(x))||al.find(x=>!Object.values(S.assign).includes(x));if(g)S.assign[t.k]=g}S.pscore=TASKS.reduce((s,t)=>s+taskScore(t,S.assign[t.k]),0)}
+  if(k==='quiz'&&st.who)fx({[st.who]:6,skill:2});done()}}
+ const wasTest=window.__test;window.__test=1;let n=0;
+ try{for(;n<200000;n++){if(n%300===0)await new Promise(r=>setTimeout(r,0));
+  if(!S||S.ending)break;if(until())break;
+  const ov=$('ov'),card=$('card');
+  if(card.classList.contains('on')){card.click();continue}
+  if(ov.classList.contains('on')){const bt=ov.querySelector('#tutok,#qd,#gd,#sd,#xd,#pgo,#cok,.btn.pri');if(bt){bt.click();continue}closeOv();continue}
+  if($('vn').classList.contains('on')){const ch=[...$('chs').querySelectorAll('.ch')];if(ch.length){const ok=ch.filter(b=>!AUTOBAD.test(b.textContent));(ok[0]||ch[0]).click();continue}tapBox();continue}
+  const bt=curBeat();if(bt){startBeat(bt);continue}
+  if(isFree()){if(o.hang){const g=ROM.find(sceneReady);if(g){const i=scn(g);run([...scr(g+i),()=>{adv(g,i);spend('hang');return[]}],hub);continue}}
+   if(S.slot===5)endDay();else spend('wait');continue}
+  if(S.slot===5)endDay();else spend('wait')}}
+ finally{for(const k in keepGames)GAMES[k]=keepGames[k];window.__test=wasTest}
+ return n}
+function dbgOpen(){if(!S)return;if(document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}WD.active=false;dbgDraw()}
+const DBG={tab:'jump'};
+function beatList(){const L=[];for(let d=1;d<=7;d++)(DAYS[d]||[]).forEach((b,i)=>{if(typeof b==='string')L.push({d,i,id:b,t:BEATS[b].t})});return L}
+function dbgDraw(){
+ const tabs=[['jump','Jump to'],['tp','Teleport'],['give','Give & set'],['scene','Play a scene'],['end','Endings']];
+ let body='';
+ if(DBG.tab==='jump')body=`<p class="small">Starts a fresh game as "${esc(S.h)}" and fast-plays to the start of the chosen beat. Careful choices, minigames skipped. Takes a few seconds.</p>
+  <label class="small"><input type="checkbox" id="dbgHang" ${DBG.hang?'checked':''}> Spend free time on people's scenes on the way (otherwise free time is skipped)</label>
+  <div class="dbl">${beatList().map(b=>`<button class="dbi" data-b="${b.id}"><b>Day ${b.d} · ${SLOTN[b.i]}</b><small>${esc(b.t)}</small></button>`).join('')}<button class="dbi" data-b="__end"><b>Day 7 · the end</b><small>Play everything through to an ending</small></button></div>`;
+ if(DBG.tab==='tp'){const net=MAPNET[WD.reg]?Object.values(AREAS):[];const g={};for(const a of Object.values(AREAS)){if(a.hide)continue;(g[areaGroup(a)]=g[areaGroup(a)]||[]).push(a)}
+  body=`<label class="small"><input type="checkbox" id="dbgOpenAll" ${window.__allOpen?'checked':''}> Ignore area locks</label>`+AGROUPS.filter(k=>g[k]).map(k=>`<div class="dbh">${esc(k)}</div><div class="dbg2">${g[k].map(a=>`<button class="dbi" data-tp="${a.k}"><b>${esc(a.n)}</b><small>${esc(levelName(a.reg,a.sp[3]||0))}${areaLock(a.k)?' · locked now':''}</small></button>`).join('')}</div>`).join('')}
+ if(DBG.tab==='give')body=`<div class="dbg2">${[['meet','Meet all 21'],['aff20','+20 affection, everyone met'],['aff100','Max affection, everyone met'],['clues','Every clue'],['solve','Solve every mystery'],['skill','Skill +100'],['clout','Clout +100'],['exp0','Exposure to 0'],['exp95','Exposure to 95'],['cred','+200 credits'],['items','Every item'],['visit','Visit every area'],['slot','Next part of the day'],['day','End the day'],['restore','Restore session (harem mode)']].map(x=>`<button class="dbi" data-g="${x[0]}"><b>${x[1]}</b></button>`).join('')}</div>
+  <div class="dbh">Advance someone's story by one scene (plays it)</div><div class="dbg2">${ROM.map(g=>`<button class="dbi" data-adv="${g}"><b>${CH[g].name}</b><small>${scn(g)}/${ROUTES[g].n} · ♥ ${aff(g)}</small></button>`).join('')}</div>`;
+ if(DBG.tab==='scene'){const ks=Object.keys(SC).sort();body=`<input class="inp" id="dbgQ" placeholder="Filter scenes" value="${esc(DBG.q||'')}"><div class="dbg2">${ks.filter(k=>!DBG.q||k.includes(DBG.q)).slice(0,300).map(k=>`<button class="dbi" data-sc="${k}"><b>${k}</b></button>`).join('')}</div>`}
+ if(DBG.tab==='end')body=`<p class="small">Plays the ending's epilogue and shows its card. Ends this run.</p><div class="dbg2">${ENDORDER.map(k=>`<button class="dbi" data-end="${k}"><b>${esc(ENDINFO[k][0])}</b><small>${META.ends[k]?'seen':''}</small></button>`).join('')}</div>`;
+ ov(`<div class="bigapp"><div class="mtop"><b>Debug</b><span class="small">${esc(clockLabel())} · Exposure ${S.exp} · ${RANKS.skill[rank('skill')]} / ${RANKS.clout[rank('clout')]}</span><button class="pback" id="dbx">✕</button></div>
+  <div class="atabs">${tabs.map(t=>`<button class="${DBG.tab===t[0]?'on':''}" data-t="${t[0]}">${t[1]}</button>`).join('')}</div><div class="abody">${body}</div></div>`);
+ const o=$('ov');o.classList.add('phoneov','mapov');updBlur();
+ $('dbx').onclick=closePhone;o.querySelectorAll('.atabs button').forEach(b=>b.onclick=()=>{DBG.tab=b.dataset.t;dbgDraw()});
+ if($('dbgHang'))$('dbgHang').onchange=e=>{DBG.hang=e.target.checked};
+ if($('dbgOpenAll'))$('dbgOpenAll').onchange=e=>{window.__allOpen=e.target.checked};
+ if($('dbgQ'))$('dbgQ').oninput=e=>{DBG.q=e.target.value;const p=e.target.selectionStart;dbgDraw();$('dbgQ').focus();$('dbgQ').setSelectionRange(p,p)};
+ o.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>dbgJump(b.dataset.b));
+ o.querySelectorAll('[data-tp]').forEach(b=>b.onclick=()=>{const k=b.dataset.tp;closePhone();fadeTp(()=>{teleportArea(k);S.visited[k]=1;hub()})});
+ o.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{dbgGive(b.dataset.g);dbgDraw()});
+ o.querySelectorAll('[data-adv]').forEach(b=>b.onclick=()=>{const g=b.dataset.adv;closePhone();if(!met(g)){meet(g);adv(g,0);return run(scr(g+'0'),hub)}const i=scn(g);if(i>=ROUTES[g].n)return;run([...scr(g+i),()=>{adv(g,i);return[]}],hub)});
+ o.querySelectorAll('[data-sc]').forEach(b=>b.onclick=()=>{closePhone();run(scr(b.dataset.sc),hub)});
+ o.querySelectorAll('[data-end]').forEach(b=>b.onclick=()=>{closePhone();S.partner=ROM.find(loved)||null;run(scr('end_'+b.dataset.end),()=>{})});
+}
+function dbgGive(k){
+ if(k==='meet')ROM.forEach(g=>{if(!met(g)){meet(g);adv(g,0)}});
+ if(k==='aff20')ROM.filter(met).forEach(g=>{S.aff[g]=clamp(S.aff[g]+20,0,100)});
+ if(k==='aff100')ROM.filter(met).forEach(g=>{S.aff[g]=100});
+ if(k==='clues')Object.keys(CLUE).forEach(addClue);
+ if(k==='solve')for(const m in MYST){S.solved[m]=1;META.solved[m]=1}
+ if(k==='skill')fx({skill:100});if(k==='clout')fx({clout:100});
+ if(k==='exp0')S.exp=0;if(k==='exp95')S.exp=95;if(k==='cred')fx({cred:200});
+ if(k==='items')Object.keys(ITEMS).forEach(i=>{S.inv[i]=(S.inv[i]||0)+1});
+ if(k==='visit')Object.keys(AREAS).forEach(a=>S.visited[a]=1);
+ if(k==='slot'){closePhone();if(S.slot===5)endDay();else nextSlot();return}
+ if(k==='day'){closePhone();endDay();return}
+ if(k==='restore')S.restore=true;
+ hud();save();toast('Done','var(--mint)')}
+async function dbgJump(id){
+ const h=S.h,hang=DBG.hang;closePhone();
+ ov(`<div class="card"><h3>Fast-playing…</h3><p class="small">To ${id==='__end'?'an ending':esc(BEATS[id].t)}.</p></div>`);
+ S=fresh(h);S.unl={};beatBusy=false;
+ if(G.ok&&S.inWorld!==1){S.inWorld=1}
+ run(scr('prologue'),()=>{S.day=1;S.ch=1;S.slot=0;S.exp=S.foot;snapDay();hub()});
+ await autoplay(()=>id!=='__end'&&curBeat()&&curBeat().id===id&&!beatBusy&&!$('vn').classList.contains('on'),{hang});
+ closeOv();if(S.ending)return;
+ // land where the beat is waiting
+ const b=curBeat(),tg=b&&beatTarget(b);if(G.ok&&tg){const A=b.w&&AREAS[b.w];if(A)teleportArea(b.w);else teleport(tg.reg,tg.x,tg.z+2,0,tg.y)}
+ save();hub();toast('Jumped: '+(b?b.t:'done'),'var(--mint)')}
+addEventListener('keydown',e=>{if((e.key==='F9'||e.key==='`')&&S&&!$('title').classList.contains('on')){e.preventDefault();if($('ov').classList.contains('on')&&$('dbx'))closePhone();else{closeOv();dbgOpen()}}});
 
 /* ============ SAVE SLOTS ============ */
 const NSLOT=5;
@@ -11330,6 +11607,8 @@ function resumeGame(s){
 /* ============ DEVICE + KEYBOARD ============ */
 (()=>{const coarse=matchMedia&&matchMedia('(pointer:coarse)').matches&&!matchMedia('(pointer:fine)').matches;document.body.classList.add(coarse?'touchui':'desk');if(coarse)WD.touch=true})();
 addEventListener('touchstart',()=>{if(!WD.touch)setTouch(true)},{passive:true});
+/* no pinch or double-tap zoom on phones: the game owns every touch */
+for(const ev of['gesturestart','gesturechange','dblclick'])addEventListener(ev,e=>{if(e.cancelable)e.preventDefault()},{passive:false});
 addEventListener('mousemove',e=>{if(WD.touch&&e.movementX!==undefined&&(Math.abs(e.movementX)+Math.abs(e.movementY))>3&&!e.sourceCapabilities?.firesTouchEvents)setTouch(false)});
 addEventListener('keydown',e=>{
  if(!S)return;
@@ -11340,7 +11619,7 @@ addEventListener('keydown',e=>{
   if(isPhone){e.preventDefault();closePhone();return}
   if(!ovOn){e.preventDefault();phone();return}
  }
- if(k==='Escape'&&isPhone){e.preventDefault();if(phApp){if(phThread)phThread=null;else phApp=null;drawPhone()}else closePhone();return}
+ if(k==='Escape'&&isPhone){e.preventDefault();if($('ov').dataset.app)phoneBack();else closePhone();return}
  // Esc opens the phone (in the world the browser also uses Esc to release the mouse, which opens it too)
  if(k==='Escape'&&!ovOn&&!$('title').classList.contains('on')&&!$('card').classList.contains('on')){e.preventDefault();phone();return}
  if($('card').classList.contains('on')&&(k===' '||k==='Enter')){e.preventDefault();$('card').click();return}

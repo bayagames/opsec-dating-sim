@@ -28,9 +28,12 @@ const beatStep=b=>b&&b.steps?Object.assign({},b,b.steps[(S.bstep&&S.bstep[b.id])
 function startBeat(b0){if(beatBusy)return;beatBusy=true;const b=beatStep(b0);S.inBeat=b0.id;
  run(scr(b.sc),()=>{beatBusy=false;S.inBeat=null;if(S.failing)return;
   if(b0.steps){S.bstep=S.bstep||{};const k=(S.bstep[b0.id]||0)+1;if(k<b0.steps.length){S.bstep[b0.id]=k;save();hub();return}}
-  S.done[b0.id]=1;if(b0.after)b0.after();if(S.ending)return;if(S.noAdvance){delete S.noAdvance;save();hub();return}nextSlot()})}
+  S.done[b0.id]=1;addSlotLog(b0.t);if(b0.after)b0.after();if(S.ending)return;
+  // most story beats happen at the start of their part of the day and leave the rest of it free; travel and the big ones use it up
+  if(S.noAdvance||!b0.adv){delete S.noAdvance;save();hub();return}if(b0.adv==='day'){endDay();return}nextSlot()})}
+function addSlotLog(t){if(!S||!t)return;S.slog=S.slog||{};const k=S.day+':'+S.slot;(S.slog[k]=S.slog[k]||[]).push(t)}
 /* time moves only here */
-function spend(kind){S.acts=(S.acts||0)+1;
+function spend(kind,what){S.acts=(S.acts||0)+1;addSlotLog(what||({hang:'Time with someone',lead:'Worked a lead',talk:'A talk',ctf:'CTF practice',bounty:'Bug bounty',rest:'Rested',wait:'Let it go by'}[kind]||kind));
  if(S.restore&&!S.oc&&S.day>=1){S.oc=1;toast('Overclocked: one more thing this '+SLOTN[S.slot].toLowerCase(),'var(--mint)');save();hub();return}
  nextSlot()}
 function nextSlot(){S.oc=0;S.slot++;if(S.slot>5){endDay();return}save();toast(SLOTN[S.slot],'var(--dim)');if(typeof sfx==='function')sfx('advance');hub()}
