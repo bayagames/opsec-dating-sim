@@ -29,7 +29,7 @@ const AREA_AUD={flat:['home','home'],stairs:['home','home'],bakery:['home','bake
  workshopA:['con','room'],workshop:['con','room'],hwv:['con','room'],creator:['con','room'],arcade:['arcade','arcade'],conops:['con','room'],press:['con','room'],speakers:['hotel','room'],quiet:['night',null],
  basement:['tense','hotel'],carpark:['tense','hotel'],noc:['tense','room'],plant:['tense','hotel'],tunnel:['tense','hotel'],conroof:['night','wind'],
  promenade:['hotel','lobby'],lifts:['hotel','lobby'],grill:['bar','bar'],pdining:['bar','bar'],hkitchen:['tense','hotel'],backoffice:['hotel','hotel'],boutique:['hotel','lobby'],ballroom:['hotel','lobby'],library:['hotel','room'],
- hotelL2:['hotel','hotel'],pool:['night','hotel'],spa:['night',null],foyerG:['con','hum'],foyerG2:['con','hum'],ring2:['con','hum'],skyterrace:['night','garden'],hallBback:['tense','hotel'],stores:['tense','hotel'],
+ hotelL2:['hotel','hotel'],pool:['night','hotel'],spa:['night',null],foyerG:['con','hum'],foyerG2:['con','hum'],ring2:['con','hum'],link:['hotel','lobby'],garden:['night','garden'],hallC:['con','hum'],badgelab:['con','hum'],hallBback:['tense','hotel'],stores:['tense','hotel'],
  kitchenC:['tense','hotel'],breakroom:['tense','room'],neconc:['con','hum'],neconc2:['con','hum'],constore:['con','hum'],demostage:['con','hum'],seconc:['con','hum'],seconc1:['con','hum'],aero:['con','room'],
  tabletop:['con','room'],film:['night','room'],skygarden:['night','garden'],tunnelN:['tense','hotel'],
  corridor:['hotel','hotel'],room1337:['hotel','hotel'],room1336:['party','bar'],housekeeping:['hotel','hotel'],stairwell:['hotel','hotel'],roof:['night','wind'],plantdeck:['night','wind']};

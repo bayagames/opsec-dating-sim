@@ -399,7 +399,7 @@ input[type=text],input:not([type]),textarea{cursor:text!important}
 body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 input,textarea{-webkit-user-select:text;user-select:text}
 img,svg,canvas{-webkit-user-drag:none;user-drag:none}
-#loading{position:absolute;inset:0;z-index:80;display:none;place-items:center;background:#07040af2;text-align:center}#loading.on{display:grid}#loading .k{font:18px 'VT323',monospace;color:var(--coral)}#loading b{display:block;font:34px 'VT323',monospace;color:var(--butter);margin:4px 0 12px}.lbar{width:min(320px,70vw);height:8px;border-radius:4px;background:#ffffff1a;overflow:hidden}.lbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--coral),var(--butter));transition:width .2s}#loading small{display:block;margin-top:8px;color:var(--dim);font:16px 'VT323',monospace}
+#loading{position:fixed;inset:0;z-index:80;display:none;place-items:center;justify-items:center;background:#07040af2;text-align:center}#loading>div{display:flex;flex-direction:column;align-items:center}#loading.on{display:grid}#loading .k{font:18px 'VT323',monospace;color:var(--coral)}#loading b{display:block;font:34px 'VT323',monospace;color:var(--butter);margin:4px 0 12px}.lbar{width:min(320px,70vw);margin:0 auto;height:8px;border-radius:4px;background:#ffffff1a;overflow:hidden}.lbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--coral),var(--butter));transition:width .2s}#loading small{display:block;margin-top:8px;color:var(--dim);font:16px 'VT323',monospace}
 #vcur{position:fixed;left:0;top:0;width:22px;height:22px;margin:-2px 0 0 -2px;z-index:500;pointer-events:none;display:none;background:no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22'%3E%3Cpath d='M2 2 L2 18 L6.5 13.8 L9.6 20.4 L12.6 19 L9.6 12.6 L15.6 12.6Z' fill='%23f6eefc' stroke='%231b1026' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E");filter:drop-shadow(0 2px 3px #0008)}
 .ch.vhover{border-color:var(--butter);background:#352349;translate:5px 0;box-shadow:0 6px 18px #0009,-4px 0 0 var(--butter)}
 .btn.vhover:not(:disabled){translate:0 -2px;box-shadow:0 6px 16px #0007;filter:brightness(1.12)}
@@ -467,7 +467,7 @@ img,svg,canvas{-webkit-user-drag:none;user-drag:none}
   <div class="ov" id="ov"></div>
   <div id="card"></div>
   <div id="toasts"></div>
-  <div id="loading"><div><div class="k">PREPARING THE CON</div><b>Baking the lights</b><div class="lbar"><i id="loadBar"></i></div><small id="loadPct">0%</small></div></div>
+  <div id="loading"><div><b>Loading...</b><div class="lbar"><i id="loadBar"></i></div><small id="loadPct">0%</small></div></div>
   <div id="fade"></div>
   <div id="vcur"></div>
 </div>

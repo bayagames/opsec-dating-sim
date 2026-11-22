@@ -142,15 +142,16 @@ function towerDetail(nb,sb){
   for(let x=214;x<246;x+=4)kPlanter(x,20.2,x+3.4,21.6,.6,y,MT.clad);
   for(const[a,b]of[[[254,y+1.6,-18.5],[254,y+1.6,9]],[[255,y+1.6,-8.5],[264,y+1.6,-8.5]],[[263.5,y+1.6,-8.5],[263.5,y+1.6,15]]])kBeam(a,b,.6,.6,MT.metal,[0,1,0]);
   for(const[x,z]of[[272,-18],[273.5,-15]]){box(x-.05,y,z-.05,x+.05,y+4.4,z+.05,MT.metal,{col:false});box(x-.25,y+3.2,z-.02,x+.25,y+4.2,z+.02,MT.plain('#d9d4cc'),{col:false})}}
- // ---- the convention centre below, lit (f13 x = site x + 404, z = site z + 44, y = site y - 56) ----
- {const X=x=>x+404,Z=z=>z+44,Y=y=>y-56,E=(c,k)=>mt('white',c,.5,1,{k:k||.6});const G0=G.lmK;
+ // ---- the hotel podium and the convention centre below, lit (f13 x = site x + 468, z = site z + 44, y = site y - 56) ----
+ {const X=x=>x+468,Z=z=>z+44,Y=y=>y-56,E=(c,k)=>mt('white',c,.5,1,{k:k||.6});const G0=G.lmK;
   const blk=(x0,z0,x1,z1,y0,y1,m,top)=>box(X(x0),Y(y0),Z(z0),X(x1),Y(y1),Z(z1),{side:m,top:top||E('#1a1826',.5)},{col:false});
   box(211.8,-39.5,-22.2,276.2,-.05,22.2,{side:MT.hfac,top:MT.hfac},{col:false,nt:1});
-  blk(-200,-64,-110,60,0,16.5,MT.hfac,E('#2a2630',.5));floorQ(X(-152),Z(4),X(-118),Z(60),Y(16.6),E('#ffd9a0',.9));
-  blk(-110,-4,-64,60,0,16.5,E('#3a2a5a',.7),E('#ff9fd0',.55));blk(-60,-136,50,-64,0,26,MT.cfac);kSign(X(-5),Y(19),Z(-63.9),60,6,'s','CTRL+ALT+CON · HALL A','#ff5d73','#120a14');
-  for(const r of[[-64,-64,56,-50],[-64,-24,-50,20],[40,-50,56,20],[-64,20,56,34]])blk(r[0],r[1],r[2],r[3],0,16.5,MT.cfac,E('#24222e',.5));
+  blk(-264,-64,-128,-4,0,16.5,MT.hfac,E('#2a2630',.5));blk(-264,-4,-174,60,0,16.5,MT.hfac,E('#2a2630',.5));floorQ(X(-216),Z(4),X(-182),Z(60),Y(16.6),E('#ffd9a0',.9));
+  floorQ(X(-174),Z(-12),X(-110),Z(60),Y(.08),E('#1f3a24',.4));blk(-128,-22,-110,-12,0,11,E('#3a3448',.6));
+  blk(-110,-24,-64,60,0,16.5,E('#3a2a5a',.7),E('#ff9fd0',.55));blk(-110,-64,-64,-24,0,16.5,MT.clad);blk(-60,-136,50,-64,0,26,MT.clad);kSign(X(-5),Y(19),Z(-63.9),60,6,'s','CTRL+ALT+CON · HALL A','#ff5d73','#120a14');
+  for(const r of[[-64,-64,56,-50],[-64,-50,-50,20],[40,-50,56,20],[-64,20,56,34]])blk(r[0],r[1],r[2],r[3],0,16.5,MT.clad,E('#24222e',.5));
   floorQ(X(-50),Z(-50),X(40),Z(20),Y(.1),E('#1f4a28',.35));for(let i=0;i<14;i++){const x=-44+((i*37)%84),z=-44+((i*53)%60);box(X(x)-.3,Y(3.2),Z(z)-.3,X(x)+.3,Y(3.8),Z(z)+.3,E('#ffd98a',1.4),{col:false})}
-  blk(56,-54,134,20,0,16.5,MT.cfac);blk(134,-64,196,34,0,11,MT.cfac);blk(-10,34,50,76,0,11,MT.cfac);blk(-64,34,-10,60,0,11,E('#4a3a2a',.6),E('#2a4a2a',.5));blk(56,-111,134,-64,0,16.5,MT.cfac);
-  floorQ(X(-215),Z(60),X(215),Z(100),Y(.05),E('#2a2830',.4));floorQ(X(-215),Z(100),X(215),Z(114),Y(.06),E('#1a1a20',.4));for(let x=-205;x<210;x+=18)box(X(x)-.3,Y(4.8),Z(98.6)-.3,X(x)+.3,Y(5.3),Z(98.6)+.3,E('#ffd98a',1.6),{col:false});
+  blk(56,-54,134,20,0,16.5,MT.clad);blk(134,-64,196,34,0,11,MT.clad);blk(-10,34,50,76,0,11,MT.clad);blk(-64,34,-10,60,0,11,E('#4a3a2a',.6),E('#2a4a2a',.5));blk(56,-111,134,-64,0,16.5,MT.clad);
+  floorQ(X(-300),Z(60),X(300),Z(100),Y(.05),E('#2a2830',.4));floorQ(X(-300),Z(100),X(300),Z(114),Y(.06),E('#1a1a20',.4));for(let x=-295;x<296;x+=18)if(x<-224||x>-176)box(X(x)-.3,Y(4.8),Z(98.6)-.3,X(x)+.3,Y(5.3),Z(98.6)+.3,E('#ffd98a',1.6),{col:false});
   box(X(-47),Y(0),Z(79.6),X(-27),Y(7.2),Z(80.4),E('#ff5d73',1.2),{col:false})}
 }

@@ -1,22 +1,23 @@
-/* ============ THE HALCYON HOTEL (west block of the site) ============ */
-/* Ground: the atrium lobby (x -160..-110, z -4..60: reception on the west wall, the grand staircase, the café in the
-   south-east corner, a piano, three chandeliers under a skylight 16.5 m up), the Promenade along the north
-   (x -200..-64, z -24..-4) with the lift lobby, the Bar (x -110..-64) and its terrace door, the Grill and its private
-   dining room, the hotel kitchen, and the back rooms behind reception (back office, luggage, back stairs, boutique).
-   Level 1: galleries round the atrium, the mezzanine corridor, the Grand Ballroom, the Lumen Lounge, two meeting rooms,
-   the library, and the glass skybridge across the con Foyer. Level 2: galleries, the pool hall, the gym, the spa. */
+/* ============ THE HALCYON HOTEL (its own building, west of the con) ============ */
+/* Drawn on its own plan: buildSite places it HX (64 m) west, so plan x -200..-64 stands at world x -264..-128.
+   Every coordinate in this file is a plan coordinate; content placed in the world (09a_place) uses world ones.
+   Ground: the atrium lobby (plan x -160..-110, z -4..60: reception on the west wall, the grand staircase, the café in
+   the south-east corner by the garden glass, a piano, three chandeliers under a skylight 16.5 m up), the Promenade
+   along the north (x -200..-64, z -24..-4) with the lift lobby and, at its east end, the doors to the Link (the glazed
+   bridge building across the lane to the con), the Bar (x -110..-64) and its terrace in the lane, the Grill and its
+   private dining room, the hotel kitchen, and the back rooms behind reception (back office, luggage, back stairs,
+   boutique). Level 1: galleries round the atrium, the mezzanine corridor and the Skybridge door, the Grand Ballroom,
+   the Lumen Lounge, two meeting rooms, the library. Level 2: galleries, the pool hall, the gym, the spa. */
 function buildHotel(){
  const D=door,W=wallLine,LIM=MT.lime,WP=MT.wpan,MAR=MT.marble,CPT=MT.carpetHotel,COF=MT.coffer,BR_=MT.brass,MD=MT.mdark;
  const mr=o=>{(MAPR.con=MAPR.con||[]).push({x0:o.x0,z0:o.z0,x1:o.x1,z1:o.z1,y:o.y||0,n:o.n||'',c:o.c||'#5a4a3a'})};
  /* ---------- doors (before the walls that hold them) ---------- */
- gap('v',-110,25,30,5);                       // lobby <-> con foyer, the big gap
- gap('h',-4,-87,20,5);                        // promenade <-> foyer
- gap('v',-64,-14,16,5);                       // promenade <-> ring west
- D('h',-24,-87,6,3.4);D('v',-64,-37,4,3);       // bar from the promenade; bar -> terrace
+ D('v',-110,30,4,3.2);                         // lobby -> the garden (the forecourt between the hotel and the con)
+ D('v',-64,-17,6,3.2);D('v',-64,-17,4,3,L1);    // promenade / mezzanine -> the Link and the Skybridge over it
+ D('h',-24,-87,6,3.4);D('v',-64,-37,4,3);       // bar from the promenade; bar -> its terrace
  D('h',-24,-123,5,3.2);D('v',-136,-50,2,2.6);D('v',-160,-44,1.6,2.4);D('h',-24,-185,1.6,2.4); // grill, private dining, kitchen pass, kitchen staff door
  D('v',-160,8,1.6,2.4);D('v',-180,4,1.2,2.3);D('v',-160,30,1.6,2.4);D('v',-160,50,4,3.2); // luggage, back office, back stairs, boutique
   // level 1
- D('v',-110,8,4,3,L1);                          // skybridge
  D('h',-24,-95,4,3.4,L1);D('h',-24,-72,2,2.6,L1);D('h',-24,-123,2,2.6,L1);D('h',-24,-185,2.4,2.8,L1);
  D('v',-136,-50,1.6,2.4,L1);
  // level 2
@@ -26,7 +27,8 @@ function buildHotel(){
  sFloor(-160,-4,-110,60,0,MAR);
  for(let x=-150;x<=-120;x+=10)floorQ(x-.06,-4,x+.06,60,.004,MT.plain('#b89c74'));
  W('v',-160,-4,60,0,L1,LIM,1);W('v',-160,-4,60,L1,L2-L1,LIM,1);W('v',-160,-4,60,L2,16.5-L2,LIM,1);
- W('v',-110,-4,60,0,L1,LIM,-1);W('v',-110,-4,60,L1,L2-L1,LIM,-1);W('v',-110,-4,60,L2,16.5-L2,LIM,-1);
+ // the east facade: three storeys of glass onto the garden, stone piers outside, the garden door by the lounge
+ W('v',-110,-4,60,0,16.5,MT.glass,-1);for(const z of[1.5,13,24,37,48,58.5])column(-109.6,z,0,16.5,.7,LIM,null);
  // south facade: a three-storey glass wall with stone piers, the revolving door and two side doors
  D('h',60,-135,4.4,3.2);D('h',60,-147,2.4,2.8);D('h',60,-123,2.4,2.8);
  W('h',60,-160,-110,0,16.5,MT.glass,-1);
@@ -79,14 +81,16 @@ function buildHotel(){
   for(const x of[-125,-121])kPendant(x,3.5,cz+.35,1.3,.22,'#ffd98a',5,.7,'#c9a46a');for(const[x,z]of[[-124,52],[-120,52]])kPendant(x,3.5,z,1.2,.2,'#ffd98a',5,.55,'#c9a46a');
   for(const[tx,tz]of[[-126,50],[-122,50],[-126,54.5],[-122,54.5],[-118,52]]){box(tx-.4,.74,tz-.4,tx+.4,.78,tz+.4,MD,{col:false});box(tx-.04,0,tz-.04,tx+.04,.74,tz+.04,BR_,{col:false});colBox(tx-.4,tz-.4,tx+.4,tz+.4,0,.78);kStool(tx-.75,tz,.46,MT.fabric('#6a3a4a'));kStool(tx+.75,tz,.46,MT.fabric('#6a3a4a'))}}
  // wall sconces on the stone piers
- for(const z of[8,20,32,44,56]){box(-159.8,2.6,z-.12,-159.65,3,z+.12,MT.glow('#ffe2b0',1.5),{col:false});if(z<9||z>41)box(-110.35,2.6,z-.12,-110.2,3,z+.12,MT.glow('#ffe2b0',1.5),{col:false})}
+ for(const z of[8,20,32,44,56])box(-159.8,2.6,z-.12,-159.65,3,z+.12,MT.glow('#ffe2b0',1.5),{col:false});
  addLight(-135,3,10,[1,.84,.62],14,.7);addLight(-135,3,40,[1,.84,.62],14,.7);addLight(-148,3,30,[1,.84,.62],10,.6);addLight(-122,3,30,[1,.84,.62],10,.6);addLight(-122,3,52,[1,.8,.58],9,.8);
  mr({x0:-160,z0:-4,x1:-110,z1:60,n:'Hotel Lobby',c:'#5a4a3a'});
  // ---- the promenade: a marble gallery along the north, the lift lobby, the doors to the bar and the grill ----
  sFloor(-200,-24,-64,-4,0,MAR);quad([-198,.012,-11],[-66,.012,-11],[-66,.012,-17],[-198,.012,-17],mt('carpetHotel',0,.5,0,{r:1}),66,3);
  sCeil(-200,-24,-64,-4,L1-.45,COF);
  W('h',-24,-200,-160,0,L1,WP,1);W('h',-24,-136,-64,0,L1,WP,1);W('v',-200,-24,-4,0,L1,WP,1);
- W('h',-4,-200,-160,0,L1,WP,-1);W('h',-4,-110,-64,0,L1,LIM,-1);
+ W('h',-4,-200,-160,0,L1,WP,-1);W('h',-4,-110,-64,0,L1,MT.glass,-1);W('v',-64,-24,-4,0,L1,LIM,-1);
+ for(const x of[-104,-92,-80,-70])column(x,-3.7,0,L1-.45,.5,LIM,null);
+ kSign(-64.22,3.9,-17,5,.5,'w','THE LINK · CTRL+ALT+CON →','#ffe0a0','#2a1a12');
  for(let x=-196;x<=-68;x+=8){if(x>-161&&x<-109||Math.abs(x+87)<4)continue;box(x-.3,0,-23.8,x+.3,L1-.45,-23.5,LIM);box(x-.35,L1-.8,-23.85,x+.35,L1-.45,-23.45,BR_,{col:false})}
  for(const x of[-192,-176,-168,-104,-96,-78,-70])kOnWall('h',-23.8,1,x,2.4,1.4,1.6,MT.morning);
  for(let x=-194;x<=-66;x+=8)downl(x,L1-.45,-14,'#ffe2b0',7,.55);
@@ -111,9 +115,23 @@ function buildHotel(){
  for(const[x,z]of[[-94,-44],[-84,-44],[-74,-44],[-94,-34],[-84,-34],[-74,-34]]){box(x-.5,.72,z-.5,x+.5,.76,z+.5,MD,{col:false});box(x-.05,0,z-.05,x+.05,.72,z+.05,BR_,{col:false});colBox(x-.5,z-.5,x+.5,z+.5,0,.76);
   for(const[dx,f]of[[-1,'e'],[1,'w']]){const cx=x+dx*.95;box(cx-.35,0,z-.35,cx+.35,.42,z+.35,MT.fabric('#6a3a2a'));box(dx<0?cx-.35:cx+.17,.42,z-.35,dx<0?cx-.17:cx+.35,.82,z+.35,MT.fabric('#6a3a2a'),{col:false})}}
  kOnWall('v',-109.8,1,-30,3.6,1.8,2,MT.keyscreen);kOnWall('v',-64.2,-1,-30,2.4,2,1.3,mt(signTex('HAPPY HOUR 5-7','#ff9a5c','#241510',256,128),0,1,1,{k:1.2}));
- kSign(-64.22,3.12,-37,3.6,.45,'w','TERRACE · COURTYARD →','#ff9a5c','#241510');
+ kSign(-64.22,3.12,-37,3.6,.45,'w','TERRACE →','#ff9a5c','#241510');
  addLight(-88,3.4,-44,[1,.62,.36],18,.95);addLight(-88,3.4,-30,[1,.62,.36],14,.8);addLight(-107,3,-40,[1,.62,.36],10,.75);addLight(-74,3.4,-40,[1,.62,.36],10,.7);
  mr({x0:-110,z0:-64,x1:-64,z1:-24,n:'Hotel Bar',c:'#5a3a2a'});
+ // ---- the bar terrace: a timber deck in the lane between the hotel and the con, walled at the far end, open to the sky ----
+ {const x0=-64,x1=-46,z0=-64,z1=-22;floorQ(x0,z0+.2,x1,z1,.05,MT.timber);surf(x0,z0+.2,x1,z1,.05);box(x0,0,z1-.02,x1,.05,z1,MT.timber,{col:false,nt:1});
+  W('h',-64,-64,-46,0,3.2,LIM,1);box(-64,3.2,-64,-46,3.45,-63.6,LIM,{col:false});
+  // planters along the garden wall with olive trees, a living wall on the con's side (its wall is the con's)
+  for(const x of[-61,-55,-49]){kPlanter(x-2.2,-63.7,x+2.2,-62.3,.75,0,LIM);kPlant(x-1,-63,1.5,.75,'#3a2418');kPlant(x+1,-63,1.5,.75,'#3a2418')}
+  for(let z=-60;z<-23;z+=4){box(-46.32,0,z-.04,-46.2,3.6,z+.04,MT.woodDark,{col:false});card(-46.5,.3,z+2,3.6,3.2,Math.PI/2,MT.leaves)}box(-46.32,3.6,-61,-46.2,3.7,-23,MT.woodDark,{col:false});
+  // tables under festoon lights strung between the two buildings, patio heaters, a lounge corner with a fire table
+  for(const[x,z]of[[-60,-55],[-54,-55],[-60,-47],[-54,-47],[-60,-39],[-54,-31]]){table(x,z,1.1,1.1,MT.plain('#2a2026'),.74,.05);chair(x-.8,z,'w',MT.plain('#c9a46a'),.05);chair(x+.8,z,'e',MT.plain('#c9a46a'),.05)}
+  for(const z of[-51,-35]){box(-50.6,.05,z-.25,-50.1,.15,z+.25,MT.metal,{col:false});box(-50.4,.15,z-.06,-50.3,2.25,z+.06,MT.metal,{col:false});colBox(-50.6,z-.25,-50.1,z+.25,0,2.3);box(-50.75,2.25,z-.4,-49.95,2.55,z+.4,MT.glow('#ff9a5c',1.2),{col:false})}
+  {const cx=-50,cz=-27;quad([cx-3.2,.062,cz+3.6],[cx+3.2,.062,cz+3.6],[cx+3.2,.062,cz-3.2],[cx-3.2,.062,cz-3.2],MT.rugH,2,2);sofa(cx,cz+2.4,3,'s','#3a3a44',.05);sofa(cx-2.4,cz,2.6,'w','#3a3a44',.05);
+   box(cx-1,.05,cz-.6,cx+1,.45,cz+.6,LIM);box(cx-.8,.45,cz-.4,cx+.8,.47,cz+.4,MT.plain('#14121a'),{col:false});box(cx-.7,.47,cz-.12,cx+.7,.62,cz+.12,MT.glow('#ff9a5c',1.3),{col:false});addLight(cx,.9,cz,[1,.6,.3],6,.8)}
+  for(let k=0;k<5;k++){const z=-58+k*8.4;for(let i=1;i<12;i++){const t=i/12,x=x0+(x1-x0)*t,y=4.4-Math.sin(t*Math.PI)*.7;box(x-.05,y-.05,z-.05,x+.05,y+.05,z+.05,MT.glow('#ffd98a',1.6),{col:false})}}
+  for(const z of[-56,-42,-28])addLight(-55,3.4,z,[1,.76,.48],11,.7);
+  mr({x0,z0,x1,z1,n:'Bar terrace',c:'#4a3a2a'})}
  // ---- the Grill + private dining ----
  sFloor(-136,-64,-110,-24,0,MT.wood);sCeil(-136,-64,-110,-24,L1-.45,COF);W('v',-136,-64,-36,0,L1,WP,1);W('h',-64,-136,-110,0,L1,WP,1);
  {box(-134,0,-63.8,-112,1.1,-62.4,MT.chrome);box(-134,1.1,-63.8,-112,1.16,-62.4,MT.plain('#e9e3da'),{col:false});kOnWall('h',-63.8,1,-123,20,1.6,1.4,MT.oven,2,1.4);
@@ -166,13 +184,14 @@ function buildHotelUp(){
   if(y===L1)sFloor(-199.8,-24,-64,-4,y,CPT);else{sFloor(-199.8,-24,-64,-4,y,CPT,[[-199.8,-22,-193.8,-8]],.45,COF);sCeil(-199.8,-24,-64,-4,16.1,COF)}
   const h=y===L1?L2-y:16.5-y;
   W('h',-24,-200,-160,y,h,WP,1);W('h',-24,-136,-64,y,h,WP,1);W('v',-200,-24,-4,y,h,WP,1);W('h',-4,-200,-160,y,h,LIM,-1);
-  W('h',-4,-110,-64,y,1,LIM,-1);W('h',-4,-110,-64,y+1,h-1,GL,-1);
+  W('h',-4,-110,-64,y,1,LIM,-1);W('h',-4,-110,-64,y+1,h-1,GL,-1);W('v',-64,-24,-4,y,h,WP,-1);
+  if(y===L1)kSign(-64.22,y+3.3,-17,4.4,.45,'w','SKYBRIDGE · CON LEVEL 1 →','#ffe0a0','#2a1a12');
   for(const x of[-196,-188,-180,-172,-164,-104,-96,-80,-68]){if(Math.abs(x+87)<3||Math.abs(x+95)<3||Math.abs(x+72)<2||Math.abs(x+185)<2.4)continue;box(x-.3,y,-23.8,x+.3,y+h-.1,-23.5,LIM);box(x-.35,y+2.4,-23.5,x+.35,y+2.9,-23.35,MT.glow('#ffe2b0',1.4),{col:false})}
   for(let x=-194;x<=-66;x+=8)downl(x,y+(y===L1?h-.45:h-.4),-14,'#ffe2b0',7,.5);
   quad([-190,y+.012,-11],[-66,y+.012,-11],[-66,y+.012,-17],[-190,y+.012,-17],MT.rugH,62,3);
   for(let i=0;i<3;i++){const x=-180+i*8;box(x,y,-5.6,x+2.4,y+.45,-4.8,{side:WP,top:MT.fabric('#6a3a4a')});kOnWall('h',-4.2,-1,x+1.2,1.8,y+1.4,1.2,MT.morning)}
   for(const x of[-190,-175])kSign(x,y+2.5,-4.22,1.6,.3,'n','STAFF ONLY','#ffe0a0','#2a1a12');for(const x of[-190,-175])kOnWall('h',-4.2,-1,x,1,y,2.2,MT.door);
-  kPlant(-108,-6,1.3,y,'#2a2026');kPlant(-66,-22,1.3,y,'#2a2026');
+  kPlant(-108,-6,1.3,y,'#2a2026');kPlant(-66,-22.4,1.3,y,'#2a2026');kPlant(-66,-5.6,1.3,y,'#2a2026');
   lifts(y);
   // the atrium galleries at this level: armchairs by the balustrade, plants, doors to staff rooms on the west wall
   for(const z of[16,30,44]){for(const[x,f]of[[-157.5,'e']]){box(x-.45,y,z-.45,x+.45,y+.45,z+.45,MT.fabric('#3a4a5a'));box(x-.45,y+.45,z-.45,x-.27,y+.9,z+.45,MT.fabric('#3a4a5a'),{col:false})}
@@ -257,23 +276,25 @@ function buildHotelUp(){
 }
 /* ---------------- the outside of the hotel: stone skins, the tower, the porte-cochère, the roof ---------------- */
 /* a facade skin just outside a wall line, with rectangular holes (doors, glazing) left open */
-function skin(o,at,a0,a1,y0,y1,m,dir,holes){const R=rectsMinus(a0,y0,a1,y1,holes||[]),k=m.s||.125;
+function skin(o,at,a0,a1,y0,y1,m,dir,holes){const R=rectsMinus(a0,y0,a1,y1,holes||[]),k=m.s||.125;at+=dir*.04;
  for(const r of R){const[a,b,c,d]=r;if(o==='h'){if(dir>0)quad([a,b,at],[c,b,at],[c,d,at],[a,d,at],m,(c-a)*k,(d-b)*k);else quad([c,b,at],[a,b,at],[a,d,at],[c,d,at],m,(c-a)*k,(d-b)*k)}
   else{if(dir>0)quad([at,b,c],[at,b,a],[at,d,a],[at,d,c],m,(c-a)*k,(d-b)*k);else quad([at,b,a],[at,b,c],[at,d,c],[at,d,a],m,(c-a)*k,(d-b)*k)}}}
 function buildHotelOut(){
  const LIM=MT.lime,HF=MT.hfac,BR_=MT.brass,G0=G.lmK;
  G.lmK=.45;
- // south: stone over the boutique, the lobby glass is its own wall; west and north: windows above the ground floor
- skin('h',60.02,-200,-160,0,5.5,LIM,1,[]);for(let x=-198;x<-160;x+=4)box(x,5.5,60.02,x+2.4,15.6,60.12,MT.plain('#3a2e26'),{col:false});
- skin('h',60.02,-200,-160,5.5,16.5,HF,1,[]);
- skin('v',-200.02,-64,60,0,16.5,LIM,-1,[]);skin('v',-200.04,-64,60,5.6,16.2,HF,-1,[]);
- skin('h',-64.02,-200,-64,0,16.5,LIM,-1,[[-110,0,-64,5.2]]);skin('h',-64.04,-200,-110,5.6,16.2,HF,-1,[]);skin('h',-64.04,-110,-64,5.6,16.2,HF,-1,[]);
- // east, over the bar terrace (the bar's own wall below, with its door)
- skin('v',-63.98,-64,-24,5.5,16.5,LIM,1,[]);skin('v',-63.96,-64,-24,6,10.6,HF,1,[]);
- for(const y of[5.5,11,16.5]){box(-200.4,y-.25,-64.4,-199.98,y,60.4,LIM,{col:false});box(-200.4,y-.25,60.02,-160,y,60.4,LIM,{col:false});box(-200.4,y-.25,-64.4,-64,y,-64.02,LIM,{col:false})}
+ // stone below and between, a band of lit windows on the upper floors: each face is one plane, the window band a hole in
+ // the stone (stacked skins a couple of centimetres apart shimmer against each other from across the plaza)
+ const face=(o,at,a0,a1,dir,holes,band)=>{skin(o,at,a0,a1,0,16.5,LIM,dir,holes.concat(band?[[band[0],band[1],band[2],band[3]]]:[]));if(band)skin(o,at,band[0],band[2],band[1],band[3],HF,dir,[])};
+ face('h',60.02,-200,-160,1,[],[-200,5.5,-160,16.5]);for(let x=-198;x<-160;x+=4)box(x,5.5,60.08,x+2.4,15.6,60.18,MT.plain('#3a2e26'),{col:false});
+ face('v',-200.02,-64,60,-1,[],[-64,5.6,60,16.2]);
+ face('h',-64.02,-200,-64,-1,[],[-200,5.6,-64,16.2]);
+ // east, onto the lane: the bar's terrace door, the Link built against the promenade's end, windows over the terrace
+ face('v',-63.98,-64,-4,1,[[-39,0,-35,3],[-22,0,-12,L2+.1]],[-62,6,-26,10.6]);
+ for(const y of[5.5,11,16.5]){box(-200.4,y-.25,-64.4,-199.98,y,60.4,LIM,{col:false});box(-200.4,y-.25,60.02,-160,y,60.4,LIM,{col:false});box(-200.4,y-.25,-64.4,-64,y,-64.02,LIM,{col:false});
+  for(const[z0,z1]of y<L2+1?[[-64.4,-22.1],[-11.9,-3.6]]:[[-64.4,-3.6]])box(-63.98,y-.25,z0,-63.6,y,z1,LIM,{col:false});box(-110,y-.25,-3.98,-63.98,y,-3.6,LIM,{col:false})}
  // the podium roof: gravel, a stone parapet, plant on top, the atrium skylight and the pool glass left open
- for(const r of rectsMinus(-200,-64,-110,60,[[-152,4,-118,60],[-195,-62,-125,-26]]))floorQ(r[0],r[1],r[2],r[3],16.52,MT.gravel);floorQ(-110,-64,-64,-24,16.52,MT.glass);
- for(const[a,b,c,d]of[[-200.4,-64.4,-64,-64],[-200.4,60,-110,60.4],[-200.4,-64,-200,60]])box(a,16.5,b,c,17.6,d,LIM,{col:false});
+ for(const r of rectsMinus(-200,-64,-110,60,[[-152,4,-118,60],[-195,-62,-125,-26]]))floorQ(r[0],r[1],r[2],r[3],16.52,MT.gravel);floorQ(-110,-64,-64,-24,16.52,MT.glass);floorQ(-110,-24,-64,-4,16.52,MT.gravel);
+ for(const[a,b,c,d]of[[-200.4,-64.4,-64,-64],[-200.4,60,-110,60.4],[-200.4,-64,-200,60],[-64,-64.4,-63.6,-3.6],[-110,-4,-64,-3.6],[-110.4,-4,-110,60.4]])box(a,16.5,b,c,17.6,d,LIM,{col:false});
  for(const[x,z,w,d]of[[-150,-20,5,3],[-140,-12,4,4],[-120,-18,3,3],[-180,-10,6,3],[-176,30,4,4],[-185,48,3,3]])box(x,16.52,z,x+w,18.1,z+d,{side:MT.metal,top:MT.fan},{col:false});
  // the tower: 25 storeys of lit windows, a setback crown with the name, red aviation lights
  G.lmK=.12;

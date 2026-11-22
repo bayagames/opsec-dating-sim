@@ -180,13 +180,13 @@ function objective(){
  }else if(S.ch===1){
   if(!S.f.d1_badge)o={t:'Pick up your badge at Registration (the Foyer\'s west wall).',reg:'con',x:-105.2,z:53.4,y:0};
   else if(!S.f.d1_open)o={t:'The opening ceremony is starting. Find a seat in Hall A (north side of the Ring).',reg:'con',x:-5,z:-79.5,y:2.75};
-  else if(!S.f.d1_checkin)o={t:'Check in at the Halcyon Hotel: reception, through the big gap on the Foyer\'s west side.',reg:'con',x:-154.4,z:22.5,y:0};
+  else if(!S.f.d1_checkin)o={t:'Check in at the Halcyon Hotel: through the Link off the Foyer\'s north-west corner, then the Promenade to reception.',reg:'con',x:-218.4,z:22.5,y:0};
   else if(!S.f.d1_room)o={t:'Drop your bag in Room 1337 (the hotel lifts, off the Promenade → 13th floor).',reg:'f13',x:273.6,z:14.2,y:0};
-  else o={t:'Explore the con. When you\'re ready, end the day at the Hotel Bar (off the Promenade).',reg:'con',x:-88,z:-58.2,y:0};
+  else o={t:'Explore the con. When you\'re ready, end the day at the Hotel Bar (off the Promenade).',reg:'con',x:-152,z:-58.2,y:0};
  }else o={2:{t:'When you\'re done, head up to Room 1337 for the night.',reg:'f13',x:273.6,z:14.2,y:0},3:{t:'When you\'re ready: Room 1337. Everyone\'s coming over.',reg:'f13',x:273.6,z:14.2,y:0},4:{t:'Finish what you started. Then find Marge on the Hall A stage.',reg:'con',x:-5,z:-121,y:1.6}}[S.ch]||null;
  // different building? point at the way there
  if(o&&o.reg!==WD.reg){
-  if(o.reg==='f13'&&WD.reg==='con')o=Object.assign({},o,{reg:'con',x:-148,z:-27,y:WD.y>8?L2:WD.y>3?L1:0});
+  if(o.reg==='f13'&&WD.reg==='con')o=Object.assign({},o,{reg:'con',x:-212,z:-27,y:WD.y>8?L2:WD.y>3?L1:0});
   else if(o.reg==='con'&&WD.reg==='f13')o=Object.assign({},o,{reg:'f13',x:243,z:-9.4,y:0});
   else if(o.reg==='con'&&WD.reg==='station')o=Object.assign({},o,{reg:'station',x:734,z:4.4,y:0});
  }
@@ -269,6 +269,15 @@ function gateObj(g){
  if(g.kind==='rope'){const n=Math.max(1,Math.round(L/2.4));
   for(let i=0;i<=n;i++){const t=i/n,p=new T.Mesh(new T.CylinderGeometry(.045,.06,1,10),G.gm.post);p.position.set(g.x0+dx*t,g.y+.5,g.z0+dz*t);grp.add(p);const b=new T.Mesh(new T.CylinderGeometry(.16,.18,.04,14),G.gm.post);b.position.set(p.position.x,g.y+.02,p.position.z);grp.add(b)}
   for(let i=0;i<n;i++){const t=(i+.5)/n,seg=L/n,r=new T.Mesh(new T.BoxGeometry(seg,.05,.05),G.gm.rope);r.position.set(g.x0+dx*t,g.y+.86,g.z0+dz*t);r.rotation.y=-ang;grp.add(r)}}
+ else if(g.kind==='glass'){
+  // a pair of glass doors in chrome frames with push bars, sized to the doorway (the revolving door has its own drum)
+  if(g.label==='Revolving door')return grp;
+  const f=fitGate(g);let w=L,h=2.6,cx=(g.x0+g.x1)/2,cz=(g.z0+g.z1)/2,y=g.y,a=-ang;if(f){w=f.w-.02;h=f.h-.01;cx=f.cx;cz=f.cz;y=f.y;a=f.o==='h'?0:-Math.PI/2}
+  G.gm.glass=G.gm.glass||new T.MeshStandardMaterial({color:0x9fb8c8,transparent:true,opacity:.28,roughness:.05,metalness:.2,depthWrite:false});
+  const fr=(bw,bh,px,py)=>{const m=new T.Mesh(new T.BoxGeometry(bw,bh,.06),G.gm.post);m.position.set(px,py,0);return m},leaf=new T.Group();leaf.position.set(cx,y,cz);leaf.rotation.y=a;
+  for(const s of[-1,1]){const lx=s*w/4,lw=w/2-.02;leaf.add(fr(.06,h,lx-lw/2+.03,h/2),fr(.06,h,lx+lw/2-.03,h/2),fr(lw,.06,lx,h-.03),fr(lw,.12,lx,.06));
+   const gl=new T.Mesh(new T.BoxGeometry(lw-.1,h-.16,.02),G.gm.glass);gl.position.set(lx,h/2+.03,0);leaf.add(gl);const bar=fr(lw*.6,.05,lx,1.05);bar.position.z=.06;leaf.add(bar)}
+  grp.add(leaf)}
  else{const f=fitGate(g);let w=L,h=g.kind==='card'||g.label==='The bar'?2.6:2.4,cx=(g.x0+g.x1)/2,cz=(g.z0+g.z1)/2,y=g.y,a=-ang;
   if(f){w=f.w-.02;h=f.h-.01;cx=f.cx;cz=f.cz;y=f.y;a=f.o==='h'?0:-Math.PI/2}
   const d=new T.Mesh(new T.BoxGeometry(w,h,.07),G.gm.door);d.position.set(cx,y+h/2,cz);d.rotation.y=a;grp.add(d);

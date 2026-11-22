@@ -55,7 +55,7 @@ function kBin(x,z,y,col){y=y||0;box(x-.15,y,z-.15,x+.15,y+.4,z+.15,MT.gloss(col|
 function kMug(x,y,z,col){box(x-.04,y,z-.04,x+.04,y+.095,z+.04,MT.gloss(col||'#e9e3da'),{col:false})}
 function kPaper(x,y,z,n){for(let i=0;i<(n||1);i++)box(x-.105+i*.01,y+i*.004,z-.148,x+.105+i*.01,y+i*.004+.003,z+.148,MT.plain('#f4f4f0'),{col:false})}
 // a hanging ceiling light panel (baked point light under it)
-function kPanelLight(x,y,z,w,d,col,rng,int){box(x-w/2,y-.04,z-d/2,x+w/2,y,z+d/2,MT.plain('#d8dce4'),{col:false,nt:1});box(x-w/2+.03,y-.045,z-d/2+.03,x+w/2-.03,y-.04,z+d/2-.03,MT.glow(col||'#f4f6ff',1.2),{col:false,b:1,nt:1});addLight(x,y-.35,z,hx(col||'#f4f6ff'),rng||7,int||.6)}
+function kPanelLight(x,y,z,w,d,col,rng,int){box(x-w/2,y-.04,z-d/2,x+w/2,y,z+d/2,MT.plain('#d8dce4'),{col:false,nt:1});box(x-w/2+.03,y-.045,z-d/2+.03,x+w/2-.03,y-.04,z+d/2-.03,MT.glow(col||'#f4f6ff',1.2),{col:false,b:1,nt:1});addLight(x,y-.35,z,hx(col||'#f4f6ff'),rng||7,int||.6,1)}
 // a pendant: flex, shade, glowing underside
 function kPendant(x,y,z,len,r,col,rng,int,shade){box(x-.006,y-len,z-.006,x+.006,y,z+.006,MT.plain('#222'),{col:false});box(x-r,y-len-.22,z-r,x+r,y-len,z+r,MT.plain(shade||'#1a1a20'),{col:false,nt:1});
  box(x-r+.02,y-len-.225,z-r+.02,x+r-.02,y-len-.215,z+r-.02,MT.glow(col||'#ffe2b0',1.3),{col:false,b:1,nt:1});addLight(x,y-len-.45,z,hx(col||'#ffe2b0'),rng||6,int||.7)}
