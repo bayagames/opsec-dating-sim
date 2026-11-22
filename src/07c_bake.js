@@ -20,7 +20,7 @@ function bakeMats(){
   // the depth bias grows where the light grazes the surface: a cube texel covers a long strip of a wall seen edge-on,
   // and a flat bias there leaves rings of false shadow round every light (acne)
   float vis(vec3 p,float d,float ndl){vec3 dir=(p-lp)/d;vec3 t1=normalize(cross(dir,abs(dir.y)<.9?vec3(0.,1.,0.):vec3(1.,0.,0.)));vec3 t2=cross(dir,t1);
-   float r=soft*(.5+d*.08)/max(d,.3),bias=.035+d*.012+(1.-clamp(ndl,0.,1.))*(.03+d*.025),s=0.;for(int i=0;i<12;i++){vec2 o=PD[i]*r;float sd=textureCube(cube,dir+t1*o.x+t2*o.y).r*far;s+=sd>d-bias?1.:0.;}return s/12.;}
+   float r=soft*(.5+d*.08)/max(d,.3),bias=.035+d*.012+(1.-clamp(ndl,0.,1.))*(.03+d*.025),s=0.;for(int i=0;i<12;i++){vec2 o=PD[i]*r;vec2 c=textureCube(cube,dir+t1*o.x+t2*o.y).rg*far;s+=c.x>d-bias?(c.y>d-bias?1.:.6):0.;}return s/12.;}
   void main(){vec3 n=normalize(wn);vec3 L=lp-wp;float d=length(L);if(d>lr)discard;vec3 l=L/d;float x=clamp(1.-d/lr,0.,1.),fall=x*x,ndl=dot(n,l);if(length(wn)>1.5&&ndl<0.){n=-n;ndl=-ndl;}
    // ceiling fittings (downlights, panels) shine down: what's level with or above them only gets a little spill
    if(dn>.5)fall*=mix(.12,1.,smoothstep(-.05,.55,l.y));
@@ -29,7 +29,7 @@ function bakeMats(){
   side:T.DoubleSide,depthTest:false,depthWrite:false,blending:T.CustomBlending,blendEquation:T.AddEquation,blendSrc:T.OneFactor,blendDst:T.OneFactor,blendSrcAlpha:T.ZeroFactor,blendDstAlpha:T.OneFactor});
  const dist=new T.ShaderMaterial({uniforms:{lp:{value:new T.Vector3()},far:{value:1}},
   vertexShader:'varying vec3 wp;void main(){wp=(modelMatrix*vec4(position,1.)).xyz;gl_Position=projectionMatrix*viewMatrix*vec4(wp,1.);}',
-  fragmentShader:'uniform vec3 lp;uniform float far;varying vec3 wp;void main(){gl_FragColor=vec4(length(wp-lp)/far,0.,0.,1.);}',side:T.DoubleSide});
+  fragmentShader:'uniform vec3 lp;uniform float far;varying vec3 wp;void main(){gl_FragColor=vec4(length(wp-lp)/far,1.,0.,1.);}',side:T.DoubleSide});
  // gutter dilation + RGBM encode into an 8-bit page
  const fin=new T.ShaderMaterial({uniforms:{src:{value:null},px:{value:1},M:{value:BAKE.rgbm}},
   vertexShader:'varying vec2 v;void main(){v=uv;gl_Position=vec4(position.xy,0.,1.);}',
@@ -51,9 +51,11 @@ function bakeMats(){
  return G.bk={cov,light,dist,fin,sun,sdep};
 }
 /* a shadow material that cuts holes where a texture is transparent (leaves), sharing the light's uniforms */
+/* for point lights a leaf writes its distance to g and leaves r "far": leaves cast a light, dappled shadow instead of
+   a solid one (a pot plant under a downlight otherwise throws huge dark blobs over the walls round it) */
 function cutMat(base,map){const T=G.T,u=Object.assign({},base.uniforms,{map:{value:map}});
  return new T.ShaderMaterial({uniforms:u,vertexShader:'varying vec3 wp;varying vec2 vu;void main(){vu=uv;wp=(modelMatrix*vec4(position,1.)).xyz;gl_Position=projectionMatrix*viewMatrix*vec4(wp,1.);}',
-  fragmentShader:base.fragmentShader.replace('varying vec3 wp;','varying vec3 wp;varying vec2 vu;uniform sampler2D map;').replace('void main(){','void main(){if(texture2D(map,vu).a<.5)discard;'),side:T.DoubleSide})}
+  fragmentShader:base.fragmentShader.replace('varying vec3 wp;','varying vec3 wp;varying vec2 vu;uniform sampler2D map;').replace('void main(){','void main(){if(texture2D(map,vu).a<.5)discard;').replace('gl_FragColor=vec4(length(wp-lp)/far,1.,0.,1.);','gl_FragColor=vec4(1.,length(wp-lp)/far,0.,1.);'),side:T.DoubleSide})}
 /* prepare one region: float accumulation pages, the flattened bake scenes, and a shadow-caster scene */
 function bakeSetup(reg){
  const T=G.T,r=G.r,R=G.regions[reg],LM=R.lm,BK=bakeMats();
@@ -123,7 +125,7 @@ const LMDB={db:null,open(){return new Promise(res=>{try{const q=indexedDB.open('
  put(k,v){if(!LMDB.db)return;try{const t=LMDB.db.transaction('lm','readwrite');t.objectStore('lm').put(v,k)}catch(e){}}};
 function lmKey(reg){const R=G.regions[reg],L=G.lights[reg]||[];let h=0;const add=v=>{h=(h*31+Math.round(v*100))|0};
  for(const l of L)l.forEach(add);const SU=G.sun&&G.sun[reg];if(SU)[...SU.d,...SU.c,SU.k,SU.half,...SU.c0].forEach(add);let verts=0;R.obj.traverse(o=>{if(o.isMesh&&o.userData.pg>=0){verts+=o.geometry.attributes.position.count;const a=o.geometry.attributes.lmuv.array;for(let i=0;i<a.length;i+=97)add(a[i]*1e4)}});
- return['v6',reg,R.lm.S,R.lm.pages,R.lm.D.toFixed(3),verts,h,G.LK,R.lk||1,LOOK.reach,BAKE.fill,BAKE.soft,BAKE.cube].join('|')}
+ return['v7',reg,R.lm.S,R.lm.pages,R.lm.D.toFixed(3),verts,h,G.LK,R.lk||1,LOOK.reach,BAKE.fill,BAKE.soft,BAKE.cube].join('|')}
 function lmApply(reg,pages){const T=G.T,R=G.regions[reg],S=R.lm.S;R.lmTex=pages.map(px=>{const t=new T.DataTexture(px,S,S,T.RGBAFormat,T.UnsignedByteType);t.minFilter=t.magFilter=T.LinearFilter;t.generateMipmaps=false;t.channel=1;t.colorSpace=T.NoColorSpace;t.needsUpdate=true;t.onUpdate=()=>{t.image={width:S,height:S,data:null}};return t});
  R.obj.traverse(o=>{if(o.isMesh&&o.userData.mk&&o.userData.pg>=0){o.userData.lmk=reg+':'+o.userData.pg;o.material=getMat(o.userData.mk,o.userData.lmk)}})}
 /* Lightmaps live per region, and only the place you're in (plus the one you just left, so hopping between the
