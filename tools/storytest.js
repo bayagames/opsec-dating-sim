@@ -79,7 +79,7 @@ const BOT=async(runs)=>{
    if(rnd()<.5){attendTalk();continue}
    if(S.slot===5)endDay();else spend('wait');
   }
-  out.runs.push({run:ri,strat,ending:S.ending,day:S.day,slot:S.slot,fav,loved:ROM.filter(loved),routes:Object.fromEntries(ROM.filter(met).map(g=>[g,scn(g)])),solved:Object.keys(S.solved).length,clues:S.clues.length,skill:RANKS.skill[rank('skill')],clout:RANKS.clout[rank('clout')],fails:S.fails||0,acts:S.acts,missing:[...missing]});
+  out.runs.push({run:ri,strat,ending:S.ending,day:S.day,slot:S.slot,fav,loved:ROM.filter(loved),routes:Object.fromEntries(ROM.filter(met).map(g=>[g,scn(g)])),solved:Object.keys(S.solved).length,clues:S.clues.length,skill:RANKS.skill[rank('skill')],clout:RANKS.clout[rank('clout')],fails:S.fails||0,acts:S.acts,texts:S.msgs.filter(m=>m.q).length,missing:[...missing]});
   S=null;
  }
  out.ends=Object.keys(META.ends);return out};

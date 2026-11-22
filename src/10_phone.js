@@ -62,11 +62,11 @@ const APPS={
   const ks=Object.keys(by).sort((a,b)=>S.msgs.lastIndexOf(by[b][by[b].length-1])-S.msgs.lastIndexOf(by[a][by[a].length-1]));
   if(!phThread&&ks.length&&innerWidth>760)phThread=ks[0];
   const nm=k=>CH[k]?CH[k].name:k,av=k=>CH[k]?head(lookOf(k),'n'):'';
-  const list=ks.map(k=>{const L=by[k],last=L[L.length-1],un=L.filter(m=>!m.r).length,wait=L.some(m=>m.q&&!m.ans);return`<button class="mthr ${phThread===k?'on':''}" data-f="${esc(k)}"><span class="hd">${av(k)}</span><span class="mt"><b>${esc(nm(k))}</b><small>${last.me?'You: ':''}${esc(last.t)}</small></span>${un?`<i class="nb">${un}</i>`:wait?'<i class="nb q">?</i>':''}</button>`}).join('');
+  const list=ks.map(k=>{const L=by[k],last=L[L.length-1],un=L.filter(m=>!m.r).length,wait=L.some(m=>m.q&&m.ans===undefined);return`<button class="mthr ${phThread===k?'on':''}" data-f="${esc(k)}"><span class="hd">${av(k)}</span><span class="mt"><b>${esc(nm(k))}</b><small>${last.me?'You: ':''}${esc(last.t)}</small></span>${un?`<i class="nb">${un}</i>`:wait?'<i class="nb q">?</i>':''}</button>`}).join('');
   let th='<div class="mempty small">Pick a conversation.</div>';
   if(phThread&&by[phThread]){by[phThread].forEach(m=>m.r=1);hud();
    th=`<div class="mhead"><span class="hd">${av(phThread)}</span><b>${esc(nm(phThread))}</b>${CH[phThread]&&ROM.includes(phThread)?`<small>${met(phThread)?stageOf(phThread)+' · ♥ '+aff(phThread):''}</small>`:''}</div><div class="mlog">`+
-    by[phThread].map(m=>`<div class="bub ${m.me?'me':''}">${esc(m.t)}<small>${m.c?'Day '+m.c+' · '+SLOTN[m.s||0]:'Before the con'}</small></div>${m.q&&!m.ans&&TEXTQ[m.q]?`<div class="mreply">${TEXTQ[m.q].replies.map((r,i)=>`<button class="ch" data-q="${S.msgs.indexOf(m)}" data-i="${i}">${esc(sub(r.t))}</button>`).join('')}</div>`:''}`).join('')+'</div>'}
+    by[phThread].map(m=>`<div class="bub ${m.me?'me':''}">${esc(m.t)}<small>${m.c?'Day '+m.c+' · '+SLOTN[m.s||0]:'Before the con'}</small></div>${m.q&&m.ans===undefined&&TEXTQ[m.q]?`<div class="mreply">${TEXTQ[m.q].replies.map((r,i)=>`<button class="ch" data-q="${S.msgs.indexOf(m)}" data-i="${i}">${esc(sub(r.t))}</button>`).join('')}</div>`:''}`).join('')+'</div>'}
   return`<div class="msgs ${phThread?'open':''}"><div class="mlist">${list||'<p class="small" style="padding:12px">No messages yet.</p>'}</div><div class="mview2">${innerWidth<=760&&phThread?'<button class="btn" id="mback">‹ All conversations</button>':''}${th}</div></div>`},
  /* ---- Calendar: the week, today in detail, what you can do now ---- */
  calendar(){

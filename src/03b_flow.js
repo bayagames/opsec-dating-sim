@@ -13,7 +13,7 @@ function sceneWhy(g){const R=ROUTES[g],i=scn(g);if(!R||i>=R.n)return null;const 
  if(r.c&&!r.c())return r.y||'not yet';
  return null}
 const sceneReady=g=>met(g)&&ROUTES[g]&&scn(g)<ROUTES[g].n&&scn(g)>0&&!sceneWhy(g);
-function adv(g,i){if(!S)return;S.sc[g]=Math.max(S.sc[g]||0,i+1);if(ROUTES[g]&&S.sc[g]>=ROUTES[g].n)loveDone(g)}
+function adv(g,i){if(!S)return;if((S.sc[g]||0)<=i&&typeof tqQueue==='function')tqQueue(g,i);S.sc[g]=Math.max(S.sc[g]||0,i+1);if(ROUTES[g]&&S.sc[g]>=ROUTES[g].n)loveDone(g)}
 function loveDone(g){META.routes[g]=1;saveMeta();ach('love_'+g);const n=romCount();if(n>=2)ach('love2');if(n>=3)ach('love3')}
 /* ---- the calendar ---- */
 const BEATS={};
@@ -37,7 +37,7 @@ function addSlotLog(t){if(!S||!t)return;S.slog=S.slog||{};const k=S.day+':'+S.sl
 function spend(kind,what){S.acts=(S.acts||0)+1;addSlotLog(what||({hang:'Time with someone',lead:'Worked a lead',talk:'A talk',ctf:'CTF practice',bounty:'Bug bounty',rest:'Rested',wait:'Let it go by'}[kind]||kind));
  if(S.restore&&!S.oc&&S.day>=1){S.oc=1;toast('Overclocked: one more thing this '+SLOTN[S.slot].toLowerCase(),'var(--mint)');save();hub();return}
  nextSlot()}
-function nextSlot(){S.oc=0;S.slot++;if(S.slot>5){endDay();return}save();toast(SLOTN[S.slot],'var(--dim)');if(typeof sfx==='function')sfx('advance');hub()}
+function nextSlot(){S.oc=0;S.slot++;if(S.slot>5){endDay();return}tqFlush();save();toast(SLOTN[S.slot],'var(--dim)');if(typeof sfx==='function')sfx('advance');hub()}
 function endDay(){
  const d=S.day;S.slot=5;
  const sleep=SC['sleep'+d]!==undefined?scr('sleep'+d):scr('sleep');
@@ -45,7 +45,7 @@ function endDay(){
 function newDay(d){
  if(S.day>=1&&S.exp<=10)ach('lowkey');
  S.day=d;S.ch=Math.min(d,4);S.slot=0;S.oc=0;S.exp=S.foot;S.hang={};delete S.failing;
- const wake=S.wakeAt||'room1337';snapDay();save();
+ const wake=S.wakeAt||'room1337';tqFlush();snapDay();save();
  const go=()=>{run([{chapter:d},{hide:1}],hub)};
  if(G.ok&&S.inWorld)fadeTp(()=>{teleportArea(wake);S.pos=null;go()});else go();
 }
