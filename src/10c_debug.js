@@ -29,7 +29,7 @@ function dbgDraw(){
   <div class="dbl">${beatList().map(b=>`<button class="dbi" data-b="${b.id}"><b>Day ${b.d} · ${SLOTN[b.i]}</b><small>${esc(b.t)}</small></button>`).join('')}<button class="dbi" data-b="__end"><b>Day 7 · the end</b><small>Play everything through to an ending</small></button></div>`;
  if(DBG.tab==='tp'){const net=MAPNET[WD.reg]?Object.values(AREAS):[];const g={};for(const a of Object.values(AREAS)){if(a.hide)continue;(g[areaGroup(a)]=g[areaGroup(a)]||[]).push(a)}
   body=`<label class="small"><input type="checkbox" id="dbgOpenAll" ${window.__allOpen?'checked':''}> Ignore area locks</label>`+AGROUPS.filter(k=>g[k]).map(k=>`<div class="dbh">${esc(k)}</div><div class="dbg2">${g[k].map(a=>`<button class="dbi" data-tp="${a.k}"><b>${esc(a.n)}</b><small>${esc(levelName(a.reg,a.sp[3]||0))}${areaLock(a.k)?' · locked now':''}</small></button>`).join('')}</div>`).join('')}
- if(DBG.tab==='give')body=`<div class="dbg2">${[['meet','Meet all 21'],['aff20','+20 affection, everyone met'],['aff100','Max affection, everyone met'],['clues','Every clue'],['solve','Solve every mystery'],['skill','Skill +100'],['clout','Clout +100'],['exp0','Exposure to 0'],['exp95','Exposure to 95'],['cred','+200 credits'],['items','Every item'],['visit','Visit every area'],['slot','Next part of the day'],['day','End the day'],['restore','Restore session (harem mode)']].map(x=>`<button class="dbi" data-g="${x[0]}"><b>${x[1]}</b></button>`).join('')}</div>
+ if(DBG.tab==='give')body=`<div class="dbg2">${[['meet','Meet all 21'],['aff20','+20 affection, everyone met'],['aff100','Max affection, everyone met'],['clues','Every clue'],['solve','Solve every mystery'],['skill','Skill +100'],['clout','Clout +100'],['exp0','Exposure to 0'],['exp95','Exposure to 95'],['cred','+£200'],['items','Every item'],['visit','Visit every area'],['slot','Next part of the day'],['day','End the day'],['restore','Restore session (harem mode)']].map(x=>`<button class="dbi" data-g="${x[0]}"><b>${x[1]}</b></button>`).join('')}</div>
   <div class="dbh">Advance someone's story by one scene (plays it)</div><div class="dbg2">${ROM.map(g=>`<button class="dbi" data-adv="${g}"><b>${CH[g].name}</b><small>${scn(g)}/${ROUTES[g].n} · ♥ ${aff(g)}</small></button>`).join('')}</div>`;
  if(DBG.tab==='scene'){const ks=Object.keys(SC).sort();body=`<input class="inp" id="dbgQ" placeholder="Filter scenes" value="${esc(DBG.q||'')}"><div class="dbg2">${ks.filter(k=>!DBG.q||k.includes(DBG.q)).slice(0,300).map(k=>`<button class="dbi" data-sc="${k}"><b>${k}</b></button>`).join('')}</div>`}
  if(DBG.tab==='end')body=`<p class="small">Plays the ending's epilogue and shows its card. Ends this run.</p><div class="dbg2">${ENDORDER.map(k=>`<button class="dbi" data-end="${k}"><b>${esc(ENDINFO[k][0])}</b><small>${META.ends[k]?'seen':''}</small></button>`).join('')}</div>`;
@@ -54,7 +54,7 @@ function dbgGive(k){
  if(k==='clues')Object.keys(CLUE).forEach(addClue);
  if(k==='solve')for(const m in MYST){S.solved[m]=1;META.solved[m]=1}
  if(k==='skill')fx({skill:100});if(k==='clout')fx({clout:100});
- if(k==='exp0')S.exp=0;if(k==='exp95')S.exp=95;if(k==='cred')fx({cred:200});
+ if(k==='exp0')S.exp=0;if(k==='exp95')S.exp=95;if(k==='cred')fx({money:200});
  if(k==='items')Object.keys(ITEMS).forEach(i=>{S.inv[i]=(S.inv[i]||0)+1});
  if(k==='visit')Object.keys(AREAS).forEach(a=>S.visited[a]=1);
  if(k==='slot'){closePhone();if(S.slot===5)endDay();else nextSlot();return}

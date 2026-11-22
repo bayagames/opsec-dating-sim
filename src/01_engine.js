@@ -211,7 +211,7 @@ function hud(){
  if(S.unl.skill){const[r,p]=rk('skill');ms.push(['SKL '+r,p,'var(--mint)',RANKS.skill[r]])}
  if(S.unl.clout){const[r,p]=rk('clout');ms.push(['CLT '+r,p,'var(--butter)',RANKS.clout[r]])}
  if(S.unl.exp)ms.push(['EXP '+S.exp,S.exp,'var(--coral)','Exposure '+S.exp+'/100 · resets to '+S.foot+' each morning']);
- $('meters').innerHTML=ms.map(m=>`<div class="m" title="${m[3]}">${m[0]}<b><i style="width:${m[1]}%;background:${m[2]}"></i></b></div>`).join('')+(S.unl.cred?`<div class="m" style="width:auto;color:var(--butter)">CR<br>${S.cred}</div>`:'');
+ $('meters').innerHTML=ms.map(m=>`<div class="m" title="${m[3]}">${m[0]}<b><i style="width:${m[1]}%;background:${m[2]}"></i></b></div>`).join('')+(S.unl.money||S.unl.cred?`<div class="m" style="width:auto;color:var(--butter)">£<br>${S.money||0}</div>`:'');
  $('phoneBtn').style.display='block';
  $('phoneBtn').innerHTML='Phone<span class="kn" style="margin:0 0 0 6px">P</span>'+(S.msgs.some(m=>!m.r)?'<span class="dot"></span>':'');
 }
@@ -315,8 +315,8 @@ const TUT={
  map:['The map','Press M for the map. Drag to look around, scroll or pinch to zoom, tap a room you\'ve visited to fast travel. A green light in the world, and a green star on the map, mark where the story wants you.'],
  time:['Time','Each day has six parts: Morning, Midday, Afternoon, Evening, Night and Late night. Time only moves when you do something that takes it. Some parts of the day belong to the story: the green light shows where. The rest are yours: spend each one with someone, on a lead, at a talk, or however you like. Walking, talking, shopping and your phone are free. You can\'t do everything. Choose.'],
  hang:['Spending time','Walk up to someone and choose Spend time to use the current part of the day with them. Their next scene needs them to like you enough, and sometimes it needs the right day, or enough Skill or Clout. Talking shop is free, once a day each.'],
- cred:['Credits','You earn credits from minigames, bug bounties and the CTF. Spend them at the Con Store in the Vendor Hall, on gear and gifts. Each person has a gift they\'ll love.'],
- room:['Room 1337','Your hotel room. The laptop runs bug bounties for credits, and the bed ends the day. Your phone can call it a night from anywhere.'],
+ money:['Money','Brindle pays a per diem every morning. You can earn more from bug bounties on your laptop, minigames, the CTF, and shifts (the info desk, the hotel bar, Proof). Shops are spread around: the Con Store, the Byte Café, the hotel boutique, the bar, the station kiosk. Gifts are ordinary things, and everyone feels differently about each one. You find out by giving, by getting closer, or by asking the wrong people.'],
+ room:['Room 1337','Your hotel room. The laptop runs bug bounties for money, and the bed ends the day. Your phone can call it a night from anywhere.'],
  clues:['The case board','Someone at this con is watching everyone, and there\'s more going on than that. Clues go onto the case board in your phone. Leads there cost time, and some are risky. When you have the evidence, pick the answer and the three clues that prove it. Get it wrong and people notice you asking.']
 };
 function unlock(k,cb){

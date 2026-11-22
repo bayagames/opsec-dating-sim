@@ -45,6 +45,8 @@ function resumeGame(s){
  // saves from before the week was rebuilt (chapters, nine people) can't be carried over: start that player again
  if(!s.v||s.v<4){S=fresh(s.h||'n00b');S.resume='pro';startPrologue();return}
  S=s;if(!S.msgs)S.msgs=[];if(!S.log)S.log=[];
+ // credits became money; gifts became ordinary things
+ if(S.money===undefined){S.money=(S.cred||0)+20;delete S.cred;if(S.unl.cred)S.unl.money=1}for(const k in S.inv)if(!ITEMS[k])delete S.inv[k];for(const g in S.gifted)if(S.gifted[g]===true)S.gifted[g]=1;
  // quit during the prologue: it's one scene, so it starts again
  if(S.day===0){const h=S.h,r=S.restore,sb=S.f.sessionbak;S=fresh(h);S.restore=r;if(sb)S.f.sessionbak=1;S.resume='pro';startPrologue();return}
  if(!WD.touch&&window.THREE)tryLock();

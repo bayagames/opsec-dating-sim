@@ -776,7 +776,7 @@ function hud(){
  if(S.unl.skill){const[r,p]=rk('skill');ms.push(['SKL '+r,p,'var(--mint)',RANKS.skill[r]])}
  if(S.unl.clout){const[r,p]=rk('clout');ms.push(['CLT '+r,p,'var(--butter)',RANKS.clout[r]])}
  if(S.unl.exp)ms.push(['EXP '+S.exp,S.exp,'var(--coral)','Exposure '+S.exp+'/100 · resets to '+S.foot+' each morning']);
- $('meters').innerHTML=ms.map(m=>`<div class="m" title="${m[3]}">${m[0]}<b><i style="width:${m[1]}%;background:${m[2]}"></i></b></div>`).join('')+(S.unl.cred?`<div class="m" style="width:auto;color:var(--butter)">CR<br>${S.cred}</div>`:'');
+ $('meters').innerHTML=ms.map(m=>`<div class="m" title="${m[3]}">${m[0]}<b><i style="width:${m[1]}%;background:${m[2]}"></i></b></div>`).join('')+(S.unl.money||S.unl.cred?`<div class="m" style="width:auto;color:var(--butter)">£<br>${S.money||0}</div>`:'');
  $('phoneBtn').style.display='block';
  $('phoneBtn').innerHTML='Phone<span class="kn" style="margin:0 0 0 6px">P</span>'+(S.msgs.some(m=>!m.r)?'<span class="dot"></span>':'');
 }
@@ -880,8 +880,8 @@ const TUT={
  map:['The map','Press M for the map. Drag to look around, scroll or pinch to zoom, tap a room you\'ve visited to fast travel. A green light in the world, and a green star on the map, mark where the story wants you.'],
  time:['Time','Each day has six parts: Morning, Midday, Afternoon, Evening, Night and Late night. Time only moves when you do something that takes it. Some parts of the day belong to the story: the green light shows where. The rest are yours: spend each one with someone, on a lead, at a talk, or however you like. Walking, talking, shopping and your phone are free. You can\'t do everything. Choose.'],
  hang:['Spending time','Walk up to someone and choose Spend time to use the current part of the day with them. Their next scene needs them to like you enough, and sometimes it needs the right day, or enough Skill or Clout. Talking shop is free, once a day each.'],
- cred:['Credits','You earn credits from minigames, bug bounties and the CTF. Spend them at the Con Store in the Vendor Hall, on gear and gifts. Each person has a gift they\'ll love.'],
- room:['Room 1337','Your hotel room. The laptop runs bug bounties for credits, and the bed ends the day. Your phone can call it a night from anywhere.'],
+ money:['Money','Brindle pays a per diem every morning. You can earn more from bug bounties on your laptop, minigames, the CTF, and shifts (the info desk, the hotel bar, Proof). Shops are spread around: the Con Store, the Byte Café, the hotel boutique, the bar, the station kiosk. Gifts are ordinary things, and everyone feels differently about each one. You find out by giving, by getting closer, or by asking the wrong people.'],
+ room:['Room 1337','Your hotel room. The laptop runs bug bounties for money, and the bed ends the day. Your phone can call it a night from anywhere.'],
  clues:['The case board','Someone at this con is watching everyone, and there\'s more going on than that. Clues go onto the case board in your phone. Leads there cost time, and some are risky. When you have the evidence, pick the answer and the three clues that prove it. Get it wrong and people notice you asking.']
 };
 function unlock(k,cb){
@@ -940,7 +940,7 @@ function addClue(c){if(!S||!CLUE[c]||S.clues.includes(c))return;S.clues.push(c);
  if(S.clues.length>=10)ach('clues10');if(S.clues.length>=30)ach('clues30');if(Object.keys(CLUE).every(k=>S.clues.includes(k)))ach('clues_all')}
 function clockLabel(){if(!S)return'';if(S.day===0)return DAYN[0];return'Day '+S.day+' · '+DAYN[S.day]+' · '+SLOTN[S.slot]}
 function fresh(h){const z={};ROM.forEach(g=>z[g]=0);
- return{v:4,h,day:0,slot:0,ch:0,skill:0,clout:0,exp:5,foot:5,cred:20,aff:{...z},sc:{...z},met:{},hang:{},gifted:{},inv:{},f:{},clues:[],solved:{},leads:{},done:{},msgs:[],log:[],unl:{},sum:[],ach:{},room:{},fast:false,ending:null,visited:{},ftRecent:[],restore:false,oc:0,fails:0,acts:0,look:{}}}
+ return{v:4,h,day:0,slot:0,ch:0,skill:0,clout:0,exp:5,foot:5,money:40,aff:{...z},sc:{...z},met:{},hang:{},gifted:{},inv:{},f:{},clues:[],solved:{},leads:{},done:{},msgs:[],log:[],unl:{},sum:[],ach:{},room:{},fast:false,ending:null,visited:{},ftRecent:[],restore:false,oc:0,fails:0,acts:0,look:{}}}
 /* effects: affection, exposure (with the day's fail), skill/clout XP and ranks, credits, flags, clues, items */
 function fx(e){
  if(!e)return;
@@ -969,10 +969,10 @@ function fx(e){
    if(S.unl[k]&&v)toast(`${k==='skill'?'Skill':'Clout'} ${v>=0?'+':''}${v}`,k==='skill'?'var(--mint)':'var(--butter)');
    if(r1>r0&&S.unl[k]){setTimeout(()=>toast(`${k==='skill'?'Skill':'Clout'} rank: ${RANKS[k][r1]}`,k==='skill'?'var(--mint)':'var(--butter)'),400);ach(k+'_r'+r1)}
   }
-  else if(k==='cred'){S.cred=Math.max(0,S.cred+v);if(S.unl.cred&&v)toast(`Credits ${v>=0?'+':''}${v}`,'var(--dim)');if(S.cred>=300)ach('rich')}
+  else if(k==='cred'||k==='money'){earn(v)}
   else if(k==='flag'){[].concat(v).forEach(f=>S.f[f]=1)}
   else if(k==='clue'){[].concat(v).forEach(addClue)}
-  else if(k==='item'){S.inv[v]=(S.inv[v]||0)+1;toast('Got: '+ITEMS[v].n,'var(--mint)')}
+  else if(k==='item'){if(!ITEMS[v])continue;S.inv[v]=(S.inv[v]||0)+1;toast('Got: '+ITEMS[v].n,'var(--mint)')}
   else if(k==='met'){meet(v)}
  }
  hud();
@@ -1459,8 +1459,11 @@ const ACH={
  doxxed:['Doxxed','Hit 100 Exposure.'],doxxed3:['Glutton for Punishment','Get doxxed three times in one run.'],
  lowkey:['Low Profile','End a day of the con with Exposure at 10 or less.'],
  ghostfoot:['Ghost','Reach the keynote without adding to your Footprint once.'],
- rich:['Bug Bounty Hunter','Hold 300 credits at once.'],
- shopper:['Retail Therapy','Buy something at the Con Store.'],
+ rich:['Bug Bounty Hunter','Hold £200 at once.'],
+ perfect_gift:['Paying Attention','Give someone a gift they love.'],
+ worked:['Gig Economy','Work a shift for money.'],
+ broker:['Data Broker','Buy someone\'s secrets from PEOPLEFINDR. You know what you did.'],
+ shopper:['Retail Therapy','Buy something in a shop.'],
  gifts5:['Thoughtful','Give five people the gift they love.'],
  ctf_win:['Capture the Flag','Win the CTF finals with Ada.'],
  dave:['Redemption Arc','Help Dave lock down his life.'],
@@ -1494,7 +1497,7 @@ function sceneWhy(g){const R=ROUTES[g],i=scn(g);if(!R||i>=R.n)return null;const 
  if(r.c&&!r.c())return r.y||'not yet';
  return null}
 const sceneReady=g=>met(g)&&ROUTES[g]&&scn(g)<ROUTES[g].n&&scn(g)>=1&&!sceneWhy(g);
-function adv(g,i){if(!S)return;if((S.sc[g]||0)<=i&&typeof tqQueue==='function')tqQueue(g,i);S.sc[g]=Math.max(S.sc[g]||0,i+1);if(ROUTES[g]&&S.sc[g]>=ROUTES[g].n)loveDone(g)}
+function adv(g,i){if(!S)return;if((S.sc[g]||0)<=i&&(i===2||i===4)&&typeof prefReveal==='function')setTimeout(()=>prefReveal(g,1),1200);if((S.sc[g]||0)<=i&&typeof tqQueue==='function')tqQueue(g,i);S.sc[g]=Math.max(S.sc[g]||0,i+1);if(ROUTES[g]&&S.sc[g]>=ROUTES[g].n)loveDone(g)}
 function loveDone(g){META.routes[g]=1;saveMeta();ach('love_'+g);const n=romCount();if(n>=2)ach('love2');if(n>=3)ach('love3')}
 /* ---- the calendar ---- */
 const BEATS={};
@@ -1527,6 +1530,7 @@ function newDay(d){
  if(S.day>=1&&S.exp<=10)ach('lowkey');
  neglectCheck(d);
  S.day=d;S.ch=Math.min(d,4);S.slot=0;S.oc=0;S.exp=S.foot;S.hang={};delete S.failing;
+ if(d>=1&&d<=7){S.money=(S.money||0)+20;if(S.unl.money)setTimeout(()=>toast('+£20 · Brindle per diem','var(--butter)'),2400)}
  evMissCheck();const wake=S.wakeAt||'room1337';tqFlush();snapDay();save();setTimeout(evSoonToast,1800);
  const go=()=>{run([{chapter:d},{hide:1}],hub)};
  if(G.ok&&S.inWorld)fadeTp(()=>{teleportArea(wake);S.pos=null;go()});else go();
@@ -1560,8 +1564,7 @@ function hangMenu(g,bgk){
    return[N('How do you want to spend it?'),...approachMenu(g,()=>[...scr(g+i),()=>{fx({[g]:8});adv(g,i);seen(g);addSum(R.sum?R.sum[i]||'':'');if(S.slot===5)ach('night_owl');ach('first_hang');spend('hang');return[]}])]}});
  const tk=g+':'+S.day;
  opts.push({t:'Talk shop',hint:S.hang[tk]?'Already did that today':'Free · once a day',if:()=>!S.hang[tk],then:()=>{S.hang[tk]=1;seen(g);S.thint=S.thint||{};const first=!S.thint[g];S.thint[g]=1;return[{unlock:'hang'},{game:'quiz',who:g,n:3},...(first&&TASTE[g]?[T('think',TASTE[g][4])]:[])]}});
- const gi=Object.keys(ITEMS).find(k=>ITEMS[k].g===g);
- if(gi&&S.inv[gi]&&!S.gifted[g])opts.push({t:'Give the '+ITEMS[gi].n.toLowerCase(),then:()=>{S.inv[gi]--;if(!S.inv[gi])delete S.inv[gi];S.gifted[g]=1;seen(g);if(Object.keys(S.gifted).length>=5)ach('gifts5');return[FX({[g]:12}),L(pg,'b',R.gift)]}});
+ opts.push(...giftOpts(g));
  opts.push({t:'Just chat',then:()=>{seen(g);const ck=g+':c:'+S.day,first=!S.hang[ck];S.hang[ck]=1;return[L(pg,'h',pick(R.idle)),...(first?[FX({[g]:2})]:[])]}});
  opts.push({t:'Leave',then:[]});
  const st=stageOf(g);
@@ -1583,7 +1586,7 @@ function ctfPractice(){if(!freeCheck())return;
  run([{bg:'ctf'},{hide:1},N('The CTF Arena. Scoreboard on the wall, four hundred laptops, the smell of solder and instant noodles. You pick a challenge off the board.'),{game:pick(['pipe','spot']),n:3,keys:shuffle(Object.keys(SPOT)).slice(0,2),title:'CTF practice'},
   ()=>{const r=[];if(day()>=2&&!clue('cipher')&&Math.random()<.5)r.push(N('One challenge on the board has no author. Its flag is EXPOSURE_IS_ART, and it\'s signed "—M".'),{fx:{clue:'cipher'}});r.push(FX({skill:6}),()=>{spend('ctf');return[]});return r}],hub)}
 function bugBounty(){if(!freeCheck())return;
- run([{bg:'hotel'},{hide:1},N('You open the con\'s bug bounty board. Real bugs in con systems, paid in con credits.'),{game:'pipe',n:3,title:'Bug bounty'},()=>{spend('bounty');return[]}],hub)}
+ run([{bg:'hotel'},{hide:1},N('You open the con\'s bug bounty board. Real bugs in con systems, paid in real money.'),{game:'pipe',n:3,title:'Bug bounty'},()=>{earn(12+rank('skill')*4,'bounty');spend('bounty');return[]}],hub)}
 function restSlot(){if(!freeCheck())return;run([{hide:1},N(pick(['You sit somewhere quiet and let the con go by for a while. Your shoulders come down from around your ears.','You lie down for twenty minutes and wake up an hour later, which is how naps work at cons.'])),FX({exp:-10}),()=>{spend('rest');return[]}],hub)}
 /* ---- leads ---- */
 const leadOpen=k=>{const L=LEADS[k];return L&&!S.leads[k]&&L.when()};
@@ -1592,7 +1595,7 @@ function leadStart(k){const L=LEADS[k];if(!freeCheck())return;if(L.need&&!L.need
 /* a risky moment: the roll is shown, so it's fair. Risk 1-3; the hoodie and a high Skill help; a coffee skips it */
 function riskRoll(r,caught){
  {let p=[0,.2,.38,.55][r]||0;if(S.inv.hoodie)p-=.12;p-=rank('skill')*.04;p=clamp(p,.04,.9);
-  if(S.inv.coffee){S.inv.coffee--;if(!S.inv.coffee)delete S.inv.coffee;return[N('The triple espresso kicks in. You\'re in and out before anyone has blinked.')]}
+  if(S.inv.espresso){S.inv.espresso--;if(!S.inv.espresso)delete S.inv.espresso;return[N('The triple espresso kicks in. You\'re in and out before anyone has blinked.')]}
   const bad=Math.random()<p;if(!bad)return[N('Nobody sees you. '+pick(['Your heart is going like a drum, but nobody sees you.','A door closes somewhere else. You breathe out.','You\'re just another lanyard in a corridor.']))];
   return scr(caught||'caught').concat([FX({exp:20+r*12})])}}
 /* ---- the case board ---- */
@@ -1624,6 +1627,115 @@ function event(id,o){EVENTS[id]=Object.assign({id,sc:'ev_'+id},o)}
 const eventsNow=()=>Object.values(EVENTS).filter(e=>e.d===S.day&&e.s===S.slot&&!(S.evs&&S.evs[e.id])&&(!e.when||e.when()));
 function joinEvent(id){const e=EVENTS[id];if(!freeCheck())return;S.evs=S.evs||{};S.evs[id]=1;
  run([...scr(e.sc),()=>{ach('first_event');if(Object.keys(S.evs).length>=6)ach('events6');spend('event',e.n);return[]}],hub)}
+
+/* ============ MONEY, SHOPS AND GIFTS ============
+   You have money (£), not credits. You get it from Brindle's per diem each morning, bug bounties on your laptop,
+   minigames and the CTF, shifts (the info desk, the hotel bar), and selling things back. You spend it in shops spread
+   around the week: the Con Store, the café in the food court, the hotel boutique, the bar, the station kiosk, the
+   arcade's prize counter, and one booth in the Vendor Hall that sells something it shouldn't.
+   Gifts are ordinary things now. Everyone feels differently about each one: loves, likes, doesn't mind, dislikes.
+   You learn by giving, by getting closer (people mention what they love), by talking shop, or by paying a data broker. */
+/* gear: things that help you, not gifts */
+for(const k in ITEMS)delete ITEMS[k];
+Object.assign(ITEMS,{
+ yubi:{n:'Hardware security key',d:'Blocks the Exposure from one bad click.',p:30,gear:1},
+ faraday:{n:'Faraday pouch',d:'Phone goes in, signals stay out. Cuts every Exposure gain by 40%.',p:45,gear:1},
+ hoodie:{n:'Plain black hoodie',d:'No logo, no slogan. Risky leads are less likely to go wrong when nobody remembers you.',p:35,gear:1},
+ espresso:{n:'Triple espresso',d:'Single use. Skip the risk roll on one lead: you\'re just faster than everyone.',p:5,gear:1},
+ // gifts
+ coffee:{n:'Proper coffee',d:'Flat white, oat, from the good place. Small, warm, says "I noticed you\'re tired".',p:4},
+ pastry:{n:'Box of pastries',d:'Six, still warm, in a paper box tied with string.',p:9},
+ tea:{n:'Loose-leaf tea',d:'A tin of something smoky with a long name.',p:7},
+ sweets:{n:'Bag of retro sweets',d:'Fizzy cola bottles, flying saucers, a sherbet dip.',p:3},
+ flowers:{n:'Bunch of flowers',d:'Ranunculus and eucalyptus, wrapped in brown paper.',p:16},
+ plant:{n:'Little potted plant',d:'A succulent in a hand-thrown pot. Hard to kill.',p:12},
+ book:{n:'Paperback novel',d:'Something second-hand with someone else\'s pencil notes in it.',p:8},
+ notebook:{n:'Good notebook',d:'Dotted pages, lies flat, survives rain.',p:9},
+ zine:{n:'Hacker zine',d:'Photocopied, stapled, furious and funny.',p:4},
+ stickers:{n:'Sticker pack',d:'Holographic, die-cut, extremely laptop.',p:4},
+ gadget:{n:'Tiny dev board',d:'A microcontroller the size of a stamp, a USB-C port and endless possibility.',p:18},
+ tools:{n:'Precision tool kit',d:'Sixty-four bits, a magnetic driver, tweezers. Smells like a workshop.',p:22},
+ game:{n:'Retro game cartridge',d:'Boxed, mint, a little bit sun-faded.',p:24},
+ record:{n:'Vinyl record',d:'An old jazz pressing with a coffee ring on the sleeve.',p:20},
+ pendant:{n:'Silver pendant',d:'A tiny moon on a fine chain.',p:30},
+ wine:{n:'Bottle of wine',d:'Red. The barman said "good choice" and didn\'t sound sarcastic.',p:18},
+ plush:{n:'Plush cryptid',d:'A soft green moth with button eyes. Arcade prize, can\'t be bought.',p:0,prize:1},
+ starmap:{n:'Star chart print',d:'The sky over the city tonight, printed on heavy paper.',p:11}
+});
+const GIFTS=Object.keys(ITEMS).filter(k=>!ITEMS[k].gear);
+/* how everyone feels about each gift: 2 love, 1 like, -1 dislike, anything else is fine */
+const GPREF={};
+(function(){const raw={
+ ellie:'plant book|tea coffee notebook flowers|pastry gadget',nyx:'tools sweets|stickers gadget record zine|flowers pendant',
+ ada:'game gadget|sweets coffee zine plush|wine flowers',priya:'tea notebook|book plant tools|gadget stickers',
+ juno:'stickers plush|sweets gadget pendant coffee|book tea',kit:'tools gadget|stickers plush coffee|wine flowers',
+ rin:'sweets plush|game zine pastry|wine coffee',bea:'book record|plant tea flowers|wine coffee',
+ mira:'zine starmap|record tools coffee|pendant plush',saoirse:'notebook coffee|book wine pastry|plush stickers',
+ sunny:'coffee pastry|sweets tea plant|gadget game',tilly:'tools gadget|stickers sweets plush|wine pendant',
+ petra:'record tools|coffee sweets game|flowers tea',astrid:'starmap book|tea plant notebook|stickers wine',
+ yuki:'game plush|sweets stickers pastry|book wine',vesper:'record pendant|wine flowers book|stickers plush',
+ delphine:'book wine|flowers tea pendant|stickers game',noor:'notebook tea|book pastry flowers|wine game',
+ fern:'plant tea|book pastry notebook|gadget stickers',wren:'book zine|notebook coffee sweets|pendant wine',
+ pia:'record flowers|tea pastry book|game gadget'};
+ for(const g in raw){const[l,k,h]=raw[g].split('|').map(s=>s.split(' '));GPREF[g]={};l.forEach(i=>GPREF[g][i]=2);k.forEach(i=>GPREF[g][i]=1);h.forEach(i=>GPREF[g][i]=-1)}})();
+const prefOf=(g,i)=>(GPREF[g]&&GPREF[g][i])||0;
+const PREFW={2:'Loves',1:'Likes',0:'Doesn\'t mind',[-1]:'Dislikes'};
+function prefKnow(g,i){S.pk=S.pk||{};(S.pk[g]=S.pk[g]||{})[i]=1}
+const prefKnown=(g,i)=>!!(S.pk&&S.pk[g]&&S.pk[g][i]);
+/* getting closer: people mention what they love (scene 2 and scene 4 each give one away) */
+function prefReveal(g,n){const loves=GIFTS.filter(i=>prefOf(g,i)===2&&!prefKnown(g,i));for(const i of loves.slice(0,n||1)){prefKnow(g,i);if(S.unl.aff)toast(CH[g].name+' loves: '+ITEMS[i].n,CH[g].col)}}
+/* ---- money ---- */
+function earn(v,why){if(!v)return;S.money=Math.max(0,(S.money||0)+v);if(v>0)META_note('earned',v);if(S.unl.money||S.unl.cred)toast((v>0?'+':'−')+'£'+Math.abs(v)+(why?' · '+why:''),v>0?'var(--butter)':'var(--dim)');if(S.money>=200)ach('rich');hud()}
+function META_note(k,v){if(typeof META==='undefined')return;META.stats=META.stats||{};META.stats[k]=(META.stats[k]||0)+v}
+/* ---- the shops ---- */
+const SHOPS={
+ constore:{n:'Con Store',w:'Vendor Hall',open:()=>S.day>=2,closed:'"Opening tomorrow!" says a sign. The shopkeeper waves a price gun at you menacingly.',stock:['yubi','faraday','hoodie','stickers','zine','gadget','tools','game','starmap','sweets']},
+ cafe:{n:'Byte Café',w:'Food Court',open:()=>S.day>=1&&S.slot<=4,closed:'The shutter\'s down. A sign: "BACK AT 7AM. GO TO BED."',stock:['espresso','coffee','pastry','tea','sweets']},
+ boutique:{n:'Halcyon Boutique',w:'hotel lobby',open:()=>S.day>=1&&S.slot<=4,closed:'Closed. The mannequins watch you through the glass.',stock:['flowers','plant','pendant','tea','book']},
+ bar:{n:'The Bar',w:'Halcyon',open:()=>S.day>=1&&S.slot>=3,closed:'The bar doesn\'t open until the evening.',stock:['wine','coffee','sweets']},
+ proof:{n:'Proof',w:'Linden Street',open:()=>S.slot<=2,closed:'Ellie\'s sold out. There is one sad bun left and she\'s eating it.',stock:['pastry','coffee','tea']},
+ kiosk:{n:'Paper & Co',w:'Central Station',open:()=>true,stock:['book','notebook','zine','sweets','coffee','record','flowers']}
+};
+function shopOpen(id){const sh=SHOPS[id];if(!sh)return;
+ if(!sh.open())return run([N(sh.closed||'Closed.')],hub);
+ if(!S.unl.money)return run([{unlock:'money'}],()=>shopOpen(id));
+ const draw=(msg)=>{
+  const rows=sh.stock.map(k=>{const it=ITEMS[k],have=S.inv[k]||0,lovers=it.gear?[]:ROM.filter(g=>met(g)&&prefKnown(g,k)&&prefOf(g,k)>0);
+   return`<div class="item"><div><b>${esc(it.n)}</b>${have?` <span class="small">(×${have} in your bag)</span>`:''}<small>${esc(it.d)}${lovers.length?' · '+lovers.map(g=>CH[g].name+(prefOf(g,k)===2?' ♥':'')).join(', '):''}</small></div><span class="price">£${it.p}</span><button class="btn" data-k="${k}" ${S.money<it.p?'disabled':''}>Buy</button></div>`}).join('');
+  const sell=Object.keys(S.inv).filter(k=>ITEMS[k]&&!ITEMS[k].gear&&ITEMS[k].p>1);
+  ov(`<div class="card"><h3>${esc(sh.n)}</h3><p class="small">You have <b class="term" style="font-size:20px;color:var(--butter)">£${S.money}</b>.${msg?' '+esc(msg):''}</p>${rows}
+  ${id==='constore'&&sell.length?`<p class="small" style="margin-top:14px"><b>Sell back</b> (half price)</p>${sell.map(k=>`<div class="item"><div><b>${esc(ITEMS[k].n)}</b> <span class="small">×${S.inv[k]}</span></div><span class="price">£${Math.floor(ITEMS[k].p/2)}</span><button class="btn" data-s="${k}">Sell</button></div>`).join('')}`:''}
+  <div class="row"><button class="btn pri" id="sx">Done</button></div></div>`);
+  $('ov').querySelectorAll('.item .btn[data-k]').forEach(b=>b.onclick=()=>{const k=b.dataset.k;if(S.money<ITEMS[k].p)return;S.money-=ITEMS[k].p;S.inv[k]=(S.inv[k]||0)+1;ach('shopper');if(typeof sfx==='function')sfx('coin');hud();draw('Bought: '+ITEMS[k].n+'.')});
+  $('ov').querySelectorAll('.item .btn[data-s]').forEach(b=>b.onclick=()=>{const k=b.dataset.s;S.inv[k]--;if(!S.inv[k])delete S.inv[k];S.money+=Math.floor(ITEMS[k].p/2);hud();draw('Sold.')});
+  $('sx').onclick=()=>{closeOv();hub()}};draw()}
+/* ---- gifts: one a day each. What they think of it is a surprise the first time ---- */
+const GIFTLINE={2:['Oh. Oh! How did you know?','This is... this is exactly right. Thank you.','You\'ve been paying attention. I like that a lot.'],1:['That\'s really sweet. Thank you.','Oh, nice! I\'ll use this.','You didn\'t have to. I\'m glad you did.'],0:['Oh. Thanks! That\'s... thoughtful.','Huh. Okay. Thank you.','That\'s nice of you.'],[-1]:['Ah. Right. Thanks. I\'ll... find somewhere for it.','Oh. Um. That\'s not really my thing, but thank you.','I appreciate the thought. Genuinely. The thought.']};
+function giftOpts(g){const tk=g+':g:'+S.day,have=GIFTS.filter(k=>S.inv[k]);
+ if(!have.length)return[];
+ return[{t:'Give a gift',hint:S.hang[tk]?'Already gave one today':have.length+' in your bag · once a day',if:()=>!S.hang[tk],then:()=>[N('Which one?'),C(...have.map(k=>({t:ITEMS[k].n,hint:prefKnown(g,k)?PREFW[prefOf(g,k)]+' this':'',then:()=>giveGift(g,k)})),{t:'Never mind',then:[]})]}]}
+function giveGift(g,k){S.hang[g+':g:'+S.day]=1;S.inv[k]--;if(!S.inv[k])delete S.inv[k];const v=prefOf(g,k),first=!prefKnown(g,k);prefKnow(g,k);
+ S.gifted[g]=(S.gifted[g]||0)+1;seen(g);if(Object.keys(S.gifted).length>=5)ach('gifts5');if(v===2)ach('perfect_gift');
+ const R=ROUTES[g],pg=typeof worldLook==='function'?worldLook(g):g;
+ const line=pick(GIFTLINE[v]);
+ // a gift is time you chose to spend on them: it shares the day's limit with hangouts
+ S.amult=S.amult||{};S.amult[g]=1;
+ return[L(pg,v===2?'h':v===1?'h':v===0?'n':'d',line),FX({[g]:[-6,2,5,10][v+1]}),()=>{delete S.amult[g];return first?[T('think',CH[g].name+' '+PREFW[v].toLowerCase()+' '+ITEMS[k].n.toLowerCase()+'. Noted.')]:[]}]}
+/* ---- work: a part of the day for money ---- */
+const JOBS={
+ infodesk:{n:'Do a shift on the info desk',w:'foyer',pay:22,fx:{clout:3},when:()=>S.day>=2,txt:['Two hours of "where are the toilets", "is the Wi-Fi safe" (no) and one man who wants to report his own badge for "looking at him". Marge pays volunteers in cash and biscuits.','You give directions to Hall B nineteen times. Somebody tips you in stickers. Marge tips you in actual money.']},
+ barshift:{n:'Help Bea behind the bar',w:'bar',pay:30,fx:{bea:3},when:()=>S.day>=2&&S.slot>=3&&met('bea'),txt:['Bea shows you how to pour without a head, how to say no to a drunk speaker, and where the good ice is. Tips go in a pint glass. Your half is yours.','A rush at nine. You and Bea move round each other like you\'ve done it for years. She doesn\'t say thanks. She slides you the tip glass.']},
+ bakery:{n:'Help out at Proof for the morning',w:'proof',pay:18,fx:{ellie:3},when:()=>S.day>=1&&S.slot<=1,txt:['Flour to the elbows. Ellie lets you do the till, then takes it off you after you give a man £40 change from a tenner.','You fold three hundred croissants badly and one perfectly. Ellie keeps the perfect one for herself.']}
+};
+function jobRun(id){const J=JOBS[id];if(!J||!J.when())return run([N('Not now.')],hub);if(!isFree())return run([N(curBeat()?blockedMsg():'Not now.')],hub);if(!freeCheck())return;
+ run([N(pick(J.txt)),FX(J.fx),()=>{earn(J.pay,'shift');ach('worked');spend('job');return[]}],hub)}
+/* ---- the data broker's booth in the Vendor Hall: £15 buys a "background report" on anyone you've met ---- */
+function brokerOpen(){if(S.day<2)return run([N('A booth under a banner: PEOPLEFINDR · KNOW WHO YOU\'RE MEETING. The shutter is down.')],hub);
+ if(!S.unl.money)return run([{unlock:'money'}],brokerOpen);
+ const who=ROM.filter(g=>met(g)&&GIFTS.some(i=>prefOf(g,i)&&!prefKnown(g,i)));
+ run([N('PEOPLEFINDR · KNOW WHO YOU\'RE MEETING. A man in a suit too shiny for a hacker con smiles at you with a lot of teeth.'),L('Broker','n','Shopping history, social likes, loyalty cards. Fifteen quid and I\'ll tell you what anyone here likes. They\'ll never know. Probably.'),
+  C(...who.slice(0,8).map(g=>({t:CH[g].name,hint:S.money<15?'£15 · you can\'t afford it':'£15 · Exposure +4',if:()=>S.money>=15,then:()=>{earn(-15,'PEOPLEFINDR');const ks=GIFTS.filter(i=>prefOf(g,i)&&!prefKnown(g,i)).slice(0,3);ks.forEach(i=>prefKnow(g,i));S.f['broker_'+g]=1;ach('broker');
+   return[FX({exp:4}),N('A printout, still warm. '+ks.map(i=>PREFW[prefOf(g,i)]+': '+ITEMS[i].n.toLowerCase()).join('. ')+'.'),T('think','It took him eleven seconds. Imagine what LANTERN takes.')]}})),{t:'Walk away',then:()=>[T('think','Fifteen quid to sell out a friend\'s shopping list. Not today.')]})],hub)}
 
 /* ============ THE WEEK: which part of which day belongs to the story ============ */
 /* where the "use something" steps are, for the goal light */
@@ -10554,19 +10666,13 @@ function hub2d(){
  if($('cont'))$('cont').onclick=()=>startBeat(b);
  $('hub').querySelectorAll('.loc').forEach(x=>x.onclick=()=>{if(x.dataset.g){const g=x.dataset.g;hangMenu(g,ROUTES[g].loc)}else if(x.dataset.l)leadStart(x.dataset.l);else if(x.dataset.a==='talk')attendTalk();else if(S.slot===5)endDay();else spend('wait')});
 }
-/* ---- the Con Store ---- */
-function shop(){
- const draw=()=>{
-  ov(`<div class="card"><h3>Con Store</h3><p class="small">Credits: <b class="term" style="font-size:20px;color:var(--butter)">${S.cred}</b>. Earn more from bug bounties on your laptop, the CTF, and minigames.</p>${Object.entries(ITEMS).map(([k,it])=>{const own=it.g?(S.inv[k]||S.gifted[it.g]):(S.inv[k]&&!['coffee','yubi'].includes(k));const lock=it.g&&!met(it.g);return `<div class="item"><div><b>${lock?'???':it.n}</b>${S.inv[k]?' <span class="small">(in your bag)</span>':''}<small>${lock?'You haven\'t met who this is for yet.':it.d}</small></div><span class="price">${it.p}c</span><button class="btn" data-k="${k}" ${S.cred<it.p||own||lock?'disabled':''}>${own?'Got it':'Buy'}</button></div>`}).join('')}<div class="row"><button class="btn pri" id="sx">Done</button></div></div>`);
-  $('ov').querySelectorAll('.item .btn').forEach(b=>b.onclick=()=>{const k=b.dataset.k;S.cred-=ITEMS[k].p;fx({item:k});ach('shopper');draw()});
-  $('sx').onclick=()=>{closeOv();hub()};
- };draw();
-}
-function vendor(){if(S.day<2)return run([N('"Opening tomorrow!" says a sign. The shopkeeper waves a price gun at you menacingly.')],hub);shop()}
+/* ---- the Con Store: see SHOPS ---- */
+function shop(){shopOpen('constore')}
+function vendor(){shopOpen('constore')}
 /* ---- Room 1337 ---- */
 function roomMenu(){
  run([{bg:'hotel'},{hide:1},{unlock:'room'},N('Room 1337. The minibar hums. The bed crunches. Your laptop waits.'),C(
-  {t:'Hunt a bug bounty',hint:isFree()?'Terminal minigame · credits · uses the '+SLOTN[S.slot].toLowerCase():curBeat()?blockedMsg():'Not now',then:()=>{bugBounty();Q=[];onDone=null;return[]}},
+  {t:'Hunt a bug bounty',hint:isFree()?'Terminal minigame · money · uses the '+SLOTN[S.slot].toLowerCase():curBeat()?blockedMsg():'Not now',then:()=>{bugBounty();Q=[];onDone=null;return[]}},
   {t:'Triage your inbox',hint:S.room['inbox'+S.day]?'Done today':'Free · phishing minigame · a clean run lowers Exposure',if:()=>!S.room['inbox'+S.day],then:()=>{S.room['inbox'+S.day]=1;return[{game:'phish'}]}},
   {t:'Restore session.bak',if:()=>S.f.sessionbak&&!S.restore,then:()=>scr('restore')},
   {t:S.slot===5?'Go to bed':'Lie down for a while',hint:S.slot===5?'Ends the day':isFree()?'Uses the '+SLOTN[S.slot].toLowerCase()+' · Exposure −10':'',if:()=>S.day>=1&&(isFree()||S.slot===5&&!curBeat()),then:()=>{if(S.slot===5){Q=[];onDone=null;endDay();return[]}restSlot();Q=[];onDone=null;return[]}},
@@ -14663,7 +14769,7 @@ function placeWorld(){
  int('con',24,97.6,()=>'Bus stop',N1('Bus 42. The timetable is a Lumen ad. "SafeSphere: Privacy On The Move." Someone has added, in marker: "on the move to where?"'));
  /* ---- foyer ---- */
  int('con',-105.2,53.4,()=>stepIs('reg')?'Pick up your badge':'Registration desk',()=>{if(stepIs('reg'))return stepGo();run([N(pick(['The volunteers have the thousand-yard stare of people who have handed out four thousand lanyards.','A volunteer is explaining, for the ninth time today, that the badge is not a phone charger.']))],hub)});
- int('con',-88,50,()=>'Info desk',()=>run([{w:'Info',np:1,t:pick(ROLELINES.Info)}],hub),{r:2.7});
+ int('con',-88,50,()=>'Info desk',()=>run([{w:'Info',np:1,t:pick(ROLELINES.Info)},C({t:JOBS.infodesk.n,hint:JOBS.infodesk.when()?'£'+JOBS.infodesk.pay+' · uses the '+SLOTN[S.slot].toLowerCase():'From tomorrow',if:()=>true,then:()=>{if(!JOBS.infodesk.when())return[N('"Come back tomorrow, love. Today we\'re all panicking."')];setTimeout(()=>jobRun('infodesk'),0);Q=[];onDone=null;return[]}},{t:'Thanks',then:[]})],hub),{r:2.7});
  int('con',-94,32.6,()=>S.ch>=1&&S.ch<4?'Take a SafeSphere flyer':null,()=>run([N('"SafeSphere: your privacy, protected. Free forever!" On the back, in 4-point type: "By installing you agree to share insights with trusted partners."'),N(S.ch>=3?'You bin it. Three other people do the same while you watch.':'You fold it into a very small square.')],hub));
  int('con',-87,30.6,()=>'Try a SafeSphere demo pod',N1('The pod asks for your contacts "to protect them too". Then your location "to keep you safe". Then your camera "for your security". You step out. It says "Come back soon!" in a voice that is far too warm.'));
  int('con',-103,48.6,()=>'Look up at the ceiling',()=>run([N(S.clues.includes('evil_twin')?'The tile Nyx pointed out. Behind it, a small box with a Lumen asset tag blinks away, pretending to be the con\'s Wi-Fi.':'One ceiling tile above the registration desk is slightly askew. A tiny green light blinks behind it. Probably nothing. Probably.')],hub));
@@ -14674,7 +14780,14 @@ function placeWorld(){
  int('con',-3,-147.4,()=>'Raid the speakers\' snacks',N1('Grapes, crisps and a bowl of only green M&Ms. You take one grape. You feel like a criminal.'),{y:1.6});
  int('con',86,-80,()=>'Catch a talk in Hall B',once('hb',()=>[N(pick(['Track 2: "I Found a Bug in a Toaster". It\'s an hour long. The toaster gets a standing ovation.','Track 2: "Your Smart Doorbell Is Watching Your Neighbours". The room goes quiet. Several people text their neighbours.','Track 2: "Lessons From a Year of Honeypots". The main lesson: people will try "admin/admin" on anything.'])),FX({skill:1})],'The next Track 2 talk is about blockchain. You leave before you can be persuaded of anything.'));
  /* ---- vendor ---- */
- int('con',65,11.2,()=>'Shop at the Con Store',()=>{if(S.ch<2)return run([N('"Opening tomorrow!" says a sign. The shopkeeper waves a price gun at you menacingly.')],hub);if(!S.unl.cred)return run([{unlock:'cred'}],()=>shop());shop()});
+ int('con',65,11.2,()=>'Shop at the Con Store',()=>shopOpen('constore'));
+
+ // shops and shifts around the week
+ int('con',-232,50,()=>'Halcyon Boutique',()=>shopOpen('boutique'));
+ int('con',-156,-55.4,()=>'The bar',()=>run([N(S.slot>=3?'The bar\'s busy. Somebody is explaining a buffer overflow with beer mats.':'The bar\'s shut. Chairs on tables.'),C({t:'Buy something',then:()=>{setTimeout(()=>shopOpen('bar'),0);Q=[];onDone=null;return[]}},{t:JOBS.barshift.n,hint:JOBS.barshift.when()?'£'+JOBS.barshift.pay+' · uses the '+SLOTN[S.slot].toLowerCase():!met('bea')?'You don\'t know anyone behind the bar':'Evenings, from Tuesday',if:()=>true,then:()=>{if(!JOBS.barshift.when())return[N('Not now.')];setTimeout(()=>jobRun('barshift'),0);Q=[];onDone=null;return[]}},{t:'Leave',then:[]})],hub),{r:2.6});
+ int('station',770,44,()=>'Paper & Co',()=>shopOpen('kiosk'),{r:2.6});
+ int('con',100,-12,()=>'PEOPLEFINDR booth',()=>brokerOpen(),{r:2.6});
+ int('home',-301.3,4.6,()=>'Proof: the counter',()=>run([N('Ellie\'s counter. Flour on everything, including Ellie.'),C({t:'Buy something',then:()=>{setTimeout(()=>shopOpen('proof'),0);Q=[];onDone=null;return[]}},{t:JOBS.bakery.n,hint:JOBS.bakery.when()?'£'+JOBS.bakery.pay+' · uses the '+SLOTN[S.slot].toLowerCase():'Mornings only',if:()=>true,then:()=>{if(!JOBS.bakery.when())return[N('"The rush is over. Go away. Lovingly."')];setTimeout(()=>jobRun('bakery'),0);Q=[];onDone=null;return[]}},{t:'Leave',then:[]})],hub),{r:2});
  [['STICKERS',''],['LOCK PICKS','Tension wrenches, rakes, a lock shaped like a heart. The vendor winks. You don\'t know why.'],['LEDs & BADGES','A badge that plays Snake. A badge that plays Doom. A badge that is just a very bright light.'],['SUSPICIOUS USB CABLES','"Totally normal cables," says the sign. The vendor is wearing sunglasses. You keep walking.'],['LANYARDS ONLY','He sells lanyards. Only lanyards. He seems at peace.'],['T-SHIRTS','"There\'s no place like 127.0.0.1." You\'ve seen four people wearing it already.'],['KEYBOARDS','Someone types on a keyboard so loud it sounds like popcorn. They look extremely happy.'],['BOOKS & ZINES','A zine titled "So You Got Doxxed". It\'s selling very well this weekend.'],['RETRO COMPUTERS','A beige machine from 1989 boots up with a noise like a jet engine. A crowd gathers in reverence.'],['FPGA BOARDS','Tiny boards that can pretend to be any chip. The vendor pretends to be a person who understands them.'],['"MILITARY-GRADE" VPNs','"Unbreakable!" says the poster. The vendor won\'t say what it\'s unbreakable against. You suspect "sales".'],['FARADAY BAGS','Little bags that block every signal. You put your phone in one. For the first time in years, it\'s quiet.']].forEach((s,i)=>{const cx=STALLPOS[i].x,cz=STALLPOS[i].z;if(i!==0)int('con',cx,cz+1.4,()=>'Browse: '+s[0].toLowerCase(),N1(s[1]))});
  int('con',116,-39.6,()=>'Watch the demo stage',N1('A presenter opens a "smart" padlock with a phone, a magnet and a deeply unimpressed expression. The lock\'s marketing slogan was "unpickable". The crowd chants it ironically.'));
  /* ---- villages ---- */
@@ -14689,7 +14802,7 @@ function placeWorld(){
  int('con',FOODPOS[1].x,FOODPOS[1].z,()=>'Order pizza',N1('"Any toppings?" "Not pineapple." "Correct answer. We\'ve had incidents."'));
  int('con',FOODPOS[2].x,FOODPOS[2].z,()=>'Order tacos',N1('Three tacos. One falls apart instantly. Classic.'));
  int('con',FOODPOS[3].x,FOODPOS[3].z,()=>'Buy a Club-Mate',N1('Cold, fizzy, faintly bitter. You can feel your neurons applauding.'));
- int('con',-5,-12,()=>'Toss a credit in the fountain',()=>run([N(S.cred>0?'You toss a con credit in. You wish for a good keynote. A pigeon watches, judgementally.':'You don\'t have any credits. You wish anyway.'),...(S.cred>0?[FX({cred:-1})]:[])],hub),{y:-1.2});
+ int('con',-5,-12,()=>'Toss a coin in the fountain',()=>run([N(S.money>0?'You toss a pound in. You wish for a good keynote. A pigeon watches, judgementally.':'You don\'t have any change. You wish anyway.'),...(S.money>0?[FX({money:-1})]:[])],hub),{y:-1.2});
  int('con',24,-30.8,()=>'Sit under the big tree',N1('The only tree in the building, and it\'s enormous. You sit on the bench beneath it. Through the glass on every side, the con carries on without you. For a minute, that\'s fine.'));
  /* ---- cosplay, lounge ---- */
  int('con',18,62.6,()=>'Strike a pose on the runway',N1('You stand at the end of the runway and pose. Nobody is watching. It still feels amazing. A tape mark on the floor says "WINGS NEED 3M CLEARANCE".'),{y:.6});
@@ -14715,8 +14828,8 @@ function placeWorld(){
  int('con',136.4,6,()=>'Watch the LED wall',N1('Thousands of LEDs cycling through Conway\'s Game of Life. Someone has built a glider gun that spells "BE EXCELLENT".'),{y:L1});
  int('con',152.8,-3,()=>'Badge hacking table',N1('Tables of con badges with their guts out. A teenager has made hers play the con\'s theme tune in eight-bit. You clap. She bows.'),{y:L1});
  int('con',173.4,-43,()=>'Peek into a studio pod',N1('A tiny room with a ring light, a microphone and a streamer explaining SQL injection to 900 viewers using only a sandwich as a prop.'),{y:L1});
- int('con',180,-30,()=>'Play OUTRUN.EXE',once('arc',()=>[N('You grip the wheel. Neon palm trees. A synth soundtrack that sounds like 1987 dreaming of the future. You take first place and a little ticket printer chatters.'),FX({cred:3})],'You put your last coin in. You crash on the first corner. The machine plays a sad little tune.'),{y:L1});
- int('con',172,-38.5,()=>'Vending machine',()=>run([N(S.cred>0?'The machine thinks about it, then drops a Club-Mate with a clunk. One credit well spent.':'You pat your pockets. No credits. The machine glows at you, unbothered.'),...(S.cred>0?[FX({cred:-1})]:[])],hub),{y:L1});
+ int('con',180,-30,()=>'Play OUTRUN.EXE',once('arc',()=>[N('You grip the wheel. Neon palm trees. A synth soundtrack that sounds like 1987 dreaming of the future. You take first place and a little ticket printer chatters. Forty tickets: enough for the prize shelf.'),FX({item:'plush'}),T('think','A plush green moth with button eyes. Somebody, somewhere, is going to love this.')],'You put your last coin in. You crash on the first corner. The machine plays a sad little tune.'),{y:L1});
+ int('con',172,-38.5,()=>'Vending machine',()=>run([N(S.money>0?'The machine thinks about it, then drops a Club-Mate with a clunk. One pound well spent.':'You pat your pockets. No change. The machine glows at you, unbothered.'),...(S.money>0?[FX({money:-1})]:[])],hub),{y:L1});
  int('con',71,-109,()=>'Read the Con Ops whiteboard',()=>run([N(S.ch>=4?'Marge\'s whiteboard, rewritten overnight: "4PM KEYNOTE · AV: NYX (signed!) · EVIDENCE: RIN, ADA · REGULATOR: SENT · DO NOT BE WRONG." Someone has drawn a small heart next to the last line.':'A whiteboard: "BADGES · RADIOS · LOST PROPERTY · DAVE (?)". Under it, in Marge\'s handwriting: "Do not trust the Wi-Fi. I mean it."')],hub),{y:L2});
  int('con',86,-100,()=>'Press room',N1('Three journalists, one coffee machine, and a sign: "PLEASE DO NOT PHOTOGRAPH ATTENDEES WITHOUT CONSENT". A man photographs the sign.'),{y:L2});
  int('con',101,-102.6,()=>'Speaker lounge biscuits',N1('Real biscuits. Chocolate ones. You take one and walk out at a normal speed, as if you are a speaker. Nobody stops you. You are, for one biscuit, a speaker.'),{y:L2});
@@ -14736,7 +14849,7 @@ function placeWorld(){
  int('con',-47,6.8,()=>'Talk to the network engineers',()=>run([{w:'Engineer',np:1,t:S.ch>=3?'You want to trace WHISPER? Join the queue. Every upload goes out through an access point we don\'t own. Somewhere up high. Roof height.':pick(ROLELINES.Engineer)},...(S.f.met_priya?[N('A sticky note on a monitor: "PRIYA — your rogue AP list, printed. Don\'t lose it."')]:[])],hub),{y:BY});
  int('con',-246,-1.2,()=>'Hide among the laundry carts',N1('Warm towels, the smell of starch, and the hum of fifty machines. Nobody would look for you here. You think about staying until Monday.'),{y:BY});
  int('con',FOODPOS[4].x,FOODPOS[4].z,()=>'Order dumplings',N1('Six dumplings in a paper boat. The chef folds them faster than you can watch. "Mind, they\'re hot," he says, as you burn your mouth.'));
- int('con',FOODPOS[5].x,FOODPOS[5].z,()=>'Get a cold brew',N1('Cold brew in a can with a QR code on it. You don\'t scan it. The barista nods: "Good instinct."'));
+ int('con',FOODPOS[5].x,FOODPOS[5].z,()=>'Byte Café · coffee and cake',()=>shopOpen('cafe'));
  for(const x of[-106,-102]){for(const y of[0,L1])int('con',x,-23.2,()=>'Call the lift',()=>conLift(),{y,r:2.8,h:1.3});int('con',x,-52.4,()=>'Call the lift',()=>conLift(),{y:BY,r:2.8,h:1.3})}
  int('con',-213.6,49.6,()=>'Play the lobby piano',N1('You play the four notes of the only song you know. The piano, which is a MIDI device, plays the rest of the song for you. Somebody in the lobby claps. You bow, as if you meant it.'));
  int('con',-243,-26.4,()=>'Warm up by the library fire',N1('Leather chairs, shelves to the ceiling, a fire that is definitely gas but commits to the bit. A book on the arm of a chair: "Social Engineering: The Art of Human Hacking". Someone has left a bookmark at chapter one. Ominous.'),{y:L1});
@@ -15094,7 +15207,7 @@ const APPS={
   const card=g=>{const m=met(g),i=scn(g),lv=loved(g);return`<button class="hcard ${m?'':'unk'} ${sel===g?'on':''} ${lv?'love':''}" data-g="${g}" style="--hc:${CH[g].col}"><span class="hp">${m?head(lookOf(g),lv?'h':'n'):'<span class="sil">?</span>'}</span><b>${m?CH[g].name:'???'}</b><small>${m?stageOf(g):'Not met'}</small>${m?bar(aff(g),CH[g].col):''}${m&&sceneReady(g)?'<i class="nb">!</i>':''}</button>`};
   const grid=`<div class="hgrid">${ROM.map(card).join('')}</div>`;
   if(!sel)return`<div class="abody"><p class="small">${ROM.filter(met).length}/${ROM.length} met · ${ROM.filter(loved).length} in love · tap someone for their file</p>${grid}</div>`;
-  const g=sel,R=ROUTES[g],i=scn(g),m=met(g),why=sceneWhy(g),gi=Object.keys(ITEMS).find(k=>ITEMS[k].g===g),wn=whereNow(g);
+  const g=sel,R=ROUTES[g],i=scn(g),m=met(g),why=sceneWhy(g),wn=whereNow(g);
   let file;
   if(!m)file=`<div class="hfile"><h3>???</h3><p>${esc(UNMET[g]?'Someone: '+UNMET[g]+'.':'Someone you haven\'t met.')}</p><p class="small">${esc(R.blurb)}</p>${wn?`<p class="small">Seen around: ${esc(wn)}</p>`:''}</div>`;
   else{const steps=[];for(let k=1;k<R.n;k++){const done=i>k,next=i===k;steps.push(`<div class="hstep ${done?'done':''} ${next?'next':''}"><b>${k===R.n-1?'♥ Last scene':k===4?'Scene 4 · with a friend':'Scene '+k}</b><span>${done?esc((R.sum&&R.sum[k])||'Seen'):next?(why?'Locked: '+esc(why):'Ready now'+(wn?' · '+esc(wn):'')):'???'}</span></div>`)}
@@ -15104,7 +15217,7 @@ const APPS={
    <div class="chem"><b class="small">How they like to spend time</b><div class="chips">${Object.keys(TONES).map(t=>{const k=S.taste&&S.taste[g]&&S.taste[g][t];return`<span class="tchip ${k===1?'yes':k===-1?'no':k===0?'meh':'unk'}" title="${esc(TONES[t])}">${k===1?'♥ ':k===-1?'✗ ':k===0?'· ':'? '}${esc({quiet:'Quiet',fun:'Fun',bold:'Reckless',work:'The case'}[t])}</span>`}).join('')}</div>${S.thint&&S.thint[g]&&TASTE[g]?`<p class="small">“${esc(TASTE[g][4])}”</p>`:'<p class="small">Talk shop with them to learn more, or just try things.</p>'}</div>
    <p class="small">Today: ${warmToday(g)>=AFFCAP?'they\'ve had all of you they can take today. Tomorrow.':'room to get closer ('+(AFFCAP-warmToday(g))+' left today)'}${S.seenD&&S.seenD[g]?' · last together Day '+S.seenD[g]:''}</p>
    ${dating(g)&&!loved(g)?`<p class="small" style="color:var(--butter)">You're dating. Go a whole day without seeing them and they'll notice.</p>`:''}
-   <p class="small">${gi?(S.gifted[g]?'Gift: '+esc(ITEMS[gi].n)+' (given)':'Would love: '+esc(ITEMS[gi].n)+(S.inv[gi]?' (in your bag)':' (Con Store, '+ITEMS[gi].p+'c)')):''}</p>
+   <div class="chem"><b class="small">Gifts</b><div class="chips">${GIFTS.filter(i=>prefKnown(g,i)).sort((a,b)=>prefOf(g,b)-prefOf(g,a)).map(i=>{const v=prefOf(g,i);return`<span class="tchip ${v===2?'yes':v===1?'meh':v<0?'no':'unk'}" title="${PREFW[v]}">${v===2?'♥♥ ':v===1?'♥ ':v<0?'✗ ':'· '}${esc(ITEMS[i].n)}</span>`}).join('')||'<span class="small">Nothing known yet. Give something, get closer, or ask around.</span>'}</div><p class="small">${S.gifted[g]?'Gifts given: '+S.gifted[g]+' · ':''}One gift a day each.</p></div>
    <div class="row">${wn?`<button class="btn" id="hpin">Pin their location</button>`:''}</div></div></div><div class="hsteps">${steps.join('')}</div></div>`}
   return`<div class="abody hsplit"><div class="hleft">${grid}</div><div class="hright"><button class="btn" id="hclose">‹ Everyone</button>${file}</div></div>`},
  /* ---- Case board: a corkboard of mysteries, clues on strings, leads as sticky notes ---- */
@@ -15133,7 +15246,7 @@ const APPS={
   const chart=`<div class="sbox"><h4>Exposure <span class="term">${S.exp}/100</span></h4>${bar(S.exp,'var(--coral)')}<p class="small">Resets each morning to your Footprint: ${S.foot}. ${S.fails?'Doxxed '+S.fails+' time'+(S.fails>1?'s':'')+'.':'Never doxxed this run.'}</p>
    <div class="echart">${[1,2,3,4,5,6,7].map(d=>`<div class="ecol ${d===S.day?'now':''}"><i style="height:${pk[d]||0}%"></i><small>D${d}</small><em>${pk[d]!==undefined?pk[d]:''}</em></div>`).join('')}</div><p class="small">Highest Exposure each day.</p>
    <h4 style="margin-top:12px">Your footprint</h4>${(S.footLog||[]).filter(x=>x.v).map(x=>`<div class="fl ${x.v<0?'good':''}"><b>${x.v>0?'+':''}${x.v}</b><span>${esc(x.w||'')}</span><small>${x.d?'Day '+x.d+' · '+SLOTN[x.s]:'Before the con'}</small></div>`).join('')||'<p class="small">Nothing yet.</p>'}</div>`;
-  const cnt=[['People met',ROM.filter(met).length+'/'+ROM.length],['In love',ROM.filter(loved).length],['Scenes seen',ROM.reduce((a,g)=>a+Math.max(0,scn(g)-1),0)],['Mysteries solved',Object.keys(S.solved).length+'/12'],['Clues',S.clues.length+'/'+Object.keys(CLUE).length],['Leads worked',Object.keys(S.leads).length],['Talks',S.talks||0],['Things done with your time',S.acts||0],['Credits',S.cred]];
+  const cnt=[['People met',ROM.filter(met).length+'/'+ROM.length],['In love',ROM.filter(loved).length],['Scenes seen',ROM.reduce((a,g)=>a+Math.max(0,scn(g)-1),0)],['Mysteries solved',Object.keys(S.solved).length+'/12'],['Clues',S.clues.length+'/'+Object.keys(CLUE).length],['Leads worked',Object.keys(S.leads).length],['Talks',S.talks||0],['Things done with your time',S.acts||0],['Money','£'+(S.money||0)]];
   return`<div class="abody sgrid">${S.unl.skill?ladder('skill'):''}${S.unl.clout?ladder('clout'):''}${S.unl.exp?chart:''}<div class="sbox"><h4>This run</h4>${cnt.map(c=>`<div class="kv"><span>${c[0]}</span><b>${c[1]}</b></div>`).join('')}</div></div>`},
  /* ---- Story: your week so far ---- */
  story(){const by={};for(const e of S.sum)(by[e.d]=by[e.d]||[]).push(e);const ks=Object.keys(by).map(Number).sort((a,b)=>a-b);
@@ -15143,7 +15256,9 @@ const APPS={
  achieve(){const cat=k=>k.startsWith('end_')?'end':k.startsWith('love_')?'love':k.startsWith('solve_')||k.includes('clue')||k.includes('solve')||k==='first_lead'?'myst':k.startsWith('skill_')||k.startsWith('clout_')?'rank':'other';
   const ks=Object.keys(ACH).filter(k=>PH.atab==='all'||cat(k)===PH.atab),all=Object.keys(ACH),got=all.filter(k=>META.ach[k]).length;
   return tabsH(PH.atab,[['all','All'],['end','Endings'],['love','Love'],['myst','Mysteries'],['rank','Ranks'],['other','Everything else']],'at')+`<div class="abody"><p class="small">${got}/${all.length} unlocked across every run</p>${bar(got/all.length*100,'var(--butter)')}<div class="agrid">${ks.map(k=>{const a=ACH[k],on=!!META.ach[k],hid=a[2]&&!on;return`<div class="atile ${on?'on':''}"><span class="aic">${on?'★':hid?'?':'☆'}</span><b>${hid?'???':esc(a[0])}</b><small>${hid?'Hidden':esc(a[1])}</small>${on?`<em>${new Date(META.ach[k]).toLocaleDateString()}</em>`:''}</div>`}).join('')}</div></div>`},
- bag(){const e=Object.entries(S.inv);return`<div class="abody"><p class="small">${S.cred} credits. The Con Store is in the Expo Hall.</p><div class="bgrid">${e.length?e.map(([k,v])=>{const it=ITEMS[k];return`<div class="bitem">${it.g?`<span class="hd">${met(it.g)?head(lookOf(it.g),'h'):''}</span>`:''}<b>${it.n}${v>1?' ×'+v:''}</b><small>${it.d}${it.g?` Give it to ${met(it.g)?CH[it.g].name:'someone'} next time you see them.`:''}</small></div>`}).join(''):'<p class="small">Empty.</p>'}</div></div>`},
+ bag(){const e=Object.entries(S.inv).filter(([k])=>ITEMS[k]);
+  const who=k=>ROM.filter(g=>met(g)&&prefKnown(g,k)&&prefOf(g,k)>0).sort((a,b)=>prefOf(b,k)-prefOf(a,k));
+  return`<div class="abody"><p class="small"><b class="term" style="font-size:22px;color:var(--butter)">£${S.money||0}</b> · Shops: Con Store (Expo Hall), Byte Café (Food Court), Halcyon Boutique (hotel lobby), the bar (evenings), Paper & Co (Central Station), Proof (mornings). Work: the info desk, a bar shift with Bea, a morning at Proof.</p><div class="bgrid">${e.length?e.map(([k,v])=>{const it=ITEMS[k],w=it.gear?[]:who(k);return`<div class="bitem"><b>${esc(it.n)}${v>1?' ×'+v:''}</b><small>${esc(it.d)}${it.gear?' (gear)':w.length?' · '+w.map(g=>CH[g].name+(prefOf(g,k)===2?' ♥':'')).join(', '):' · a gift: you haven\'t learned who loves it yet'}</small></div>`}).join(''):'<p class="small">Empty.</p>'}</div></div>`},
  saves(){return '<div class="abody"><div id="spanel"></div></div>'},
  log(){return`<div class="abody">`+(S.log.slice(-150).reverse().map(l=>`<div class="logl">${l[0]?`<b>${esc(l[0])}</b> `:''}${esc(l[1])}</div>`).join('')||'<p class="small">Nothing yet.</p>')+'</div>'},
  settings(){const vol=[['master','Master'],['music','Music'],['amb','Ambience'],['sfx','Effects']];
@@ -15322,7 +15437,7 @@ function dbgDraw(){
   <div class="dbl">${beatList().map(b=>`<button class="dbi" data-b="${b.id}"><b>Day ${b.d} · ${SLOTN[b.i]}</b><small>${esc(b.t)}</small></button>`).join('')}<button class="dbi" data-b="__end"><b>Day 7 · the end</b><small>Play everything through to an ending</small></button></div>`;
  if(DBG.tab==='tp'){const net=MAPNET[WD.reg]?Object.values(AREAS):[];const g={};for(const a of Object.values(AREAS)){if(a.hide)continue;(g[areaGroup(a)]=g[areaGroup(a)]||[]).push(a)}
   body=`<label class="small"><input type="checkbox" id="dbgOpenAll" ${window.__allOpen?'checked':''}> Ignore area locks</label>`+AGROUPS.filter(k=>g[k]).map(k=>`<div class="dbh">${esc(k)}</div><div class="dbg2">${g[k].map(a=>`<button class="dbi" data-tp="${a.k}"><b>${esc(a.n)}</b><small>${esc(levelName(a.reg,a.sp[3]||0))}${areaLock(a.k)?' · locked now':''}</small></button>`).join('')}</div>`).join('')}
- if(DBG.tab==='give')body=`<div class="dbg2">${[['meet','Meet all 21'],['aff20','+20 affection, everyone met'],['aff100','Max affection, everyone met'],['clues','Every clue'],['solve','Solve every mystery'],['skill','Skill +100'],['clout','Clout +100'],['exp0','Exposure to 0'],['exp95','Exposure to 95'],['cred','+200 credits'],['items','Every item'],['visit','Visit every area'],['slot','Next part of the day'],['day','End the day'],['restore','Restore session (harem mode)']].map(x=>`<button class="dbi" data-g="${x[0]}"><b>${x[1]}</b></button>`).join('')}</div>
+ if(DBG.tab==='give')body=`<div class="dbg2">${[['meet','Meet all 21'],['aff20','+20 affection, everyone met'],['aff100','Max affection, everyone met'],['clues','Every clue'],['solve','Solve every mystery'],['skill','Skill +100'],['clout','Clout +100'],['exp0','Exposure to 0'],['exp95','Exposure to 95'],['cred','+£200'],['items','Every item'],['visit','Visit every area'],['slot','Next part of the day'],['day','End the day'],['restore','Restore session (harem mode)']].map(x=>`<button class="dbi" data-g="${x[0]}"><b>${x[1]}</b></button>`).join('')}</div>
   <div class="dbh">Advance someone's story by one scene (plays it)</div><div class="dbg2">${ROM.map(g=>`<button class="dbi" data-adv="${g}"><b>${CH[g].name}</b><small>${scn(g)}/${ROUTES[g].n} · ♥ ${aff(g)}</small></button>`).join('')}</div>`;
  if(DBG.tab==='scene'){const ks=Object.keys(SC).sort();body=`<input class="inp" id="dbgQ" placeholder="Filter scenes" value="${esc(DBG.q||'')}"><div class="dbg2">${ks.filter(k=>!DBG.q||k.includes(DBG.q)).slice(0,300).map(k=>`<button class="dbi" data-sc="${k}"><b>${k}</b></button>`).join('')}</div>`}
  if(DBG.tab==='end')body=`<p class="small">Plays the ending's epilogue and shows its card. Ends this run.</p><div class="dbg2">${ENDORDER.map(k=>`<button class="dbi" data-end="${k}"><b>${esc(ENDINFO[k][0])}</b><small>${META.ends[k]?'seen':''}</small></button>`).join('')}</div>`;
@@ -15347,7 +15462,7 @@ function dbgGive(k){
  if(k==='clues')Object.keys(CLUE).forEach(addClue);
  if(k==='solve')for(const m in MYST){S.solved[m]=1;META.solved[m]=1}
  if(k==='skill')fx({skill:100});if(k==='clout')fx({clout:100});
- if(k==='exp0')S.exp=0;if(k==='exp95')S.exp=95;if(k==='cred')fx({cred:200});
+ if(k==='exp0')S.exp=0;if(k==='exp95')S.exp=95;if(k==='cred')fx({money:200});
  if(k==='items')Object.keys(ITEMS).forEach(i=>{S.inv[i]=(S.inv[i]||0)+1});
  if(k==='visit')Object.keys(AREAS).forEach(a=>S.visited[a]=1);
  if(k==='slot'){closePhone();if(S.slot===5)endDay();else nextSlot();return}
@@ -15414,6 +15529,8 @@ function resumeGame(s){
  // saves from before the week was rebuilt (chapters, nine people) can't be carried over: start that player again
  if(!s.v||s.v<4){S=fresh(s.h||'n00b');S.resume='pro';startPrologue();return}
  S=s;if(!S.msgs)S.msgs=[];if(!S.log)S.log=[];
+ // credits became money; gifts became ordinary things
+ if(S.money===undefined){S.money=(S.cred||0)+20;delete S.cred;if(S.unl.cred)S.unl.money=1}for(const k in S.inv)if(!ITEMS[k])delete S.inv[k];for(const g in S.gifted)if(S.gifted[g]===true)S.gifted[g]=1;
  // quit during the prologue: it's one scene, so it starts again
  if(S.day===0){const h=S.h,r=S.restore,sb=S.f.sessionbak;S=fresh(h);S.restore=r;if(sb)S.f.sessionbak=1;S.resume='pro';startPrologue();return}
  if(!WD.touch&&window.THREE)tryLock();

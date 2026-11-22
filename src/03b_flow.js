@@ -15,7 +15,7 @@ function sceneWhy(g){const R=ROUTES[g],i=scn(g);if(!R||i>=R.n)return null;const 
  if(r.c&&!r.c())return r.y||'not yet';
  return null}
 const sceneReady=g=>met(g)&&ROUTES[g]&&scn(g)<ROUTES[g].n&&scn(g)>=1&&!sceneWhy(g);
-function adv(g,i){if(!S)return;if((S.sc[g]||0)<=i&&typeof tqQueue==='function')tqQueue(g,i);S.sc[g]=Math.max(S.sc[g]||0,i+1);if(ROUTES[g]&&S.sc[g]>=ROUTES[g].n)loveDone(g)}
+function adv(g,i){if(!S)return;if((S.sc[g]||0)<=i&&(i===2||i===4)&&typeof prefReveal==='function')setTimeout(()=>prefReveal(g,1),1200);if((S.sc[g]||0)<=i&&typeof tqQueue==='function')tqQueue(g,i);S.sc[g]=Math.max(S.sc[g]||0,i+1);if(ROUTES[g]&&S.sc[g]>=ROUTES[g].n)loveDone(g)}
 function loveDone(g){META.routes[g]=1;saveMeta();ach('love_'+g);const n=romCount();if(n>=2)ach('love2');if(n>=3)ach('love3')}
 /* ---- the calendar ---- */
 const BEATS={};
@@ -48,6 +48,7 @@ function newDay(d){
  if(S.day>=1&&S.exp<=10)ach('lowkey');
  neglectCheck(d);
  S.day=d;S.ch=Math.min(d,4);S.slot=0;S.oc=0;S.exp=S.foot;S.hang={};delete S.failing;
+ if(d>=1&&d<=7){S.money=(S.money||0)+20;if(S.unl.money)setTimeout(()=>toast('+£20 · Brindle per diem','var(--butter)'),2400)}
  evMissCheck();const wake=S.wakeAt||'room1337';tqFlush();snapDay();save();setTimeout(evSoonToast,1800);
  const go=()=>{run([{chapter:d},{hide:1}],hub)};
  if(G.ok&&S.inWorld)fadeTp(()=>{teleportArea(wake);S.pos=null;go()});else go();
@@ -81,8 +82,7 @@ function hangMenu(g,bgk){
    return[N('How do you want to spend it?'),...approachMenu(g,()=>[...scr(g+i),()=>{fx({[g]:8});adv(g,i);seen(g);addSum(R.sum?R.sum[i]||'':'');if(S.slot===5)ach('night_owl');ach('first_hang');spend('hang');return[]}])]}});
  const tk=g+':'+S.day;
  opts.push({t:'Talk shop',hint:S.hang[tk]?'Already did that today':'Free · once a day',if:()=>!S.hang[tk],then:()=>{S.hang[tk]=1;seen(g);S.thint=S.thint||{};const first=!S.thint[g];S.thint[g]=1;return[{unlock:'hang'},{game:'quiz',who:g,n:3},...(first&&TASTE[g]?[T('think',TASTE[g][4])]:[])]}});
- const gi=Object.keys(ITEMS).find(k=>ITEMS[k].g===g);
- if(gi&&S.inv[gi]&&!S.gifted[g])opts.push({t:'Give the '+ITEMS[gi].n.toLowerCase(),then:()=>{S.inv[gi]--;if(!S.inv[gi])delete S.inv[gi];S.gifted[g]=1;seen(g);if(Object.keys(S.gifted).length>=5)ach('gifts5');return[FX({[g]:12}),L(pg,'b',R.gift)]}});
+ opts.push(...giftOpts(g));
  opts.push({t:'Just chat',then:()=>{seen(g);const ck=g+':c:'+S.day,first=!S.hang[ck];S.hang[ck]=1;return[L(pg,'h',pick(R.idle)),...(first?[FX({[g]:2})]:[])]}});
  opts.push({t:'Leave',then:[]});
  const st=stageOf(g);
@@ -104,7 +104,7 @@ function ctfPractice(){if(!freeCheck())return;
  run([{bg:'ctf'},{hide:1},N('The CTF Arena. Scoreboard on the wall, four hundred laptops, the smell of solder and instant noodles. You pick a challenge off the board.'),{game:pick(['pipe','spot']),n:3,keys:shuffle(Object.keys(SPOT)).slice(0,2),title:'CTF practice'},
   ()=>{const r=[];if(day()>=2&&!clue('cipher')&&Math.random()<.5)r.push(N('One challenge on the board has no author. Its flag is EXPOSURE_IS_ART, and it\'s signed "—M".'),{fx:{clue:'cipher'}});r.push(FX({skill:6}),()=>{spend('ctf');return[]});return r}],hub)}
 function bugBounty(){if(!freeCheck())return;
- run([{bg:'hotel'},{hide:1},N('You open the con\'s bug bounty board. Real bugs in con systems, paid in con credits.'),{game:'pipe',n:3,title:'Bug bounty'},()=>{spend('bounty');return[]}],hub)}
+ run([{bg:'hotel'},{hide:1},N('You open the con\'s bug bounty board. Real bugs in con systems, paid in real money.'),{game:'pipe',n:3,title:'Bug bounty'},()=>{earn(12+rank('skill')*4,'bounty');spend('bounty');return[]}],hub)}
 function restSlot(){if(!freeCheck())return;run([{hide:1},N(pick(['You sit somewhere quiet and let the con go by for a while. Your shoulders come down from around your ears.','You lie down for twenty minutes and wake up an hour later, which is how naps work at cons.'])),FX({exp:-10}),()=>{spend('rest');return[]}],hub)}
 /* ---- leads ---- */
 const leadOpen=k=>{const L=LEADS[k];return L&&!S.leads[k]&&L.when()};
@@ -113,7 +113,7 @@ function leadStart(k){const L=LEADS[k];if(!freeCheck())return;if(L.need&&!L.need
 /* a risky moment: the roll is shown, so it's fair. Risk 1-3; the hoodie and a high Skill help; a coffee skips it */
 function riskRoll(r,caught){
  {let p=[0,.2,.38,.55][r]||0;if(S.inv.hoodie)p-=.12;p-=rank('skill')*.04;p=clamp(p,.04,.9);
-  if(S.inv.coffee){S.inv.coffee--;if(!S.inv.coffee)delete S.inv.coffee;return[N('The triple espresso kicks in. You\'re in and out before anyone has blinked.')]}
+  if(S.inv.espresso){S.inv.espresso--;if(!S.inv.espresso)delete S.inv.espresso;return[N('The triple espresso kicks in. You\'re in and out before anyone has blinked.')]}
   const bad=Math.random()<p;if(!bad)return[N('Nobody sees you. '+pick(['Your heart is going like a drum, but nobody sees you.','A door closes somewhere else. You breathe out.','You\'re just another lanyard in a corridor.']))];
   return scr(caught||'caught').concat([FX({exp:20+r*12})])}}
 /* ---- the case board ---- */

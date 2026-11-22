@@ -35,7 +35,7 @@ function addClue(c){if(!S||!CLUE[c]||S.clues.includes(c))return;S.clues.push(c);
  if(S.clues.length>=10)ach('clues10');if(S.clues.length>=30)ach('clues30');if(Object.keys(CLUE).every(k=>S.clues.includes(k)))ach('clues_all')}
 function clockLabel(){if(!S)return'';if(S.day===0)return DAYN[0];return'Day '+S.day+' · '+DAYN[S.day]+' · '+SLOTN[S.slot]}
 function fresh(h){const z={};ROM.forEach(g=>z[g]=0);
- return{v:4,h,day:0,slot:0,ch:0,skill:0,clout:0,exp:5,foot:5,cred:20,aff:{...z},sc:{...z},met:{},hang:{},gifted:{},inv:{},f:{},clues:[],solved:{},leads:{},done:{},msgs:[],log:[],unl:{},sum:[],ach:{},room:{},fast:false,ending:null,visited:{},ftRecent:[],restore:false,oc:0,fails:0,acts:0,look:{}}}
+ return{v:4,h,day:0,slot:0,ch:0,skill:0,clout:0,exp:5,foot:5,money:40,aff:{...z},sc:{...z},met:{},hang:{},gifted:{},inv:{},f:{},clues:[],solved:{},leads:{},done:{},msgs:[],log:[],unl:{},sum:[],ach:{},room:{},fast:false,ending:null,visited:{},ftRecent:[],restore:false,oc:0,fails:0,acts:0,look:{}}}
 /* effects: affection, exposure (with the day's fail), skill/clout XP and ranks, credits, flags, clues, items */
 function fx(e){
  if(!e)return;
@@ -64,10 +64,10 @@ function fx(e){
    if(S.unl[k]&&v)toast(`${k==='skill'?'Skill':'Clout'} ${v>=0?'+':''}${v}`,k==='skill'?'var(--mint)':'var(--butter)');
    if(r1>r0&&S.unl[k]){setTimeout(()=>toast(`${k==='skill'?'Skill':'Clout'} rank: ${RANKS[k][r1]}`,k==='skill'?'var(--mint)':'var(--butter)'),400);ach(k+'_r'+r1)}
   }
-  else if(k==='cred'){S.cred=Math.max(0,S.cred+v);if(S.unl.cred&&v)toast(`Credits ${v>=0?'+':''}${v}`,'var(--dim)');if(S.cred>=300)ach('rich')}
+  else if(k==='cred'||k==='money'){earn(v)}
   else if(k==='flag'){[].concat(v).forEach(f=>S.f[f]=1)}
   else if(k==='clue'){[].concat(v).forEach(addClue)}
-  else if(k==='item'){S.inv[v]=(S.inv[v]||0)+1;toast('Got: '+ITEMS[v].n,'var(--mint)')}
+  else if(k==='item'){if(!ITEMS[v])continue;S.inv[v]=(S.inv[v]||0)+1;toast('Got: '+ITEMS[v].n,'var(--mint)')}
   else if(k==='met'){meet(v)}
  }
  hud();

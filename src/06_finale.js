@@ -20,19 +20,13 @@ function hub2d(){
  if($('cont'))$('cont').onclick=()=>startBeat(b);
  $('hub').querySelectorAll('.loc').forEach(x=>x.onclick=()=>{if(x.dataset.g){const g=x.dataset.g;hangMenu(g,ROUTES[g].loc)}else if(x.dataset.l)leadStart(x.dataset.l);else if(x.dataset.a==='talk')attendTalk();else if(S.slot===5)endDay();else spend('wait')});
 }
-/* ---- the Con Store ---- */
-function shop(){
- const draw=()=>{
-  ov(`<div class="card"><h3>Con Store</h3><p class="small">Credits: <b class="term" style="font-size:20px;color:var(--butter)">${S.cred}</b>. Earn more from bug bounties on your laptop, the CTF, and minigames.</p>${Object.entries(ITEMS).map(([k,it])=>{const own=it.g?(S.inv[k]||S.gifted[it.g]):(S.inv[k]&&!['coffee','yubi'].includes(k));const lock=it.g&&!met(it.g);return `<div class="item"><div><b>${lock?'???':it.n}</b>${S.inv[k]?' <span class="small">(in your bag)</span>':''}<small>${lock?'You haven\'t met who this is for yet.':it.d}</small></div><span class="price">${it.p}c</span><button class="btn" data-k="${k}" ${S.cred<it.p||own||lock?'disabled':''}>${own?'Got it':'Buy'}</button></div>`}).join('')}<div class="row"><button class="btn pri" id="sx">Done</button></div></div>`);
-  $('ov').querySelectorAll('.item .btn').forEach(b=>b.onclick=()=>{const k=b.dataset.k;S.cred-=ITEMS[k].p;fx({item:k});ach('shopper');draw()});
-  $('sx').onclick=()=>{closeOv();hub()};
- };draw();
-}
-function vendor(){if(S.day<2)return run([N('"Opening tomorrow!" says a sign. The shopkeeper waves a price gun at you menacingly.')],hub);shop()}
+/* ---- the Con Store: see SHOPS ---- */
+function shop(){shopOpen('constore')}
+function vendor(){shopOpen('constore')}
 /* ---- Room 1337 ---- */
 function roomMenu(){
  run([{bg:'hotel'},{hide:1},{unlock:'room'},N('Room 1337. The minibar hums. The bed crunches. Your laptop waits.'),C(
-  {t:'Hunt a bug bounty',hint:isFree()?'Terminal minigame · credits · uses the '+SLOTN[S.slot].toLowerCase():curBeat()?blockedMsg():'Not now',then:()=>{bugBounty();Q=[];onDone=null;return[]}},
+  {t:'Hunt a bug bounty',hint:isFree()?'Terminal minigame · money · uses the '+SLOTN[S.slot].toLowerCase():curBeat()?blockedMsg():'Not now',then:()=>{bugBounty();Q=[];onDone=null;return[]}},
   {t:'Triage your inbox',hint:S.room['inbox'+S.day]?'Done today':'Free · phishing minigame · a clean run lowers Exposure',if:()=>!S.room['inbox'+S.day],then:()=>{S.room['inbox'+S.day]=1;return[{game:'phish'}]}},
   {t:'Restore session.bak',if:()=>S.f.sessionbak&&!S.restore,then:()=>scr('restore')},
   {t:S.slot===5?'Go to bed':'Lie down for a while',hint:S.slot===5?'Ends the day':isFree()?'Uses the '+SLOTN[S.slot].toLowerCase()+' · Exposure −10':'',if:()=>S.day>=1&&(isFree()||S.slot===5&&!curBeat()),then:()=>{if(S.slot===5){Q=[];onDone=null;endDay();return[]}restSlot();Q=[];onDone=null;return[]}},
