@@ -73,13 +73,20 @@ const BOT=async(runs)=>{
    if(strat===1||strat===2){pickG=[...fav,'ellie'].find(g=>ready.includes(g))}
    if(!pickG&&strat===0&&ready.length&&rnd()<.6)pickG=ready[Math.floor(rnd()*ready.length)];
    if(!pickG&&strat===3&&ready.includes('ellie'))pickG='ellie';
-   if(pickG){const i=scn(pickG);run([...scr(pickG+i),()=>{adv(pickG,i);spend('hang');return[]}],hub);continue}
+   // talk shop with the people you're after, once a day (free)
+   for(const g of fav)if(met(g)&&!S.hang[g+':'+S.day]&&strat){S.hang[g+':'+S.day]=1;seen(g);fx({[g]:6})}
+   const hang=g=>{const i=scn(g),tones=Object.keys(TONES);S.taste=S.taste||{};S.taste[g]=S.taste[g]||{};
+    const known=tones.find(t=>S.taste[g][t]>0),tried=tones.filter(t=>S.taste[g][t]===undefined);
+    const tone=strat===0?tones[Math.floor(rnd()*4)]:known||tried[Math.floor(rnd()*tried.length)]||tones[0];
+    const v=tasteOf(g,tone);S.taste[g][tone]=v;S.amult=S.amult||{};S.amult[g]=v>0?1.6:v<0?.45:1;
+    run([...scr(g+i),()=>{fx({[g]:8});delete S.amult[g];adv(g,i);seen(g);spend('hang');return[]}],hub)};
+   if(pickG){hang(pickG);continue}
    if(leads.length&&(strat===3||strat===2||rnd()<.5)){leadStart(leads[Math.floor(rnd()*leads.length)]);continue}
-   if(ready.length&&strat!==1&&strat!==2){const g=ready[0],i=scn(g);run([...scr(g+i),()=>{adv(g,i);spend('hang');return[]}],hub);continue}
+   if(ready.length&&strat!==1&&strat!==2){hang(ready[0]);continue}
    if(rnd()<.5){attendTalk();continue}
    if(S.slot===5)endDay();else spend('wait');
   }
-  out.runs.push({run:ri,strat,ending:S.ending,day:S.day,slot:S.slot,fav,loved:ROM.filter(loved),routes:Object.fromEntries(ROM.filter(met).map(g=>[g,scn(g)])),solved:Object.keys(S.solved).length,clues:S.clues.length,skill:RANKS.skill[rank('skill')],clout:RANKS.clout[rank('clout')],fails:S.fails||0,acts:S.acts,texts:S.msgs.filter(m=>m.q).length,missing:[...missing]});
+  out.runs.push({run:ri,strat,ending:S.ending,day:S.day,slot:S.slot,fav,loved:ROM.filter(loved),routes:Object.fromEntries(ROM.filter(met).map(g=>[g,scn(g)])),solved:Object.keys(S.solved).length,clues:S.clues.length,skill:RANKS.skill[rank('skill')],clout:RANKS.clout[rank('clout')],fails:S.fails||0,acts:S.acts,texts:S.msgs.filter(m=>m.q).length,favAff:fav.map(g=>aff(g)+':'+(sceneWhy(g)||'ready')),missing:[...missing]});
   S=null;
  }
  out.ends=Object.keys(META.ends);return out};

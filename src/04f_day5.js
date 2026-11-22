@@ -150,8 +150,8 @@ SC.sleep4=`
 [hide]
 ~ Room 1337, late. The plastic plant on the windowsill. The Lumen logo turning across the lane.
 * Three days left. Friday, Saturday, Sunday. You count the hours you've got, and then you count the people, and the numbers don't fit.
-if ROM.filter(g=>scn(g)>=3).length
- * {=ROM.filter(g=>scn(g)>=3).map(g=>CH[g].name).join(', ')}. The people you've got close to. The ones who'd notice if you weren't there.
+if ROM.filter(g=>scn(g)>=2).length
+ * {=ROM.filter(g=>scn(g)>=2).map(g=>CH[g].name).join(', ')}. The people you've got close to. The ones who'd notice if you weren't there.
  * You can't be everywhere. You're starting to understand that every hour you spend is a kind of promise. The ones you've already started making are the ones to keep.
 else
  * You've met a lot of people this week. You haven't let many of them close. There isn't much time left to change that.

@@ -47,7 +47,7 @@ const ROMEPI={
  wren:'Wren dives into the pool fully clothed. Then she looks up at you from the water. "Lifeguard\'s off duty," she says. "You\'re on your own." You jump in.',
  pia:'Pia plays you "that one". The song she never plays for money. It\'s short, and a bit sad, and when it\'s finished she puts the violin down and holds your hand.'
 };
-function epilogueCast(good){const r=[];const ppl=ROM.filter(g=>met(g)&&scn(g)>=3&&g!==S.partner);for(const g of ppl)r.push(N(FATE[g][good?0:1]));if(f('dave_helped'))r.push(N(good?'Dave deletes the SafeSphere TikTok account live on stream. Two million people watch. His mum calls him "David" again, but nicely.':'Dave quits Lumen on Monday. He doesn\'t post about it. That\'s how you know he means it.'));return r}
+function epilogueCast(good){const r=[];const ppl=ROM.filter(g=>met(g)&&scn(g)>=2&&g!==S.partner);for(const g of ppl)r.push(N(FATE[g][good?0:1]));if(f('dave_helped'))r.push(N(good?'Dave deletes the SafeSphere TikTok account live on stream. Two million people watch. His mum calls him "David" again, but nicely.':'Dave quits Lumen on Monday. He doesn\'t post about it. That\'s how you know he means it.'));return r}
 function romanceEpi(){if(!S.partner)return[N(pick(['You don\'t end up with anyone tonight. That\'s all right. You did something that mattered with people who mattered.','At two in the morning you\'re on the hotel steps on your own, with a cold cinnamon knot and a strange, quiet feeling that might be pride.']))];
  return SC['epi_'+S.partner]!==undefined?scr('epi_'+S.partner):[N(ROMEPI[S.partner])]}
 SC.end_disclosure=`

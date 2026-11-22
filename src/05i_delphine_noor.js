@@ -188,7 +188,7 @@ SC.noor4=`
 noor.n: An injunction is a court order. It tells someone: stop. Not after a trial. Now. Until we can have the trial.
 noor.n: If I can get one before Sunday at four, Lumen can't launch LANTERN, can't transfer it to Corvid, and can't "demonstrate" the data they've taken from four thousand people at this con without asking.
 noor.d: But I need two things. Evidence a judge can check overnight. And a witness from inside. Under oath. Someone who'll say "I saw it" with their name on it.
-if scn('delphine')>=4||f('delphine_testify')
+if scn('delphine')>=3||f('delphine_testify')
  > Delphine Vos. Lumen's head of communications. She found WH1SPER's drafts in their own folder. She's going to say it on stage. She'd say it to a judge.
  noor.o: ...The woman who wrote "privacy is a human right"?
  > The same woman.

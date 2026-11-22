@@ -13,7 +13,7 @@ function sceneWhy(g){const R=ROUTES[g],i=scn(g);if(!R||i>=R.n)return null;const 
  if(r.cl&&rank('clout')<r.cl)return'needs Clout rank '+r.cl+' ('+RANKS.clout[r.cl]+')';
  if(r.c&&!r.c())return r.y||'not yet';
  return null}
-const sceneReady=g=>met(g)&&ROUTES[g]&&scn(g)<ROUTES[g].n&&scn(g)>0&&!sceneWhy(g);
+const sceneReady=g=>met(g)&&ROUTES[g]&&scn(g)<ROUTES[g].n&&scn(g)>=1&&!sceneWhy(g);
 function adv(g,i){if(!S)return;if((S.sc[g]||0)<=i&&typeof tqQueue==='function')tqQueue(g,i);S.sc[g]=Math.max(S.sc[g]||0,i+1);if(ROUTES[g]&&S.sc[g]>=ROUTES[g].n)loveDone(g)}
 function loveDone(g){META.routes[g]=1;saveMeta();ach('love_'+g);const n=romCount();if(n>=2)ach('love2');if(n>=3)ach('love3')}
 /* ---- the calendar ---- */
@@ -45,6 +45,7 @@ function endDay(){
  run(sleep,()=>{newDay(d+1)})}
 function newDay(d){
  if(S.day>=1&&S.exp<=10)ach('lowkey');
+ neglectCheck(d);
  S.day=d;S.ch=Math.min(d,4);S.slot=0;S.oc=0;S.exp=S.foot;S.hang={};delete S.failing;
  const wake=S.wakeAt||'room1337';tqFlush();snapDay();save();
  const go=()=>{run([{chapter:d},{hide:1}],hub)};
@@ -75,12 +76,13 @@ function hangMenu(g,bgk){
    if(why)return[N(CH[g].name+'\'s story '+(why.startsWith('their')?'continues later: ':'needs more: ')+why+'.')];
    if(!freeCheck())return[];
    if(elsewhere(g,g+i))return[];
-   return[...scr(g+i),()=>{adv(g,i);addSum(R.sum?R.sum[i]||'':'');if(S.slot===5)ach('night_owl');ach('first_hang');spend('hang');return[]}]}});
+   seen(g);
+   return[N('How do you want to spend it?'),...approachMenu(g,()=>[...scr(g+i),()=>{fx({[g]:8});adv(g,i);seen(g);addSum(R.sum?R.sum[i]||'':'');if(S.slot===5)ach('night_owl');ach('first_hang');spend('hang');return[]}])]}});
  const tk=g+':'+S.day;
- opts.push({t:'Talk shop',hint:S.hang[tk]?'Already did that today':'Free · once a day',if:()=>!S.hang[tk],then:()=>{S.hang[tk]=1;return[{unlock:'hang'},{game:'quiz',who:g,n:3}]}});
+ opts.push({t:'Talk shop',hint:S.hang[tk]?'Already did that today':'Free · once a day',if:()=>!S.hang[tk],then:()=>{S.hang[tk]=1;seen(g);S.thint=S.thint||{};const first=!S.thint[g];S.thint[g]=1;return[{unlock:'hang'},{game:'quiz',who:g,n:3},...(first&&TASTE[g]?[T('think',TASTE[g][4])]:[])]}});
  const gi=Object.keys(ITEMS).find(k=>ITEMS[k].g===g);
- if(gi&&S.inv[gi]&&!S.gifted[g])opts.push({t:'Give the '+ITEMS[gi].n.toLowerCase(),then:()=>{S.inv[gi]--;if(!S.inv[gi])delete S.inv[gi];S.gifted[g]=1;if(Object.keys(S.gifted).length>=5)ach('gifts5');return[FX({[g]:12}),L(pg,'b',R.gift)]}});
- opts.push({t:'Just chat',then:()=>[L(pg,'h',pick(R.idle))]});
+ if(gi&&S.inv[gi]&&!S.gifted[g])opts.push({t:'Give the '+ITEMS[gi].n.toLowerCase(),then:()=>{S.inv[gi]--;if(!S.inv[gi])delete S.inv[gi];S.gifted[g]=1;seen(g);if(Object.keys(S.gifted).length>=5)ach('gifts5');return[FX({[g]:12}),L(pg,'b',R.gift)]}});
+ opts.push({t:'Just chat',then:()=>{seen(g);const ck=g+':c:'+S.day,first=!S.hang[ck];S.hang[ck]=1;return[L(pg,'h',pick(R.idle)),...(first?[FX({[g]:2})]:[])]}});
  opts.push({t:'Leave',then:[]});
  const st=stageOf(g);
  run([{bg:bgk},L(pg,'n',pick(R.hello||R.idle)),N(`${CH[g].name} · ${loved(g)?'In love':st} · ♥ ${aff(g)}${why&&i<R.n?' · next: '+why:''}`),C(...opts)],hub);
@@ -133,7 +135,7 @@ const TASKS=[
  {k:'buyer',n:'Find the buyer',d:'Halberd\'s man is somewhere in the building.',best:'vesper',good:['fern','wren','astrid']},
  {k:'story',n:'The human story',d:'Make three thousand people feel why it matters.',best:'ellie',good:['pia','delphine','dave']}
 ];
-const allyReady=g=>g==='dave'?!!S.f.dave_helped:(met(g)&&scn(g)>=3);
+const allyReady=g=>g==='dave'?!!S.f.dave_helped:(met(g)&&scn(g)>=2);
 /* the right person, someone you love, someone who's ready (their sixth scene), each holds a little harder */
 const taskScore=(t,a)=>{let s=!a?(rank('skill')>=3?1:0):a===t.best?3:t.good.includes(a)?2:1;if(a&&a!=='dave'&&loved(a))s++;if(a&&S.f[a+'_ready'])s++;return Math.min(3,s)};
 /* ---- the con programme: optional events at a time and place. Joining one takes that part of the day. ---- */

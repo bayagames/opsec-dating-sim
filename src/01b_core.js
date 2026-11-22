@@ -18,9 +18,9 @@ const solved=m=>!!(S&&S.solved[m]);
 const day=()=>S?S.day:0;
 const slot=()=>S?S.slot:0;
 const done=b=>!!(S&&S.done[b]);
-/* how close you are: scenes seen after meeting (routes have eight scenes: meeting, six, and the last one) */
-const stageOf=g=>{const i=scn(g)-1,n=ROUTES[g]?ROUTES[g].n:8;return i>=n-1?STAGEN[5]:i<=0?STAGEN[0]:i<=2?STAGEN[1]:i<=3?STAGEN[2]:i<=5?STAGEN[3]:STAGEN[4]};
-const dating=g=>scn(g)>=7;
+/* how close you are: scenes seen (routes have six: meeting, four hangouts, and the last one) */
+const stageOf=g=>STAGEN[clamp(scn(g)-1,0,5)];
+const dating=g=>scn(g)>=5;
 const loved=g=>!!ROUTES[g]&&scn(g)>=ROUTES[g].n;
 /* who someone looks like right now (Ellie changes out of her apron for the con, Kit wears her armour some days) */
 const lookOf=g=>{if(!S)return g;if(g==='ellie')return S.day>=3&&!S.f.ellie_apron?'ellie2':'ellie';if(g==='kit')return S.f.kit_armour?'kitc':'kit';if(g==='dave')return S.day>=2?'davex':'dave';return g};
@@ -44,8 +44,10 @@ function fx(e){
   if(k in S.aff){
    let g=v;
    if(S.aff[k]>=100&&g>0)continue;
+   const raw=g;if(typeof affGain==='function')g=affGain(k,g);
    S.aff[k]=clamp(S.aff[k]+g,0,100);
-   if(S.unl.aff&&g){toast(`${CH[k].name} ${g>=0?'♥ +'+g:'♥ '+g}`,CH[k].col);if(typeof sfx==='function')sfx(g>=0?'heartUp':'heartDown')}
+   // words, not numbers: you feel it, you don't count it
+   if(S.unl.aff&&raw){const nm=CH[k].name,t=raw<0?nm+' didn\'t like that':!g?nm+' has had a lot of you today':g>=9?nm+' ♥♥♥ loved that':g>=5?nm+' ♥♥ liked that':nm+' ♥ noticed';toast(t,raw<0?'var(--dim)':CH[k].col);if(typeof sfx==='function')sfx(raw>=0?'heartUp':'heartDown')}
    if(S.aff[k]>=100)ach('maxlove');
   }
   else if(k==='exp'){

@@ -3,7 +3,7 @@
    Each reply has its own answer back, and can move closeness (fx). */
 function tqAdd(g,i,t,...r){TEXTQ[g+'_'+i]={t,replies:r.map(([t,a,n])=>({t,a,fx:{[g]:n||3}}))}}
 /* delivered at the start of the next slot (see nextSlot), never in the middle of a scene with them */
-function tqQueue(g,i){if(TEXTQ[g+'_'+i]&&!S.f['tq_'+g+'_'+i]){S.tqp=S.tqp||[];if(!S.tqp.includes(g+'_'+i))S.tqp.push(g+'_'+i)}}
+function tqQueue(g,i){for(const k of[g+'_'+i,g+'_'+i+'b'])if(TEXTQ[k]&&!S.f['tq_'+k]){S.tqp=S.tqp||[];if(!S.tqp.includes(k))S.tqp.push(k)}}
 function tqFlush(){if(!S||!S.tqp||!S.tqp.length)return;const l=S.tqp.splice(0);for(const k of l)textQ(k.split('_')[0],k)}
 
 tqAdd('ellie',3,'Okay I have now looked up "lockpicking" and there are YOUTUBERS. There are COMPETITIONS. Am I a lockpicker now?? Do I need a name??',

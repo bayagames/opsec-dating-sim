@@ -244,7 +244,7 @@ button:focus-visible{outline:3px solid var(--butter);outline-offset:2px}
 #ov.mapov{padding:0;display:block;overflow:hidden}
 .bigmap{position:relative;width:100%;height:100dvh;display:flex;flex-direction:column;background:#0a0610f2}
 .mtop{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:2px solid var(--line)}.mtop b{font-size:20px}.mtop .small{flex:1}
-.mbody{flex:1;display:flex;min-height:0}#bmap{touch-action:none;-webkit-user-select:none;user-select:none}
+.mbody{flex:1;display:flex;min-height:0}.chem{margin:8px 0}.chem .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}.tchip{padding:3px 9px;border-radius:999px;border:2px solid var(--line);font-size:13px}.tchip.yes{border-color:var(--mint);color:var(--mint)}.tchip.no{border-color:#ff5d73;color:#ff5d73}.tchip.meh{opacity:.8}.tchip.unk{opacity:.5}#bmap{touch-action:none;-webkit-user-select:none;user-select:none}
 .mview{position:relative;flex:1;min-width:0;display:flex;flex-direction:column}
 .mcv{position:relative;flex:1;min-height:0}.mview canvas{position:absolute;left:0;top:0;width:100%;height:100%;touch-action:none;cursor:grab;background:#0a0610}
 .mtabs{padding:8px 10px;margin:0;flex-wrap:wrap}
@@ -914,9 +914,9 @@ const solved=m=>!!(S&&S.solved[m]);
 const day=()=>S?S.day:0;
 const slot=()=>S?S.slot:0;
 const done=b=>!!(S&&S.done[b]);
-/* how close you are: scenes seen after meeting (routes have eight scenes: meeting, six, and the last one) */
-const stageOf=g=>{const i=scn(g)-1,n=ROUTES[g]?ROUTES[g].n:8;return i>=n-1?STAGEN[5]:i<=0?STAGEN[0]:i<=2?STAGEN[1]:i<=3?STAGEN[2]:i<=5?STAGEN[3]:STAGEN[4]};
-const dating=g=>scn(g)>=7;
+/* how close you are: scenes seen (routes have six: meeting, four hangouts, and the last one) */
+const stageOf=g=>STAGEN[clamp(scn(g)-1,0,5)];
+const dating=g=>scn(g)>=5;
 const loved=g=>!!ROUTES[g]&&scn(g)>=ROUTES[g].n;
 /* who someone looks like right now (Ellie changes out of her apron for the con, Kit wears her armour some days) */
 const lookOf=g=>{if(!S)return g;if(g==='ellie')return S.day>=3&&!S.f.ellie_apron?'ellie2':'ellie';if(g==='kit')return S.f.kit_armour?'kitc':'kit';if(g==='dave')return S.day>=2?'davex':'dave';return g};
@@ -940,8 +940,10 @@ function fx(e){
   if(k in S.aff){
    let g=v;
    if(S.aff[k]>=100&&g>0)continue;
+   const raw=g;if(typeof affGain==='function')g=affGain(k,g);
    S.aff[k]=clamp(S.aff[k]+g,0,100);
-   if(S.unl.aff&&g){toast(`${CH[k].name} ${g>=0?'♥ +'+g:'♥ '+g}`,CH[k].col);if(typeof sfx==='function')sfx(g>=0?'heartUp':'heartDown')}
+   // words, not numbers: you feel it, you don't count it
+   if(S.unl.aff&&raw){const nm=CH[k].name,t=raw<0?nm+' didn\'t like that':!g?nm+' has had a lot of you today':g>=9?nm+' ♥♥♥ loved that':g>=5?nm+' ♥♥ liked that':nm+' ♥ noticed';toast(t,raw<0?'var(--dim)':CH[k].col);if(typeof sfx==='function')sfx(raw>=0?'heartUp':'heartDown')}
    if(S.aff[k]>=100)ach('maxlove');
   }
   else if(k==='exp'){
@@ -1426,6 +1428,7 @@ const ENDORDER=Object.keys(ENDINFO);
 /* achievements: [name, description, hidden until earned] */
 const ACH={
  first_hang:['Quality Time','Spend part of a day with someone.'],
+ tastes:['Read the Room','Pick exactly the right way to spend time with someone.'],
  first_event:['On the Programme','Go to a con event.'],events6:['Con Veteran','Go to six con events in one run.'],
  first_lead:['Following Up','Work a lead.'],
  first_solve:['Case Closed','Solve a mystery on the case board.'],
@@ -1472,7 +1475,7 @@ function sceneWhy(g){const R=ROUTES[g],i=scn(g);if(!R||i>=R.n)return null;const 
  if(r.cl&&rank('clout')<r.cl)return'needs Clout rank '+r.cl+' ('+RANKS.clout[r.cl]+')';
  if(r.c&&!r.c())return r.y||'not yet';
  return null}
-const sceneReady=g=>met(g)&&ROUTES[g]&&scn(g)<ROUTES[g].n&&scn(g)>0&&!sceneWhy(g);
+const sceneReady=g=>met(g)&&ROUTES[g]&&scn(g)<ROUTES[g].n&&scn(g)>=1&&!sceneWhy(g);
 function adv(g,i){if(!S)return;if((S.sc[g]||0)<=i&&typeof tqQueue==='function')tqQueue(g,i);S.sc[g]=Math.max(S.sc[g]||0,i+1);if(ROUTES[g]&&S.sc[g]>=ROUTES[g].n)loveDone(g)}
 function loveDone(g){META.routes[g]=1;saveMeta();ach('love_'+g);const n=romCount();if(n>=2)ach('love2');if(n>=3)ach('love3')}
 /* ---- the calendar ---- */
@@ -1504,6 +1507,7 @@ function endDay(){
  run(sleep,()=>{newDay(d+1)})}
 function newDay(d){
  if(S.day>=1&&S.exp<=10)ach('lowkey');
+ neglectCheck(d);
  S.day=d;S.ch=Math.min(d,4);S.slot=0;S.oc=0;S.exp=S.foot;S.hang={};delete S.failing;
  const wake=S.wakeAt||'room1337';tqFlush();snapDay();save();
  const go=()=>{run([{chapter:d},{hide:1}],hub)};
@@ -1534,12 +1538,13 @@ function hangMenu(g,bgk){
    if(why)return[N(CH[g].name+'\'s story '+(why.startsWith('their')?'continues later: ':'needs more: ')+why+'.')];
    if(!freeCheck())return[];
    if(elsewhere(g,g+i))return[];
-   return[...scr(g+i),()=>{adv(g,i);addSum(R.sum?R.sum[i]||'':'');if(S.slot===5)ach('night_owl');ach('first_hang');spend('hang');return[]}]}});
+   seen(g);
+   return[N('How do you want to spend it?'),...approachMenu(g,()=>[...scr(g+i),()=>{fx({[g]:8});adv(g,i);seen(g);addSum(R.sum?R.sum[i]||'':'');if(S.slot===5)ach('night_owl');ach('first_hang');spend('hang');return[]}])]}});
  const tk=g+':'+S.day;
- opts.push({t:'Talk shop',hint:S.hang[tk]?'Already did that today':'Free · once a day',if:()=>!S.hang[tk],then:()=>{S.hang[tk]=1;return[{unlock:'hang'},{game:'quiz',who:g,n:3}]}});
+ opts.push({t:'Talk shop',hint:S.hang[tk]?'Already did that today':'Free · once a day',if:()=>!S.hang[tk],then:()=>{S.hang[tk]=1;seen(g);S.thint=S.thint||{};const first=!S.thint[g];S.thint[g]=1;return[{unlock:'hang'},{game:'quiz',who:g,n:3},...(first&&TASTE[g]?[T('think',TASTE[g][4])]:[])]}});
  const gi=Object.keys(ITEMS).find(k=>ITEMS[k].g===g);
- if(gi&&S.inv[gi]&&!S.gifted[g])opts.push({t:'Give the '+ITEMS[gi].n.toLowerCase(),then:()=>{S.inv[gi]--;if(!S.inv[gi])delete S.inv[gi];S.gifted[g]=1;if(Object.keys(S.gifted).length>=5)ach('gifts5');return[FX({[g]:12}),L(pg,'b',R.gift)]}});
- opts.push({t:'Just chat',then:()=>[L(pg,'h',pick(R.idle))]});
+ if(gi&&S.inv[gi]&&!S.gifted[g])opts.push({t:'Give the '+ITEMS[gi].n.toLowerCase(),then:()=>{S.inv[gi]--;if(!S.inv[gi])delete S.inv[gi];S.gifted[g]=1;seen(g);if(Object.keys(S.gifted).length>=5)ach('gifts5');return[FX({[g]:12}),L(pg,'b',R.gift)]}});
+ opts.push({t:'Just chat',then:()=>{seen(g);const ck=g+':c:'+S.day,first=!S.hang[ck];S.hang[ck]=1;return[L(pg,'h',pick(R.idle)),...(first?[FX({[g]:2})]:[])]}});
  opts.push({t:'Leave',then:[]});
  const st=stageOf(g);
  run([{bg:bgk},L(pg,'n',pick(R.hello||R.idle)),N(`${CH[g].name} · ${loved(g)?'In love':st} · ♥ ${aff(g)}${why&&i<R.n?' · next: '+why:''}`),C(...opts)],hub);
@@ -1592,7 +1597,7 @@ const TASKS=[
  {k:'buyer',n:'Find the buyer',d:'Halberd\'s man is somewhere in the building.',best:'vesper',good:['fern','wren','astrid']},
  {k:'story',n:'The human story',d:'Make three thousand people feel why it matters.',best:'ellie',good:['pia','delphine','dave']}
 ];
-const allyReady=g=>g==='dave'?!!S.f.dave_helped:(met(g)&&scn(g)>=3);
+const allyReady=g=>g==='dave'?!!S.f.dave_helped:(met(g)&&scn(g)>=2);
 /* the right person, someone you love, someone who's ready (their sixth scene), each holds a little harder */
 const taskScore=(t,a)=>{let s=!a?(rank('skill')>=3?1:0):a===t.best?3:t.good.includes(a)?2:1;if(a&&a!=='dave'&&loved(a))s++;if(a&&S.f[a+'_ready'])s++;return Math.min(3,s)};
 /* ---- the con programme: optional events at a time and place. Joining one takes that part of the day. ---- */
@@ -3231,8 +3236,8 @@ SC.sleep4=`
 [hide]
 ~ Room 1337, late. The plastic plant on the windowsill. The Lumen logo turning across the lane.
 * Three days left. Friday, Saturday, Sunday. You count the hours you've got, and then you count the people, and the numbers don't fit.
-if ROM.filter(g=>scn(g)>=3).length
- * {=ROM.filter(g=>scn(g)>=3).map(g=>CH[g].name).join(', ')}. The people you've got close to. The ones who'd notice if you weren't there.
+if ROM.filter(g=>scn(g)>=2).length
+ * {=ROM.filter(g=>scn(g)>=2).map(g=>CH[g].name).join(', ')}. The people you've got close to. The ones who'd notice if you weren't there.
  * You can't be everywhere. You're starting to understand that every hour you spend is a kind of promise. The ones you've already started making are the ones to keep.
 else
  * You've met a lot of people this week. You haven't let many of them close. There isn't much time left to change that.
@@ -3358,18 +3363,18 @@ if met('ellie')
 ~ What you can do tomorrow depends on what you know, and who you have.
 ? Disclosure. Marge's ten minutes, the evidence on Victor's screen, the regulator already notified. The slow, proper way.
  [call S.plan='disc']
- if met('priya')&&scn('priya')>=3
+ if met('priya')&&scn('priya')>=2
   priya.n: The regulator has it. I sent it at 11:42 this morning. Timestamped, signed, with Rin's findings and Ada's reproduction. Tomorrow isn't an attack. It's a disclosure with a receipt.
   [flag reg_sent]
  else
   > I'll send the regulator everything tonight. Timestamped. It's not as clean as it should be. It'll have to do.
-?(met('saoirse')&&scn('saoirse')>=4) Front Page. Saoirse's story runs the second the keynote starts, with everything in it.
+?(met('saoirse')&&scn('saoirse')>=3) Front Page. Saoirse's story runs the second the keynote starts, with everything in it.
  [call S.plan='front']
  saoirse.n: My editor's signed it off. Three lawyers have read it. It goes live at 4:01 PM, the minute Victor says hello. He'll be standing on stage while everyone in the room reads it on their phone.
-?(met('noor')&&scn('noor')>=4&&(scn('delphine')>=4||solved('m7'))) Injunction. Noor goes to a judge in the morning to stop the launch.
+?(met('noor')&&scn('noor')>=3&&(scn('delphine')>=3||solved('m7'))) Injunction. Noor goes to a judge in the morning to stop the launch.
  [call S.plan='inj']
  noor.n: I need a judge, a sworn statement from inside, and three hours. A Sunday judge is a grumpy judge. Grumpy judges read faster.
-?(met('mira')&&scn('mira')>=4&&clue('signkey')) Kill Switch. Mira's way. The update that switches SafeSphere off, on every phone, at once.
+?(met('mira')&&scn('mira')>=3&&clue('signkey')) Kill Switch. Mira's way. The update that switches SafeSphere off, on every phone, at once.
  [call S.plan='kill']
  mira.n: I didn't come here to be the plan. But here I am. Ten million phones. One signed update. Nobody asked them. That's the bit I can't get past.
 ? Walk away. Take the last train tomorrow. It isn't your fight.
@@ -3516,10 +3521,10 @@ if !solved('m6')&&!f('mole_fed')
  [flag mole_struck]
  if taskOK('screens')
   ~ {=KTX('screens',a=>CH[a].name+' is already in the AV booth. "Nope," you hear over the comms. Three switches, a cable you didn\\'t know existed, and the faders come back up. Owen stares at the desk like it bit him.',a=>CH[a].name+' scrambles at the desk and gets one microphone back. One is enough.','')}
- elif met('astrid')&&scn('astrid')>=4
+ elif met('astrid')&&scn('astrid')>=3
   ~ Your phone buzzes. Astrid. "They cut the room. They can't cut the sky. Going out by satellite. Keep talking."
   [flag signal]
- elif met('sunny')&&scn('sunny')>=4&&taskOf('uplink')==='sunny'
+ elif met('sunny')&&scn('sunny')>=3&&taskOf('uplink')==='sunny'
   ~ Your earpiece crackles. Sunny. "They've got the room. Fine. Then nobody gets anything." And the whole building goes dark.
   [flag blackout]
  else
@@ -3576,11 +3581,11 @@ else
    ~ Dave takes the mic. "I was MegaHax. I made the TikTok. Ten million downloads. I didn't know. Now I do. Delete it." It's the most honest thing anyone in a Lumen T-shirt has ever said.
   else
    ~ {=CH[taskOf('story')].name} tells the human part. It lands.
- if scn('delphine')>=5&&!f('delphine_stage')
+ if scn('delphine')>=3&&!f('delphine_stage')
   ~ And then Delphine Vos walks out of the wings, in her navy suit, with her hair down. Victor's face does something you'll remember for the rest of your life.
   delphine.n: I'm Lumen's VP of Communications. I wrote every word Victor has said this week. I also found WH1SPER's posts in our own Trust and Safety folder, written days before they went up. I'd like to read you some.
   [flag delphine_stage]
- if solved('m9')&&scn('pia')>=4
+ if solved('m9')&&scn('pia')>=3
   ~ And from the back of the hall, a thin man with a beard and a hoodie walks all the way down the centre aisle. Nobody knows who he is. Then Saoirse, in the front row, stands up.
   saoirse.d: That's Jonah Reyes.
   ~ He climbs onto the stage beside you. He has LANTERN's first design documents in a carrier bag, with Victor's signature on every page.
@@ -3603,7 +3608,7 @@ mira.d: And nobody asked them. That's the part I can't get past. I'm doing to te
  ~ She presses enter.
  ~ Far below, through the con's glass roof, two thousand phones in Hall A buzz at once. Then the whole city's do.
  ~ "SafeSphere has been updated by its original author. Data collection: off. Thank you for trusting us. You shouldn't have."
-?(scn('mira')>=5) "Come with me instead. After. Leave all of this."
+?(scn('mira')>=3) "Come with me instead. After. Leave all of this."
  [flag kill_go ghost]
  ~ She looks at you for a long time. Then she presses enter, closes the laptop, and holds out her hand.
  mira.b: ...Yes. After. Somewhere with no Wi-Fi at all.
@@ -3641,7 +3646,7 @@ if f('lantern_dead')
   "Police officer": Silas Krall? We'd like to talk to you about a series of posts made under the name WH1SPER.
   ~ Krall turns from the window. For the first time all week, he looks surprised.
   [flag krall_arrested]
- if scn('vesper')>=5&&clue('vconfess')
+ if scn('vesper')>=3&&clue('vconfess')
   ~ Vesper is in the corridor behind you. You didn't hear her arrive. No earpiece.
   vesper.n: Halberd will want someone inside who understands what happened here today. Someone who knows Lumen's mistakes, and LANTERN's code, and the people in it.
   vesper.s: Come with me, darling. Inside. We could take them apart from the middle, slowly, beautifully, for years.
@@ -3733,7 +3738,7 @@ const ROMEPI={
  wren:'Wren dives into the pool fully clothed. Then she looks up at you from the water. "Lifeguard\'s off duty," she says. "You\'re on your own." You jump in.',
  pia:'Pia plays you "that one". The song she never plays for money. It\'s short, and a bit sad, and when it\'s finished she puts the violin down and holds your hand.'
 };
-function epilogueCast(good){const r=[];const ppl=ROM.filter(g=>met(g)&&scn(g)>=3&&g!==S.partner);for(const g of ppl)r.push(N(FATE[g][good?0:1]));if(f('dave_helped'))r.push(N(good?'Dave deletes the SafeSphere TikTok account live on stream. Two million people watch. His mum calls him "David" again, but nicely.':'Dave quits Lumen on Monday. He doesn\'t post about it. That\'s how you know he means it.'));return r}
+function epilogueCast(good){const r=[];const ppl=ROM.filter(g=>met(g)&&scn(g)>=2&&g!==S.partner);for(const g of ppl)r.push(N(FATE[g][good?0:1]));if(f('dave_helped'))r.push(N(good?'Dave deletes the SafeSphere TikTok account live on stream. Two million people watch. His mum calls him "David" again, but nicely.':'Dave quits Lumen on Monday. He doesn\'t post about it. That\'s how you know he means it.'));return r}
 function romanceEpi(){if(!S.partner)return[N(pick(['You don\'t end up with anyone tonight. That\'s all right. You did something that mattered with people who mattered.','At two in the morning you\'re on the hotel steps on your own, with a cold cinnamon knot and a strange, quiet feeling that might be pride.']))];
  return SC['epi_'+S.partner]!==undefined?scr('epi_'+S.partner):[N(ROMEPI[S.partner])]}
 SC.end_disclosure=`
@@ -4214,7 +4219,7 @@ SC.ev_arcadecup=`
 if met('yuki')
  yuki.h: You entered! Oh no. Oh no, I'm going to have to destroy you. Respectfully.
 [game timing kind=pins n=3 mult=0 title="Round one"]
-if rank('skill')>=3||scn('yuki')>=3
+if rank('skill')>=3||scn('yuki')>=2
  ~ You make it to the quarter-finals. Then the semi-finals. Then you meet Yuki, and she beats you in a way that's so precise it's almost polite.
  [fx clout:8]
  [call cameo('yuki','Semi-final! You were nearly good! You were actually good! Don\\'t tell anyone I said that.',8)]
@@ -7487,7 +7492,7 @@ SC.noor4=`
 noor.n: An injunction is a court order. It tells someone: stop. Not after a trial. Now. Until we can have the trial.
 noor.n: If I can get one before Sunday at four, Lumen can't launch LANTERN, can't transfer it to Corvid, and can't "demonstrate" the data they've taken from four thousand people at this con without asking.
 noor.d: But I need two things. Evidence a judge can check overnight. And a witness from inside. Under oath. Someone who'll say "I saw it" with their name on it.
-if scn('delphine')>=4||f('delphine_testify')
+if scn('delphine')>=3||f('delphine_testify')
  > Delphine Vos. Lumen's head of communications. She found WH1SPER's drafts in their own folder. She's going to say it on stage. She'd say it to a judge.
  noor.o: ...The woman who wrote "privacy is a human right"?
  > The same woman.
@@ -8929,7 +8934,7 @@ pia.d: ...
    Each reply has its own answer back, and can move closeness (fx). */
 function tqAdd(g,i,t,...r){TEXTQ[g+'_'+i]={t,replies:r.map(([t,a,n])=>({t,a,fx:{[g]:n||3}}))}}
 /* delivered at the start of the next slot (see nextSlot), never in the middle of a scene with them */
-function tqQueue(g,i){if(TEXTQ[g+'_'+i]&&!S.f['tq_'+g+'_'+i]){S.tqp=S.tqp||[];if(!S.tqp.includes(g+'_'+i))S.tqp.push(g+'_'+i)}}
+function tqQueue(g,i){for(const k of[g+'_'+i,g+'_'+i+'b'])if(TEXTQ[k]&&!S.f['tq_'+k]){S.tqp=S.tqp||[];if(!S.tqp.includes(k))S.tqp.push(k)}}
 function tqFlush(){if(!S||!S.tqp||!S.tqp.length)return;const l=S.tqp.splice(0);for(const k of l)textQ(k.split('_')[0],k)}
 
 tqAdd('ellie',3,'Okay I have now looked up "lockpicking" and there are YOUTUBERS. There are COMPETITIONS. Am I a lockpicker now?? Do I need a name??',
@@ -9068,6 +9073,796 @@ tqAdd('pia',4,'jonah sent a song request. it was a new one. not "that one". i th
  ['You did that.','we both did. ok. i\'m crying at a bus stop. normal',5],
  ['What song?','one our mum used to sing. the happy one. i forgot it existed',4]);
 
+/* ============ CROSSOVERS (1/2): each route's fifth scene (index 4) brings in someone else from the cast ============
+   Every one has a version for when you haven't met the other person. Several set flags the main plot reads. */
+/* clues the crossovers turn up */
+Object.assign(CLUE,{
+ barwatch:{s:'The man at the end of the bar',t:'A grey-suited Lumen man sits at the end of the Hotel Bar every night, writing down who walks past. He never tips.',m:['m3']},
+ beaconroute:{s:'Red team, blue team',t:'Nyx and Priya agree: the beacon flood is a red-team tool hidden inside a blue-team building.',m:['m5']},
+ firmwareskip:{s:'The frame skip',t:'Ada and Yuki: the badge firmware updates in a loop. Hit it at the wrong moment and it skips the bad update.',m:['m5']},
+ lanternbox:{s:'LANTERN-01',t:'The beacon flood all goes to one box in the MDF closet, with no asset tag and a label: LANTERN-01.',m:['m4','m5']},
+ rinsource:{s:'Rin\'s source',t:'Three years ago someone sent Rin SafeSphere\'s internal documents anonymously. It was Mira.',m:['m2']},
+ vespertell:{s:'The singer who watches the door',t:'Vesper never drinks what she orders. She watches the room like a bartender, or a spy.',m:['m11']},
+ laundrychute:{s:'The way off the roof',t:'Fern knows an old laundry chute from the roof to the basement, big enough for a person.',m:['m2']},
+ delphinetalks:{s:'Tuesday',t:'Delphine to Saoirse: the apology for WH1SPER\'s "attacks" was written on Tuesday, before the attacks.',m:['m3']},
+ badgepatch:{s:'The patch',t:'Someone patched the badges\' key list last month, after Tilly shipped them, while Owen had them "for QA".',m:['m5','m6']},
+ trolleytimes:{s:'The trolley with no towels',t:'Every night at 3:15 a "housekeeping" trolley carries a grey case up to Suite 1313.',m:['m3']},
+ buyerinside:{s:'The buyer\'s in the building',t:'Vesper reports to Halberd: Corvid Holdings on paper, a man called Ashgrove.',m:['m8','m11']},
+ recoveryscam:{s:'Three thousand bakeries',t:'Lumen Growth Partners stole small business accounts and sold the owners the "recovery". Delphine has the documents.',m:['m1']},
+ lantern02:{s:'LANTERN-02',t:'There\'s a second box. In Suite 1313. Delivered every night by a trolley with no towels.',m:['m4','m8']}});
+for(const[c,o]of Object.entries(CLUE))for(const m of o.m)if(MYST[m]&&!MYST[m].ev.includes(c)&&['barwatch','beaconroute','firmwareskip','lanternbox','rinsource','vespertell','laundrychute','delphinetalks','badgepatch','trolleytimes','buyerinside','recoveryscam','lantern02'].includes(c))MYST[m].ev.push(c);
+SC.ellie_x=`
+[bg bar]
+~ The Hotel Bar, mid-afternoon, nearly empty. Ellie's on a stool with her elbows on the counter and a notebook open, and she's talking to the bartender like they've known each other for years.
+if met('bea')
+ bea.h: ...no, you fold the zest INTO the syrup. Not on top. On top is for people who want a photo.
+ ellie.h: Oh, that's clever. That's so clever. Can I put that in a bun? I'm putting that in a bun.
+ ~ They've swapped notebooks. Bea's is full of cocktails drawn as little diagrams. Ellie's is full of laminated-dough cross-sections. They both look up when you sit down, guiltily, like you've caught them doing something.
+ bea.s: Your baker's a menace. She's been here an hour and she's improved my old fashioned.
+ ellie.b: I added cardamom! Just a tiny bit! I'm so sorry!
+ ? "You two are going to open a place together, aren't you."
+  bea.d: ...Don't say it out loud. I'll start planning it. I've got a whole notebook for things I don't do.
+  ellie.n: A bakery that's a bar at night. Bread in the morning, cocktails at six. "Proof". It's already got the name.
+  [fx ellie:6 bea:6]
+ ? "Make me whatever you both think I'd like."
+  ~ They argue about it for five minutes, in whispers, like it's a heist. What arrives is warm, cinnamon-sweet, and has a tiny croissant drawn on the napkin in Bea's biro.
+  [fx ellie:6 bea:5]
+ bea.n: She told me what Lumen did to her shop. The account. The "recovery" fee. I've seen their people in here every night this week. Same table. Same drink. They never tip.
+ bea.a: There's one of them who drinks alone at the end. Grey suit. Writes things down when people walk past. I thought you'd want to know.
+ [clue barwatch]
+ [flag ellie_bea]
+else
+ ~ The bartender slides Ellie a glass of something orange with a cinnamon stick in it. "On the house. You look like you need it." Ellie looks like she's about to cry about it.
+ ellie.n: Everyone here is so nice. Even the people who scare me. Especially them, actually. They're scary because they care so much.
+ [fx ellie:5]
+ellie.d: Can I tell you something? At home, I'm the one who knows what to do. Every morning. Dough, oven, customers. Here I don't know anything. And it's... nice? Not knowing. With you.
+? "You know more than you think. You saw through the Lumen 'recovery' email before I did."
+ ellie.b: ...I did, didn't I. I read it twice and it felt wrong. Like a bad loaf. You can't say why, you just know.
+ [fx ellie:5 skill:1]
+? "I like not knowing things with you too."
+ ellie.h: Good. Then we'll be stupid together. It's the best way to be stupid.
+ [fx ellie:6]
+`;
+SC.nyx_x=`
+[bg soc]
+~ The Blue Team Village, 1 AM. Every screen off but one. Nyx is crouched by the equipment cage with a tension wrench in her teeth.
+nyx.n: Relax. It's a game. Red team versus blue team. I get into the cage before she notices, I win.
+if met('priya')
+ priya.a: She noticed. She noticed eleven minutes ago. I've been watching her on the thermal camera I set up for exactly this.
+ ~ Priya steps out from behind a server rack holding a mug that says WORLD'S OKAYEST SYSADMIN. Nyx doesn't even flinch.
+ nyx.s: Raman.
+ priya.n: Nyx. You picked the cage lock on day one last year too. I changed it. You still got in.
+ nyx.h: You changed it to a better one. Thank you. I enjoyed that.
+ * They've done this before. Every year. Like fencing.
+ ? "Who's winning?"
+  priya.s: Overall? Seven to six. Her.
+  nyx.d: Six to seven. She counts the time I got caught in the ceiling. I wasn't caught. I was resting.
+  [fx nyx:5 priya:5]
+ ? "Show me how you'd stop her."
+  ~ Priya does. Door sensors. A canary file. A webcam that only records when the room's empty. Nyx watches with the expression of an artist looking at another artist's work.
+  [fx priya:6 nyx:4 skill:3]
+ priya.n: Here's the thing. The badges. The beacon flood. Someone's built a thing that listens to everyone at once. That's a red-team tool, inside a blue-team building.
+ nyx.n: Which means you need a red teamer to find where it lives, and a blue teamer to prove it's there.
+ priya.d: ...Are we really going to work together.
+ nyx.s: One time. Don't tell anyone.
+ [flag redblue]
+ [clue beaconroute]
+else
+ ~ The cage door swings open. Nyx steps back to let you go first, like a gentleman. Inside: forty spare badges, a box of cables and a sticky note in someone's neat handwriting: "NICE TRY, NYX. -P."
+ nyx.h: She's good. I like her. I'll never tell her that.
+ [fx nyx:5]
+nyx.n: This is why I do it. Not the locks. The other person on the other side, trying as hard as you are. It's the only honest conversation I ever get.
+? "Is that what this is? An honest conversation?"
+ nyx.o: ...Yes. You picked me. I didn't see it coming. That never happens.
+ [fx nyx:6]
+? "You're terrible at admitting you have friends."
+ nyx.d: I have colleagues. And rivals. And you. You're a category of one.
+ [fx nyx:5]
+`;
+SC.ada_x=`
+[bg arcade]
+~ The Retro Arcade. A small crowd round the racing cabinet, and in the middle of it, Ada, sleeves pushed up, glaring at a leaderboard.
+if met('yuki')
+ yuki.h: Ninety seconds! That's the record! Mine! You can't beat it with maths, CTF girl!
+ ada.a: I can beat ANYTHING with maths. Watch me.
+ ~ Ada pulls out a notebook and starts writing down the track's frame timings. Yuki starts writing down Ada's frame timings. Nobody is racing. Everyone is writing.
+ ? "Race each other. Best of three. I'll referee."
+  ~ Ada wins the first by reading the game's physics like a puzzle. Yuki wins the second by doing something with the wall that should not be possible. The third ends in a draw so exact the cabinet prints two scores.
+  ada.h: That's not a draw. That's a bug. Which means we both found it. Which means we're...
+  yuki.s: ...a team. Oh no. Oh, I hate that. I love that.
+  [fx ada:6 yuki:5]
+ ? "Ada, what's your plan?"
+  ada.n: Yuki's routes skip parts of the game. CTFs are the same: you don't do the challenge, you find where the challenge is badly built. We're the same person. That's why she's so annoying.
+  yuki.h: You're the annoying one!
+  [fx ada:5 yuki:4 skill:2]
+ ada.n: Yuki. The badge firmware. It updates in a loop. If you hit it with an update at exactly the wrong moment...
+ yuki.o: ...it'd skip the bad update. Like a frame skip. Oh my god. That's a speedrun of the firmware.
+ [flag ada_yuki]
+ [clue firmwareskip]
+else
+ ~ Ada plays the racing game alone. She loses. She plays again. She loses. She gets out a notebook. On the fourth go she wins by six seconds and turns round with her arms up and nobody's watching but you.
+ ada.b: You saw that. You're a witness.
+ [fx ada:5]
+ada.n: I never had friends who liked the same thing as me. I had people who were better than me, and people who were worse, and I counted which. This week I stopped counting.
+? "What changed?"
+ ada.o: You did. You don't keep score. It's contagious.
+ [fx ada:6]
+? "You're still counting. You said six seconds."
+ ada.h: Okay, I'm counting a LITTLE.
+ [fx ada:4]
+`;
+SC.priya_x=`
+[bg noc]
+~ The NOC, after midnight. Priya's on Sunny's spare chair, not touching anything, which for Priya is a form of meditation.
+if met('sunny')
+ sunny.n: She taught me. Did she tell you? Six years ago, at a different con. I was a volunteer who couldn't crimp a cable. Priya made me crimp four hundred.
+ priya.s: Four hundred and twelve. And then she built a network for four thousand people. I'm very proud. I will never say it again.
+ ~ Between them, on the big screen, the beacon flood: a heat map of the con, every badge chattering to every other badge, pulsing like a heart.
+ sunny.a: Here's what I can't show anyone. The flood all goes to one address. Not out. In. Somewhere in this building there's a box eating all of it.
+ priya.n: And we can't pull the plug because Owen signed for the "sponsor firmware" and we'd be breaking a contract.
+ ? "Then don't pull the plug. Follow the cable."
+  ~ They look at each other. Then at you. Then Sunny takes a torch off the wall.
+  ~ Forty minutes in the ceiling void. Priya reading the labels, Sunny reading the switch lights. The cable goes to the MDF closet. To a box with no asset tag.
+  priya.a: LANTERN-01. That's what the label says. Who labels their spy box?
+  sunny.d: Someone who thinks nobody will ever look.
+  [clue lanternbox]
+  [flag flood_traced]
+  [fx priya:6 sunny:6 skill:3]
+ ? "Log everything. Every hour. A diary of the flood."
+  priya.h: A timeline. You want a timeline. Oh, you're speaking my language.
+  [flag flood_log]
+  [fx priya:6 sunny:4]
+else
+ ~ The NOC lead's asleep in her chair with a radio on her chest. Priya puts a blanket on her without waking her, and logs the beacon flood herself, quietly, line by line.
+ priya.n: Nobody looks after the people who look after everything. So I do it. Badly. With blankets.
+ [fx priya:5]
+priya.d: Can I say something weird? I don't usually let people sit in rooms with me while I work. You just... sit. You don't touch anything.
+? "I'm scared to touch anything."
+ priya.h: Correct. Healthy. Good instinct. Marry me. That was a joke.
+ [fx priya:5]
+? "I like watching you work."
+ priya.o: ...That's the nicest thing anyone's said to me in a server room.
+ [fx priya:6]
+`;
+SC.juno_x=`
+[bg creator]
+~ Creator Corner. Juno's stream is live: 12,000 people. And then the chat explodes, because someone has just walked into the back of the shot in full armour.
+if met('kit')
+ kit.n: ...Hi. Sorry. I didn't know you were live.
+ juno.a: You always know when I'm live. You used to run my schedule.
+ * Oh. OH.
+ ~ The chat has worked it out faster than you: "IS THAT KIT", "THE EX", "THEY'RE IN THE SAME ROOM", "OH MY GOD".
+ juno.d: We did the stream together for two years. Then we didn't. That's all anyone needs to know. Chat, that's all YOU need to know.
+ kit.d: I made you the helmet. The one you wear for your intro. You still wear it.
+ juno.n: ...It's a good helmet.
+ ? Turn the camera off
+  ~ You reach over and flip the lens cap down. Twelve thousand people see a black screen. In the quiet, Juno and Kit look at each other like people who've been shouting across a canyon for a year.
+  kit.b: Thanks. I didn't want that to be content.
+  juno.o: Neither did I. That's the first time I've ever not wanted something to be content.
+  [fx juno:6 kit:6]
+  [flag juno_kit]
+ ? "You two should talk. Properly. Without chat."
+  juno.s: Bossy. I like it. Fine. After the stream. Kit, don't leave.
+  kit.n: I'm not leaving. I came to find you.
+  [fx juno:4 kit:5]
+  [flag juno_kit]
+ kit.n: Juno. The badges. You've got twelve thousand people watching you. If you said the badges were spying on them...
+ juno.a: ...they'd believe me. More than any journalist. That's the scary part.
+ [flag juno_audience]
+else
+ ~ Juno sees you and turns the camera to you without asking. Twelve thousand people say hi. You wave like a hostage.
+ juno.h: Chat, this is the cryptid. Say hi to the cryptid. ...Okay, they're shy. Camera off. Sorry. Couldn't resist.
+ [fx juno:4]
+juno.n: You know what I'm scared of? That I'm only interesting with an audience. That when the light goes off there's nothing there.
+? "I like you best when the light's off."
+ juno.o: ...You can't just say things like that. That's a clip. I'd clip that.
+ [fx juno:6]
+? "There's a lot there. I've seen it."
+ juno.b: Name one thing.
+ > You buy every volunteer a coffee and never put it on stream.
+ juno.d: ...How do you know about that.
+ [fx juno:6]
+`;
+SC.kit_x=`
+[bg badgelab]
+~ The Badge Lab. Kit's helmet is on the bench in pieces, and Tilly is soldering something into the visor with her tongue between her teeth.
+if met('tilly')
+ tilly.h: A heads-up display! In a cosplay helmet! With a real camera! Kit, this is the best thing anyone's ever asked me to build.
+ kit.b: Can it record? Everything I look at? Without anyone knowing?
+ tilly.o: ...That's a very specific question.
+ kit.n: I walk past the Lumen booth eight times a day in full armour. Nobody looks at a cosplayer twice. They talk about everything in front of me.
+ ~ Silence. Then Tilly grins, very slowly.
+ tilly.s: Give me an hour. And don't tell Sunny.
+ ? Help Tilly with the wiring
+  [game pipe n=1 only=4 title="Wire the visor camera"]
+  ~ It works. The visor shows a tiny green REC in the corner. Kit puts the helmet on and looks at you through it, and the camera sees you, and Kit doesn't say anything at all for a while.
+  [flag kit_cam]
+  [fx kit:6 tilly:5 skill:2]
+ ? "Is this legal?"
+  tilly.n: In a public space? Probably. Morally? Lumen's put spyware in four thousand badges. I think we're allowed a helmet.
+  [flag kit_cam]
+  [fx kit:4 tilly:4]
+else
+ ~ Kit's fixing the helmet alone, with a magnifier and a lot of swearing. You hold the torch. She lets you, which is a big deal for Kit.
+ kit.n: I keep thinking about putting a camera in it. Walking past Lumen's booth all day. Nobody looks at a cosplayer.
+ [fx kit:5]
+kit.d: Do you ever feel like you only exist in costume? Like the real you is the boring one underneath?
+? "The real you made the costume."
+ kit.o: ...Huh. Yeah. She did, didn't she.
+ [fx kit:6]
+? "I like the boring one underneath."
+ kit.b: She's terrible at small talk.
+ > So am I.
+ kit.h: Perfect. We'll stand in silence. Together.
+ [fx kit:5]
+`;
+SC.rin_x=`
+[bg roof]
+~ The hotel roof, late. Rin's sitting on the air-con unit Mira always sits on, which is how you know he came looking for her.
+if met('mira')
+ ~ Mira's at the rail. She doesn't turn round.
+ mira.n: You've been following me all week, Takahashi.
+ rin.d: You've been following me for three years. Every report I've written. Somebody reads them within an hour of me posting them. From a different country every time.
+ rin.n: Three years ago, someone sent me SafeSphere's internal documentation. Anonymously. It's the only reason I knew where to look. It's the reason my report exists. It's the reason I lost my job.
+ mira.o: ...
+ rin.a: It was you. Wasn't it. You were my source.
+ * The whole week reorganises itself in your head.
+ mira.d: I sent it to the one person I thought was brave enough. And then I watched them destroy you for it, and I didn't help. I couldn't. I was hiding.
+ ? "You two have been on the same side this whole time."
+  rin.n: On the same side, alone, for three years. That's a stupid way to be on a side.
+  mira.s: Yes. It is.
+  [fx rin:6 mira:6]
+ ? Say nothing. Let them have this.
+  ~ You step back. They stand at the rail for a long time, a metre apart. Then Rin offers her a gummy worm. She takes it.
+  [fx rin:5 mira:6]
+ rin.h: I'm not angry. I was. For about a year. Then I realised the report was right, and you were right to send it, and the people who were wrong were everyone else.
+ mira.n: If you stand on that stage on Sunday, they'll say you're working with WHISPER.
+ rin.s: Then I'll say I am.
+ [flag mira_source]
+ [clue rinsource]
+else
+ rin.n: I'm looking for someone. My source from three years ago. I think they're here. I think they're on this roof most nights. I just want to say thank you. And maybe shout a bit.
+ [fx rin:5]
+rin.d: Do you ever think the bravest thing you did was an accident? I didn't decide to be brave. I just posted a report and then everything happened to me.
+? "Staying brave after was the decision."
+ rin.o: ...Oh. Okay. I'm going to think about that for a week.
+ [fx rin:6]
+? "You're braver than you think."
+ rin.b: You keep saying that. I keep almost believing it.
+ [fx rin:5]
+`;
+SC.bea_x=`
+[bg lumenlounge]
+~ The Lumen Lounge, before the evening set. Bea's delivering a crate of wine, which is not her job, which is how you know she's here on purpose.
+if met('vesper')
+ ~ Vesper's at the piano, warming up. She sees Bea and the warm-up stops halfway through a scale.
+ bea.n: You sit at the end of my bar every night after your set. You never drink what you order. You watch the door.
+ vesper.s: I'm a singer, darling. We like to know where the exit is.
+ bea.a: I've been behind that bar six years. I've watched everyone. Spies, cheats, affairs. You watch the room like I do. Except I get paid for it in tips.
+ ~ Vesper stops smiling. It's the first time you've seen her not perform.
+ vesper.d: ...Who are you going to tell?
+ ? "Bea's not going to tell anyone. She's telling you she knows."
+  bea.s: Exactly. Whatever you're doing, do it somewhere else. Not to them. Not to my regulars.
+  vesper.n: Your regulars are the safest people in this building. You have my word. For what it's worth.
+  [fx bea:6 vesper:4]
+  [flag vesper_warned]
+ ? "Who ARE you, Vesper?"
+  vesper.o: Someone who's very good at a job she doesn't want any more. Ask me again on Saturday.
+  [fx vesper:5 bea:3]
+  [flag vesper_suspect]
+ bea.n: (to you, on the way out) Be careful with her. Not because she's bad. Because she's not sure yet which side she's on, and that's the most dangerous kind.
+ [clue vespertell]
+else
+ ~ Bea unloads the wine, then sits on the edge of the stage with her sketchbook and draws the empty room. The piano. The chairs. A single glass on the end of the bar.
+ bea.n: Somebody sits there every night after the set. Never drinks. Watches the door. I've been drawing her all week.
+ [flag vesper_suspect]
+ [fx bea:5]
+bea.d: I draw people because it makes me look properly. If I just glance, I miss things. Most people only glance at each other.
+? "Draw me properly, then."
+ bea.h: I already have. Twenty times. Don't ask to see them.
+ [fx bea:6]
+? "You don't glance at anything."
+ bea.o: ...No. Especially not you.
+ [fx bea:6]
+`;
+SC.mira_x=`
+[bg garden]
+~ The Halcyon Garden, just after dawn. Mira's on the bench by the olive tree, which is new, and she's eating something, which is newer.
+if met('fern')
+ fern.n: Toast. With honey. From the roof hives. She's been eating it every morning for three weeks. She just never let me see her eat it before.
+ mira.d: I thought she didn't know I was there.
+ fern.h: You climbed down my maintenance ladder at two in the morning on the second night. You stepped on my basil. I put a plate on the air-con unit the next day. You took it.
+ mira.o: ...I thought it was the hotel. Room service for nobody.
+ fern.n: It was me. Nobody sees the gardener. I see everyone.
+ * Fern has been feeding WHISPER for three weeks and never told a soul.
+ ? "Why didn't you tell anyone?"
+  fern.n: Because she was hungry, and frightened, and hiding. And that's not anyone's business but the bees'.
+  [fx fern:6 mira:6]
+ ? "Mira, say thank you."
+  mira.s: ...Thank you. That's... thank you. I don't say that. I'm saying it.
+  fern.b: You're welcome. Don't step on the basil.
+  [fx mira:5 fern:5]
+ fern.n: If she ever needs to leave the roof without the fire stairs, there's a way. The old laundry chute to the basement. Big enough for a person, if she's brave.
+ mira.a: ...I'm brave.
+ [flag fern_mira]
+ [clue laundrychute]
+else
+ ~ A plate on the bench beside her. Toast with honey, a sprig of rosemary on top, arranged carefully. Mira doesn't know who leaves it. She eats it anyway.
+ mira.n: Every morning. Somebody in this hotel feeds me. I've never seen them. It's the kindest thing that's happened to me in three years.
+ [fx mira:5]
+mira.d: I used to think people were the problem. Data's just people, written down. If you want to stop the data, you have to stop trusting people.
+? "And now?"
+ mira.o: Now someone feeds me toast, and you come up here and don't ask me for anything. It's ruining my whole philosophy.
+ [fx mira:6]
+? "You trust me."
+ mira.s: Don't push it.
+ > You trust me a little.
+ mira.b: ...A little.
+ [fx mira:5]
+`;
+SC.saoirse_x=`
+[bg library]
+~ The hotel library, closed for the night, one lamp on. Saoirse has asked you to "be in the room". She hasn't said for what.
+if met('delphine')
+ ~ Delphine Vos walks in, exactly on time, in a coat she hasn't taken off. Two women who have spent six years on opposite ends of every Lumen story sit down at the same table.
+ saoirse.n: You've hung up on me thirty-one times.
+ delphine.n: Thirty-four. You stopped counting the ones at night.
+ saoirse.a: Why are you here?
+ delphine.d: Because they want you to know I'm here. That's what this is, isn't it? You want me on the record.
+ ? "No record. Just talk. I'll make sure nobody's listening."
+  ~ You put both their phones in the drawer of an old writing desk. Then the desk in the corridor. Then you sit by the door.
+  ~ It takes an hour. At first they fence. Then Delphine says "Tuesday", and Saoirse's pen stops, and she says "the apology was written on Tuesday", and Saoirse stops writing altogether and just listens.
+  [fx saoirse:5 delphine:6]
+  [flag delphine_on_record]
+ ? "Saoirse. Promise her she's protected."
+  saoirse.n: You're protected. I've gone to court for sources. I'll go to prison for them. I'm not exaggerating. Ask the Ledger's lawyers, they hate it.
+  delphine.o: ...I believe you. That's very inconvenient.
+  [fx saoirse:5 delphine:5]
+  [flag delphine_on_record]
+ saoirse.n: (afterwards, very quietly) Six years. I've written about her as a villain for six years. She was in that building, writing the lies, hating every word.
+ [clue delphinetalks]
+else
+ ~ Nobody comes. At eleven, Saoirse puts her pen down.
+ saoirse.d: My source bottled it. Somebody inside Lumen. She's been on the edge for months. She'll come. When she's ready. They always do. Or they don't, and they live with it.
+ [fx saoirse:5]
+saoirse.n: You know what the job is? It's waiting. Ninety-nine per cent waiting. In libraries. With people who might not come.
+? "I'll wait with you."
+ saoirse.o: ...That's not a thing people say to journalists.
+ [fx saoirse:6]
+? "Is that why you're alone so much?"
+ saoirse.d: Ouch. Yes. Fair. Ouch.
+ [fx saoirse:4]
+`;
+SC.sunny_x=`
+[bg noc]
+~ The NOC, 3 AM. Sunny and Tilly are side by side at the big desk, both in hoodies, both with cold tea, a badge wired to a laptop between them.
+if met('tilly')
+ tilly.n: If we roll every badge back to my firmware at once, the beacon flood stops. Instantly. All four thousand.
+ sunny.a: And the network has to survive four thousand devices rebooting in the same second. Which it won't. Unless I stagger them.
+ tilly.h: Can you stagger them?
+ sunny.s: Can I stagger them. Tilly. I can stagger anything. I staggered the 2019 Wi-Fi outage so politely nobody noticed.
+ ? "Test it. One badge."
+  ~ One badge. Mine. Sunny counts down. Tilly hits enter. Your badge blinks blue, then dark, then rainbow round the edge.
+  tilly.b: Mine. My firmware. On a real badge. In the wild.
+  sunny.n: One down. Three thousand nine hundred and ninety-nine to go. All we need is a reason and a ten-second window.
+  [flag rollback_ready]
+  [fx sunny:6 tilly:6 skill:3]
+ ? "What happens if Owen finds out?"
+  sunny.d: We get fired. Tilly gets sued. Owen gets a bonus.
+  tilly.a: So we don't get found out. I'm very good at not being found out. I hid notes on the backs of badges for nine years.
+  [flag rollback_ready]
+  [fx sunny:5 tilly:5]
+ ~ At four, Tilly falls asleep on the keyboard and types "kkkkkkkkkk" into a terminal. Sunny saves it as a file called "tilly_was_here" and doesn't wake her.
+else
+ ~ Sunny alone, a badge on a breadboard, the network map in amber and green. She's trying to make the badges reboot without killing her network. It keeps not working.
+ sunny.d: I need the person who wrote the firmware. Tilly. Badge Lab. I keep meaning to go and talk to her. There's never time.
+ [fx sunny:5]
+sunny.n: I don't know how to do things for myself. I only know how to keep things running for other people.
+? "Then let me keep something running for you."
+ sunny.o: ...Like what?
+ > Coffee. Hourly. Until Sunday.
+ sunny.h: That's the most romantic thing anyone's ever offered a NOC lead.
+ [fx sunny:6]
+? "Go to sleep. I'll wake you if it breaks."
+ sunny.b: You'd do that? You'd watch the map?
+ [fx sunny:6]
+`;
+
+/* ============ CROSSOVERS (2/2) ============ */
+SC.tilly_x=`
+[bg badgelab]
+~ The Badge Lab. Someone has taken one of Tilly's badges apart on her own bench, and it isn't Tilly.
+if met('ada')
+ ada.n: Sorry! Sorry. I just wanted to see how the bootloader worked. It's beautiful. Did you know it's beautiful?
+ tilly.a: Of course I know it's beautiful. I made it. Put my oscilloscope DOWN.
+ ~ Ada puts it down. Then picks it up again, because she's found something.
+ ada.o: The sponsor update. It's signed with a different key. But the bootloader checks the key against a list, and the list has a gap at the end. Like a door somebody left on the latch.
+ tilly.d: ...A gap. In my list. I didn't leave a gap.
+ ada.n: You didn't. Someone patched it. Look at the date. Last month. After you shipped them.
+ * Someone reached into Tilly's work after it left her hands.
+ ? "Then someone at the con had the badges before the con."
+  tilly.a: Owen. Owen signed for the delivery. Owen had them for a week in Con Ops "for QA".
+  [clue badgepatch]
+  [fx tilly:6 ada:4 skill:2]
+ ? "Tilly, are you okay?"
+  tilly.d: No. Someone opened my thing and put their thing inside it. That's... that's a violation. That's what it is.
+  ada.n: We'll close it. Together. I'll find every byte they touched.
+  [clue badgepatch]
+  [fx tilly:6 ada:5]
+ [flag badge_rev]
+else
+ ~ Tilly alone, staring at a hex dump. The sponsor update's signature. Something about the date bothers her.
+ tilly.n: It was patched last month. After I shipped them. Someone had them before the con. Who had them before the con?
+ [clue badgepatch]
+ [fx tilly:5]
+tilly.b: I'm glad you're here. People think making things is lonely. It is. But it's less lonely when someone reads the back.
+? "I'll always read the back."
+ tilly.o: ...Careful. I'll start hiding notes for you specifically.
+ [fx tilly:6]
+? "Show me what else you've hidden."
+ ~ She shows you nine years of tiny notes on nine years of badges. A joke about a printer. A heart. "Somebody, please, notice."
+ [fx tilly:6]
+`;
+SC.petra_x=`
+[bg carpark]
+~ The car park, level minus one. Petra's car has its bonnet up. Next to it: a satellite dish on a tripod, a roll of cable, and Astrid in a hi-vis vest she clearly stole.
+if met('astrid')
+ astrid.n: The dish needs twelve volts and a clear view of the south sky. The car park roof has a clear view. Petra's car has twelve volts.
+ petra.h: Petra's car has twelve volts, a bad attitude and a tape deck. She's perfect for this.
+ ~ They've been planning it for two days without telling anyone: a mobile uplink. If anyone ever cuts the con's network, the van on the roof broadcasts instead.
+ ? "Can you get it on the roof?"
+  petra.s: The ramp's got a two-metre height limit. The dish is two point one. Watch.
+  ~ She lets the tyres down. Drives up the ramp on rims, sparks and all, with Astrid holding the dish and screaming. They get to the roof with a centimetre to spare.
+  astrid.h: That was the worst thing I've ever done. I need to do it again.
+  [flag van_ready]
+  [fx petra:6 astrid:6]
+ ? "Test it first. Down here."
+  ~ Astrid aims the dish at a concrete pillar and gets, impossibly, a weather satellite. Petra plays it a song from the tape deck. Somewhere over the Atlantic, a satellite receives a cassette of 80s pop.
+  [flag van_ready]
+  [fx petra:5 astrid:5 skill:2]
+ petra.n: If they cut the mics on Sunday, we're the back door. A car and a dish. Nobody ever looks at the car park.
+else
+ ~ Petra's under the car. "There's a radio girl who keeps looking at my battery like she wants it. Aerospace Village. I'm going to let her have it. I'm a soft touch."
+ [fx petra:5]
+petra.d: I've never been part of a plan before. I fix things for people's plans. It's nice to be... in one.
+? "You're the most important part of this one."
+ petra.o: ...Shut up. Okay. Thank you. Shut up.
+ [fx petra:6]
+? "What do you want, when this is over?"
+ petra.n: A road trip. No destination. Somebody in the passenger seat who doesn't touch the radio.
+ [fx petra:6]
+`;
+SC.astrid_x=`
+[bg pool]
+~ The hotel pool, after hours, under the big glass roof. Astrid's lying on a sun lounger with a radio telescope app on a tablet, looking up.
+if met('wren')
+ wren.n: You're not supposed to be in here. I'm the lifeguard. I'm off duty. I'm also not supposed to be in here.
+ astrid.h: Look up. The glass roof's perfect. No light pollution from the city because the lights are off. You can see Jupiter.
+ ~ Wren looks up. Then she lies down on the next lounger. Then she gets out a microphone.
+ wren.n: Episode fifty-five. "The Night I Saw Jupiter From A Hotel Pool." Do you mind?
+ astrid.s: Only if you put the satellite in. There's one at 23:14. It's always a bit late.
+ ? Lie down between them and look up
+  ~ The three of you on three loungers. At 23:14 a light crosses the glass. Nobody says anything. Wren doesn't even narrate it.
+  [fx astrid:6 wren:5]
+ ? "Wren, have you seen anything strange from here? At night?"
+  wren.a: Every night. The thirteenth floor. You can see it through the roof, the corner suite. The lights go on at three. A trolley goes up in the service lift at quarter past. I've timed it all week.
+  astrid.n: ...You've been watching the suite and I've been watching the sky. Between us we've seen everything.
+  [clue trolleytimes]
+  [fx wren:5 astrid:4]
+ [flag wren_witness]
+else
+ ~ Astrid alone, looking up. "Jupiter," she says, and points, and you look, and there it is: a small steady light, not a star.
+ [fx astrid:5]
+astrid.d: I spend all my time listening for things far away. I forget to listen to things that are close.
+? "I'm close."
+ astrid.o: ...Yes. You are. I've noticed.
+ [fx astrid:6]
+? "What are you listening for?"
+ astrid.n: Someone saying something they mean. Mostly I get weather.
+ [fx astrid:5]
+`;
+SC.yuki_x=`
+[bg creator]
+~ Creator Corner. Juno has a guest on the stream, and the guest is under the desk.
+if met('juno')
+ juno.h: Chat, she's here! The speedrunner! She's hiding! Yuki, twelve thousand people want to see you play.
+ yuki.d: Twelve thousand. That's sixty times more people than the pit. That's sixty pits.
+ ~ Yuki looks at you from under the desk with the face of an animal in headlights.
+ ? "Play for me. Not them. Look at me, not the chat."
+  ~ She plays. Her hands shake for one level. Then she looks at you, and they stop, and she does the whole route clean. The chat goes so fast it's just colour.
+  juno.s: That's the best thing that's ever been on this stream. And I once had a tortoise on.
+  [fx yuki:7 juno:4]
+ ? "Juno, turn the chat off."
+  juno.n: ...Okay. Chat's off. It's just the game.
+  ~ It helps. Yuki plays, the stream watches, and nobody types. Afterwards Juno turns the chat back on and the first message, a minute late, just says "thank you".
+  [fx yuki:5 juno:5]
+ juno.n: Yuki. Sunday. If something happens on stage, would you play something? Anything? Keep the stream busy?
+ yuki.a: A distraction. A run. Live. While something else happens. That's... that's the most speedrunner thing I've ever been asked.
+ [flag yuki_stream]
+else
+ ~ Yuki plays the cabinet alone in the arcade, the crowd gone. She does the pit perfectly, three times, and nobody sees but you.
+ [fx yuki:5]
+yuki.n: I keep thinking about who's watching. Then I look at you and I forget. You're like a pause button.
+? "That's a compliment, right?"
+ yuki.h: The best one. Pausing is the most powerful thing in a game.
+ [fx yuki:6]
+? "Then I'll keep pausing you."
+ yuki.b: Forever? You can't pause forever. ...Can you?
+ [fx yuki:6]
+`;
+SC.vesper_x=`
+[bg grill]
+~ The Grill, late. Two women in a booth: Vesper Lane and Delphine Vos, both perfectly made up, both with untouched glasses, both saying absolutely nothing.
+if met('delphine')
+ delphine.n: You sing at our reception every night. I wrote your introduction. "Brand-aligned". I chose those words.
+ vesper.s: I've always wondered who wrote that. It's dreadful.
+ delphine.a: You were asking our people questions. At the bar. Nice questions. The kind I'd write for someone who needed to find something out without looking like it.
+ ~ Silence. Then Vesper laughs, low and real.
+ vesper.n: Darling. We're the same. Two women saying other people's words beautifully. I work for a man in London. You work for a man in Suite 1313.
+ delphine.d: ...Halberd. You work for the buyer.
+ ? "Both of you. What do you actually want?"
+  delphine.n: To stop writing his words.
+  vesper.d: To stop singing for anyone who's listening for something else.
+  ~ They look at each other. Then, very carefully, Delphine slides her untouched glass across the table to Vesper, and Vesper slides hers back.
+  [fx vesper:5 delphine:5]
+  [flag vesper_delphine]
+ ? "Vesper. Tell her who you report to."
+  vesper.a: ...Halberd. Corvid Holdings on paper. A man called Ashgrove. He lands on Friday.
+  delphine.o: Then the buyer's already in the building. And Victor doesn't know Halberd has someone inside his own reception.
+  [clue buyerinside]
+  [flag vesper_delphine]
+  [fx vesper:4 delphine:6]
+else
+ ~ Vesper alone in the booth, with two glasses. She pours one out into the plant. "For a woman I haven't met yet," she says. "Lumen's speechwriter. We'd have a lot to say to each other."
+ [fx vesper:5]
+vesper.n: Everyone I meet is a mark or a handler. You're the first person in years who's neither.
+? "What am I, then?"
+ vesper.o: I don't have a word for it. I'm finding that thrilling.
+ [fx vesper:6]
+? "Maybe you could be neither too."
+ vesper.d: ...Careful. That sounds like hope.
+ [fx vesper:6]
+`;
+SC.delphine_x=`
+[bg cafe]
+~ The Halcyon Café. Delphine is ordering a coffee when Ellie walks in with a box of pastries for the volunteers, and stops dead.
+if met('ellie')&&f('ellie_here')
+ ellie.a: You. You're... I've seen you. On the Lumen website. You're the one who writes the emails.
+ delphine.n: I'm the head of communications. Yes. I approve the emails.
+ ellie.d: "Your business account is at risk. Lumen Account Recovery can help." I got that one. After they stole my account. I paid them nine hundred pounds to give me back my own bakery.
+ ~ The café goes quiet. Delphine puts the coffee down.
+ ? Stand next to Ellie. Say nothing.
+  ~ You stand next to Ellie. Delphine looks at you both. For a long time.
+  delphine.d: I wrote that email. Not the theft. I didn't know about the theft until this week. But I wrote that email. Every word.
+  delphine.n: I'm sorry. That's not enough. It's the first time I've said it to anyone I actually hurt.
+  ellie.n: ...Okay. It's not enough. But you said it. To my face. That's more than anyone at Lumen ever did.
+  [fx delphine:5 ellie:4]
+  [flag delphine_sorry]
+ ? "Delphine. Tell her what you told me."
+  delphine.n: Lumen Growth Partners runs a scheme. They steal small business accounts, then sell the owners the recovery. I found out on Tuesday. I've got the documents.
+  ellie.o: ...You've got proof? Of what they did to me?
+  delphine.d: I've got proof of what they did to three thousand of you.
+  [clue recoveryscam]
+  [flag delphine_sorry]
+  [fx delphine:5 ellie:5]
+ ellie.n: (later, to you) She looked so tired. I wanted to hate her. I gave her a cinnamon knot. I don't know why.
+else
+ ~ Delphine takes her coffee to the window and reads, on her phone, an email she approved two years ago. "Lumen Account Recovery can help." Her face does something complicated.
+ delphine.n: Three thousand small businesses. I wrote the email. I didn't ask what it was for.
+ [clue recoveryscam]
+ [fx delphine:5]
+delphine.d: I've been thinking about who I'd be if I'd asked. One question. "What is this for?"
+? "Ask it now."
+ delphine.o: ...What is this for? This. Us. You.
+ > I don't know yet. That's the honest answer.
+ delphine.h: God. An honest answer. I'd forgotten what they sounded like.
+ [fx delphine:6]
+? "You're asking now. That counts."
+ delphine.b: Does it? Late counts?
+ > Late counts.
+ [fx delphine:6]
+`;
+SC.noor_x=`
+[bg library]
+~ The hotel library. Noor and Saoirse at opposite ends of the reading table, arguing, at volume, in the specific way of people who've argued for fifteen years.
+if met('saoirse')
+ saoirse.a: A court order takes days! A story takes minutes! By the time your judge reads page one, LANTERN's on ten million phones!
+ noor.a: And a story can be denied! Sued! Buried! A court order can't be buried, Saoirse! It's the law!
+ ~ They both turn to you at once.
+ noor.n: We were at law school together. She dropped out to be a journalist. I've never forgiven her.
+ saoirse.s: She stayed in to be a lawyer. I've never forgiven her either. We have dinner every month.
+ ? "Do both. Story and court. At the same time."
+  ~ They stop. They look at each other. Noor picks up her pen.
+  noor.n: ...If the story runs at the moment the order's served, Lumen can't deny it AND can't launch.
+  saoirse.h: And if they sue the story, the court's already looking at them. Oh. Oh, that's nasty. I love it.
+  [flag press_court]
+  [fx noor:6 saoirse:5]
+ ? "Who's right?"
+  noor.s: I am.
+  saoirse.s: I am.
+  noor.d: ...We both are. That's the problem. That's always been the problem.
+  [fx noor:5 saoirse:5]
+ saoirse.n: (to Noor, quietly) You looked happy, this week. For the first time since Jonah.
+ noor.o: ...Don't.
+else
+ ~ Noor alone, drafting two documents side by side: an injunction, and a press release. "In case a journalist ever turns up," she says. "Journalists always turn up. Usually at the wrong moment."
+ [fx noor:5]
+noor.n: I've spent twelve years arguing for other people. I've never once argued for myself.
+? "What would you argue for?"
+ noor.o: ...An evening off. A long dinner. Somebody who asks me how I am and waits for the answer.
+ > How are you?
+ noor.b: ...Tired. Happy. Both. Thank you for waiting.
+ [fx noor:6]
+? "Argue for yourself now. I'll be the judge."
+ noor.h: Objection. Leading the witness. Sustained. Oh, I'm going to enjoy this.
+ [fx noor:5]
+`;
+SC.fern_x=`
+[bg plantdeck]
+~ The plant deck, 3 AM. Fern's crouched behind the hives with a thermos. Next to her, in a hoodie, with a recorder: Wren.
+if met('wren')
+ wren.n: Episode forty-one, live. "The Housekeeping Trolley That Wasn't." Part two.
+ fern.n: Shh. Quarter past. Watch the service lift.
+ ~ At 3:15 exactly, the service lift light comes on. The trolley comes out: two men in housekeeping jackets that don't fit, pushing it towards Suite 1313. No towels. A grey case where the towels should be.
+ wren.a: That's not housekeeping. Housekeeping's a woman called Doreen and she's on holiday.
+ fern.d: They do it every night. In with the case at quarter past. Out without it at half past.
+ ? Photograph the trolley
+  ~ You photograph it. The case has a label, the same as the box in the MDF: LANTERN. Different number. Not -01. -02.
+  wren.o: There are two of them. There's a SECOND box.
+  [clue lantern02]
+  [fx fern:5 wren:6 skill:2]
+ ? Follow it, quietly
+  ~ The three of you follow it down the corridor, Fern leading, past the doors nobody uses. Into 1313. The door shuts. But not before you see the rack inside: a second box, humming.
+  [clue lantern02]
+  [fx fern:6 wren:5]
+ [flag trolley_solved]
+else
+ ~ Fern alone, behind the hives, watching the service lift. At 3:15 it lights up. "Every night," she says. "A trolley with no towels. Going to 1313."
+ [clue trolleytimes]
+ [fx fern:5]
+fern.n: I've been watching that trolley for a week. I didn't tell anyone because I thought nobody would believe the gardener.
+? "I believe you."
+ fern.o: ...I know. That's why I told you.
+ [fx fern:6]
+? "You're the best detective in this hotel."
+ fern.h: Second best. Wren's got a podcast.
+ [fx fern:5]
+`;
+SC.wren_x=`
+[bg bar]
+~ The Hotel Bar, closing time. Wren's set up her microphone on the counter, and Bea's polishing a glass very slowly, which is how Bea says no.
+if met('bea')
+ wren.h: Episode sixty! "The Bartender Who Sees Everything." Come on. Six years behind this bar. You must have stories.
+ bea.s: I have stories. They're called "my regulars' privacy". You'll never hear them.
+ wren.n: Okay. Not them. You. What's it like? Watching everyone and nobody watching you?
+ ~ Bea stops polishing.
+ bea.d: ...Lonely. That's what it's like. I know everyone's drink. Nobody knows mine.
+ ? "What's your drink, Bea?"
+  bea.o: ...Nobody's ever asked. It's a gin and tonic. Badly made. By someone who isn't me.
+  ~ You make it. Badly. Wren records the sound of it being slid across the counter. Bea drinks it and laughs for the first time all week.
+  [fx bea:5 wren:5]
+ ? "Wren, turn it off. Let her just talk."
+  wren.n: ...Off. Done. Just us.
+  ~ Bea talks. About Glasgow. About drawing. About a man who sat at the end of this bar every night of the con with a notebook and never once tipped.
+  [clue barwatch]
+  [fx bea:5 wren:6]
+ [flag bea_podcast]
+else
+ ~ Wren talks into the microphone alone: "Notes for an episode I'll never make. About everyone at this con who's being watched and doesn't know it." She looks at you. "And everyone who knows."
+ [fx wren:5]
+wren.n: My whole life I've been the one watching. The pool. The podcast. Other people's stories. You're the first person who's ever watched back.
+? "Is that okay?"
+ wren.o: ...It's terrifying. Keep doing it.
+ [fx wren:6]
+? "You deserve your own story."
+ wren.b: Maybe this is it. Episode one. Season two.
+ [fx wren:6]
+`;
+SC.pia_x=`
+[bg station]
+~ Central Station. Pia's at the piano. And standing over her, with a ring light on a stick: Juno.
+if met('juno')
+ juno.h: Twelve thousand people! On my stream! You'd be famous by Friday! Play the song! The sad one! Chat's been asking!
+ pia.a: No.
+ juno.o: ...No?
+ pia.d: That one isn't for twelve thousand people. It's for one. And he's not on your stream.
+ ~ Juno lowers the ring light. For a second she looks embarrassed, which you've never seen.
+ ? "Juno. Some things aren't content."
+  juno.d: ...Yeah. Yeah, I know. I said that to someone this week. I'm bad at remembering it.
+  pia.n: Stream something else. Stream the station. People going home. That's nice. Nobody streams that.
+  ~ Juno does. Twelve thousand people watch commuters go home for an hour, and it's the calmest the chat's ever been.
+  [fx pia:6 juno:4]
+  [flag pia_juno]
+ ? "Pia. Play something else for them. Something happy."
+  pia.s: ...Okay. Happy. For your chat. Not that one.
+  ~ She plays something fast and silly and twelve thousand people dance in their bedrooms. At the end, quietly, for one person who isn't there, she plays eleven notes of "that one", and stops.
+  [fx pia:5 juno:5]
+  [flag pia_juno]
+ juno.n: (to you, after) If her brother ever wants to say something on Sunday. To everyone. My stream's his. No chat. No ads. Just his face.
+ [flag juno_audience]
+else
+ ~ Pia plays to the concourse. A man with a hood stands at the back. He leaves a folded note in her case and walks away. She doesn't open it until he's gone.
+ pia.n: "Sunday." That's all it says. He's coming on Sunday.
+ [fx pia:5]
+pia.d: People think busking's begging. It's not. It's asking. "Will you stop? Just for a minute?" Most people don't. You did.
+? "I'll always stop for you."
+ pia.o: ...Don't say always. People say always and then they get on a train.
+ > I'll get off the train.
+ pia.b: ...Okay. Okay, that one I'll believe.
+ [fx pia:6]
+? "What do you ask for, when you play?"
+ pia.n: For him to be okay. Every single time.
+ [fx pia:5]
+`;
+
+/* ============ SIX SCENES A ROUTE ============
+   Every route is six scenes now: meeting (0), four hangouts (1-4) and the last one (5). The scene files were
+   written as eight shorter scenes plus a crossover (SC[g+'_x']); here they're joined, in order, into six longer
+   ones, so nothing written is lost. Scene 4 is always the crossover: time with someone else from the cast. */
+const RMAP={_:[[0],[1,2],[3,4],[5,6],['x'],[7]],ellie:[[0],[1],[2],[3,4],[5,6,'x'],[7]]};
+/* closeness needed for each scene, and the earliest day (the scene's own story timing wins if it's later) */
+const NEWREQ={_:[{a:0,d:1},{a:5,d:1},{a:15,d:2},{a:26,d:3},{a:38,d:4},{a:50,d:5}],ellie:[{a:0,d:1},{a:0,d:1},{a:0,d:3},{a:20,d:3},{a:38,d:4},{a:54,d:6}]};
+const XSUM={ellie:'Ellie and Bea swapped notebooks at the bar and nearly opened a business together.',nyx:'Nyx and Priya, red team and blue team, agreed to work together. Once.',ada:'Ada and Yuki raced each other to a dead draw and found the same bug.',priya:'Priya and Sunny followed the beacon flood through the ceiling to a box called LANTERN-01.',juno:'Juno\'s ex walked onto her stream. You turned the camera off.',kit:'Tilly built a camera into Kit\'s helmet.',rin:'Rin found his source from three years ago, on the roof. It was Mira.',bea:'Bea told Vesper she knows exactly what she is.',mira:'Fern has been feeding Mira toast for three weeks, and knows a way off the roof.',saoirse:'Saoirse and Delphine finally talked. Off the record. For an hour.',sunny:'Sunny and Tilly worked out how to roll every badge back at once.',tilly:'Ada found the patch someone slipped into Tilly\'s badges before the con.',petra:'Petra drove the uplink van onto the car park roof on its rims.',astrid:'Astrid and Wren watched Jupiter, and the thirteenth floor, from the pool.',yuki:'Yuki played live on Juno\'s stream, looking at you, not the chat.',vesper:'Vesper and Delphine recognised each other: two women saying other people\'s words.',delphine:'Delphine said sorry to Ellie, to her face.',noor:'Noor and Saoirse stopped arguing long enough to plan the story and the court order together.',fern:'You, Fern and Wren followed the trolley with no towels to Suite 1313.',wren:'Wren asked Bea what her drink was. Nobody had ever asked.',pia:'Pia told Juno no. Some songs aren\'t content.'};
+/* old scene count -> the same progress in six scenes (for conditions written against the old numbering) */
+const OLDN={_:[0,1,2,2,3,3,4,4,6],ellie:[0,1,2,3,4,4,5,5,6]};
+(function(){
+ for(const g of ROM){const R=ROUTES[g];if(!R)continue;const M=RMAP[g]||RMAP._,NR=NEWREQ[g]||NEWREQ._,old={},oreq=R.req,osum=R.sum||[];
+  for(let i=0;i<8;i++){old[i]=SC[g+i];delete SC[g+i]}old.x=SC[g+'_x'];
+  const req=[],sum=[];
+  M.forEach((parts,ni)=>{const txt=parts.map(p=>old[p]).filter(t=>t!==undefined);
+   if(txt.length){let t=txt.join('\n~ Later.\n');t=t.replace(/\[adv (\w+) (\d)\]/g,(m,w,k)=>'[adv '+w+' '+(OLDN[w]||OLDN._)[+k]+']');SC[g+ni]=t}
+   const os=parts.filter(p=>p!=='x').map(p=>oreq[p]||{}),r={a:NR[ni].a,d:Math.max(NR[ni].d,...os.map(o=>o.d||1))};
+   for(const o of os){if(o.c){const c0=r.c;r.c=c0?(()=>c0()&&o.c()):o.c;r.y=o.y||r.y}if(o.sk>1)r.sk=Math.max(r.sk||0,o.sk-1);if(o.cl>1)r.cl=Math.max(r.cl||0,o.cl-1)}
+   req.push(r);sum.push(parts.map(p=>p==='x'?(XSUM[g]||''):(osum[p]||'')).filter(Boolean).join(' '))});
+  R.n=6;R.req=req;R.sum=sum;R.aff=req.map(r=>r.a)}
+ // texts written against old scene numbers
+ {const all=Object.entries(TEXTQ);for(const[k]of all)delete TEXTQ[k];
+  for(const[k,v]of all){const m=k.match(/^([a-z]+)_(\d)$/);let nk=k;if(m&&ROUTES[m[1]])nk=m[1]+'_'+((OLDN[m[1]]||OLDN._)[+m[2]+1]-1);if(TEXTQ[nk])nk+='b';TEXTQ[nk]=v}}
+})();
+
+/* ============ DATING: how you spend time with someone matters ============
+   Before every hangout you choose how to spend it. Everyone has something they love and something they don't;
+   you find out by trying (or by talking shop, which drops hints). Closeness comes slower the closer you get,
+   there's only so much anyone can take in one day, and people you're dating notice when you vanish. */
+const AFFCAP=16;
+const TONES={quiet:'Somewhere quiet, just the two of you',fun:'Something fun',bold:'Something a bit reckless',work:'Work the case together'};
+/* [loves, dislikes, what they say when you get it right, when you get it wrong, a hint for talk shop] */
+const TASTE={
+ ellie:['quiet','bold','This. Just this. A bench and you and nothing on fire.','Ooh. Okay. That\'s... a lot. Can we do something smaller next time?','She lights up whenever things slow down.'],
+ nyx:['bold','fun','Now you\'re talking. Somewhere with a lock on it.','A party? With people? You\'re lucky I like you.','She only relaxes when something\'s a bit illegal.'],
+ ada:['work','bold','A problem! For us! To solve! Best date ever, I mean, best... thing.','That\'s, um. I\'m going to need a minute. And a whiteboard.','She\'s happiest when there\'s a puzzle on the table.'],
+ priya:['quiet','bold','Phones off. Door shut. Perfect threat model.','Reckless is a word I put in incident reports.','Anywhere without cameras is her idea of luxury.'],
+ juno:['fun','quiet','Yes! Chaos! I\'m in!','Quiet. Right. I\'ll just... sit. In the quiet. Silently.','She hates silence. Silence is dead air.'],
+ kit:['work','fun','Build something? With me? Get the glue gun.','Crowds and noise. My armour isn\'t that thick.','Give her something to make and she\'ll talk for hours.'],
+ rin:['fun','bold','Snacks and nonsense. You know me too well.','Ah. Danger. Yay. My favourite. I\'m lying.','He relaxes when there\'s sugar and silliness.'],
+ bea:['quiet','work','Somewhere nobody needs a drink from me. Bliss.','Work. On my night off. Of course.','She serves people all day. Give her quiet.'],
+ mira:['bold','fun','Finally. Something that feels like breathing.','Fun. Right. I\'ve heard of it.','She trusts people who take risks with her.'],
+ saoirse:['work','quiet','Notes out. Tell me everything.','Quiet. Lovely. Now I\'m thinking about my story.','The story is her love language.'],
+ sunny:['quiet','work','Somewhere the radio can\'t reach. Please.','I literally just came off shift.','She never gets to switch off. Let her.'],
+ tilly:['work','bold','Can I bring my soldering iron? I\'m bringing it.','Risky? Me? I\'ll... try. I\'ll hold your sleeve.','Making things is how she says hello.'],
+ petra:['bold','quiet','Floor it.','Sitting still. My least favourite activity.','She\'s happiest doing something slightly dangerous at speed.'],
+ astrid:['quiet','fun','Somewhere dark, with sky. Perfect.','Loud. Okay. I\'ll be at the edge.','Quiet and a view of the sky is all she wants.'],
+ yuki:['fun','work','Games! Snacks! Yes!','Homework. On a date. Oh no.','She plays to relax. Let her play.'],
+ vesper:['bold','work','Darling. Danger. You do know how to treat a girl.','Work. How very... like work.','She\'s bored by anything safe.'],
+ delphine:['quiet','fun','No microphones. No brief. Thank god.','A party. Wonderful. I\'ve been to four hundred.','She\'s exhausted by performing. Give her quiet.'],
+ noor:['work','bold','A case? Together? I\'ll get my pen.','Reckless. I\'ll be drafting your bail application.','She thinks best with a problem in front of her.'],
+ fern:['quiet','bold','The garden at night. Yes.','That sounds like it involves a lot of people and no plants.','Somewhere green and quiet is her whole heart.'],
+ wren:['fun','work','Yes! Let\'s go! Can I record it? I won\'t record it.','I do enough investigating on the podcast.','She wants to stop watching and start doing.'],
+ pia:['fun','work','Something silly! Yes! I never get silly!','Work. On a Thursday. I play on Thursdays.','She\'s been sad for a year. She wants to laugh.']};
+function tasteOf(g,t){const T=TASTE[g];return !T?0:T[0]===t?1:T[1]===t?-1:0}
+function tasteKnown(g,t){return !!(S.taste&&S.taste[g]&&S.taste[g][t]!==undefined)}
+/* the approach menu: one tap before every hangout */
+function approachMenu(g,go){const T=TASTE[g]||[];S.taste=S.taste||{};
+ return[{choice:Object.keys(TONES).map(t=>({t:TONES[t],hint:tasteKnown(g,t)?(S.taste[g][t]>0?'They loved this last time':S.taste[g][t]<0?'They didn\'t enjoy this':'It was fine'):'',then:()=>{const v=tasteOf(g,t);(S.taste[g]=S.taste[g]||{})[t]=v;S.amult=S.amult||{};S.amult[g]=v>0?1.6:v<0?.45:1;
+  if(v>0)ach('tastes');const ln=v>0?T[2]:v<0?T[3]:null;return[...(ln?[L(typeof worldLook==='function'?worldLook(g):g,v>0?'h':'d',ln)]:[]),...go(),()=>{if(S.amult)delete S.amult[g];return[]}]}}))}]}
+/* how much a moment can move someone: less the closer you are, and only so much a day */
+function affGain(k,g){if(g<=0)return g;g=g*((S.amult&&S.amult[k])||1)*Math.max(.35,1-S.aff[k]/150);
+ const dk=S.day+':'+k;S.affd=S.affd||{};const room=Math.max(0,AFFCAP-(S.affd[dk]||0));g=Math.min(Math.round(g),room);S.affd[dk]=(S.affd[dk]||0)+g;return g}
+const warmToday=k=>S&&S.affd?S.affd[S.day+':'+k]||0:0;
+function seen(g){if(!S)return;S.seenD=S.seenD||{};S.seenD[g]=S.day}
+/* people you're dating notice if you disappear for a whole day */
+function neglectCheck(d){if(!S||d<2)return;S.seenD=S.seenD||{};for(const g of ROM){if(!dating(g)||loved(g))continue;const last=S.seenD[g]||0;if(last<d-1){S.aff[g]=clamp(S.aff[g]-5,0,100);S.msgs.push({f:g,t:pick(['Everything okay? Haven\'t seen you.','You\'ve gone quiet. Busy saving the world?','Missed you yesterday. Just saying.','Did I do something?']),c:d,s:0,r:0});if(S.unl.aff)toast(CH[g].name+' missed you','var(--dim)')}}}
+
 /* ============ HUB, SHOP, ROOM 1337, THE PLAN, ENDINGS, TITLE ============ */
 function hub(){
  closeOv();$('ov').classList.remove('phoneov','mapov');S.resume=null;
@@ -9150,7 +9945,7 @@ function endingKey(){
  if(S.plan==='front')return'frontpage';
  if(S.plan==='inj')return'injunction';
  if(sc<18)return'half';
- if(!romCount())return ROM.filter(g=>scn(g)>=3).length>=6?'opensource':'notfound';
+ if(!romCount())return ROM.filter(g=>scn(g)>=2).length>=6?'opensource':'notfound';
  return'disclosure'}
 function finishEnding(k){
  S.ending=k;S.inWorld=0;WD.active=false;if(document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}if(typeof updBlur==='function')updBlur();META.ends[k]=1;META.runs=(META.runs||0)+1;saveMeta();ach('end_'+k);if(!S.fails)ach('survivor');if(S.foot<=5)ach('ghostfoot');
@@ -13287,7 +14082,7 @@ function placeWorld(){
  int('f13',212.8,-10,()=>'Look out of the corridor window',N1('Thirteen floors down, the plaza glows. The neon sign is a pink smudge. Over the road, an office tower with one lit window: a man eating cereal at his desk at midnight.'));
  int('f13',275.2,10,()=>'Look out of the corridor window',N1('The convention centre, flat-roofed and glowing, and beyond it the whole city. On the con roof, a tiny red light blinks on a mast.'));
  int('f13',261.4,13.4,()=>'Drop into Room 1336',()=>run([{w:'Partygoer',np:1,t:pick(ROLELINES.Partygoer)},N('The room is twelve people, six laptops, a mountain of fries and a TV showing a Linux boot screen on loop. Someone hands you a fry. You have been accepted.')],hub));
- int('f13',212+8*16/3+2.67,-12.7,()=>'Room 1309',()=>run([N(scn('kit')>=4?'Room 1309. Kit\'s room. A new sign on the door: "DO NOT DISTURB". The peephole has a sticker over it from the outside. You hope it was her.':S.stage.kit>=2?'Room 1309. A photo taken outside this door is how the creep found her. You don\'t linger. You check the corridor both ways when you leave.':'Room 1309. A cyan strip of armour paint on the door handle. Someone\'s been in and out in a hurry, carrying a costume.')],hub));
+ int('f13',212+8*16/3+2.67,-12.7,()=>'Room 1309',()=>run([N(scn('kit')>=3?'Room 1309. Kit\'s room. A new sign on the door: "DO NOT DISTURB". The peephole has a sticker over it from the outside. You hope it was her.':S.stage.kit>=2?'Room 1309. A photo taken outside this door is how the creep found her. You don\'t linger. You check the corridor both ways when you leave.':'Room 1309. A cyan strip of armour paint on the door handle. Someone\'s been in and out in a hurry, carrying a costume.')],hub));
  int('f13',212+2*16/3+2.67,-12.7,()=>'Room 1303',N1('Room 1303. A Faraday bag hangs on the door handle like a "do not disturb" sign. Even the peephole has a tiny square of tape over it. You don\'t need to ask whose room this is.'));
  int('f13',269.5,13.6,()=>'Use your laptop',()=>roomMenu());
  int('f13',273.6,14.2,()=>stepIs('bed')?(beatStep(curBeat()).lbl||'Drop your bag'):S.day>=1&&S.slot===5&&!curBeat()?'Go to bed (end the day)':'Lie on the bed',()=>{if(stepIs('bed'))return stepGo();if(S.day>=1&&S.slot===5&&!curBeat())return endDay();roomMenu()});
@@ -13586,10 +14381,13 @@ const APPS={
   const g=sel,R=ROUTES[g],i=scn(g),m=met(g),why=sceneWhy(g),gi=Object.keys(ITEMS).find(k=>ITEMS[k].g===g),wn=whereNow(g);
   let file;
   if(!m)file=`<div class="hfile"><h3>???</h3><p>${esc(UNMET[g]?'Someone: '+UNMET[g]+'.':'Someone you haven\'t met.')}</p><p class="small">${esc(R.blurb)}</p>${wn?`<p class="small">Seen around: ${esc(wn)}</p>`:''}</div>`;
-  else{const steps=[];for(let k=1;k<R.n;k++){const done=i>k,next=i===k;steps.push(`<div class="hstep ${done?'done':''} ${next?'next':''}"><b>${k===R.n-1?'♥ Last scene':'Scene '+k}</b><span>${done?esc((R.sum&&R.sum[k])||'Seen'):next?(why?'Locked: '+esc(why):'Ready now'+(wn?' · '+esc(wn):'')):'???'}</span></div>`)}
+  else{const steps=[];for(let k=1;k<R.n;k++){const done=i>k,next=i===k;steps.push(`<div class="hstep ${done?'done':''} ${next?'next':''}"><b>${k===R.n-1?'♥ Last scene':k===4?'Scene 4 · with a friend':'Scene '+k}</b><span>${done?esc((R.sum&&R.sum[k])||'Seen'):next?(why?'Locked: '+esc(why):'Ready now'+(wn?' · '+esc(wn):'')):'???'}</span></div>`)}
    file=`<div class="hfile"><div class="hfhead"><div class="hbig">${por(lookOf(g),loved(g)?'h':'n')}</div><div><h3 style="color:${CH[g].col}">${CH[g].name}</h3><p>${esc(R.blurb)}</p><p class="small">${stageOf(g)} · ♥ ${aff(g)}/100</p>${bar(aff(g),CH[g].col)}
    <div class="aff-marks">${R.aff.slice(1).map((a,k)=>`<i style="left:${a}%" title="Scene ${k+1}"></i>`).join('')}</div>
    <p class="small">${wn?'Right now: '+esc(wn):'Not around right now'}${S.hang[g+':'+S.day]?' · talked shop today':''}</p>
+   <div class="chem"><b class="small">How they like to spend time</b><div class="chips">${Object.keys(TONES).map(t=>{const k=S.taste&&S.taste[g]&&S.taste[g][t];return`<span class="tchip ${k===1?'yes':k===-1?'no':k===0?'meh':'unk'}" title="${esc(TONES[t])}">${k===1?'♥ ':k===-1?'✗ ':k===0?'· ':'? '}${esc({quiet:'Quiet',fun:'Fun',bold:'Reckless',work:'The case'}[t])}</span>`}).join('')}</div>${S.thint&&S.thint[g]&&TASTE[g]?`<p class="small">“${esc(TASTE[g][4])}”</p>`:'<p class="small">Talk shop with them to learn more, or just try things.</p>'}</div>
+   <p class="small">Today: ${warmToday(g)>=AFFCAP?'they\'ve had all of you they can take today. Tomorrow.':'room to get closer ('+(AFFCAP-warmToday(g))+' left today)'}${S.seenD&&S.seenD[g]?' · last together Day '+S.seenD[g]:''}</p>
+   ${dating(g)&&!loved(g)?`<p class="small" style="color:var(--butter)">You're dating. Go a whole day without seeing them and they'll notice.</p>`:''}
    <p class="small">${gi?(S.gifted[g]?'Gift: '+esc(ITEMS[gi].n)+' (given)':'Would love: '+esc(ITEMS[gi].n)+(S.inv[gi]?' (in your bag)':' (Con Store, '+ITEMS[gi].p+'c)')):''}</p>
    <div class="row">${wn?`<button class="btn" id="hpin">Pin their location</button>`:''}</div></div></div><div class="hsteps">${steps.join('')}</div></div>`}
   return`<div class="abody hsplit"><div class="hleft">${grid}</div><div class="hright"><button class="btn" id="hclose">‹ Everyone</button>${file}</div></div>`},
@@ -13647,7 +14445,7 @@ function pinArea(k){const A=AREAS[k];if(!A)return;S.wp={reg:A.reg,x:A.sp[0],z:A.
 const APPS_AFTER={
  messages(){const o=$('ov');o.querySelectorAll('.mthr').forEach(b=>b.onclick=()=>{phThread=b.dataset.f;redraw()});
   if($('mback'))$('mback').onclick=()=>{phThread=null;redraw()};
-  o.querySelectorAll('.mreply .ch').forEach(b=>b.onclick=()=>{const m=S.msgs[+b.dataset.q],r=TEXTQ[m.q].replies[+b.dataset.i];m.ans=+b.dataset.i;
+  o.querySelectorAll('.mreply .ch').forEach(b=>b.onclick=()=>{const m=S.msgs[+b.dataset.q],r=TEXTQ[m.q].replies[+b.dataset.i];m.ans=+b.dataset.i;if(ROM.includes(m.f))seen(m.f);
    S.msgs.push({f:m.f,me:1,t:sub(r.t),c:S.day,s:S.slot,r:1});if(r.fx)fx(r.fx);if(r.a)S.msgs.push({f:m.f,t:sub(r.a),c:S.day,s:S.slot,r:1});save();redraw();
    const lg=o.querySelector('.mlog');if(lg)lg.scrollTop=1e6});
   const lg=o.querySelector('.mlog');if(lg)lg.scrollTop=1e6},

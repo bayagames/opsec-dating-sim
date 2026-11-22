@@ -109,18 +109,18 @@ if met('ellie')
 ~ What you can do tomorrow depends on what you know, and who you have.
 ? Disclosure. Marge's ten minutes, the evidence on Victor's screen, the regulator already notified. The slow, proper way.
  [call S.plan='disc']
- if met('priya')&&scn('priya')>=3
+ if met('priya')&&scn('priya')>=2
   priya.n: The regulator has it. I sent it at 11:42 this morning. Timestamped, signed, with Rin's findings and Ada's reproduction. Tomorrow isn't an attack. It's a disclosure with a receipt.
   [flag reg_sent]
  else
   > I'll send the regulator everything tonight. Timestamped. It's not as clean as it should be. It'll have to do.
-?(met('saoirse')&&scn('saoirse')>=4) Front Page. Saoirse's story runs the second the keynote starts, with everything in it.
+?(met('saoirse')&&scn('saoirse')>=3) Front Page. Saoirse's story runs the second the keynote starts, with everything in it.
  [call S.plan='front']
  saoirse.n: My editor's signed it off. Three lawyers have read it. It goes live at 4:01 PM, the minute Victor says hello. He'll be standing on stage while everyone in the room reads it on their phone.
-?(met('noor')&&scn('noor')>=4&&(scn('delphine')>=4||solved('m7'))) Injunction. Noor goes to a judge in the morning to stop the launch.
+?(met('noor')&&scn('noor')>=3&&(scn('delphine')>=3||solved('m7'))) Injunction. Noor goes to a judge in the morning to stop the launch.
  [call S.plan='inj']
  noor.n: I need a judge, a sworn statement from inside, and three hours. A Sunday judge is a grumpy judge. Grumpy judges read faster.
-?(met('mira')&&scn('mira')>=4&&clue('signkey')) Kill Switch. Mira's way. The update that switches SafeSphere off, on every phone, at once.
+?(met('mira')&&scn('mira')>=3&&clue('signkey')) Kill Switch. Mira's way. The update that switches SafeSphere off, on every phone, at once.
  [call S.plan='kill']
  mira.n: I didn't come here to be the plan. But here I am. Ten million phones. One signed update. Nobody asked them. That's the bit I can't get past.
 ? Walk away. Take the last train tomorrow. It isn't your fight.

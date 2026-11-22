@@ -252,7 +252,7 @@ SC.ev_arcadecup=`
 if met('yuki')
  yuki.h: You entered! Oh no. Oh no, I'm going to have to destroy you. Respectfully.
 [game timing kind=pins n=3 mult=0 title="Round one"]
-if rank('skill')>=3||scn('yuki')>=3
+if rank('skill')>=3||scn('yuki')>=2
  ~ You make it to the quarter-finals. Then the semi-finals. Then you meet Yuki, and she beats you in a way that's so precise it's almost polite.
  [fx clout:8]
  [call cameo('yuki','Semi-final! You were nearly good! You were actually good! Don\\'t tell anyone I said that.',8)]

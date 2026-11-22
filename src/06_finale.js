@@ -80,7 +80,7 @@ function endingKey(){
  if(S.plan==='front')return'frontpage';
  if(S.plan==='inj')return'injunction';
  if(sc<18)return'half';
- if(!romCount())return ROM.filter(g=>scn(g)>=3).length>=6?'opensource':'notfound';
+ if(!romCount())return ROM.filter(g=>scn(g)>=2).length>=6?'opensource':'notfound';
  return'disclosure'}
 function finishEnding(k){
  S.ending=k;S.inWorld=0;WD.active=false;if(document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}if(typeof updBlur==='function')updBlur();META.ends[k]=1;META.runs=(META.runs||0)+1;saveMeta();ach('end_'+k);if(!S.fails)ach('survivor');if(S.foot<=5)ach('ghostfoot');

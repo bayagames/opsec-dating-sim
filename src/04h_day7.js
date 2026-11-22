@@ -125,10 +125,10 @@ if !solved('m6')&&!f('mole_fed')
  [flag mole_struck]
  if taskOK('screens')
   ~ {=KTX('screens',a=>CH[a].name+' is already in the AV booth. "Nope," you hear over the comms. Three switches, a cable you didn\\'t know existed, and the faders come back up. Owen stares at the desk like it bit him.',a=>CH[a].name+' scrambles at the desk and gets one microphone back. One is enough.','')}
- elif met('astrid')&&scn('astrid')>=4
+ elif met('astrid')&&scn('astrid')>=3
   ~ Your phone buzzes. Astrid. "They cut the room. They can't cut the sky. Going out by satellite. Keep talking."
   [flag signal]
- elif met('sunny')&&scn('sunny')>=4&&taskOf('uplink')==='sunny'
+ elif met('sunny')&&scn('sunny')>=3&&taskOf('uplink')==='sunny'
   ~ Your earpiece crackles. Sunny. "They've got the room. Fine. Then nobody gets anything." And the whole building goes dark.
   [flag blackout]
  else
@@ -185,11 +185,11 @@ else
    ~ Dave takes the mic. "I was MegaHax. I made the TikTok. Ten million downloads. I didn't know. Now I do. Delete it." It's the most honest thing anyone in a Lumen T-shirt has ever said.
   else
    ~ {=CH[taskOf('story')].name} tells the human part. It lands.
- if scn('delphine')>=5&&!f('delphine_stage')
+ if scn('delphine')>=3&&!f('delphine_stage')
   ~ And then Delphine Vos walks out of the wings, in her navy suit, with her hair down. Victor's face does something you'll remember for the rest of your life.
   delphine.n: I'm Lumen's VP of Communications. I wrote every word Victor has said this week. I also found WH1SPER's posts in our own Trust and Safety folder, written days before they went up. I'd like to read you some.
   [flag delphine_stage]
- if solved('m9')&&scn('pia')>=4
+ if solved('m9')&&scn('pia')>=3
   ~ And from the back of the hall, a thin man with a beard and a hoodie walks all the way down the centre aisle. Nobody knows who he is. Then Saoirse, in the front row, stands up.
   saoirse.d: That's Jonah Reyes.
   ~ He climbs onto the stage beside you. He has LANTERN's first design documents in a carrier bag, with Victor's signature on every page.
@@ -212,7 +212,7 @@ mira.d: And nobody asked them. That's the part I can't get past. I'm doing to te
  ~ She presses enter.
  ~ Far below, through the con's glass roof, two thousand phones in Hall A buzz at once. Then the whole city's do.
  ~ "SafeSphere has been updated by its original author. Data collection: off. Thank you for trusting us. You shouldn't have."
-?(scn('mira')>=5) "Come with me instead. After. Leave all of this."
+?(scn('mira')>=3) "Come with me instead. After. Leave all of this."
  [flag kill_go ghost]
  ~ She looks at you for a long time. Then she presses enter, closes the laptop, and holds out her hand.
  mira.b: ...Yes. After. Somewhere with no Wi-Fi at all.
@@ -250,7 +250,7 @@ if f('lantern_dead')
   "Police officer": Silas Krall? We'd like to talk to you about a series of posts made under the name WH1SPER.
   ~ Krall turns from the window. For the first time all week, he looks surprised.
   [flag krall_arrested]
- if scn('vesper')>=5&&clue('vconfess')
+ if scn('vesper')>=3&&clue('vconfess')
   ~ Vesper is in the corridor behind you. You didn't hear her arrive. No earpiece.
   vesper.n: Halberd will want someone inside who understands what happened here today. Someone who knows Lumen's mistakes, and LANTERN's code, and the people in it.
   vesper.s: Come with me, darling. Inside. We could take them apart from the middle, slowly, beautifully, for years.
