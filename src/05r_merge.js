@@ -15,7 +15,11 @@ const OLDN={_:[0,1,2,2,3,3,4,4,6],ellie:[0,1,2,3,4,4,5,5,6]};
   M.forEach((parts,ni)=>{const txt=parts.map(p=>old[p]).filter(t=>t!==undefined);
    if(txt.length){let t=txt.join('\n~ Later.\n');t=t.replace(/\[adv (\w+) (\d)\]/g,(m,w,k)=>'[adv '+w+' '+(OLDN[w]||OLDN._)[+k]+']');SC[g+ni]=t}
    const os=parts.filter(p=>p!=='x').map(p=>oreq[p]||{}),r={a:NR[ni].a,d:Math.max(NR[ni].d,(os[0]&&os[0].d)||1)};
-   for(const o of os){if(o.c){const c0=r.c;r.c=c0?(()=>c0()&&o.c()):o.c;r.y=o.y||r.y}if(o.sk>1)r.sk=Math.max(r.sk||0,o.sk-1);if(o.cl>1)r.cl=Math.max(r.cl||0,o.cl-1)}
+   // a later part's condition that an earlier part of the same scene satisfies (a clue it gives, a flag it sets) is dropped:
+   // otherwise the scene would be waiting for itself
+   const given=parts.filter(p=>p!=='x').map(p=>old[p]||'').join('\n');
+   const selfMet=(o,k)=>k>0&&o.c&&(String(o.c).match(/(?:clue|f)\('([a-z0-9_]+)'\)/g)||[]).every(m=>{const id=m.match(/'([a-z0-9_]+)'/)[1];return new RegExp('\\[(?:clue|flag)[^\\]]*\\b'+id+'\\b').test(given)});
+   for(const[k,o]of os.entries()){if(o.c&&!selfMet(o,k)){const c0=r.c;r.c=c0?(()=>c0()&&o.c()):o.c;r.y=o.y||r.y}if(o.sk>1)r.sk=Math.max(r.sk||0,o.sk-1);if(o.cl>1)r.cl=Math.max(r.cl||0,o.cl-1)}
    req.push(r);sum.push(parts.map(p=>p==='x'?(XSUM[g]||''):(osum[p]||'')).filter(Boolean).join(' '))});
   R.n=6;R.req=req;R.sum=sum;R.aff=req.map(r=>r.a)}
  // texts written against old scene numbers
@@ -62,7 +66,7 @@ function approachMenu(g,go){const T=TASTE[g]||[];S.taste=S.taste||{};
 function affGain(k,g){if(g<=0)return g;const hang=!!(S.amult&&S.amult[k]!==undefined);g=g*((S.amult&&S.amult[k])||1)*Math.max(.35,1-S.aff[k]/150);
  // the daily limit is for time you choose to spend together; the story itself is never rationed
  if(!hang)return Math.max(1,Math.round(g));
- const dk=S.day+':'+k;S.affd=S.affd||{};const room=Math.max(0,AFFCAP-(S.affd[dk]||0));g=Math.min(Math.round(g),room);S.affd[dk]=(S.affd[dk]||0)+g;return g}
+ const dk=S.day+':'+k;S.affd=S.affd||{};const room=Math.max(0,AFFCAP*(S.loop?3:1)-(S.affd[dk]||0));g=Math.min(Math.round(g),room);S.affd[dk]=(S.affd[dk]||0)+g;return g}
 const warmToday=k=>S&&S.affd?S.affd[S.day+':'+k]||0:0;
 function seen(g){if(!S)return;S.seenD=S.seenD||{};S.seenD[g]=S.day}
 /* people you're dating notice if you disappear for a whole day */

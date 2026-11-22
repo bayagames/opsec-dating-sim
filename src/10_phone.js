@@ -1,5 +1,6 @@
 /* ============ PHONE ============ */
 const ICON={
+ echo:['#c9b6ff','<path d="M16 6a10 10 0 1 0 10 10" fill="none" stroke="#1b1026" stroke-width="2.6" stroke-linecap="round"/><path d="M26 7v9h-9" fill="none" stroke="#1b1026" stroke-width="2.6" stroke-linejoin="round"/><circle cx="16" cy="16" r="2.5" fill="#1b1026"/>'],
  messages:['#8affc1','<path d="M6 8h20v13H13l-5 4v-4H6z" fill="#1b1026"/>'],
  map:['#7cc4ff','<path d="M5 9l7-3 8 3 7-3v17l-7 3-8-3-7 3z" fill="none" stroke="#1b1026" stroke-width="2.4" stroke-linejoin="round"/><path d="M12 6v17M20 9v17" stroke="#1b1026" stroke-width="2"/>'],
  goals:['#ffd166','<circle cx="16" cy="16" r="10" fill="none" stroke="#1b1026" stroke-width="2.4"/><circle cx="16" cy="16" r="5" fill="none" stroke="#1b1026" stroke-width="2.4"/><circle cx="16" cy="16" r="1.8" fill="#1b1026"/>'],
@@ -16,8 +17,8 @@ const ICON={
  achieve:['#ffb347','<path d="M10 6h12v6a6 6 0 0 1-12 0z" fill="#1b1026"/><path d="M10 8H6a4 4 0 0 0 4 5M22 8h4a4 4 0 0 1-4 5" fill="none" stroke="#1b1026" stroke-width="2"/><path d="M16 18v4M11 26h10" stroke="#1b1026" stroke-width="2.6" stroke-linecap="round"/>'],
  settings:['#d9d4cc','<circle cx="16" cy="16" r="4.5" fill="none" stroke="#1b1026" stroke-width="2.6"/><path d="M16 5v4M16 23v4M5 16h4M23 16h4M8.2 8.2l2.8 2.8M21 21l2.8 2.8M8.2 23.8l2.8-2.8M21 11l2.8-2.8" stroke="#1b1026" stroke-width="2.6" stroke-linecap="round"/>']
 };
-const APPN={messages:'Messages',calendar:'Calendar',map:'Map',hearts:'Hearts',cases:'Case board',stats:'Stats',story:'Story',achieve:'Achievements',bag:'Bag',saves:'Saves',log:'Log',settings:'Settings',quit:'Quit'};
-const APPU={messages:'phone',calendar:'phone',map:'map',hearts:'aff',cases:'clues',stats:'skill',story:'phone',achieve:'phone',bag:'phone'};
+const APPN={echo:'Echo',messages:'Messages',calendar:'Calendar',map:'Map',hearts:'Hearts',cases:'Case board',stats:'Stats',story:'Story',achieve:'Achievements',bag:'Bag',saves:'Saves',log:'Log',settings:'Settings',quit:'Quit'};
+const APPU={echo:'echo',messages:'phone',calendar:'phone',map:'map',hearts:'aff',cases:'clues',stats:'skill',story:'phone',achieve:'phone',bag:'phone'};
 /* the phone: a home screen of apps; every app opens full screen. Back (or Esc) goes back to the home screen. */
 let phApp=null,phThread=null,phReg=null;const PH={case:null,pick:[],ans:null,heart:null,day:null,stab:'week',atab:'all',ctab:'board',sday:null};
 function phone(app){
@@ -82,7 +83,7 @@ const APPS={
   if(d===S.day){const b=curBeat();
    if(b)now=`<div class="cnow"><b>Now: ${esc(beatStep(b).t||b.t)}</b><p class="small">The green light shows where. Free time comes after.</p><button class="btn" id="cpin">Point me there</button></div>`;
    else if(isFree()){const ready=ROM.filter(sceneReady),leads=Object.keys(LEADS).filter(leadOpen);
-    now=`<div class="cnow"><b>The ${SLOTN[S.slot].toLowerCase()} is yours.</b><p class="small">One thing per part of the day${S.restore?' (two, overclocked)':''}. Walking, talking shop, gifts, shopping and your phone are free.</p>
+    now=`<div class="cnow"><b>The ${SLOTN[S.slot].toLowerCase()} is yours.</b><p class="small">One thing per part of the day${S.loop?' (six, in the loop)':''}. Walking, talking shop, gifts, shopping and your phone are free.</p>
     ${ready.length?`<div class="small"><b>Ready for you</b></div><div class="cppl">${ready.map(g=>`<button class="chip" data-who="${g}"><span class="hd">${head(lookOf(g),'n')}</span>${CH[g].name}<small>${esc(whereNow(g)||'')}</small></button>`).join('')}</div>`:''}
     ${eventsNow().length?`<div class="small"><b>On now</b></div><div class="cppl">${eventsNow().map(e=>`<button class="chip" data-ev="${e.id}">${esc(e.n)}<small>${esc(AREAS[e.w]?AREAS[e.w].n:'')}</small></button>`).join('')}</div>`:''}
     ${leads.length?`<div class="small"><b>Open leads</b></div><div class="cppl">${leads.map(k=>`<button class="chip" data-lead="${k}">${esc(LEADS[k].n)}<small>${esc(AREAS[LEADS[k].w]?AREAS[LEADS[k].w].n:'')}</small></button>`).join('')}</div>`:''}
@@ -109,7 +110,7 @@ const APPS={
   return`<div class="abody hsplit"><div class="hleft">${grid}</div><div class="hright"><button class="btn" id="hclose">‹ Everyone</button>${file}</div></div>`},
  /* ---- Case board: a corkboard of mysteries, clues on strings, leads as sticky notes ---- */
  cases(){
-  const ms=Object.keys(MYST).filter(m=>mystClues(m).length||Object.keys(LEADS).some(k=>LEADS[k].m===m&&leadOpen(k))||S.solved[m]||(S.restore&&META.solved[m]));
+  const ms=Object.keys(MYST).filter(m=>mystClues(m).length||Object.keys(LEADS).some(k=>LEADS[k].m===m&&leadOpen(k))||S.solved[m]||(S.loop&&META.solved[m]));
   const tabs=tabsH(PH.ctab,[['board','Board'],['locker','Evidence locker'],['leads','All leads']],'ct');
   if(PH.ctab==='locker'){const by={};S.clues.forEach(c=>{(by[CLUE[c].m[0]]=by[CLUE[c].m[0]]||[]).push(c)});
    return tabs+`<div class="abody"><p class="small">${S.clues.length}/${Object.keys(CLUE).length} clues</p>${Object.keys(MYST).filter(m=>by[m]).map(m=>`<div class="dbh">${esc(MYST[m].n)}</div><div class="cork small-cork">${by[m].map(c=>`<div class="pin"><b>${esc(CLUE[c].s)}</b><span>${esc(CLUE[c].t)}</span></div>`).join('')}</div>`).join('')||'<p class="small">Nothing yet.</p>'}</div>`}
@@ -143,6 +144,9 @@ const APPS={
  achieve(){const cat=k=>k.startsWith('end_')?'end':k.startsWith('love_')?'love':k.startsWith('solve_')||k.includes('clue')||k.includes('solve')||k==='first_lead'?'myst':k.startsWith('skill_')||k.startsWith('clout_')?'rank':'other';
   const ks=Object.keys(ACH).filter(k=>PH.atab==='all'||cat(k)===PH.atab),all=Object.keys(ACH),got=all.filter(k=>META.ach[k]).length;
   return tabsH(PH.atab,[['all','All'],['end','Endings'],['love','Love'],['myst','Mysteries'],['rank','Ranks'],['other','Everything else']],'at')+`<div class="abody"><p class="small">${got}/${all.length} unlocked across every run</p>${bar(got/all.length*100,'var(--butter)')}<div class="agrid">${ks.map(k=>{const a=ACH[k],on=!!META.ach[k],hid=a[2]&&!on;return`<div class="atile ${on?'on':''}"><span class="aic">${on?'★':hid?'?':'☆'}</span><b>${hid?'???':esc(a[0])}</b><small>${hid?'Hidden':esc(a[1])}</small>${on?`<em>${new Date(META.ach[k]).toLocaleDateString()}</em>`:''}</div>`}).join('')}</div></div>`},
+ /* ---- Echo: the loop. What's left, and the day you can take back ---- */
+ echo(){const P=echoPlan(),left=P.people.filter(p=>p[1]!=='Done');
+  return`<div class="abody"><p class="small">Loop ${META.loop||1}. Each part of the day holds ${LOOPOC+1} things. People can take three times as much of you each day, and stories can run up to two days early. Routes you've finished before aren't held to their day.</p><div class="row"><button class="btn pri" id="erw" ${S.snap&&S.day>=1?'':'disabled'}>Rewind to this morning</button></div><p class="small" style="margin-top:12px"><b>People · ${ROM.length-left.length}/${ROM.length} in love</b></p>${left.map(p=>`<div class="kv"><span>${esc(p[0])}</span><b class="small">${esc(p[1])}</b></div>`).join('')||'<p class="small">Everyone. You did it.</p>'}<p class="small" style="margin-top:12px"><b>Mysteries · ${allMyst().filter(m=>S.solved[m]).length}/${allMyst().length}</b></p>${P.mys.map(m=>`<div class="kv"><span>${esc(m[0])}</span><b class="small">${esc(m[1])}</b></div>`).join('')||'<p class="small">All of it.</p>'}<p class="small" style="margin-top:12px">${haremReady()?'Ready. Go to the keynote on Sunday.':'When everyone is in love with you and every mystery is solved, Sunday becomes something else.'}</p></div>`},
  bag(){const e=Object.entries(S.inv).filter(([k])=>ITEMS[k]);
   const who=k=>ROM.filter(g=>met(g)&&prefKnown(g,k)&&prefOf(g,k)>0).sort((a,b)=>prefOf(b,k)-prefOf(a,k));
   return`<div class="abody"><p class="small"><b class="term" style="font-size:22px;color:var(--butter)">£${S.money||0}</b> · Shops: Con Store (Expo Hall), Byte Café (Food Court), Halcyon Boutique (hotel lobby), the bar (evenings), Paper & Co (Central Station), Proof (mornings). Work: the info desk, a bar shift with Bea, a morning at Proof.</p><div class="bgrid">${e.length?e.map(([k,v])=>{const it=ITEMS[k],w=it.gear?[]:who(k);return`<div class="bitem"><b>${esc(it.n)}${v>1?' ×'+v:''}</b><small>${esc(it.d)}${it.gear?' (gear)':w.length?' · '+w.map(g=>CH[g].name+(prefOf(g,k)===2?' ♥':'')).join(', '):' · a gift: you haven\'t learned who loves it yet'}</small></div>`}).join(''):'<p class="small">Empty.</p>'}</div></div>`},
@@ -186,6 +190,7 @@ const APPS_AFTER={
    ov(`<div class="card"><h3>${ok?'Solved':'That doesn\'t hold up'}</h3><p>${ok?esc(MYST[m].n)+': '+esc(MYST[m].opts[MYST[m].a]):'The clues don\'t prove it, or the answer\'s wrong. You asked around while you were checking, and people noticed.'}</p><div class="row"><button class="btn pri" id="cok">OK</button></div></div>`);$('ov').classList.remove('phoneov','mapov','appov');
    $('cok').onclick=()=>{closeOv();if(ok&&SC['solved_'+m]!==undefined){closePhone();run(scr('solved_'+m),hub)}else{phApp='cases';drawApp(from==='phone')}}}},
  story(){$('ov').querySelectorAll('[data-sd]').forEach(b=>b.onclick=()=>{PH.sday=+b.dataset.sd;redraw()})},
+ echo(){const b=$('erw');if(b)b.onclick=()=>{if(!b.dataset.c){b.dataset.c=1;b.textContent='Tap again: lose everything since this morning';return}rewindDay()}},
  achieve(){$('ov').querySelectorAll('[data-at]').forEach(b=>b.onclick=()=>{PH.atab=b.dataset.at;redraw()})},
  saves(){savesPanel($('spanel'),'phone',redraw)},
  settings(){$('stf').onclick=()=>{S.fast=!S.fast;redraw()};$('stdbg').onclick=()=>{closeOv();dbgOpen()};

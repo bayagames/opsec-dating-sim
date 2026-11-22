@@ -135,7 +135,9 @@ const TEXTQ={};
 const DAYCARD={0:['PROLOGUE','Hello, World','Two weeks before the con'],1:['DAY 1 · MONDAY','Badge In','CTRL+ALT+CON opens tonight'],2:['DAY 2 · TUESDAY','Capture the Flag','Six days to the closing keynote'],3:['DAY 3 · WEDNESDAY','Exposure','Five days to the closing keynote'],4:['DAY 4 · THURSDAY','Packet Loss','Four days to the closing keynote'],5:['DAY 5 · FRIDAY','Home','Three days to the closing keynote'],6:['DAY 6 · SATURDAY','Finals','The night before'],7:['DAY 7 · SUNDAY','Closing Keynote','Today']};
 /* endings: title, one line, and how it reads on the card */
 const ENDINFO={
- harem:['Everything Connected','Every thread, every person, every secret. All of it, together.','true'],
+ harem:['Everything Connected','The week closes. Every person, every mystery, every story ends, and it\'s finally Monday.','true'],
+ zeroday:['Zero Day','The lights go out. Not everyone comes down from the roof. And a message arrives from someone who\'s already been here.','secret'],
+ bigscore:['The Big Score','Five people, one laundry trolley, and a spy firm\'s crystal ball in the back of a van.','good'],
  disclosure:['Responsible Disclosure','The slow way, done right. LANTERN dies in daylight.','good'],
  half:['Half Measures','SafeSphere 2 is paused. Lumen is wounded. Not finished.','mixed'],
  frontpage:['Front Page','Saoirse\'s story runs at 4:01 PM. The world reads it at 4:02.','good'],
@@ -185,7 +187,7 @@ const ACH={
  worked:['Gig Economy','Work a shift for money.'],
  broker:['Data Broker','Buy someone\'s secrets from PEOPLEFINDR. You know what you did.'],
  shopper:['Retail Therapy','Buy something in a shop.'],
- gifts5:['Thoughtful','Give five people the gift they love.'],
+ gifts5:['Thoughtful','Give gifts to five different people.'],
  ctf_win:['Capture the Flag','Win the CTF finals with Ada.'],
  dave:['Redemption Arc','Help Dave lock down his life.'],
  train:['Commuter','Take the train during the con.'],
@@ -193,8 +195,19 @@ const ACH={
  talks5:['Front Row','Go to five talks or workshops.'],
  night_owl:['Night Owl','Spend a Late night slot with someone.'],
  survivor:['Clean Week','Finish the con without being doxxed once.'],
- restore:['session.bak','Restore a session.',1],
  harem:['Everything Connected','See the true ending.',1],
+ secret:['Zero Day','Find the secret ending.',1],
+ badge0:['Badge 0000','Find something in the pool that shouldn\'t exist.',1],
+ awake:['rewind','Type the word at the very beginning.',1],
+ loopclosed:['Monday','Close the loop.',1],
+ rewind_day:['Again, But Better','Rewind a day.',1],
+ bigscore_heist:['Eight Frames','Steal LANTERN-02 with the crew.',1],
+ injected:['Friends in Need','Have someone you know step into the story for you.'],
+ hints5:['Riddler','Learn five hints.'],hints_all:['Nothing Left to Learn','Learn every hint.'],
+ replay:['Rerun','Replay a scene from the postgame.'],
+ tree10:['Cartographer','Find ten different endings.'],
+ epilogue:['The Week After','Walk around after everything.',1],
+ money500:['Comfortable','Earn £500 across all your runs.'],
  newgame:['Again','Start a second run.']
 };
 for(const k of ENDORDER)ACH['end_'+k]=['Ending: '+ENDINFO[k][0],ENDINFO[k][1],1];

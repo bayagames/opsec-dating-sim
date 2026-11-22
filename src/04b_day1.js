@@ -157,6 +157,16 @@ astrid.n: Sorry. Am I being loud? It hisses. The radio. Some people find it upse
   ~ She nods at the window, where the SafeSphere billboard is sliding away.
   astrid.n: That one says it's a shield. Shields don't need to know where you are every sixty seconds.
   * Every sixty seconds. You've read that number before. You didn't know it was common knowledge.
+ ? "Is anything else up there? Anything strange?"
+  [flag heard_echo]
+  [fx astrid:5]
+  ~ She goes quiet. Then she turns the dial, very slowly, past the satellite, into hiss.
+  astrid.n: There's one. I've never told anyone because it sounds mad. Every seven days, on a frequency nothing is licensed to use, something sends a burst. Ninety seconds. Compressed. Like a whole week squeezed into one breath.
+  astrid.s: It started three weeks ago. It always comes from the direction of the Conference Quarter. And the last one ended with a word I could actually decode.
+  > What word?
+  astrid.d: "{h}." She says it carefully, like a word in a language she's learning. Is that... you?
+  * You haven't said your handle out loud today. You check. You haven't.
+  [clue echo_sky]
  astrid.s: If you come to the Aerospace Village, I'll show you how to listen. It takes a radio that costs less than a pizza.
 ? Smile, nod, and look out of the window.
  ~ She smiles back and puts the headphones on again. For the rest of the journey she listens to the sky and you watch the backs of houses go by.

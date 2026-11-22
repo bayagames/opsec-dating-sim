@@ -118,7 +118,7 @@ opens('noc carpark basement',()=>S.day>4||S.day===4&&S.slot>=1,'Staff and parkin
 opens('mdf conops stafffw staffc service security stores kitchenC breakroom dock backstage conroof backstairs luggage',()=>S.day>4||bdone('d4_noc'),'STAFF ONLY.');
 opens('backoffice pdining hkitchen plant tunnel tunnelN',()=>S.day>=5||f('heist_yes')&&S.day===4&&S.slot>=5,'Staff only.');
 const OPENOF={};
-function areaLock(a){if(!S||window.__allOpen)return null;if(!Object.keys(OPENOF).length)for(const o of OPENS)for(const k of o.areas)OPENOF[k]=o;const o=OPENOF[a];return o&&!o.cond()?o.msg:null}
+function areaLock(a){if(!S||window.__allOpen||S.epilogue)return null;if(!Object.keys(OPENOF).length)for(const o of OPENS)for(const k of o.areas)OPENOF[k]=o;const o=OPENOF[a];return o&&!o.cond()?o.msg:null}
 /* ---------------- gates: ropes, locked doors and card readers that open with the story ---------------- */
 const GATES=[];
 function gate(reg,kind,x0,z0,x1,z1,y,open,msg,label){GATES.push({reg,kind,x0,z0,x1,z1,y:y||0,open,msg,label:label||(kind==='rope'?'Roped off':kind==='card'?'Staff door':'Locked door')})}
@@ -184,7 +184,7 @@ function placeWorld(){
  const once=(k,a,b)=>()=>{const key=k+S.ch;if(S.room[key])return run([N(b)],hub);S.room[key]=1;run(a(),hub)};
  /* ---- home: Proof and Flat 1A ---- */
  const F=3.9,RF=13.5;
- int('home',-291.6,10.6,()=>'Look at your monitors',N1('Your forum post from 3 AM: "honestly most firewalls are a joke if you know what you\'re doing." Fourteen upvotes. One reply: "source?" You never answered.'),{y:F});
+ int('home',-291.6,10.6,()=>S.f.canrewind&&!S.loop&&S.day===0?'Open the laptop':'Look at your monitors',()=>S.f.canrewind&&!S.loop&&S.day===0?run([N('The laptop. A blinking cursor. Your fingers are already on the keys, as if they know something you don\'t.'),C({t:'Type: rewind',then:()=>scr('rewind')},{t:'Close it',then:()=>[T('think','Not yet. Maybe never. It\'s a normal week. It\'s going to be a normal week.')]})],hub):N1('Your forum post from 3 AM: "honestly most firewalls are a joke if you know what you\'re doing." Fourteen upvotes. One reply: "source?" You never answered.')(),{y:F});
  int('home',-291.5,5.6,()=>'Water the plant',N1('It\'s plastic. You water it anyway. It\'s a ritual now.'),{y:F});
  int('home',-300.5,10.3,()=>'Check the pizza boxes',N1('Three boxes. Two empty. One contains a single crust you\'re saving for reasons you can\'t explain.'),{y:F});
  int('home',-296.5,11,()=>'Look out of the window',N1('Linden Street at 7 AM. The barber is unrolling his shutter, a van is unloading flour for Ellie, and the sun is coming up over the square, gold on every window across the road.'),{y:F});
@@ -249,6 +249,8 @@ function placeWorld(){
 
  // shops and shifts around the week
  int('con',-232,50,()=>'Halcyon Boutique',()=>shopOpen('boutique'));
+ // something at the bottom of the pool, after midnight
+ int('con',-153,-32.6,()=>S.day>=3&&S.slot===5&&!S.f.badge0?'Something is blinking in the deep end':null,()=>run(scr('pool_badge'),hub),{y:L2,r:3.2});
  int('con',-156,-55.4,()=>'The bar',()=>run([N(S.slot>=3?'The bar\'s busy. Somebody is explaining a buffer overflow with beer mats.':'The bar\'s shut. Chairs on tables.'),C({t:'Buy something',then:()=>{setTimeout(()=>shopOpen('bar'),0);Q=[];onDone=null;return[]}},{t:JOBS.barshift.n,hint:JOBS.barshift.when()?'£'+JOBS.barshift.pay+' · uses the '+SLOTN[S.slot].toLowerCase():!met('bea')?'You don\'t know anyone behind the bar':'Evenings, from Tuesday',if:()=>true,then:()=>{if(!JOBS.barshift.when())return[N('Not now.')];setTimeout(()=>jobRun('barshift'),0);Q=[];onDone=null;return[]}},{t:'Leave',then:[]})],hub),{r:2.6});
  int('station',770,44,()=>'Paper & Co',()=>shopOpen('kiosk'),{r:2.6});
  int('con',100,-12,()=>'PEOPLEFINDR booth',()=>brokerOpen(),{r:2.6});

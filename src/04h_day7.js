@@ -92,6 +92,7 @@ else
   * You have backups. Of course you have backups. But Rin is the one who can explain them, and Rin is in the back of a car.
 if f('scapegoat')
  [scene end_scapegoat]
+[call inject('d7_krall')]
 [sum Midday: Krall came for Rin, with police and a complaint from Bastion.]
 `;
 SC.d7_keynote=`
@@ -99,7 +100,13 @@ SC.d7_keynote=`
 [hide]
 ~ 3:58 PM. Hall A. Every seat full, people standing in the aisles, sitting on the stairs. The screen the size of a house shows a slowly turning blue shield.
 ~ Backstage, the air smells of hot lights and other people's nerves. Marge is in the wings with her reading glasses on her head and her arms folded.
-if S.plan==='soldout'
+if haremReady()
+ [scene key_loop]
+elif S.plan==='oracle'
+ [scene key_oracle]
+elif S.plan==='bigscore'
+ [scene key_bigscore]
+elif S.plan==='soldout'
  [scene key_sold]
 elif S.plan==='kill'
  [scene key_kill]

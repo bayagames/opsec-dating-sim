@@ -94,11 +94,14 @@ krall.n: We'll be on our way. Enjoy the rest of the con. There's not much of it 
 ~ On the way out he stops at the door.
 krall.s: You should get a better plant.
 ~ The duty manager apologises nine more times and leaves you with your suitcase upside down on the bed.
+[call inject('d6_raid')]
 [sum Lumen security searched Room 1337. Silas Krall knew exactly who had been at Thursday's meeting.]
 `;
 SC.d6_council=`
 [bg library]
 [hide]
+if f('bigscore_got')
+ [scene bigscore_council]
 if f('took_offer')&&!f('turncoat')
  [scene council_sold]
 else
@@ -157,6 +160,17 @@ if met('ellie')
 ?(met('mira')&&scn('mira')>=3&&clue('signkey')&&!f('mira_taken')) Kill Switch. Mira's way. The update that switches SafeSphere off, on every phone, at once.
  [call S.plan='kill']
  mira.n: I didn't come here to be the plan. But here I am. Ten million phones. One signed update. Nobody asked them. That's the bit I can't get past.
+?(f('bigscore_got')) The Big Score. The machine's on the table. Make sure the whole world knows it's gone before Victor finds out.
+ [call S.plan='bigscore']
+ nyx.h: He's going to click that clicker and nothing's going to happen. I want a seat in the front row.
+?(f('heard_echo')&&f('badge0')) Pull the plug. Not the keynote: the thing in Suite 1313 that already knows what we're going to say.
+ [call S.plan='oracle']
+ * Everyone stares. You don't know where the words came from. You do: from a badge in a swimming pool, in your own handwriting.
+ if met('mira')&&!f('mira_taken')
+  mira.o: ...How do you know about 1313's second box? I've never said it out loud. Not once. Not to anyone.
+  > I don't know. I think I was told. By me.
+ if met('astrid')
+  astrid.n: The signal. Every seven days. It's coming from the thirteenth floor, isn't it. It always was.
 ? Walk away. Take the last train tomorrow. It isn't your fight.
  [call S.plan='walk']
  ~ Nobody says anything. Ellie, if she's here, looks at her tea.

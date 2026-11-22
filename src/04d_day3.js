@@ -119,6 +119,7 @@ saoirse.d: I learned that the hard way. Once.
 ~ Her phone rings. She looks at it like it owes her money.
 saoirse.n: Editor. Four minutes. Told you. Think, {h}. Keep thinking.
 * She knew your handle. She never looked at your badge after the first glance. She'd read it in one.
+[call inject('d3_copycat')]
 [sum In the chaos, Saoirse Quinn, an investigative journalist from The Ledger, found you. Two different people wrote those posts, she said: one is a lesson, the other is a sales pitch with a body count.]
 `;
 SC.d3_roof=`

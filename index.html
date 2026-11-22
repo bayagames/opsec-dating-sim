@@ -496,6 +496,27 @@ img,svg,canvas{-webkit-user-drag:none;user-drag:none}
 .loc.vhover,.chat.vhover,.seg button.vhover,.pback.vhover,.tok.vhover,.chip.vhover,.code button.vhover{border-color:var(--butter);filter:brightness(1.15)}
 #box.vhover{border-color:#6d4d8a}
 #vcur.hot{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22'%3E%3Cpath d='M2 2 L2 18 L6.5 13.8 L9.6 20.4 L12.6 19 L9.6 12.6 L15.6 12.6Z' fill='%23ffd166' stroke='%231b1026' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E")}
+
+.pfiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;width:min(860px,calc(100vw - 32px))}
+.pfile{background:linear-gradient(#2a1a3af2,#1e1229f7);border:2px solid var(--line);border-radius:14px;padding:14px;text-align:left;cursor:pointer;color:var(--ink);font:inherit;display:flex;flex-direction:column;gap:6px;min-height:150px}
+.pfile:hover,.pfile.vhover{border-color:var(--butter)}
+.pfile h4{margin:0;font:22px VT323,monospace;color:var(--butter)}
+.pfile .pct{font:34px VT323,monospace;color:var(--mint);line-height:1}
+.pfile .del{align-self:flex-start;margin-top:auto;font-size:12px;opacity:.7}
+.pfile.empty{opacity:.75;border-style:dashed}
+@media(max-width:640px){.pfiles{grid-template-columns:1fr}.pfile{min-height:0}}
+
+.pgcard{width:min(980px,calc(100vw - 24px));max-height:calc(100vh - 40px);display:flex;flex-direction:column}
+.pgbody{overflow:auto;flex:1;min-height:0;padding-right:4px}
+.ttree .tnode{margin:4px 0 4px 0}.ttree .tkids{margin-left:18px;border-left:2px solid var(--line);padding-left:12px}
+.ttree .tl{font-size:15px;color:var(--dim)}.ttree .tnode.seen>.tl{color:var(--ink)}.ttree .ok{color:var(--mint)}
+.tends,.egrid{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.echip{font:inherit;font-size:13px;padding:4px 9px;border-radius:999px;border:1.5px dashed var(--line);background:#0003;color:var(--dim);cursor:pointer}
+.echip.on{border-style:solid;color:var(--ink);background:#ffffff12}.echip.on.good{border-color:var(--mint)}.echip.on.mixed{border-color:var(--butter)}.echip.on.bad{border-color:var(--coral)}.echip.on.true,.echip.on.secret{border-color:#c9b6ff;color:#c9b6ff}
+.edetail{margin-top:12px;padding:12px;border:2px solid var(--line);border-radius:12px;background:#0002}.evar{font-size:13px;padding:8px 0;border-top:1px solid var(--line)}
+.hint{padding:8px 12px;margin:6px 0;border-left:3px solid var(--mint);background:#0002;border-radius:6px}.hint.riddle{border-color:#c9b6ff;font-style:italic}
+.ehints{text-align:left;margin:10px 0;padding:10px;border-radius:10px;background:#0003}
+.rrow{display:flex;gap:10px;align-items:center;margin:8px 0}.rhd{width:44px;height:50px;flex:none}.rbtns{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}.rbtns .btn{font-size:12px;padding:4px 8px}
 </style>
 </head>
 <body>
@@ -510,11 +531,14 @@ img,svg,canvas{-webkit-user-drag:none;user-drag:none}
         <p>A visual novel about love, lies and leaving your Bluetooth on.</p>
       </div>
       <div class="heads" id="heads"></div>
-      <div class="tbtns" id="tmain">
+      <div class="tbtns" id="tprof"></div>
+      <div class="tbtns" id="tmain" style="display:none">
+        <p class="small" id="tfile"></p>
         <button class="btn pri" id="bNew">New game</button>
-        <button class="btn" id="bCont">Continue</button>
         <button class="btn" id="bLoad">Load game</button>
-        <button class="btn" id="bEnds">Endings</button>
+        <button class="btn" id="bPost">Postgame</button>
+        <button class="btn" id="bAch">Achievements</button>
+        <button class="btn" id="bFiles">Change file</button>
       </div>
       <div class="tbtns" id="tname" style="display:none">
         <label for="hIn" class="small">What's your hacker handle? (Not your real name. Trust me on this.)</label>
@@ -522,7 +546,7 @@ img,svg,canvas{-webkit-user-drag:none;user-drag:none}
         <button class="btn pri" id="bGo">Begin</button>
         <button class="btn" id="bBack">Back</button>
       </div>
-      <p class="small" style="margin-top:22px">An original parody. Every character is a fictional adult. Saves stay in this browser.</p>
+      <p class="small" style="margin-top:22px">An original parody. Every character is a fictional adult. Saves stay in this browser, in three files.</p>
     </div>
   </section>
 
@@ -759,7 +783,7 @@ const saveSettings=()=>{try{localStorage.setItem('opsec_settings',JSON.stringify
 let CURBG=null;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const LS={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
-const save=()=>LS.set('opsec3_save',JSON.stringify(S));
+const save=()=>{if(PROF)LS.set(slotKey('auto'),JSON.stringify(S))};
 const endsSeen=()=>{try{return JSON.parse(LS.get('opsec2_endings')||'[]')}catch(e){return[]}};
 const $=id=>document.getElementById(id);
 const sub=t=>String(t).replace(/\{=([^}]*)\}/g,(m,e)=>{const r=ev(e);return r===undefined||r===false?'':r}).replace(/\{h\}/g,S?S.h:'you').replace(/\{H\}/g,S?S.h.toUpperCase():'YOU');
@@ -881,6 +905,7 @@ const TUT={
  time:['Time','Each day has six parts: Morning, Midday, Afternoon, Evening, Night and Late night. Time only moves when you do something that takes it. Some parts of the day belong to the story: the green light shows where. The rest are yours: spend each one with someone, on a lead, at a talk, or however you like. Walking, talking, shopping and your phone are free. You can\'t do everything. Choose.'],
  hang:['Spending time','Walk up to someone and choose Spend time to use the current part of the day with them. Their next scene needs them to like you enough, and sometimes it needs the right day, or enough Skill or Clout. Talking shop is free, once a day each.'],
  money:['Money','Brindle pays a per diem every morning. You can earn more from bug bounties on your laptop, minigames, the CTF, and shifts (the info desk, the hotel bar, Proof). Shops are spread around: the Con Store, the Byte Café, the hotel boutique, the bar, the station kiosk. Gifts are ordinary things, and everyone feels differently about each one. You find out by giving, by getting closer, or by asking the wrong people.'],
+ echo:['Echo','You remember. Your phone has a new app, Echo: it lists everyone and everything left, and lets you rewind the day to this morning. Each part of the day now holds six things instead of one, people can take three times as much of you, and nobody\'s story waits as long for its day.'],
  room:['Room 1337','Your hotel room. The laptop runs bug bounties for money, and the bed ends the day. Your phone can call it a night from anywhere.'],
  clues:['The case board','Someone at this con is watching everyone, and there\'s more going on than that. Clues go onto the case board in your phone. Leads there cost time, and some are risky. When you have the evidence, pick the answer and the three clues that prove it. Get it wrong and people notice you asking.']
 };
@@ -931,14 +956,24 @@ const loved=g=>!!ROUTES[g]&&scn(g)>=ROUTES[g].n;
 const lookOf=g=>{if(!S)return g;if(g==='ellie')return S.day>=3&&!S.f.ellie_apron?'ellie2':'ellie';if(g==='kit')return S.f.kit_armour?'kitc':'kit';if(g==='dave')return S.day>=2?'davex':'dave';return g};
 const romCount=()=>ROM.filter(loved).length;
 /* persistent across runs: achievements, endings, finished routes, solved mysteries */
-const META=(()=>{const d={ach:{},ends:{},routes:{},solved:{},runs:0,restored:0};try{return Object.assign(d,JSON.parse(localStorage.getItem('opsec4_meta')||'{}'))}catch(e){return d}})();
-const saveMeta=()=>{try{localStorage.setItem('opsec4_meta',JSON.stringify(META))}catch(e){}};
-function ach(id){if(!ACH[id])return;if(S)S.ach=S.ach||{};if(S&&S.ach[id])return;if(S)S.ach[id]=1;const first=!META.ach[id];META.ach[id]=META.ach[id]||Date.now();saveMeta();
+/* Three save files (profiles). Each holds everything that lasts across runs: achievements, endings and how you got them,
+   hints, scenes seen, finished routes and mysteries, the loop, and its own run saves. */
+let PROF=0;
+const META_DEF=()=>({ach:{},ends:{},endv:{},hints:[],seenSc:{},routes:{},solved:{},runs:0,restored:0,loop:0,secret:0,stats:{}});
+const META=META_DEF();
+const profKey=n=>'opsec5_p'+n;
+function readProf(n){try{const t=localStorage.getItem(profKey(n));return t?JSON.parse(t):null}catch(e){return null}}
+function loadProf(n){PROF=n;const p=readProf(n)||{name:'File '+n,made:Date.now(),meta:{}};for(const k in META)delete META[k];Object.assign(META,META_DEF(),p.meta||{});META.name=p.name;META.made=p.made;try{localStorage.setItem('opsec5_last',String(n))}catch(e){}}
+const saveMeta=()=>{if(!PROF)return;try{const p=readProf(PROF)||{name:META.name||'File '+PROF,made:META.made||Date.now()};p.meta=META;p.name=META.name||p.name;p.last=Date.now();localStorage.setItem(profKey(PROF),JSON.stringify(p))}catch(e){}};
+/* the files from before there were three: they become File 1 */
+(function(){try{if(localStorage.getItem('opsec5_p1')||!localStorage.getItem('opsec4_meta'))return;const m=JSON.parse(localStorage.getItem('opsec4_meta'));localStorage.setItem('opsec5_p1',JSON.stringify({name:'File 1',made:Date.now(),meta:m}));
+ for(const k of['save','slot_1','slot_2','slot_3','slot_4','slot_5']){const v=localStorage.getItem('opsec3_'+k);if(v)localStorage.setItem('opsec5_p1_'+(k==='save'?'auto':k),v)}}catch(e){}})();
+function ach(id){if(!ACH[id]||S&&S.replay)return;if(S)S.ach=S.ach||{};if(S&&S.ach[id])return;if(S)S.ach[id]=1;const first=!META.ach[id];META.ach[id]=META.ach[id]||Date.now();saveMeta();
  if(first){toast('Achievement: '+ACH[id][0],'var(--butter)');if(typeof sfx==='function')sfx('unlock')}}
 function addSum(t){if(!S)return;S.sum.push({d:S.day,s:S.slot,t})}
 function addClue(c){if(!S||!CLUE[c]||S.clues.includes(c))return;S.clues.push(c);if(S.unl.clues)toast('Clue: '+CLUE[c].s,'var(--butter)');if(typeof sfx==='function')sfx('discover');
  if(S.clues.length>=10)ach('clues10');if(S.clues.length>=30)ach('clues30');if(Object.keys(CLUE).every(k=>S.clues.includes(k)))ach('clues_all')}
-function clockLabel(){if(!S)return'';if(S.day===0)return DAYN[0];return'Day '+S.day+' · '+DAYN[S.day]+' · '+SLOTN[S.slot]}
+function clockLabel(){if(!S)return'';if(S.day===0)return DAYN[0];if(S.epilogue)return'The week after · '+SLOTN[S.slot];return'Day '+S.day+' · '+DAYN[S.day]+' · '+SLOTN[S.slot]}
 function fresh(h){const z={};ROM.forEach(g=>z[g]=0);
  return{v:4,h,day:0,slot:0,ch:0,skill:0,clout:0,exp:5,foot:5,money:40,aff:{...z},sc:{...z},met:{},hang:{},gifted:{},inv:{},f:{},clues:[],solved:{},leads:{},done:{},msgs:[],log:[],unl:{},sum:[],ach:{},room:{},fast:false,ending:null,visited:{},ftRecent:[],restore:false,oc:0,fails:0,acts:0,look:{}}}
 /* effects: affection, exposure (with the day's fail), skill/clout XP and ranks, credits, flags, clues, items */
@@ -978,8 +1013,6 @@ function fx(e){
  hud();
 }
 function meet(g){if(!S||S.met[g])return;S.met[g]=1;S.f['met_'+g]=1;
- // a restored session: anyone whose story you've finished before picks up where you left off
- if(S.restore&&META.routes[g]&&ROUTES[g]){S.sc[g]=Math.max(S.sc[g],ROUTES[g].n-1);S.aff[g]=Math.max(S.aff[g],ROUTES[g].aff[ROUTES[g].n-1]||70)}
  const n=ROM.filter(x=>S.met[x]).length;if(n>=5)ach('met5');if(n>=12)ach('met12');if(n>=ROM.length)ach('met_all');
  if(S.unl.aff)toast('New contact: '+CH[g].name,CH[g].col)}
 /* the morning snapshot a failed day goes back to */
@@ -987,7 +1020,7 @@ function snapDay(){const keep=S.snap;S.snap=null;const t=JSON.stringify(Object.a
 function failDay(){
  const s=S.snap?JSON.parse(S.snap):null;const fails=(S.fails||0)+1;ach('doxxed');if(fails>=3)ach('doxxed3');
  const steps=scr('doxxed');
- run(steps,()=>{if(!s){S.exp=S.foot;hub();return}const log=S.log;S=s;S.snap=null;S.log=log;S.fails=fails;snapDay();save();
+ run(steps,()=>{beatBusy=false;if(!s){S.exp=S.foot;hub();return}const log=S.log;S=s;S.snap=null;S.log=log;S.fails=fails;snapDay();save();
   if(G.ok&&S.inWorld)fadeTp(()=>{teleportArea(S.wakeAt||'room1337');S.pos=null;hub()});else hub()});
 }
 
@@ -1077,7 +1110,7 @@ function scCompile(nodes,ctx){const out=[];
  }
  return out}
 /* a scene's steps, fresh each time (choices and conditions are evaluated as they're reached) */
-function scr(id){
+function scr(id){if(S&&!S.replay&&typeof META!=='undefined'&&/^([a-z]+\d|[a-z]+_x|epi_[a-z]+)$/.test(id)){META.seenSc=META.seenSc||{};if(!META.seenSc[id]){META.seenSc[id]=1;saveMeta()}}
  if(!SCAST[id]){if(SC[id]===undefined){console.error('no scene',id);return[N('['+id+']')]}SCAST[id]=scParse(SC[id],id)}
  const top=SCAST[id],labels={};top.forEach((n,k)=>{if(n.k==='label')labels[n.n]=k});
  const ctx={top,labels,mark:()=>{}};return scCompile(top,ctx).concat([ctx.mark]);
@@ -1414,7 +1447,9 @@ const TEXTQ={};
 const DAYCARD={0:['PROLOGUE','Hello, World','Two weeks before the con'],1:['DAY 1 · MONDAY','Badge In','CTRL+ALT+CON opens tonight'],2:['DAY 2 · TUESDAY','Capture the Flag','Six days to the closing keynote'],3:['DAY 3 · WEDNESDAY','Exposure','Five days to the closing keynote'],4:['DAY 4 · THURSDAY','Packet Loss','Four days to the closing keynote'],5:['DAY 5 · FRIDAY','Home','Three days to the closing keynote'],6:['DAY 6 · SATURDAY','Finals','The night before'],7:['DAY 7 · SUNDAY','Closing Keynote','Today']};
 /* endings: title, one line, and how it reads on the card */
 const ENDINFO={
- harem:['Everything Connected','Every thread, every person, every secret. All of it, together.','true'],
+ harem:['Everything Connected','The week closes. Every person, every mystery, every story ends, and it\'s finally Monday.','true'],
+ zeroday:['Zero Day','The lights go out. Not everyone comes down from the roof. And a message arrives from someone who\'s already been here.','secret'],
+ bigscore:['The Big Score','Five people, one laundry trolley, and a spy firm\'s crystal ball in the back of a van.','good'],
  disclosure:['Responsible Disclosure','The slow way, done right. LANTERN dies in daylight.','good'],
  half:['Half Measures','SafeSphere 2 is paused. Lumen is wounded. Not finished.','mixed'],
  frontpage:['Front Page','Saoirse\'s story runs at 4:01 PM. The world reads it at 4:02.','good'],
@@ -1464,7 +1499,7 @@ const ACH={
  worked:['Gig Economy','Work a shift for money.'],
  broker:['Data Broker','Buy someone\'s secrets from PEOPLEFINDR. You know what you did.'],
  shopper:['Retail Therapy','Buy something in a shop.'],
- gifts5:['Thoughtful','Give five people the gift they love.'],
+ gifts5:['Thoughtful','Give gifts to five different people.'],
  ctf_win:['Capture the Flag','Win the CTF finals with Ada.'],
  dave:['Redemption Arc','Help Dave lock down his life.'],
  train:['Commuter','Take the train during the con.'],
@@ -1472,8 +1507,19 @@ const ACH={
  talks5:['Front Row','Go to five talks or workshops.'],
  night_owl:['Night Owl','Spend a Late night slot with someone.'],
  survivor:['Clean Week','Finish the con without being doxxed once.'],
- restore:['session.bak','Restore a session.',1],
  harem:['Everything Connected','See the true ending.',1],
+ secret:['Zero Day','Find the secret ending.',1],
+ badge0:['Badge 0000','Find something in the pool that shouldn\'t exist.',1],
+ awake:['rewind','Type the word at the very beginning.',1],
+ loopclosed:['Monday','Close the loop.',1],
+ rewind_day:['Again, But Better','Rewind a day.',1],
+ bigscore_heist:['Eight Frames','Steal LANTERN-02 with the crew.',1],
+ injected:['Friends in Need','Have someone you know step into the story for you.'],
+ hints5:['Riddler','Learn five hints.'],hints_all:['Nothing Left to Learn','Learn every hint.'],
+ replay:['Rerun','Replay a scene from the postgame.'],
+ tree10:['Cartographer','Find ten different endings.'],
+ epilogue:['The Week After','Walk around after everything.',1],
+ money500:['Comfortable','Earn £500 across all your runs.'],
  newgame:['Again','Start a second run.']
 };
 for(const k of ENDORDER)ACH['end_'+k]=['Ending: '+ENDINFO[k][0],ENDINFO[k][1],1];
@@ -1490,7 +1536,7 @@ function sceneWhy(g){const R=ROUTES[g],i=scn(g);if(!R||i>=R.n)return null;const 
  if(SC[g+i]===undefined)return'their story moves on in the main plot';
  if(typeof ROUTEBLOCK!=='undefined'&&ROUTEBLOCK[g]){const b=ROUTEBLOCK[g]();if(b)return b}
  {const sa=typeof sceneArea==='function'&&sceneArea(g+i);if(sa&&AREAS[sa]&&typeof areaLock==='function'&&areaLock(sa))return'not yet'}
- if(day()<r.d&&!(S.restore&&META.routes[g]))return'their story continues on Day '+r.d;
+ if(day()<(S.loop?Math.max(1,r.d-2):r.d)&&!(S.loop&&META.routes[g]))return'their story continues on Day '+r.d;
  if(aff(g)<r.a)return'needs ♥ '+r.a+' (you have '+aff(g)+')';
  if(r.sk&&rank('skill')<r.sk)return'needs Skill rank '+r.sk+' ('+RANKS.skill[r.sk]+')';
  if(r.cl&&rank('clout')<r.cl)return'needs Clout rank '+r.cl+' ('+RANKS.clout[r.cl]+')';
@@ -1518,8 +1564,9 @@ function startBeat(b0){if(beatBusy)return;beatBusy=true;const b=beatStep(b0);S.i
   if(S.noAdvance||!b0.adv){delete S.noAdvance;save();hub();return}if(b0.adv==='day'){endDay();return}nextSlot()})}
 function addSlotLog(t){if(!S||!t)return;S.slog=S.slog||{};const k=S.day+':'+S.slot;(S.slog[k]=S.slog[k]||[]).push(t)}
 /* time moves only here */
-function spend(kind,what){S.acts=(S.acts||0)+1;addSlotLog(what||({hang:'Time with someone',lead:'Worked a lead',talk:'A talk',ctf:'CTF practice',bounty:'Bug bounty',rest:'Rested',wait:'Let it go by'}[kind]||kind));
- if(S.restore&&!S.oc&&S.day>=1){S.oc=1;toast('Overclocked: one more thing this '+SLOTN[S.slot].toLowerCase(),'var(--mint)');save();hub();return}
+function spend(kind,what){if(S.epilogue){S.slot=(S.slot+1)%6;save();hub();return}S.acts=(S.acts||0)+1;addSlotLog(what||({hang:'Time with someone',lead:'Worked a lead',talk:'A talk',ctf:'CTF practice',bounty:'Bug bounty',rest:'Rested',wait:'Let it go by'}[kind]||kind));
+ // the loop: time stretches, each part of the day holds more
+ if(S.loop&&(S.oc||0)<LOOPOC&&S.day>=1){S.oc=(S.oc||0)+1;toast('Time stretches: '+(LOOPOC+1-S.oc)+' more this '+SLOTN[S.slot].toLowerCase(),'var(--mint)');save();hub();return}
  nextSlot()}
 function nextSlot(){S.oc=0;S.slot++;if(S.slot>5){endDay();return}evMissCheck();tqFlush();save();setTimeout(evSoonToast,600);toast(SLOTN[S.slot],'var(--dim)');if(typeof sfx==='function')sfx('advance');hub()}
 function endDay(){
@@ -1601,7 +1648,7 @@ function riskRoll(r,caught){
 /* ---- the case board ---- */
 function solveMyst(m,answer,picks){const M=MYST[m];
  const ok=answer===M.a&&picks.length===3&&picks.every(c=>M.ev.includes(c));
- if(ok){S.solved[m]=1;META.solved[m]=1;saveMeta();fx({skill:M.xp});ach('first_solve');ach('solve_'+m);if(Object.keys(MYST).every(k=>S.solved[k]))ach('all_solved');addSum('Solved: '+M.n+'. '+M.opts[M.a]+'.')}
+ if(ok){S.solved[m]=1;META.solved[m]=1;saveMeta();fx({skill:M.xp});ach('first_solve');ach('solve_'+m);if(baseMyst().every(k=>S.solved[k]))ach('all_solved');addSum('Solved: '+M.n+'. '+M.opts[M.a]+'.')}
  else{S.wrong=(S.wrong||0)+1;fx({exp:8})}
  return ok}
 /* the clues you hold that could speak to a mystery (some are red herrings) */
@@ -1685,7 +1732,7 @@ const prefKnown=(g,i)=>!!(S.pk&&S.pk[g]&&S.pk[g][i]);
 /* getting closer: people mention what they love (scene 2 and scene 4 each give one away) */
 function prefReveal(g,n){const loves=GIFTS.filter(i=>prefOf(g,i)===2&&!prefKnown(g,i));for(const i of loves.slice(0,n||1)){prefKnow(g,i);if(S.unl.aff)toast(CH[g].name+' loves: '+ITEMS[i].n,CH[g].col)}}
 /* ---- money ---- */
-function earn(v,why){if(!v)return;S.money=Math.max(0,(S.money||0)+v);if(v>0)META_note('earned',v);if(S.unl.money||S.unl.cred)toast((v>0?'+':'−')+'£'+Math.abs(v)+(why?' · '+why:''),v>0?'var(--butter)':'var(--dim)');if(S.money>=200)ach('rich');hud()}
+function earn(v,why){if(!v)return;S.money=Math.max(0,(S.money||0)+v);if(v>0)META_note('earned',v);if(S.unl.money||S.unl.cred)toast((v>0?'+':'−')+'£'+Math.abs(v)+(why?' · '+why:''),v>0?'var(--butter)':'var(--dim)');if(S.money>=200)ach('rich');if(META.stats&&META.stats.earned>=500)ach('money500');hud()}
 function META_note(k,v){if(typeof META==='undefined')return;META.stats=META.stats||{};META.stats[k]=(META.stats[k]||0)+v}
 /* ---- the shops ---- */
 const SHOPS={
@@ -2325,6 +2372,16 @@ astrid.n: Sorry. Am I being loud? It hisses. The radio. Some people find it upse
   ~ She nods at the window, where the SafeSphere billboard is sliding away.
   astrid.n: That one says it's a shield. Shields don't need to know where you are every sixty seconds.
   * Every sixty seconds. You've read that number before. You didn't know it was common knowledge.
+ ? "Is anything else up there? Anything strange?"
+  [flag heard_echo]
+  [fx astrid:5]
+  ~ She goes quiet. Then she turns the dial, very slowly, past the satellite, into hiss.
+  astrid.n: There's one. I've never told anyone because it sounds mad. Every seven days, on a frequency nothing is licensed to use, something sends a burst. Ninety seconds. Compressed. Like a whole week squeezed into one breath.
+  astrid.s: It started three weeks ago. It always comes from the direction of the Conference Quarter. And the last one ended with a word I could actually decode.
+  > What word?
+  astrid.d: "{h}." She says it carefully, like a word in a language she's learning. Is that... you?
+  * You haven't said your handle out loud today. You check. You haven't.
+  [clue echo_sky]
  astrid.s: If you come to the Aerospace Village, I'll show you how to listen. It takes a radio that costs less than a pizza.
 ? Smile, nod, and look out of the window.
  ~ She smiles back and puts the headphones on again. For the rest of the journey she listens to the sky and you watch the backs of houses go by.
@@ -2988,6 +3045,7 @@ saoirse.d: I learned that the hard way. Once.
 ~ Her phone rings. She looks at it like it owes her money.
 saoirse.n: Editor. Four minutes. Told you. Think, {h}. Keep thinking.
 * She knew your handle. She never looked at your badge after the first glance. She'd read it in one.
+[call inject('d3_copycat')]
 [sum In the chaos, Saoirse Quinn, an investigative journalist from The Ledger, found you. Two different people wrote those posts, she said: one is a lesson, the other is a sales pitch with a body count.]
 `;
 SC.d3_roof=`
@@ -3258,6 +3316,7 @@ ellie.b: Will you come? You don't have to. You've got your con. You've got your 
 > I'll come. Of course I'll come.
 ellie.b: ...Thank you. First train. I'll meet you in the lobby. Bring a coat. Linden Street's cold at eight.
 [flag ellie_home_ask]
+[call inject('d4_burglary')]
 [sum Proof was broken into. Nothing was taken but Ellie's old laptop, the one with the forwarding rule on it. She has to go home in the morning, and asked you to come.]
 `;
 
@@ -3356,10 +3415,12 @@ ellie.b: You don't owe anyone this. You're not a superhero. You're a man who fix
 ellie.n: Did I do that right? Foil?
 > You did that exactly right.
 [bg plaza]
+[call inject('d5_framed')]
 [sum Afternoon: WH1SPER named you as WHISPER, with a minute-by-minute map of your week that only the badges could have made. Lumen reposted it in four minutes. Ellie offered you a way out. You went back to the con together.]
 `;
 SC.end_proof=`
 [hide]
+[flag stayed_home]
 ~ You stay.
 ~ That evening you board up the back door with Mr Demir. You fix the till's broken drawer. You turn your phone off, all the way off, and put it in the bread bin, which Ellie insists is "basically a Faraday cage, it's metal".
 ~ The next morning, at four, you're in the bakehouse with her, folding dough you don't understand into shapes she does.
@@ -3533,11 +3594,14 @@ krall.n: We'll be on our way. Enjoy the rest of the con. There's not much of it 
 ~ On the way out he stops at the door.
 krall.s: You should get a better plant.
 ~ The duty manager apologises nine more times and leaves you with your suitcase upside down on the bed.
+[call inject('d6_raid')]
 [sum Lumen security searched Room 1337. Silas Krall knew exactly who had been at Thursday's meeting.]
 `;
 SC.d6_council=`
 [bg library]
 [hide]
+if f('bigscore_got')
+ [scene bigscore_council]
 if f('took_offer')&&!f('turncoat')
  [scene council_sold]
 else
@@ -3596,6 +3660,17 @@ if met('ellie')
 ?(met('mira')&&scn('mira')>=3&&clue('signkey')&&!f('mira_taken')) Kill Switch. Mira's way. The update that switches SafeSphere off, on every phone, at once.
  [call S.plan='kill']
  mira.n: I didn't come here to be the plan. But here I am. Ten million phones. One signed update. Nobody asked them. That's the bit I can't get past.
+?(f('bigscore_got')) The Big Score. The machine's on the table. Make sure the whole world knows it's gone before Victor finds out.
+ [call S.plan='bigscore']
+ nyx.h: He's going to click that clicker and nothing's going to happen. I want a seat in the front row.
+?(f('heard_echo')&&f('badge0')) Pull the plug. Not the keynote: the thing in Suite 1313 that already knows what we're going to say.
+ [call S.plan='oracle']
+ * Everyone stares. You don't know where the words came from. You do: from a badge in a swimming pool, in your own handwriting.
+ if met('mira')&&!f('mira_taken')
+  mira.o: ...How do you know about 1313's second box? I've never said it out loud. Not once. Not to anyone.
+  > I don't know. I think I was told. By me.
+ if met('astrid')
+  astrid.n: The signal. Every seven days. It's coming from the thirteenth floor, isn't it. It always was.
 ? Walk away. Take the last train tomorrow. It isn't your fight.
  [call S.plan='walk']
  ~ Nobody says anything. Ellie, if she's here, looks at her tea.
@@ -3711,6 +3786,7 @@ else
   * You have backups. Of course you have backups. But Rin is the one who can explain them, and Rin is in the back of a car.
 if f('scapegoat')
  [scene end_scapegoat]
+[call inject('d7_krall')]
 [sum Midday: Krall came for Rin, with police and a complaint from Bastion.]
 `;
 SC.d7_keynote=`
@@ -3718,7 +3794,13 @@ SC.d7_keynote=`
 [hide]
 ~ 3:58 PM. Hall A. Every seat full, people standing in the aisles, sitting on the stairs. The screen the size of a house shows a slowly turning blue shield.
 ~ Backstage, the air smells of hot lights and other people's nerves. Marge is in the wings with her reading glasses on her head and her arms folded.
-if S.plan==='soldout'
+if haremReady()
+ [scene key_loop]
+elif S.plan==='oracle'
+ [scene key_oracle]
+elif S.plan==='bigscore'
+ [scene key_bigscore]
+elif S.plan==='soldout'
  [scene key_sold]
 elif S.plan==='kill'
  [scene key_kill]
@@ -4213,20 +4295,7 @@ mira.s: You've done this before, haven't you. I can tell. People who've been her
 [ach harem]
 [end harem]
 `;
-SC.restore=`
-[bg hotel]
-[hide]
-~ A file on your laptop that you don't remember putting there. session.bak. Last modified: a date that hasn't happened yet.
-~ Inside, in plain text: every name. Every scene. Every clue, every lead, every answer. In your own words, as if you wrote it after a week you haven't had.
-* It should feel impossible. Instead it feels like remembering.
-? Restore it
- [call S.restore=true]
- [ach restore]
- ~ The screen flickers. You feel faster. Your days feel longer, as if each part of them has room for twice as much. The people in this file feel like people you already know.
- * Whatever this is, you're not going to waste it.
-? Close the laptop
- ~ You close it. Some things you should earn the slow way.
-`;
+
 
 /* ============ THE CON PROGRAMME: optional events. Each takes the part of the day it's on. ============ */
 event('karaoke',{d:2,s:4,w:'bar',n:'Hacker Karaoke'});
@@ -6007,6 +6076,484 @@ function romAfter(){if(!S)return[];const k=S.ending||S.endK,good=k&&ENDINFO[k]&&
 for(const k of Object.keys(ENDINFO)){const e='end_'+k,a='after_'+k;if(SC[e]===undefined)continue;
  if(SC[a]!==undefined&&!SC[e].includes('[scene '+a+']'))SC[e]=SC[e].replace('[end '+k+']','[scene '+a+']\n[end '+k+']');
  if(k!=='lastlogin'&&k!=='harem'&&!SC[e].includes('romAfter'))SC[e]=SC[e].replace('[end '+k+']','[call romAfter()]\n[end '+k+']')}
+
+/* ============ THE LOOP ============
+   Three storylines nobody gets by accident.
+   1. THE BIG SCORE: meet enough of the crew (Nyx, Petra, Kit, Tilly, Yuki) and Nyx offers you a different week:
+      steal LANTERN-02 itself out of Suite 1313 on Friday night. Saturday and Sunday go somewhere else entirely.
+   2. LIGHTS OUT (the secret ending): ask Astrid on the train what else is up there; find the badge in the pool after
+      midnight; then, at Saturday's council, a plan with no author appears. Sunday is the worst day anyone has ever had.
+   3. THE LOOP (the true route): the secret ending tells you what to type at the very start of your next run. The week
+      has happened before. You get time back. With it, every person and every mystery, and an ending that closes it all. */
+
+/* ---- 1. THE BIG SCORE ---- */
+const CREW=['nyx','petra','kit','tilly','yuki'];
+const crewMet=()=>CREW.filter(g=>met(g)).length;
+const crewReady=()=>crewMet()>=3&&CREW.filter(g=>scn(g)>=2).length>=2&&!f('crew_asked')&&!f('took_offer');
+DAYS[5][1]=()=>crewReady()?'d5_crew':null;
+DAYS[5][5]=()=>f('crew_in')?'d5_bigscore':null;
+beat('d5_crew',{t:'Nyx wants a word: the lockpick village',w:'lockpick',sc:'d5_crew'});
+beat('d5_bigscore',{adv:'day',t:'Friday night: Suite 1313',steps:[{w:'corridor',ws:['corridor','f13'],sc:'d5_bigscore',t:'The crew meets on the 13th floor, 1 AM',lbl:'Go'}]});
+SC.d5_crew=`
+[bg lockpick]
+[hide]
+[flag crew_asked]
+~ Friday, late morning. The Lockpick Village is half empty: everyone's at the talks about the framing. Nyx has her boots on the table and a padlock in each hand.
+nyx.s: Sit. Don't touch the picks. I've got a better idea than everyone else's idea.
+nyx.n: Everyone's planning for Sunday. The keynote, the slides, the regulator. Fine. Lovely. But the thing that does the work isn't on stage. It's in a flight case in Suite 1313, plugged into a wall.
+nyx.h: So we take it. Tonight. The actual box. You can't demo a graph you don't have.
+if met('petra')
+ ~ Petra drops into the seat next to you, smelling of engine oil, holding a bacon roll like a microphone.
+ petra.h: I've got a van. It's got a bed in the back and a ramp and only one of the doors falls off.
+if met('kit')
+ kit.n: Hotel staff uniforms are easy. I did a Starfleet one with less. Give me three hours and a sewing machine.
+if met('tilly')
+ tilly.n: The 13th floor card readers are the same readers as the con's. I designed the con's. I can clone a housekeeping card from the back of a cereal box.
+if met('yuki')
+ yuki.h: I can loop the corridor camera. Eight frames. Nobody watches eight frames.
+* You count them. A locksmith, a driver, a costumer, a badge maker, a speedrunner. It's either a heist crew or a very strange band.
+nyx.n: In or out? If you're out, you never heard this, and I'll pretend I don't like you.
+? "I'm in."
+ [flag crew_in]
+ [fx nyx:6 skill:3]
+ nyx.h: Good. One AM. Thirteenth floor, by the ice machine. Wear something dark and bring nothing with a battery.
+ * You've just agreed to rob a spy firm. In a hotel. On a Friday.
+? "Too risky. We do it the slow way."
+ [fx nyx:-2]
+ nyx.d: The slow way. Sure. The slow way's how people like us lose.
+ ~ She goes back to her padlocks. She doesn't look up again.
+[sum Nyx asked you to help steal LANTERN-02 from Suite 1313.]
+`;
+SC.d5_bigscore=`
+[bg corridor]
+[hide]
+~ 1:04 AM. The thirteenth floor. The ice machine hums like it's in on it.
+if met('kit')
+ ~ Kit hands out housekeeping tabards, name badges and a laundry trolley with one sticky wheel. "Nobody looks at the people pushing the trolley. Trust me."
+else
+ ~ You're in black hoodies, which in a hacker hotel at 1 AM is basically camouflage.
+if met('yuki')
+ yuki.n: (in your earpiece) Corridor camera looping in three, two... done. You have eight frames forever.
+if met('tilly')
+ ~ Tilly taps a blank white card on the reader of Suite 1313. It thinks about it. It blinks green. She looks more frightened of that than of anything else this week.
+else
+ ~ Nyx kneels at the door with two picks and her tongue between her teeth. Forty seconds. The bolt goes back like it's sorry.
+[cut off]
+~ Suite 1313. Dark. Expensive. And humming. A flight case on the floor by the window, open, two servers inside, cables running into the wall. A label on the top one: LANTERN-02 · DO NOT REBOOT. A second label, newer, under it: ORACLE.
+nyx.o: ...Oracle. What's Oracle?
+~ On the little monitor on top of the case, a terminal is printing, line by line, by itself:
+~ 01:06:12 NODE 1337-0001 ENTERS SUITE. CONFIDENCE 0.97.
+~ 01:06:14 NODE 1337-0001 READS THIS LINE.
+* That's the time. That's now. That's you, reading it.
+nyx.a: Okay, I hate this, it's lying, it's a script, unplug it, unplug it NOW.
+if f('vesper_suspect')&&met('vesper')&&!f('vesper_warned')
+ ~ The bedroom door opens. Vesper Lane, in a silk dressing gown, with a phone to her ear and a very sad face.
+ vesper.d: I'm so sorry, darling. They told me you'd come tonight. They tell me everything. It's in the printout.
+ ~ Corridor. Footsteps. A lot of them.
+ [flag crew_betrayed]
+? Pull the cables and run with it
+ [flag bigscore_got]
+ ~ Two servers, forty kilos, one laundry trolley with a sticky wheel. You run down a hotel corridor at one in the morning with a spy firm's crystal ball under the towels.
+ if f('crew_betrayed')
+  ~ Krall's men are at the lifts. Nyx takes one look and drags you into housekeeping, to the service stairs, down thirteen floors of concrete.
+  if met('petra')
+   ~ Petra's van is at the loading dock with its engine running and one door already falling off. She doesn't ask. She floors it.
+   [flag bigscore_clean]
+  else
+   ~ At the bottom, the fire door is chained. Nyx picks it in nine seconds, her hands shaking. You're out. Someone saw your face.
+   [fx exp:25]
+ else
+  if met('petra')
+   ~ Service lift. Loading dock. Petra's van, its engine running. Nobody saw anything except a trolley with a sticky wheel.
+   [flag bigscore_clean]
+  else
+   ~ You get it out through the car park in Nyx's friend's hatchback with the seats down. Nobody follows. You think.
+? Read the rest of the screen first
+ ~ You scroll up. It goes back days. Every badge in the building, every meeting, and for every one, a line: PREDICTED, and a time. And a line: OBSERVED, and the same time.
+ ~ It isn't recording the con. It's running a minute ahead of it.
+ ~ And at the very top, the first line it ever printed, three weeks ago: "LOOP 0 · NODE 1337-0001 INDEXED · 03:02 FORUM POST · 'honestly most firewalls are a joke'".
+ * Your post. From the night you couldn't sleep. That's where it starts. That's where you start.
+ [flag oracle_seen]
+ [clue echo_1313]
+ ~ Then you pull the cables, and you run.
+ [flag bigscore_got]
+ if met('petra')&&!f('crew_betrayed')
+  [flag bigscore_clean]
+[ach bigscore_heist]
+[sum You and the crew stole LANTERN-02 out of Suite 1313. It was printing what you'd do next.]
+`;
+/* Saturday after the big score: the raid finds nothing, and the council has the machine on the table */
+SC.bigscore_council=`
+~ On the library table, under a hotel tablecloth: two servers, forty kilos, still warm.
+if met('nyx')
+ nyx.h: Show-and-tell.
+if met('priya')
+ priya.a: You stole... you stole a server. From a suite. You stole evidence. Chain of custody is a phrase I'm going to say to you very slowly later.
+if met('noor')
+ noor.n: As your lawyer, I've never seen it. As someone who hates Halberd, show me.
+~ Ada plugs a screen into it. It's still running on a battery pack Petra bought at a petrol station. The terminal prints: "NODE 1337-0001 SHOWS THE COUNCIL. PREDICTED."
+`;
+/* ---- 2. LIGHTS OUT: the secret ending ---- */
+SC.pool_badge=`
+[hide]
+~ The pool's closed. The lights under the water are still on, and someone has painted Jupiter on the ceiling, and Jupiter's reflection wobbles on the tiles at the bottom.
+~ Something down there catches the light. A con badge, lying flat in the deep end, still blinking.
+~ You fish it out with the lifeguard's net. Same circuit board as yours. Same eight LEDs, going round and round.
+~ BADGE 1337-0000. And written on the blank white space, in marker, in handwriting you'd know anywhere because it's yours: {h}.
+* You picked up your badge on Monday. It's on your chest right now. 1337-0001. This one is... before yours.
+~ On the back, scratched into the green with something sharp: "SAT · PULL THE PLUG · DON'T LET HER GO UP THE STAIRS".
+[flag badge0]
+[clue echo_badge0]
+[ach badge0]
+* Her. Which her?
+`;
+SC.key_oracle=`
+[bg hallA]
+[hide]
+~ 3:40 PM. Not Hall A. You're not going to Hall A. You're going up.
+~ The plan was Mira's, in the end: the keynote is a distraction, Victor's graph is a slide, and the thing that matters is the second box in Suite 1313, the one Mira has never said out loud. ORACLE.
+if met('mira')&&!f('mira_taken')
+ mira.n: I helped build its grandfather. Jonah and me, years ago. A model that guessed what a network would do next. Halberd took it and fed it four thousand people for a week. It doesn't guess any more.
+ mira.s: If we pull it at four, while every Lumen engineer is watching Victor, nobody's at the door.
+[bg corridor]
+[cut off]
+~ 3:58 PM. The thirteenth floor is empty. Too empty. The ice machine has been switched off.
+~ Suite 1313's door is open. Not unlocked. Open. Like somebody is expecting you.
+~ Inside, on a wall of screens, a terminal, scrolling.
+~ 15:58:40 NODE 1337-0001 ENTERS SUITE. CONFIDENCE 1.00.
+~ 15:58:41 NODE 1337-0001 READS THIS LINE. NODE 1337-0001 FEELS SICK.
+* You do.
+~ And under it, in a box of its own, something that shouldn't be there. A counter. LOOP {=META.runs+1}. ENDINGS OBSERVED: {=Object.keys(META.ends).length}.
+* You've never seen this room before. The room has seen you {=META.runs+1} times.
+~ The lights go out. All of them. The screens. The corridor. Through the window, the Conference Quarter goes dark, block by block, as if someone is folding it up.
+[bg void]
+~ Then the hotel's emergency speakers. A calm man's voice. Mr Ashgrove.
+"Mr Ashgrove": Ladies and gentlemen. This is a demonstration. At four o'clock, a group of hackers attending CTRL+ALT+CON caused a power failure across the Conference Quarter and set a fire on the thirteenth floor of this hotel.
+"Mr Ashgrove": The individuals responsible have already been identified. By the graph. That's what it's for. Please make your way calmly to the exits.
+* Already identified. The fire hasn't started yet.
+~ It starts.
+[bg corridor]
+~ Smoke under the door of 1314. Ashgrove's suite. The fire alarm finally screams. Somewhere below, four thousand people with blinking badges are being told, by name, that they did this.
+if met('mira')&&!f('mira_taken')
+ ~ Mira is already at the flight case, ripping cables, her silver hair grey with smoke.
+ mira.a: It's backed itself up! Every minute! It's pushing copies out through the badges, the whole building's carrying it!
+ ~ Every badge in the hotel lights up at once. Red. Round and round.
+if met('tilly')
+ tilly.d: (on your phone, crying) It's my firmware, it's using my firmware, it's using the radio I put in so badges could say hello...
+if met('astrid')
+ astrid.n: (on your phone, very calm) The signal's going out now. The seven-day burst. It's early. It's never been early. It's sending everything. Backwards.
+~ Victor Hale comes up the stairs. Not running. Walking. His jacket's gone. His face looks like someone who's just been told what his company was for.
+victor.d: They told me it was a demo. A graph. A slide. They told me the fire was a drill.
+victor.a: Ashgrove! I own this! I own this company, I own this...
+~ A door opens. A gun that has a silencer on it, which is something you have only ever seen in films and which is much smaller and much louder than films. Victor sits down on the corridor carpet as if he's tired.
+* Victor Hale doesn't get up again.
+~ Ashgrove steps over him, calm, a leather folder under his arm, and looks at you as if you're the line on a screen that he expected.
+"Mr Ashgrove": Node 1337-0001. You're exactly on time.
+if met('nyx')
+ ~ The fire extinguisher hits him from the side. Nyx, black hoodie, swearing in two languages. Ashgrove goes down. The gun goes under a trolley.
+ nyx.a: MOVE! Stairs! Now!
+elif met('petra')
+ ~ The service lift doors open. Petra, with a fire axe she absolutely did not get from the fire-axe cabinet legally. Ashgrove looks at the axe and decides, for once, that he has not predicted something.
+ petra.a: Stairs! Go!
+else
+ ~ You run. You don't decide to run. Your legs decide.
+[bg stairwell]
+~ The fire stairs. Smoke rising up the shaft like the building is breathing out. Down is fire. Up is the roof.
+if met('mira')&&!f('mira_taken')
+ mira.n: The core's on the plant deck. The building's master radio. If I kill it from the roof, the badges stop talking. The copies die. Go down. Get them out.
+ * DON'T LET HER GO UP THE STAIRS.
+ ? Grab her arm. "No. Not up. Come with me."
+  [fx mira:10]
+  mira.d: If I don't, it lives in four thousand badges and it never forgets a single one of them. Then they're all on a list forever.
+  mira.s: You found my badge in the pool, didn't you. The one from last time. I can tell. People who've been here before look at the exits last.
+  ~ She kisses your forehead. It's very quick. Then she's gone, up, into the smoke, two stairs at a time.
+ ? Let her go
+  mira.n: Good. You learn.
+  ~ She's gone, up, into the smoke, two stairs at a time.
+[bg plantdeck]
+[hide]
+~ From the car park, five minutes later, half the con watches the top of the Halcyon. A silver-haired figure on the plant deck, by the antenna mast, in the smoke. A sound like a door slamming in the sky.
+~ Four thousand badges go dark at once. Every single one.
+~ And then the roof is just fire.
+if met('mira')&&!f('mira_taken')
+ * Mira doesn't come down. You stand in the car park until a firefighter puts a blanket on you and you realise you've been saying her name for an hour.
+else
+ * Nobody comes down. You don't know who was up there. You know it was someone.
+if met('ellie')
+ ~ Ellie finds you. She doesn't say anything. She just holds on, both hands in your hoodie, and doesn't let go.
+~ Krall is found at the bottom of the service stairs in the morning. The police statement uses the word "fall". Nobody believes it.
+~ Halberd's statement uses the word "tragedy". Lumen's statement uses the word "hackers". The graph that would have proved it was a lie burned on the plant deck, and with it, every copy of the truth.
+[scene end_zeroday]
+`;
+SC.end_zeroday=`
+[bg void]
+[hide]
+~ Three days later. A hotel in another city. You can't sleep. Your phone buzzes.
+~ A message. From a number you don't have. From the future, it says, in the little grey text where the date should be.
+sms {h}: You don't remember sending this. You will.
+sms {h}: Next time, at the very beginning, before you leave the flat: open the laptop and type rewind.
+sms {h}: You'll get the week back. All of it. Save her this time. Save all of them.
+~ The message deletes itself while you're reading it. The phone buzzes once more. A string of hex, the same one that's been at the bottom of every ending you've ever seen.
+~ 72 65 77 69 6e 64
+* rewind.
+[call META.secret=1,saveMeta()]
+[ach secret]
+[end zeroday]
+`;
+/* ---- 3. THE LOOP: the true route ---- */
+SC.rewind=`
+[hide]
+~ The laptop on your desk. 6:58 AM. Two weeks before the con. A forum tab open from last night.
+~ You type it before you've thought about it, as if your fingers remember.
+~ rewind
+~ The screen goes black. Then white text, scrolling, too fast at first, then slower, as if it's waiting for you to catch up.
+~ SESSION LOG · NODE 1337-0001
+~ {=Object.keys(META.ends).map(k=>ENDINFO[k][0]).join(' · ')}
+* Those are... weeks. Weeks you've had. You remember them the way you remember dreams: all at once, and then not at all, and then all at once again.
+~ At the bottom, a note. In your own words, as if you typed it at the end of a week you haven't had yet.
+~ "ORACLE doesn't predict. It remembers. Every Sunday it sends the whole week back to the moment it first saw you: the 3 AM post. That's why you keep waking up here. You're not in a loop. You're in its memory. And every time, you take a bit more of it back."
+~ "This time you're awake from the start. You can use that. Days stretch: you'll have time for everyone. Mira's alive. Jonah's alive. Nobody has to go up the stairs."
+~ "Love all of them. Solve all of it, including the new things: the signal, the badge, the machine. Then go up to 1313 together, and close it."
+[call S.loop=1,META.loop=(META.loop||0)+1,saveMeta()]
+[unlock echo]
+[ach awake]
+* You close the laptop. Your hands are shaking. Downstairs, Ellie is singing something terrible to a croissant.
+* Two weeks. Everyone. Everything. This time, with the clock on your side.
+[sum You typed rewind. The week has happened before. This time you remember.]
+`;
+/* the loop's own mysteries */
+Object.assign(CLUE,{
+ echo_sky:{s:'The seven-day signal',t:'Every seven days a 90-second burst on an unlicensed frequency, from the Conference Quarter, ending with your handle.',m:['m13']},
+ echo_badge0:{s:'Badge 1337-0000',t:'A con badge from the pool, older than yours, in your handwriting: "SAT · PULL THE PLUG · DON\'T LET HER GO UP THE STAIRS".',m:['m13','m14']},
+ echo_pia:{s:'Pia\'s new song',t:'Pia keeps playing a tune she says she\'s never written. Jonah used to hum it. It\'s the signal, slowed down.',m:['m13','m15']},
+ echo_tilly:{s:'Serial 0000',t:'Tilly\'s production log: she made badges 0001 to 4000. Badge 0000 was never manufactured.',m:['m14']},
+ echo_wren:{s:'Wren\'s déjà vu episode',t:'Wren\'s listeners report the same dream: this con, this week, again. All of them have badges with a radio in them.',m:['m14']},
+ echo_1313:{s:'ORACLE',t:'The second box in Suite 1313 prints what people do a minute before they do it. Its first line: your 3 AM forum post.',m:['m15']},
+ echo_jonah:{s:'Jonah\'s confession',t:'Jonah wrote ORACLE\'s first model. It doesn\'t predict. It receives its own future state. It can\'t be switched off from inside the week it remembers.',m:['m15']},
+ echo_mira:{s:'What Mira knows',t:'Mira has had this week before, too, in flashes. She always goes up the stairs.',m:['m13','m15']}
+});
+Object.assign(MYST,{
+ m13:{n:'The Signal',q:'What is the burst Astrid hears every seven days?',opts:['A dead satellite','A numbers station','ORACLE, sending the whole week back to itself','Halberd\'s encrypted backhaul'],a:2,ev:['echo_sky','echo_badge0','echo_pia','echo_mira'],xp:30,loop:1},
+ m14:{n:'Badge 0000',q:'Why is there a badge with your name on it that was never made?',opts:['A printing error','Tilly\'s joke','It came back with you, from a week that already happened','Lumen made it to frame you'],a:2,ev:['echo_badge0','echo_tilly','echo_wren'],xp:30,loop:1},
+ m15:{n:'ORACLE',q:'What is ORACLE, and how do you stop it?',opts:['Victor\'s pet project: unplug it','A Halberd weapon: blow it up','Jonah\'s model, receiving its own future: it closes only if the week ends with nobody left for it to remember wrong','WHISPER\'s last weapon'],a:2,ev:['echo_1313','echo_jonah','echo_mira','echo_pia'],xp:30,loop:1}
+});
+/* the base game's mysteries are 1-12; the loop's three only count in a loop */
+const baseMyst=()=>Object.keys(MYST).filter(m=>!MYST[m].loop);
+const allMyst=()=>Object.keys(MYST).filter(m=>!MYST[m].loop||(S&&S.loop));
+Object.assign(LEADS,{
+ echo_sky:{m:'m13',n:'Listen with Astrid',d:'Astrid says something in the sky talks every seven days. Ask her to show you.',w:'aero',when:()=>S.loop&&day()>=2&&met('astrid')&&!clue('echo_sky'),risk:0},
+ echo_pool:{m:'m14',n:'The pool, after midnight',d:'Something blinks at the bottom of the hotel pool. Late at night.',w:'pool',when:()=>S.loop&&day()>=3&&S.slot===5&&!clue('echo_badge0'),risk:1},
+ echo_pia:{m:'m13',n:'Ask Pia about the new song',d:'Pia keeps humming something she says she didn\'t write.',w:'station',when:()=>S.loop&&met('pia')&&!clue('echo_pia'),risk:0},
+ echo_tilly:{m:'m14',n:'Tilly\'s production log',d:'Every badge has a serial. Tilly logged every one.',w:'badgelab',when:()=>S.loop&&day()>=2&&met('tilly')&&!clue('echo_tilly'),risk:0},
+ echo_wren:{m:'m14',n:'Wren\'s strangest episode',d:'Wren says her listeners keep dreaming about this con.',w:'creator',when:()=>S.loop&&day()>=3&&met('wren')&&!clue('echo_wren'),risk:0},
+ echo_1313:{m:'m15',n:'Look inside Suite 1313',d:'The second box. The one Mira won\'t talk about.',w:'corridor',when:()=>S.loop&&day()>=5&&!clue('echo_1313'),risk:2},
+ echo_jonah:{m:'m15',n:'Find Jonah',d:'Pia\'s brother isn\'t "away". He\'s close. He always was.',w:'tunnel',when:()=>S.loop&&day()>=5&&(clue('jonahnote')||met('pia'))&&!clue('echo_jonah'),risk:1},
+ echo_mira:{m:'m13',n:'Ask Mira what she remembers',d:'She looks at the exits last. She\'s been here before.',w:'roof',when:()=>S.loop&&day()>=3&&met('mira')&&!f('mira_taken')&&!clue('echo_mira'),risk:0}
+});
+SC.lead_echo_sky=`
+[bg aero]
+~ The Aerospace Village, the dish on the table pointed at a window. Astrid has a waterfall plot on her laptop, blue and quiet.
+astrid.n: It's due. It's always due on a Wednesday, ninety seconds after the hour. Watch.
+~ The waterfall turns white. A burst, dense as a scream. She slows it down, and down, and down, until it's a melody.
+astrid.o: ...That's a song. Why is a signal a song? And it ends with... that's your handle. It ends with you.
+[clue echo_sky]
+[fx astrid:6 skill:4]
+`;
+SC.lead_echo_pool=SC.pool_badge;
+SC.lead_echo_pia=`
+[bg station]
+~ Central Station. Pia's playing something you've never heard and know every note of.
+pia.n: I don't know where it's from. I woke up with it on Monday. My brother used to hum it while he coded. He said it was what the machine sounded like when it was thinking.
+~ You hum the next four bars before she plays them. She stops. Everyone on the concourse keeps walking.
+pia.d: ...How did you know that?
+[clue echo_pia]
+[fx pia:6]
+`;
+SC.lead_echo_tilly=`
+[bg badgelab]
+~ Tilly's production log, a spreadsheet with four thousand rows and a hundred tabs of tears.
+tilly.n: 0001 to 4000. Every board, every solder joint. I hand-checked the first five hundred. Why?
+~ You show her the photo of badge 0000. She zooms in. She zooms in more. Her face goes very still.
+tilly.a: That's my board. That's my solder. That's MY fix on the radio pad that I didn't come up with until Wednesday. Today is Tuesday.
+[clue echo_tilly]
+[fx tilly:6 skill:3]
+`;
+SC.lead_echo_wren=`
+[bg creator]
+~ Wren's recording booth, a cupboard with foam on the walls and a mug that says I SOLVED IT FIRST.
+wren.n: Episode 212. Listeners' dreams about the con. Two hundred emails. Same dream. Same week. The keynote, a fire, a woman on a roof.
+wren.o: And every one of them was wearing a badge with a radio in it. Nobody who stayed home had the dream. Nobody.
+[clue echo_wren]
+[fx wren:6]
+`;
+SC.lead_echo_1313=`
+[bg corridor]
+~ Suite 1313, a gap in the door wide enough for one eye.
+~ A wall of screens. A terminal printing, by itself. "NODE 1337-0001 LOOKS THROUGH THE DOOR. PREDICTED." And under it, in a box, a counter: LOOP {=META.runs+1}.
+[call riskRoll(2,'You back away too fast and knock the ice bucket. A door opens down the corridor.')]
+[clue echo_1313]
+`;
+SC.lead_echo_jonah=`
+[bg tunnel]
+~ The service tunnel under the con, behind a stack of chairs from 2009. A camp bed. A laptop. A man with a beard, eating cold beans, who looks at you like he's been waiting a long time.
+jonah.n: You're early. You're never early. That means you remember. Good.
+jonah.n: I wrote the first model. It doesn't predict. It hears itself. Every Sunday it sends the week back, and it keeps you because you're the brightest dot on the graph: the first one it ever indexed.
+jonah.d: You can't switch it off from inside the week. It just sends the week back. The only way out is to end the week so there's nothing for it to fix. Everyone safe. Everyone known. Nothing left to predict wrong.
+[clue echo_jonah]
+[flag jonah_met]
+[fx skill:6]
+`;
+SC.lead_echo_mira=`
+[bg roof]
+~ The roof. Mira on her air-con unit, the same as always, as if she's never moved.
+mira.n: You've noticed it too. The way I look at the stairs.
+mira.s: Flashes. A fire. My hand on a mast. Your voice, saying no. I've always thought it was a nightmare. It isn't, is it.
+> Not this time.
+mira.h: ...Not this time.
+[clue echo_mira]
+[fx mira:8]
+`;
+/* the loop finale: every person, every mystery, up to 1313 together */
+const haremReady=()=>!!(S.loop&&ROM.every(g=>loved(g))&&allMyst().every(m=>S.solved[m]));
+SC.key_loop=`
+[bg hallA]
+[cut hallA_stage victor]
+~ 4:00 PM. Victor Hale walks out into a single spotlight. He opens his mouth to say "Good afternoon".
+~ Every screen in the hall goes white before he can. One line, in plain text, the size of a house:
+~ ORACLE CANNOT PREDICT WHAT HAPPENS NEXT.
+[cut off]
+~ Because everyone is here. Not in their positions: here, with you, every one of them, because this time you had the week to ask.
+~ Priya has the regulator on the phone and the disclosure already filed. Saoirse's story is live. Noor's injunction is being served in the wings. Delphine walks onto the stage and takes Victor's microphone, very gently, like she's taking a glass from a child.
+~ Sunny and Tilly roll every badge back to honest firmware, row by row, a wave of rainbow up the bowl. Nyx and Kit are already in Suite 1313. Petra's van is on the car park roof. Yuki owns the screens. Juno's chat has four million people in it.
+~ Rin stands up, in the third row, with the report that was always true. Jonah stands up next to him. Pia, at the back, starts playing the song the machine used to hum, and then plays the end of it, which nobody has ever heard.
+~ And at 4:00 and ninety seconds, Astrid, on the roof with her dish, says "it's quiet". The seven-day signal doesn't come.
+[bg corridor]
+~ Suite 1313. The twenty-one of you, and Jonah, and one flight case, humming.
+~ The terminal prints: NODE 1337-0001 ENTERS WITH 21 NODES. CONFIDENCE —
+~ It stops. The cursor blinks.
+~ It types: NO PREDICTION AVAILABLE.
+~ Mira puts her hand on the power switch. Then she takes it off and holds her hand out to you instead.
+mira.s: Together. You did the stairs last time. And the time before. This time nobody goes up alone.
+~ Twenty-two hands on one switch. It's ridiculous. Someone, probably Juno, starts laughing. Then all of you are.
+~ Click.
+~ The screens go dark. The hum stops. Somewhere very far away, something you've been hearing your whole life without knowing it stops too.
+* The week is just a week now. It ends on Sunday and then it's Monday. You've never had a Monday before.
+[call S.f.loop_closed=1,META.loopClosed=1,saveMeta()]
+[scene d7_party]
+`;
+/* time control in the loop: more room in every part of the day, and the day itself can be rewound */
+const LOOPOC=5;
+function rewindDay(){if(!S||!S.loop||!S.snap)return;const snap=JSON.parse(S.snap),keep=S.snap,log=S.log,rew=(S.rew||0)+1;S=snap;S.loop=1;S.snap=keep;S.log=log;S.rew=rew;beatBusy=false;ach('rewind_day');closeOv();
+ if(G.ok&&S.inWorld)fadeTp(()=>{teleportArea(S.wakeAt||'room1337');hub();toast('Rewound to this morning','var(--mint)')});else{hub();toast('Rewound to this morning','var(--mint)')}}
+/* the Echo app: what's left, and what to do when */
+function echoPlan(){const out=[];
+ const unl=ROM.filter(g=>!loved(g));
+ for(const g of unl){const i=scn(g),why=sceneWhy(g),need=ROUTES[g].req[i]||{};out.push([CH[g].name,!met(g)?'Not met yet · '+(ROUTES[g].metAt||'find them'):i>=ROUTES[g].n?'Done':why?'Scene '+i+' · '+why:'Scene '+i+' ready now'+(need.d?' (from Day '+need.d+')':''),g])}
+ const mys=allMyst().filter(m=>!S.solved[m]).map(m=>{const L=Object.keys(LEADS).filter(k=>LEADS[k].m===m&&!S.leads[k]);return[MYST[m].n,canSolve(m)?'Ready to solve on the case board':L.length?'Leads: '+L.map(k=>LEADS[k].n+(leadOpen(k)?' (now)':'')).join(', '):'Find more clues']});
+ return{people:out,mys}}
+/* the Big Score, Sunday: no keynote to fight, because the machine's in a van */
+SC.key_bigscore=`
+[bg hallA]
+[cut hallA_podium victor]
+~ 4:00 PM. Victor Hale walks out into a single spotlight. "Good afternoon, CTRL+ALT+CON. Today, I'm going to show you just how connected you are."
+~ He clicks. The screen behind him shows a slowly turning blue shield. He clicks again. The shield keeps turning.
+victor.a: ...Can we get the demo up, please? The graph. Can someone...
+[cut off]
+~ In the wings, a Lumen engineer is on his knees in front of an empty rack, holding two cables that go nowhere.
+if f('bigscore_clean')
+ ~ Ninety miles away, in the back of Petra's van in a lay-by, ORACLE is running on a battery pack, printing predictions about a hall it can't see any more. Every line is wrong.
+else
+ ~ Two floors down, in the boot of a hatchback in the car park, LANTERN-02 is running on a petrol-station battery pack. Krall's men are checking every car. Slowly. They're on level three.
+if met('saoirse')
+ ~ At 4:03, Saoirse's story goes live, with photographs of the inside of the flight case: the ORACLE label, the printout of your own night predicted a minute early, and the name of the company that paid for it.
+ [flag paper_out]
+if met('noor')
+ ~ At 4:05, Noor walks the servers into a police station with a solicitor's letter taped to the top. "Evidence," she tells the desk sergeant. "Found property. Very, very found."
+victor.d: Where is it? Where is my...
+~ Two thousand people watch a man look for something he can't predict.
+[flag lantern_dead]
+[call S.f.end='bigscore']
+`;
+SC.end_bigscore=`
+[hide]
+~ The Big Score.
+~ Halberd never gets the machine. Corvid Holdings dissolves on Tuesday. Mr Ashgrove's suite is empty by Monday morning, his leather folder still on the coffee table, unsigned.
+if f('crew_betrayed')
+ ~ It's not clean. Krall knows your faces. There's a court case, a long one, about "theft of commercial property". Noor wins it, eventually, by asking the judge one question: "Property of what?"
+else
+ ~ Nobody ever proves who took it. The hotel's CCTV shows eight frames of an empty corridor, over and over, for an hour.
+if met('nyx')
+ nyx.h: Best job I ever did. Never getting paid for it. Worth it.
+if met('petra')
+ petra.h: The van still smells of server. I've stopped trying.
+if met('tilly')
+ tilly.b: I got my badges back. All of them. Four thousand rainbows.
+if met('kit')
+ kit.n: I made the crew jackets. Nobody's allowed to wear them. We just keep them.
+if met('yuki')
+ yuki.s: Eight frames. Forever. I'm putting it on my CV.
+~ A year later, five of you meet in a pub that doesn't have Wi-Fi, and nobody says the word "heist" once, and everybody's thinking it.
+[end bigscore]
+`;
+/* the true ending: the week is closed, and every story ends */
+SC.end_harem=`
+[hide]
+~ The Grand Ballroom of the Halcyon. Purple chandeliers. Four thousand badges blinking rainbow, honestly, saying hello to each other and nothing else.
+~ It's Sunday night, and in the morning it will be Monday, and for the first time in a lot of weeks that you can't count, you have no idea what Monday will be like.
+~ It clicks, all of it, all at once. Ellie's stolen account was LANTERN's first test. Brindle's LifeScore was its first customer. Jonah built ORACLE's grandfather and Pike buried him for it. The badges were the ears. Vesper was the bait. Owen was the door. And ORACLE was the memory, sending the week back to itself, with you in it, because you were the first dot it ever saw.
+~ Every thread. Every person. Every secret. And all of them here.
+ellie.h: Proof is opening a second shop. In the con quarter. Lumen's old office. I bought it with Victor's settlement and a lot of croissants.
+nyx.s: Marge asked me to run the Lockpick Village next year. Officially. With a budget. I said yes before she finished.
+ada.b: I'm not a fraud. I've stopped asking. I've got a job offer from the regulator and one from you, apparently, and I'm taking both.
+priya.n: The disclosure's in the regulator's annual report. Page one. With a receipt. I framed it.
+juno.h: I'm keeping the channel. New rule: nobody goes on it who didn't say yes first. Me included.
+kit.b: I'm teaching a costume class. "Armour you can take off." It's full.
+rin.h: Bastion apologised. In writing. I'm having it laminated. Then I'm going to sleep for a month.
+bea.s: I quit the bar. I'm opening one. Mine. No microphones. Quiet corner. You know the one.
+mira.n: I came down the stairs. Every time from now on, I come down the stairs.
+saoirse.h: Front page, every paper. And a book deal. And I'm not writing the chapter about you. Some things are off the record forever.
+sunny.n: Network's up. Someone else is watching it. I'm going on holiday. Somewhere with no radios.
+tilly.b: Bernard's name is in the silkscreen of next year's badge. Next to mine. Next to yours.
+petra.h: Car's outside. It fits eight. We'll make it fit twenty-two.
+astrid.h: The signal's gone. It's just the sky now. I've never been so happy to hear nothing.
+yuki.s: New record. Fastest anyone's ever saved everyone. Unbeatable. I'm still going to try.
+vesper.b: I sang tonight. My own song. Nobody in my ear.
+delphine.h: I wrote my own speech. It was terrible. I gave it anyway.
+noor.n: Every case closed. Halberd's. Lumen's. Pike's. I'll never say that again.
+fern.h: The rooftop garden is staying. The hotel's new owners signed it over. The bees are thrilled.
+wren.h: Episode three hundred. The case of the week that kept happening. Solved.
+pia.b: Jonah's home. He's in the corner pretending not to cry. I'm going to play the end of the song now. You've never heard it. Nobody has.
+~ Pia plays. Jonah sings, badly, the bit he wrote for it eight years ago. Everyone stops talking. And for three minutes, in a hotel ballroom full of the best people you have ever met, nobody is watching anybody at all. Nothing is remembering any of it except you.
+~ Mira finds you at the edge of the room, just as the song ends.
+mira.s: It's Monday in four hours. Have you ever had a Monday?
+> Never. Not once.
+mira.h: Then let's go and see what one looks like. All of us.
+[ach harem]
+[ach loopclosed]
+[end harem]
+`;
+/* who steps in: people you've met change the story when it needs them */
+const INJ={
+ d3_copycat:[
+  [()=>met('wren')&&scn('wren')>=2,'wren.o: (a voice note, thirty seconds after the WH1SPER post) That cadence. "HERE\'S A REAL LESSON". That\'s a corporate comms template. I\'ve read four hundred of them. WHISPER writes like a poem. This writes like a press release.',{clue:'framepost'}],
+  [()=>met('juno')&&scn('juno')>=2,'juno.a: (on stream, live, to forty thousand people) Hey, WH1SPER, nobody who actually hacks types "1" for "I" any more. That\'s a dad in a suit. I can SMELL the suit.',{clout:4}]],
+ d4_burglary:[
+  [()=>met('priya')&&scn('priya')>=2,'priya.n: (on the phone, before you\'ve even told her) Don\'t touch anything. I\'ve pulled the camera from the bus stop opposite Proof. Two men, a Lumen van, 03:12. I\'ve already sent it to the police and to you.',{clue:'breakin'}],
+  [()=>met('petra')&&scn('petra')>=2,'petra.h: (pulling up outside in the van, in your hour of need, in a tracksuit) Get in. I\'ll have you at Proof in eleven minutes. I won\'t tell you how.',{exp:-6}]],
+ d5_framed:[
+  [()=>met('saoirse')&&scn('saoirse')>=3,'saoirse.n: (an email, 9:02 AM) My counter-story runs at ten. "Who benefits from framing a hacker?" Your name\'s not in it. Theirs is.',{exp:-12,flag:'counter_story'}],
+  [()=>met('noor')&&scn('noor')>=2,'noor.n: (a text) Say nothing. To anyone. Not even "no comment". I\'m on my way with a very boring letter.',{exp:-8}]],
+ d6_raid:[
+  [()=>met('nyx')&&scn('nyx')>=3,'nyx.s: (behind you, from the ceiling tile above the wardrobe) Don\'t look up. Your laptop\'s up here with me. They can search the room all they like.',{flag:'laptop_hidden'}],
+  [()=>met('bea')&&scn('bea')>=3,'bea.n: (at the door, with a tray, to Krall) Room service. Oh, sorry, is this a raid? I\'ll just put these down. (she leaves with your notebook under the tray)',{flag:'notes_saved'}]],
+ d7_krall:[
+  [()=>met('vesper')&&f('vesper_warned'),'vesper.s: (stepping between Krall and Rin, in heels, in a voice you\'d follow off a cliff) Silas, darling. You\'re in the wrong corridor. Mr Ashgrove wants you. Now. (he goes. He doesn\'t check.)',{flag:'rin_safe'}],
+  [()=>met('sunny')&&scn('sunny')>=3,'sunny.a: (on the radio, on every channel at once) SECURITY, FIRE DOOR SIX IS OPEN, ALL UNITS. (it isn\'t. Krall\'s men run for it.)',{flag:'rin_safe'}]]
+};
+function inject(k){const L=INJ[k];if(!L||!S)return[];const hit=L.filter(x=>x[0]()).slice(0,2);if(!hit.length)return[];
+ const out=[];for(const[,line,fxo]of hit){const m=line.match(/^(\w+)\.(\w): (.*)$/);if(m)out.push(L_(m[1],m[2],m[3]));const e=Object.assign({},fxo);if(e.clue){out.push(()=>{addClue(e.clue)});delete e.clue}if(e.flag){S.f[e.flag]=1;delete e.flag}if(Object.keys(e).length)out.push(FX(e))}
+ ach('injected');return out}
+const L_=(w,x,t)=>L(typeof lookOf==='function'?lookOf(w):w,x,t);
 
 const rsum=(g,i,t)=>{ROUTES[g].sum[i]=t};
 /* ============ THE TWENTY-ONE: who they are, when their scenes open, what they say in passing ============
@@ -10591,7 +11138,11 @@ const OLDN={_:[0,1,2,2,3,3,4,4,6],ellie:[0,1,2,3,4,4,5,5,6]};
   M.forEach((parts,ni)=>{const txt=parts.map(p=>old[p]).filter(t=>t!==undefined);
    if(txt.length){let t=txt.join('\n~ Later.\n');t=t.replace(/\[adv (\w+) (\d)\]/g,(m,w,k)=>'[adv '+w+' '+(OLDN[w]||OLDN._)[+k]+']');SC[g+ni]=t}
    const os=parts.filter(p=>p!=='x').map(p=>oreq[p]||{}),r={a:NR[ni].a,d:Math.max(NR[ni].d,(os[0]&&os[0].d)||1)};
-   for(const o of os){if(o.c){const c0=r.c;r.c=c0?(()=>c0()&&o.c()):o.c;r.y=o.y||r.y}if(o.sk>1)r.sk=Math.max(r.sk||0,o.sk-1);if(o.cl>1)r.cl=Math.max(r.cl||0,o.cl-1)}
+   // a later part's condition that an earlier part of the same scene satisfies (a clue it gives, a flag it sets) is dropped:
+   // otherwise the scene would be waiting for itself
+   const given=parts.filter(p=>p!=='x').map(p=>old[p]||'').join('\n');
+   const selfMet=(o,k)=>k>0&&o.c&&(String(o.c).match(/(?:clue|f)\('([a-z0-9_]+)'\)/g)||[]).every(m=>{const id=m.match(/'([a-z0-9_]+)'/)[1];return new RegExp('\\[(?:clue|flag)[^\\]]*\\b'+id+'\\b').test(given)});
+   for(const[k,o]of os.entries()){if(o.c&&!selfMet(o,k)){const c0=r.c;r.c=c0?(()=>c0()&&o.c()):o.c;r.y=o.y||r.y}if(o.sk>1)r.sk=Math.max(r.sk||0,o.sk-1);if(o.cl>1)r.cl=Math.max(r.cl||0,o.cl-1)}
    req.push(r);sum.push(parts.map(p=>p==='x'?(XSUM[g]||''):(osum[p]||'')).filter(Boolean).join(' '))});
   R.n=6;R.req=req;R.sum=sum;R.aff=req.map(r=>r.a)}
  // texts written against old scene numbers
@@ -10638,7 +11189,7 @@ function approachMenu(g,go){const T=TASTE[g]||[];S.taste=S.taste||{};
 function affGain(k,g){if(g<=0)return g;const hang=!!(S.amult&&S.amult[k]!==undefined);g=g*((S.amult&&S.amult[k])||1)*Math.max(.35,1-S.aff[k]/150);
  // the daily limit is for time you choose to spend together; the story itself is never rationed
  if(!hang)return Math.max(1,Math.round(g));
- const dk=S.day+':'+k;S.affd=S.affd||{};const room=Math.max(0,AFFCAP-(S.affd[dk]||0));g=Math.min(Math.round(g),room);S.affd[dk]=(S.affd[dk]||0)+g;return g}
+ const dk=S.day+':'+k;S.affd=S.affd||{};const room=Math.max(0,AFFCAP*(S.loop?3:1)-(S.affd[dk]||0));g=Math.min(Math.round(g),room);S.affd[dk]=(S.affd[dk]||0)+g;return g}
 const warmToday=k=>S&&S.affd?S.affd[S.day+':'+k]||0:0;
 function seen(g){if(!S)return;S.seenD=S.seenD||{};S.seenD[g]=S.day}
 /* people you're dating notice if you disappear for a whole day */
@@ -10674,7 +11225,6 @@ function roomMenu(){
  run([{bg:'hotel'},{hide:1},{unlock:'room'},N('Room 1337. The minibar hums. The bed crunches. Your laptop waits.'),C(
   {t:'Hunt a bug bounty',hint:isFree()?'Terminal minigame · money · uses the '+SLOTN[S.slot].toLowerCase():curBeat()?blockedMsg():'Not now',then:()=>{bugBounty();Q=[];onDone=null;return[]}},
   {t:'Triage your inbox',hint:S.room['inbox'+S.day]?'Done today':'Free · phishing minigame · a clean run lowers Exposure',if:()=>!S.room['inbox'+S.day],then:()=>{S.room['inbox'+S.day]=1;return[{game:'phish'}]}},
-  {t:'Restore session.bak',if:()=>S.f.sessionbak&&!S.restore,then:()=>scr('restore')},
   {t:S.slot===5?'Go to bed':'Lie down for a while',hint:S.slot===5?'Ends the day':isFree()?'Uses the '+SLOTN[S.slot].toLowerCase()+' · Exposure −10':'',if:()=>S.day>=1&&(isFree()||S.slot===5&&!curBeat()),then:()=>{if(S.slot===5){Q=[];onDone=null;endDay();return[]}restSlot();Q=[];onDone=null;return[]}},
   {t:'Look out of the window',then:()=>[N(pick(['The city glitters. Somewhere out there, Proof is closed for the night, and a tiny croissant is drawn on a stack of empty paper bags.','A pigeon on the ledge stares at you. You stare back. Neither of you blinks.','From up here, four thousand glowing badges look like fireflies.','The Lumen logo on the con\'s roof turns and turns. From here it looks like an eye.']))]},
   {t:'Leave',then:[]})],hub);
@@ -10701,7 +11251,6 @@ function keynoteScore(){let s=S.pscore||0;
  if(!S.solved.m6)s-=3;
  if(S.f.mira_data)s+=2;if(clue('locker'))s+=2;if(S.f.dave_inside)s+=1;if(clue('lifescore'))s+=1;
  return s}
-const haremReady=()=>S.restore&&ROM.every(g=>loved(g))&&Object.keys(MYST).every(m=>S.solved[m]);
 function endingKey(){
  if(haremReady())return'harem';
  if(S.f.end)return S.f.end;
@@ -10723,31 +11272,49 @@ function endingKey(){
  if(!romCount())return ROM.filter(g=>scn(g)>=2).length>=6?'opensource':'notfound';
  return'disclosure'}
 function finishEnding(k){
- S.ending=k;S.inWorld=0;WD.active=false;if(typeof vcShow==='function')vcShow(false);if(document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}if(typeof updBlur==='function')updBlur();META.ends[k]=1;META.runs=(META.runs||0)+1;saveMeta();ach('end_'+k);if(!S.fails)ach('survivor');if(S.foot<=5)ach('ghostfoot');
- LS.set('opsec3_save','');
+ S.ending=k;S.inWorld=0;WD.active=false;if(typeof vcShow==='function')vcShow(false);if(document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}if(typeof updBlur==='function')updBlur();META.ends[k]=1;META.runs=(META.runs||0)+1;saveMeta();const learned=typeof recordEnding==='function'&&!S.replay?recordEnding(k):[];ach('end_'+k);if(!S.fails)ach('survivor');if(S.foot<=5)ach('ghostfoot');
+ LS.set(slotKey('auto'),'');
  const E=ENDINFO[k],seen=Object.keys(META.ends).length;
  const who=ROM.filter(loved);const face=k==='harem'?null:(S.partner||who[0]);
- // a fragment of something, on every ending card, for anyone paying attention
- const frag=['73','65','73','73','69','6f','6e','2e','62','61','6b','00'][(ENDORDER.indexOf(k))%12];
- ov(`<div class="card" style="text-align:center">${face?`<div style="width:150px;height:170px;margin:0 auto">${head(lookOf(face),'h')}</div>`:''}<p class="small">${{true:'TRUE ENDING',good:'ENDING',mixed:'ENDING',bad:'BAD ENDING'}[E[2]]}</p><h3 style="font-size:40px">${esc(E[0])}</h3><p>${esc(E[1])}</p><p>${seen}/${ENDORDER.length} endings found.</p>
- <p class="small">${RANKS.skill[rank('skill')]} · ${RANKS.clout[rank('clout')]} · ${who.length} in love · ${Object.keys(S.solved).length}/12 mysteries · ${S.clues.length} clues</p><p class="small term" style="opacity:.35">0x${frag}</p>
+ ov(`<div class="card" style="text-align:center">${face?`<div style="width:150px;height:170px;margin:0 auto">${head(lookOf(face),'h')}</div>`:''}<p class="small">${{true:'TRUE ENDING',good:'ENDING',mixed:'ENDING',bad:'BAD ENDING',secret:'SECRET ENDING'}[E[2]]}</p><h3 style="font-size:40px">${esc(E[0])}</h3><p>${esc(E[1])}</p><p>${seen}/${ENDORDER.length} endings found.</p>
+ <p class="small">${RANKS.skill[rank('skill')]} · ${RANKS.clout[rank('clout')]} · ${who.length} in love · ${Object.keys(S.solved).length}/12 mysteries · ${S.clues.length} clues</p>${learned.length?`<div class="ehints"><p class="small"><b>You learned something</b></p>${learned.map(h=>`<p class="hint ${h.riddle?'riddle':''}">${h.riddle?'<b>?</b> ':''}${esc(h.t)}</p>`).join('')}<p class="small">All your hints are in Postgame, on the title screen.</p></div>`:''}
  <div class="row" style="justify-content:center"><button class="btn pri" id="eT">Title screen</button></div></div>`);
  $('eT').onclick=()=>{closeOv();titleScreen()};
+ if(k==='harem'){META.loopClosed=1;saveMeta()}
 }
-/* ---- title ---- */
+/* ---- title: choose a file, then play ---- */
+function achPct(){const all=Object.keys(ACH).length;return all?Math.round(Object.keys(META.ach).filter(k=>ACH[k]).length/all*100):0}
 function titleScreen(){
- show('title');$('tmain').style.display='flex';$('tname').style.display='none';
+ show('title');$('tname').style.display='none';
  const fl=['ellie2','nyx','ada','priya','juno','kitc','rin','bea','mira','saoirse','sunny','tilly','petra','astrid','yuki','vesper','delphine','noor','fern','wren','pia'],ex=['h','s','h','n','h','s','b','s','n','s','h','b','h','n','s','s','n','n','h','h','n'];
  $('heads').innerHTML=fl.map((g,i)=>`<span>${head(g,ex[i])}</span>`).join('');
- const sv=LS.get('opsec3_save');$('bCont').disabled=!sv;$('bLoad').disabled=!['auto',1,2,3,4,5].some(k=>readSlot(k));
+ if(!PROF){filesScreen();return}
+ fileMenu();
+}
+function filesScreen(){PROF=0;$('tmain').style.display='none';const el=$('tprof');el.style.display='flex';
+ const card=n=>{const p=readProf(n);if(!p)return`<button class="pfile empty" data-n="${n}"><h4>File ${n}</h4><span class="small">Empty. Start here.</span></button>`;
+  const m=p.meta||{},all=Object.keys(ACH).length,a=Object.keys(m.ach||{}).filter(k=>ACH[k]).length,e=Object.keys(m.ends||{}).length;
+  return`<button class="pfile" data-n="${n}"><h4>${esc(p.name||'File '+n)}</h4><span class="pct">${Math.round(a/all*100)}%</span><span class="small">${a}/${all} achievements · ${e}/${ENDORDER.length} endings · ${m.runs||0} runs${m.loop?' · ∞':''}</span><span class="small">${p.last?'Last played '+fmtTime(p.last):''}</span><span class="btn del" data-del="${n}">Delete file</span></button>`};
+ el.innerHTML=`<p class="small">Choose a file. Each one keeps its own runs, saves and achievements.</p><div class="pfiles">${[1,2,3].map(card).join('')}</div>`;
+ el.querySelectorAll('.pfile').forEach(b=>b.onclick=e=>{const d=e.target.closest('[data-del]');if(d){e.stopPropagation();if(!d.dataset.c){d.dataset.c=1;d.textContent='Tap again to delete everything in this file';return}
+   const n=d.dataset.del;try{for(const k of Object.keys(localStorage))if(k===profKey(n)||k.startsWith(profKey(n)+'_'))localStorage.removeItem(k)}catch(e){}filesScreen();return}
+  const n=+b.dataset.n;if(!readProf(n)){loadProf(n);saveMeta()}else loadProf(n);fileMenu()})}
+function fileMenu(){$('tprof').style.display='none';$('tmain').style.display='flex';
+ const e=Object.keys(META.ends).length;
+ $('tfile').innerHTML=`<b style="color:var(--butter)">${esc(META.name||'File '+PROF)}</b> · ${achPct()}% · ${e}/${ENDORDER.length} endings`;
+ $('bLoad').disabled=!['auto',1,2,3,4,5].some(k=>readSlot(k));
+ $('bPost').style.display=e?'':'none';
 }
 $('bNew').onclick=()=>{$('tmain').style.display='none';$('tname').style.display='flex';$('hIn').focus()};
 $('bBack').onclick=titleScreen;
+$('bFiles').onclick=filesScreen;
+$('bAch').onclick=()=>{if(typeof achScreen==='function')achScreen()};
+$('bPost').onclick=()=>{if(typeof postgame==='function')postgame()};
 $('bGo').onclick=()=>{
  const h=($('hIn').value||'').trim().replace(/[<>&"{}]/g,'')||'n00b';
- S=fresh(h);if(META.runs)ach('newgame');
- // every route and every mystery, done at least once, in any run: there's a file waiting on your laptop
- if(ROM.every(g=>META.routes[g])&&Object.keys(MYST).every(m=>META.solved[m]))S.f.sessionbak=1;
+ S=fresh(h);META.lastH=h;saveMeta();if(META.runs)ach('newgame');
+ // the loop: once you know, you can say the word at the very start
+ if(META.secret)S.f.canrewind=1;
  S.resume='pro';startPrologue();
 };
 function startPrologue(){
@@ -10756,9 +11323,134 @@ function startPrologue(){
  initWorld(()=>{S.day=0;S.slot=0;S.wakeAt='flat';snapDay();if(G.ok){S.inWorld=1;teleportArea('flat')}hub()});
 }
 $('hIn').addEventListener('keydown',e=>{if(e.key==='Enter')$('bGo').click()});
-$('bCont').onclick=()=>{const s=readSlot('auto');if(s&&s.h)resumeGame(s)};
-$('bLoad').onclick=()=>savesScreen();
-$('bEnds').onclick=()=>{const s=META.ends;ov(`<div class="card"><h3>Endings ${Object.keys(s).length}/${ENDORDER.length}</h3><div class="endlist">${ENDORDER.map(k=>`<div class="${s[k]?'':'no'}">${s[k]?esc(ENDINFO[k][0]):'???'}</div>`).join('')}</div><p class="small">${ENDORDER.length} ways for the week to end. Who you love is your own business, and shows up in all of them.</p><div class="row"><button class="btn pri" id="ex">Close</button></div></div>`);$('ex').onclick=closeOv};
+
+/* ============ POSTGAME ============
+   Opens on the title screen once a file has seen an ending. A map of the week (every big choice and where it leads),
+   each ending with the versions you've had and why, the hints you've earned (some are riddles), scenes to watch again,
+   achievements, and once the loop is closed, the week after. */
+/* how each ending is reached: shown once you've found it, or once a hint has told you */
+const ENDHOW={
+ disclosure:'Go to the keynote with a strong case (solve the Lumen mysteries, find the mole) and choose Disclosure at Saturday\'s council. Have someone in love with you.',
+ half:'Disclosure with a middling case: some mysteries solved, not enough.',
+ graph:'Reach the keynote with almost nothing: few mysteries solved, no mole found. LANTERN\'s demo runs.',
+ frontpage:'Get close to Saoirse (her third scene) and choose Front Page at the council.',
+ injunction:'Get close to Noor, and either Delphine or the Bastion audit solved; choose Injunction at the council.',
+ killswitch:'Get close to Mira, find her signing key, and choose Kill Switch.',
+ ghost:'Kill Switch, then run away with Mira when she asks.',
+ double:'Get close to Vesper and hear her confession; when she offers, go inside Halberd with her.',
+ whistle:'Get close to Delphine; she walks onto Victor\'s stage herself.',
+ found:'Find Jonah Reyes and bring him to the keynote.',
+ signal:'When Owen cuts the microphones, have the van (Petra and Astrid) or Astrid\'s dish ready.',
+ blackout:'When Owen cuts the microphones, have Sunny on the uplink. She takes the whole building down.',
+ scapegoat:'Let Krall\'s men catch you with Rin at midday on Sunday.',
+ larp:'Reach the keynote with lots of Clout and little Skill, and bluff when Marge hands you the microphone.',
+ opensource:'Nobody in love with you, but six or more people\'s stories well along.',
+ notfound:'Nobody in love with you, and few people close.',
+ lasttrain:'Choose Walk Away at the council.',
+ proof:'On Friday, when Proof is in trouble, stay home with Ellie.',
+ soldout:'Take Victor\'s offer on Friday and don\'t turn back.',
+ dump:'Help Mira into LANTERN-01 on Thursday night, then choose The Dump.',
+ trojan:'Fake-accept Victor\'s offer, get inside Suite 1313, then choose Trojan Horse.',
+ rollback:'Win over Sunny and Tilly (their crossover) and choose Rollback.',
+ doublecross:'Take Victor\'s offer, then turn on him: Double-Cross.',
+ informant:'Report WHISPER to Krall on Tuesday night, become his informant, and give him the plan.',
+ lastlogin:'Betray the people who trusted you and go up to the roof with nobody in love with you.',
+ bigscore:'Meet three of the crew (Nyx, Petra, Kit, Tilly, Yuki), get two of them to their second scene, and say yes when Nyx asks on Friday.',
+ zeroday:'Ask Astrid on the train what else is up there. Find the badge in the hotel pool after midnight. At the council, a plan with no name appears.',
+ harem:'After Zero Day, type rewind on the laptop at the very start of a new run. In that loop, fall in love with all 21 and solve all 15 mysteries.'
+};
+/* hints: the first ones about the secret are riddles; later ones say it plainly */
+const HINTS=[
+ {id:'r1',riddle:1,t:'Seven days of static from a sky that remembers. Before you ever arrive, ask the girl with the headphones what else is up there.'},
+ {id:'t_crew',t:'A locksmith, a driver, a costumer, a badge-maker and a speedrunner. Know enough of them by Friday and someone will offer you a very different weekend.'},
+ {id:'r2',riddle:1,t:'Under a painted planet, after the last bell, a name is waiting in the water. It\'s yours. It\'s older than you.'},
+ {id:'t_whisper',t:'On Tuesday night, the message you get from WHISPER can be answered, reported, or ignored. Each one is a different week.'},
+ {id:'r3',riddle:1,t:'When the council sits and every plan is someone else\'s, say the one nobody wrote: switch off the thing that already knows.'},
+ {id:'t_routes',t:'Some plans only exist if the right people trust you: Saoirse for the front page, Noor for a judge, Sunny and Tilly for the badges, Mira for the switch.'},
+ {id:'p1',t:'Day 1, on the train: ask Astrid if anything else is up there.'},
+ {id:'t_vesper',t:'Vesper is lying to you. Find out how, and she might stop. Or she might take you with her.'},
+ {id:'p2',t:'The hotel pool, Level 2, Late night, from Wednesday: look into the deep end.'},
+ {id:'t_heist',t:'If you help Mira on Thursday night, you get LANTERN-01\'s logs. If you tell Krall, you lose her for good.'},
+ {id:'p3',t:'With both of those, a new plan appears at Saturday\'s council: pull the plug on the thing in Suite 1313.'},
+ {id:'t_gifts',t:'Everyone tells you what they love by their second and fourth scenes. PEOPLEFINDR tells you sooner, for a price.'},
+ {id:'t_loop',after:()=>META.secret,t:'At the very start of a run, before you leave the flat: open the laptop. Type what the last message told you.'},
+ {id:'t_loop2',after:()=>META.loop,t:'In the loop, the Echo app on your phone tells you what\'s left and lets you rewind a bad day. Four things fit in every part of the day.'},
+ {id:'t_loop3',after:()=>META.loop,t:'The loop\'s three mysteries are found in the loop only: listen with Astrid, ask Tilly and Wren, find Jonah in the tunnel, and look inside 1313.'}
+];
+const hintOK=h=>!h.after||h.after();
+/* what you remember about each week: recorded at the ending card */
+function recordEnding(k){META.endv=META.endv||{};const L=META.endv[k]=META.endv[k]||[];
+ const lv=ROM.filter(g=>loved(g));
+ const v={at:Date.now(),h:S.h,loved:lv,partner:S.partner||null,plan:S.plan||null,day:S.day,solved:Object.keys(S.solved).length,
+  f:['path_whisper','path_report','path_alone','heist_yes','betray_mira','mira_taken','informant','fake_accept','took_offer','turncoat','crew_in','vesper_leaked','leak_you','jonah_met','loop_closed'].filter(x=>S.f[x])};
+ L.unshift(v);if(L.length>8)L.length=8;
+ META.fl=META.fl||{};for(const x in S.f)if(S.f[x])META.fl[x]=1;if(S.plan)META.fl['plan_'+S.plan]=1;if(S.loop)META.fl.loop=1;
+ // every ending teaches you something new
+ META.hints=META.hints||[];const fresh=[];for(const h of HINTS){if(fresh.length>=2)break;if(!META.hints.includes(h.id)&&hintOK(h)){META.hints.push(h.id);fresh.push(h)}}
+ if(META.hints.length>=5)ach('hints5');if(HINTS.every(h=>META.hints.includes(h.id)))ach('hints_all');if(Object.keys(META.ends).length>=10)ach('tree10');
+ saveMeta();return fresh}
+const PLANN={disc:'Disclosure',front:'Front Page',inj:'Injunction',kill:'Kill Switch',walk:'Walk Away',dump:'The Dump',trojan:'Trojan Horse',rollback:'Rollback',doublecross:'Double-Cross',informant:'Krall\'s way',soldout:'Sold out',bigscore:'The Big Score',oracle:'Pull the plug'};
+const FLN={path_whisper:'answered WHISPER',path_report:'reported WHISPER to Krall',path_alone:'told nobody about WHISPER',heist_yes:'helped Mira into LANTERN-01',betray_mira:'betrayed Mira',mira_taken:'Mira was taken',informant:'were Krall\'s informant',fake_accept:'faked accepting Victor\'s offer',took_offer:'took Victor\'s offer',turncoat:'turned on Lumen from inside',crew_in:'joined Nyx\'s crew',vesper_leaked:'Vesper leaked the plan',leak_you:'were blamed for the leak',jonah_met:'found Jonah',loop_closed:'closed the loop'};
+function whyLines(v){const out=[];if(v.plan)out.push('Plan: '+(PLANN[v.plan]||v.plan)+'.');
+ out.push(v.loved.length?'In love: '+v.loved.map(g=>CH[g].name).join(', ')+'.':'Nobody in love with you.');
+ if(v.f.length)out.push('You '+v.f.map(x=>FLN[x]).filter(Boolean).join('; ')+'.');out.push(v.solved+' mysteries solved.');return out}
+/* the map of the week: every big choice, what it leads to, and the endings at the end of each branch */
+const TREE=[
+ {t:'Prologue · the forum post',kids:[
+  {t:'Day 1 · on the train, ask Astrid what else is up there',fl:'heard_echo',secret:1,kids:[{t:'Find the badge in the pool after midnight',fl:'badge0',secret:1,kids:[{t:'Saturday: pull the plug',fl:'plan_oracle',secret:1,ends:['zeroday']}]}]},
+  {t:'Next run, at the very start: rewind',fl:'loop',secret:1,need:()=>META.secret,kids:[{t:'Everyone in love, all fifteen mysteries',fl:'loop_closed',ends:['harem']}]}]},
+ {t:'Tuesday night ⚑ WHISPER\'s message',kids:[
+  {t:'Answer',fl:'path_whisper',kids:[{t:'Wednesday ⚑ help Mira into LANTERN-01',fl:'heist_yes',kids:[{t:'The Dump',fl:'plan_dump',ends:['dump']}]},{t:'Help her, then tell Krall',fl:'betray_mira',ends:['lastlogin']}]},
+  {t:'Report it to Krall',fl:'path_report',kids:[{t:'Become his informant',fl:'informant',ends:['informant','lastlogin']}]},
+  {t:'Tell nobody',fl:'path_alone'}]},
+ {t:'Friday',kids:[
+  {t:'Proof is in trouble: stay home',fl:'stayed_home',ends:['proof']},
+  {t:'Nyx\'s crew: steal LANTERN-02',fl:'crew_in',kids:[{t:'The Big Score',fl:'plan_bigscore',ends:['bigscore']}]},
+  {t:'⚑ Victor\'s offer',kids:[{t:'Fake yes: inside Suite 1313',fl:'fake_accept',ends:['trojan']},{t:'Yes',fl:'took_offer',kids:[{t:'Stay sold',ends:['soldout']},{t:'Turn on him',fl:'turncoat',ends:['doublecross']}]}]}]},
+ {t:'Saturday ⚑ the plan',kids:[
+  {t:'Disclosure',fl:'plan_disc',ends:['disclosure','half','graph','opensource','notfound','found','whistle','signal','blackout','larp','scapegoat','double']},
+  {t:'Front Page (Saoirse)',fl:'plan_front',ends:['frontpage']},{t:'Injunction (Noor)',fl:'plan_inj',ends:['injunction']},
+  {t:'Rollback (Sunny and Tilly)',fl:'plan_rollback',ends:['rollback']},{t:'Kill Switch (Mira)',fl:'plan_kill',ends:['killswitch','ghost']},
+  {t:'Walk away',fl:'plan_walk',ends:['lasttrain']}]}
+];
+const PG={tab:'tree',end:null};
+function postgame(tab){if(tab)PG.tab=tab;const ne=Object.keys(META.ends).length;
+ const tabs=[['tree','The week'],['ends','Endings'],['hints','Hints'],['replay','Scenes'],['ach','Achievements']].concat(META.loopClosed?[['epi','The week after']]:[]);
+ const known=k=>!!META.ends[k],hinted=k=>ENDHOW[k]&&(known(k)||HINTS.some(h=>META.hints.includes(h.id)&&!h.riddle&&h.t.toLowerCase().includes((ENDINFO[k][0]||'').toLowerCase())));
+ const chip=k=>`<button class="echip ${known(k)?'on':''} ${ENDINFO[k][2]}" data-e="${k}">${known(k)?esc(ENDINFO[k][0]):'???'}</button>`;
+ const node=(n,d)=>{const seen=!n.fl||META.fl&&META.fl[n.fl],hide=n.secret&&!seen&&!(n.need&&n.need());
+  return`<div class="tnode ${seen?'seen':''}"><div class="tl">${hide?'<i>??? · a hidden branch</i>':esc(n.t)}${n.fl&&seen?' <span class="ok">✓</span>':''}</div>${n.ends?`<div class="tends">${n.ends.map(chip).join('')}</div>`:''}${n.kids?`<div class="tkids">${n.kids.map(c=>node(c,d+1)).join('')}</div>`:''}</div>`};
+ let body='';
+ if(PG.tab==='tree')body=`<p class="small">Every big choice in the week, and where it goes. Ticks are choices you've made in some run. Tap an ending.</p><div class="ttree">${TREE.map(n=>node(n,0)).join('')}</div>`;
+ if(PG.tab==='ends'){const k=PG.end;
+  body=`<div class="egrid">${ENDORDER.map(chip).join('')}</div>`;
+  if(k){const E=ENDINFO[k],V=(META.endv&&META.endv[k])||[];
+   body+=`<div class="edetail"><p class="small">${{true:'TRUE ENDING',good:'ENDING',mixed:'ENDING',bad:'BAD ENDING',secret:'SECRET ENDING'}[E[2]]}</p><h3>${known(k)?esc(E[0]):'???'}</h3><p>${known(k)?esc(E[1]):'Not found yet.'}</p>
+   <p class="small"><b>How:</b> ${known(k)||hinted(k)?esc(ENDHOW[k]||''):'Find more endings to learn more.'}</p>
+   ${V.length?`<p class="small"><b>Your versions</b></p>${V.map(v=>`<div class="evar"><b>${esc(v.h)}</b> · ${fmtTime(v.at)}<br>${whyLines(v).map(esc).join(' ')}</div>`).join('')}`:''}</div>`}}
+ if(PG.tab==='hints'){const H=HINTS.filter(h=>META.hints.includes(h.id));body=`<p class="small">${H.length}/${HINTS.length} hints. Every ending teaches you something. The strange ones are riddles.</p>${H.map(h=>`<div class="hint ${h.riddle?'riddle':''}">${h.riddle?'<b>?</b> ':''}${esc(h.t)}</div>`).join('')||'<p class="small">None yet.</p>'}`}
+ if(PG.tab==='replay'){const sc=META.seenSc||{};body=`<p class="small">Scenes you've seen, in any run. Replaying changes nothing.</p>${ROM.map(g=>{const ids=[0,1,2,3,4,5].map(i=>g+i).filter(id=>sc[id]);return ids.length?`<div class="rrow"><span class="rhd">${head(lookOf(g),'h')}</span><div><b style="color:${CH[g].col}">${CH[g].name}</b><div class="rbtns">${ids.map(id=>{const i=+id.slice(g.length);return`<button class="btn" data-r="${id}">${i===5?'♥ Last':i===4?'With a friend':i===0?'Meeting':'Scene '+i}</button>`}).join('')}${sc['epi_'+g]?`<button class="btn" data-r="epi_${g}">Epilogue</button>`:''}</div></div></div>`:''}).join('')||'<p class="small">Nothing yet.</p>'}`}
+ if(PG.tab==='ach'){const all=Object.keys(ACH),got=all.filter(k=>META.ach[k]).length;body=`<p class="small">${got}/${all.length} · ${achPct()}%</p>${bar(achPct(),'var(--butter)')}<div class="agrid">${all.map(k=>{const a=ACH[k],on=!!META.ach[k],hid=a[2]&&!on;return`<div class="atile ${on?'on':''}"><b>${hid?'???':esc(a[0])}</b><small>${hid?'Hidden':esc(a[1])}</small></div>`}).join('')}</div>`}
+ if(PG.tab==='epi')body=`<p>Monday. The con's over. Everyone's still here. Walk around, talk to anyone, for as long as you like.</p><div class="row"><button class="btn pri" id="pgEpi">Go back</button></div>`;
+ ov(`<div class="card pgcard"><div class="row" style="justify-content:space-between;align-items:center"><h3 style="margin:0">Postgame · ${esc(META.name||'')}</h3><button class="btn" id="pgx">Close</button></div><p class="small">${ne}/${ENDORDER.length} endings · ${achPct()}% achievements · ${META.runs||0} runs</p><div class="atabs">${tabs.map(t=>`<button class="${PG.tab===t[0]?'on':''}" data-pt="${t[0]}">${t[1]}</button>`).join('')}</div><div class="pgbody">${body}</div></div>`);
+ const o=$('ov');$('pgx').onclick=closeOv;
+ o.querySelectorAll('[data-pt]').forEach(b=>b.onclick=()=>postgame(b.dataset.pt));
+ o.querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>{PG.end=b.dataset.e;postgame('ends')});
+ o.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>replayScene(b.dataset.r));
+ if($('pgEpi'))$('pgEpi').onclick=()=>{closeOv();epilogueMode()};
+}
+const achScreen=()=>postgame('ach');
+/* replaying a scene: a sandbox week where everyone's met and nothing you do is kept */
+function replayScene(id){const keep=S;S=fresh(META.lastH||'you');S.replay=1;S.unl={aff:1};for(const g of ROM){S.met[g]=1;S.f['met_'+g]=1;S.aff[g]=70}
+ const m=id.match(/^([a-z]+)(\d)$/);if(m){S.sc[m[1]]=+m[2];S.aff[m[1]]=Math.max(20,ROUTES[m[1]].aff[+m[2]]||20)}
+ Object.assign(S.f,META.fl||{});S.day=6;S.slot=2;S.inWorld=0;ach('replay');
+ run([{bg:(sceneArea(id)&&AREAS[sceneArea(id)]&&AREAS[sceneArea(id)].bg)||'con'},...scr(id)],()=>{S=keep;show('title');titleScreen();postgame('replay')})}
+/* the week after: free roam, nothing to do but be there */
+DAYN[8]=DAYN[8]||'Monday';DAYS[8]=[null,null,null,null,null,null];
+function epilogueMode(){S=fresh(META.lastH||'you');S.epilogue=1;S.day=8;S.ch=4;S.slot=2;S.money=200;S.unl={aff:1,phone:1,map:1,move:1,clues:1,money:1,skill:1,clout:1};
+ for(const g of ROM){S.met[g]=1;S.f['met_'+g]=1;S.aff[g]=100;S.sc[g]=ROUTES[g].n}Object.assign(S.f,{d1_badge:1,d1_open:1,d1_checkin:1,d1_room:1,loop_closed:1});
+ ach('epilogue');beatBusy=false;if(!WD.touch&&window.THREE)tryLock();
+ initWorld(()=>{if(G.ok){S.inWorld=1;teleportArea('foyer')}hub();toast('Monday. Nothing to do. Everyone to see.','var(--mint)')})}
 
 /* ============ THREE.JS ENGINE ============ */
 /* Levels are still described with the small builder API below (box, quad, room...). Quads are collected
@@ -14653,7 +15345,7 @@ opens('noc carpark basement',()=>S.day>4||S.day===4&&S.slot>=1,'Staff and parkin
 opens('mdf conops stafffw staffc service security stores kitchenC breakroom dock backstage conroof backstairs luggage',()=>S.day>4||bdone('d4_noc'),'STAFF ONLY.');
 opens('backoffice pdining hkitchen plant tunnel tunnelN',()=>S.day>=5||f('heist_yes')&&S.day===4&&S.slot>=5,'Staff only.');
 const OPENOF={};
-function areaLock(a){if(!S||window.__allOpen)return null;if(!Object.keys(OPENOF).length)for(const o of OPENS)for(const k of o.areas)OPENOF[k]=o;const o=OPENOF[a];return o&&!o.cond()?o.msg:null}
+function areaLock(a){if(!S||window.__allOpen||S.epilogue)return null;if(!Object.keys(OPENOF).length)for(const o of OPENS)for(const k of o.areas)OPENOF[k]=o;const o=OPENOF[a];return o&&!o.cond()?o.msg:null}
 /* ---------------- gates: ropes, locked doors and card readers that open with the story ---------------- */
 const GATES=[];
 function gate(reg,kind,x0,z0,x1,z1,y,open,msg,label){GATES.push({reg,kind,x0,z0,x1,z1,y:y||0,open,msg,label:label||(kind==='rope'?'Roped off':kind==='card'?'Staff door':'Locked door')})}
@@ -14719,7 +15411,7 @@ function placeWorld(){
  const once=(k,a,b)=>()=>{const key=k+S.ch;if(S.room[key])return run([N(b)],hub);S.room[key]=1;run(a(),hub)};
  /* ---- home: Proof and Flat 1A ---- */
  const F=3.9,RF=13.5;
- int('home',-291.6,10.6,()=>'Look at your monitors',N1('Your forum post from 3 AM: "honestly most firewalls are a joke if you know what you\'re doing." Fourteen upvotes. One reply: "source?" You never answered.'),{y:F});
+ int('home',-291.6,10.6,()=>S.f.canrewind&&!S.loop&&S.day===0?'Open the laptop':'Look at your monitors',()=>S.f.canrewind&&!S.loop&&S.day===0?run([N('The laptop. A blinking cursor. Your fingers are already on the keys, as if they know something you don\'t.'),C({t:'Type: rewind',then:()=>scr('rewind')},{t:'Close it',then:()=>[T('think','Not yet. Maybe never. It\'s a normal week. It\'s going to be a normal week.')]})],hub):N1('Your forum post from 3 AM: "honestly most firewalls are a joke if you know what you\'re doing." Fourteen upvotes. One reply: "source?" You never answered.')(),{y:F});
  int('home',-291.5,5.6,()=>'Water the plant',N1('It\'s plastic. You water it anyway. It\'s a ritual now.'),{y:F});
  int('home',-300.5,10.3,()=>'Check the pizza boxes',N1('Three boxes. Two empty. One contains a single crust you\'re saving for reasons you can\'t explain.'),{y:F});
  int('home',-296.5,11,()=>'Look out of the window',N1('Linden Street at 7 AM. The barber is unrolling his shutter, a van is unloading flour for Ellie, and the sun is coming up over the square, gold on every window across the road.'),{y:F});
@@ -14784,6 +15476,8 @@ function placeWorld(){
 
  // shops and shifts around the week
  int('con',-232,50,()=>'Halcyon Boutique',()=>shopOpen('boutique'));
+ // something at the bottom of the pool, after midnight
+ int('con',-153,-32.6,()=>S.day>=3&&S.slot===5&&!S.f.badge0?'Something is blinking in the deep end':null,()=>run(scr('pool_badge'),hub),{y:L2,r:3.2});
  int('con',-156,-55.4,()=>'The bar',()=>run([N(S.slot>=3?'The bar\'s busy. Somebody is explaining a buffer overflow with beer mats.':'The bar\'s shut. Chairs on tables.'),C({t:'Buy something',then:()=>{setTimeout(()=>shopOpen('bar'),0);Q=[];onDone=null;return[]}},{t:JOBS.barshift.n,hint:JOBS.barshift.when()?'£'+JOBS.barshift.pay+' · uses the '+SLOTN[S.slot].toLowerCase():!met('bea')?'You don\'t know anyone behind the bar':'Evenings, from Tuesday',if:()=>true,then:()=>{if(!JOBS.barshift.when())return[N('Not now.')];setTimeout(()=>jobRun('barshift'),0);Q=[];onDone=null;return[]}},{t:'Leave',then:[]})],hub),{r:2.6});
  int('station',770,44,()=>'Paper & Co',()=>shopOpen('kiosk'),{r:2.6});
  int('con',100,-12,()=>'PEOPLEFINDR booth',()=>brokerOpen(),{r:2.6});
@@ -15113,6 +15807,7 @@ function cutCam(cam){const c=WD.cut.C,t=(performance.now()-WD.cut.t0)/1000,d=c.d
 
 /* ============ PHONE ============ */
 const ICON={
+ echo:['#c9b6ff','<path d="M16 6a10 10 0 1 0 10 10" fill="none" stroke="#1b1026" stroke-width="2.6" stroke-linecap="round"/><path d="M26 7v9h-9" fill="none" stroke="#1b1026" stroke-width="2.6" stroke-linejoin="round"/><circle cx="16" cy="16" r="2.5" fill="#1b1026"/>'],
  messages:['#8affc1','<path d="M6 8h20v13H13l-5 4v-4H6z" fill="#1b1026"/>'],
  map:['#7cc4ff','<path d="M5 9l7-3 8 3 7-3v17l-7 3-8-3-7 3z" fill="none" stroke="#1b1026" stroke-width="2.4" stroke-linejoin="round"/><path d="M12 6v17M20 9v17" stroke="#1b1026" stroke-width="2"/>'],
  goals:['#ffd166','<circle cx="16" cy="16" r="10" fill="none" stroke="#1b1026" stroke-width="2.4"/><circle cx="16" cy="16" r="5" fill="none" stroke="#1b1026" stroke-width="2.4"/><circle cx="16" cy="16" r="1.8" fill="#1b1026"/>'],
@@ -15129,8 +15824,8 @@ const ICON={
  achieve:['#ffb347','<path d="M10 6h12v6a6 6 0 0 1-12 0z" fill="#1b1026"/><path d="M10 8H6a4 4 0 0 0 4 5M22 8h4a4 4 0 0 1-4 5" fill="none" stroke="#1b1026" stroke-width="2"/><path d="M16 18v4M11 26h10" stroke="#1b1026" stroke-width="2.6" stroke-linecap="round"/>'],
  settings:['#d9d4cc','<circle cx="16" cy="16" r="4.5" fill="none" stroke="#1b1026" stroke-width="2.6"/><path d="M16 5v4M16 23v4M5 16h4M23 16h4M8.2 8.2l2.8 2.8M21 21l2.8 2.8M8.2 23.8l2.8-2.8M21 11l2.8-2.8" stroke="#1b1026" stroke-width="2.6" stroke-linecap="round"/>']
 };
-const APPN={messages:'Messages',calendar:'Calendar',map:'Map',hearts:'Hearts',cases:'Case board',stats:'Stats',story:'Story',achieve:'Achievements',bag:'Bag',saves:'Saves',log:'Log',settings:'Settings',quit:'Quit'};
-const APPU={messages:'phone',calendar:'phone',map:'map',hearts:'aff',cases:'clues',stats:'skill',story:'phone',achieve:'phone',bag:'phone'};
+const APPN={echo:'Echo',messages:'Messages',calendar:'Calendar',map:'Map',hearts:'Hearts',cases:'Case board',stats:'Stats',story:'Story',achieve:'Achievements',bag:'Bag',saves:'Saves',log:'Log',settings:'Settings',quit:'Quit'};
+const APPU={echo:'echo',messages:'phone',calendar:'phone',map:'map',hearts:'aff',cases:'clues',stats:'skill',story:'phone',achieve:'phone',bag:'phone'};
 /* the phone: a home screen of apps; every app opens full screen. Back (or Esc) goes back to the home screen. */
 let phApp=null,phThread=null,phReg=null;const PH={case:null,pick:[],ans:null,heart:null,day:null,stab:'week',atab:'all',ctab:'board',sday:null};
 function phone(app){
@@ -15195,7 +15890,7 @@ const APPS={
   if(d===S.day){const b=curBeat();
    if(b)now=`<div class="cnow"><b>Now: ${esc(beatStep(b).t||b.t)}</b><p class="small">The green light shows where. Free time comes after.</p><button class="btn" id="cpin">Point me there</button></div>`;
    else if(isFree()){const ready=ROM.filter(sceneReady),leads=Object.keys(LEADS).filter(leadOpen);
-    now=`<div class="cnow"><b>The ${SLOTN[S.slot].toLowerCase()} is yours.</b><p class="small">One thing per part of the day${S.restore?' (two, overclocked)':''}. Walking, talking shop, gifts, shopping and your phone are free.</p>
+    now=`<div class="cnow"><b>The ${SLOTN[S.slot].toLowerCase()} is yours.</b><p class="small">One thing per part of the day${S.loop?' (six, in the loop)':''}. Walking, talking shop, gifts, shopping and your phone are free.</p>
     ${ready.length?`<div class="small"><b>Ready for you</b></div><div class="cppl">${ready.map(g=>`<button class="chip" data-who="${g}"><span class="hd">${head(lookOf(g),'n')}</span>${CH[g].name}<small>${esc(whereNow(g)||'')}</small></button>`).join('')}</div>`:''}
     ${eventsNow().length?`<div class="small"><b>On now</b></div><div class="cppl">${eventsNow().map(e=>`<button class="chip" data-ev="${e.id}">${esc(e.n)}<small>${esc(AREAS[e.w]?AREAS[e.w].n:'')}</small></button>`).join('')}</div>`:''}
     ${leads.length?`<div class="small"><b>Open leads</b></div><div class="cppl">${leads.map(k=>`<button class="chip" data-lead="${k}">${esc(LEADS[k].n)}<small>${esc(AREAS[LEADS[k].w]?AREAS[LEADS[k].w].n:'')}</small></button>`).join('')}</div>`:''}
@@ -15222,7 +15917,7 @@ const APPS={
   return`<div class="abody hsplit"><div class="hleft">${grid}</div><div class="hright"><button class="btn" id="hclose">‹ Everyone</button>${file}</div></div>`},
  /* ---- Case board: a corkboard of mysteries, clues on strings, leads as sticky notes ---- */
  cases(){
-  const ms=Object.keys(MYST).filter(m=>mystClues(m).length||Object.keys(LEADS).some(k=>LEADS[k].m===m&&leadOpen(k))||S.solved[m]||(S.restore&&META.solved[m]));
+  const ms=Object.keys(MYST).filter(m=>mystClues(m).length||Object.keys(LEADS).some(k=>LEADS[k].m===m&&leadOpen(k))||S.solved[m]||(S.loop&&META.solved[m]));
   const tabs=tabsH(PH.ctab,[['board','Board'],['locker','Evidence locker'],['leads','All leads']],'ct');
   if(PH.ctab==='locker'){const by={};S.clues.forEach(c=>{(by[CLUE[c].m[0]]=by[CLUE[c].m[0]]||[]).push(c)});
    return tabs+`<div class="abody"><p class="small">${S.clues.length}/${Object.keys(CLUE).length} clues</p>${Object.keys(MYST).filter(m=>by[m]).map(m=>`<div class="dbh">${esc(MYST[m].n)}</div><div class="cork small-cork">${by[m].map(c=>`<div class="pin"><b>${esc(CLUE[c].s)}</b><span>${esc(CLUE[c].t)}</span></div>`).join('')}</div>`).join('')||'<p class="small">Nothing yet.</p>'}</div>`}
@@ -15256,6 +15951,9 @@ const APPS={
  achieve(){const cat=k=>k.startsWith('end_')?'end':k.startsWith('love_')?'love':k.startsWith('solve_')||k.includes('clue')||k.includes('solve')||k==='first_lead'?'myst':k.startsWith('skill_')||k.startsWith('clout_')?'rank':'other';
   const ks=Object.keys(ACH).filter(k=>PH.atab==='all'||cat(k)===PH.atab),all=Object.keys(ACH),got=all.filter(k=>META.ach[k]).length;
   return tabsH(PH.atab,[['all','All'],['end','Endings'],['love','Love'],['myst','Mysteries'],['rank','Ranks'],['other','Everything else']],'at')+`<div class="abody"><p class="small">${got}/${all.length} unlocked across every run</p>${bar(got/all.length*100,'var(--butter)')}<div class="agrid">${ks.map(k=>{const a=ACH[k],on=!!META.ach[k],hid=a[2]&&!on;return`<div class="atile ${on?'on':''}"><span class="aic">${on?'★':hid?'?':'☆'}</span><b>${hid?'???':esc(a[0])}</b><small>${hid?'Hidden':esc(a[1])}</small>${on?`<em>${new Date(META.ach[k]).toLocaleDateString()}</em>`:''}</div>`}).join('')}</div></div>`},
+ /* ---- Echo: the loop. What's left, and the day you can take back ---- */
+ echo(){const P=echoPlan(),left=P.people.filter(p=>p[1]!=='Done');
+  return`<div class="abody"><p class="small">Loop ${META.loop||1}. Each part of the day holds ${LOOPOC+1} things. People can take three times as much of you each day, and stories can run up to two days early. Routes you've finished before aren't held to their day.</p><div class="row"><button class="btn pri" id="erw" ${S.snap&&S.day>=1?'':'disabled'}>Rewind to this morning</button></div><p class="small" style="margin-top:12px"><b>People · ${ROM.length-left.length}/${ROM.length} in love</b></p>${left.map(p=>`<div class="kv"><span>${esc(p[0])}</span><b class="small">${esc(p[1])}</b></div>`).join('')||'<p class="small">Everyone. You did it.</p>'}<p class="small" style="margin-top:12px"><b>Mysteries · ${allMyst().filter(m=>S.solved[m]).length}/${allMyst().length}</b></p>${P.mys.map(m=>`<div class="kv"><span>${esc(m[0])}</span><b class="small">${esc(m[1])}</b></div>`).join('')||'<p class="small">All of it.</p>'}<p class="small" style="margin-top:12px">${haremReady()?'Ready. Go to the keynote on Sunday.':'When everyone is in love with you and every mystery is solved, Sunday becomes something else.'}</p></div>`},
  bag(){const e=Object.entries(S.inv).filter(([k])=>ITEMS[k]);
   const who=k=>ROM.filter(g=>met(g)&&prefKnown(g,k)&&prefOf(g,k)>0).sort((a,b)=>prefOf(b,k)-prefOf(a,k));
   return`<div class="abody"><p class="small"><b class="term" style="font-size:22px;color:var(--butter)">£${S.money||0}</b> · Shops: Con Store (Expo Hall), Byte Café (Food Court), Halcyon Boutique (hotel lobby), the bar (evenings), Paper & Co (Central Station), Proof (mornings). Work: the info desk, a bar shift with Bea, a morning at Proof.</p><div class="bgrid">${e.length?e.map(([k,v])=>{const it=ITEMS[k],w=it.gear?[]:who(k);return`<div class="bitem"><b>${esc(it.n)}${v>1?' ×'+v:''}</b><small>${esc(it.d)}${it.gear?' (gear)':w.length?' · '+w.map(g=>CH[g].name+(prefOf(g,k)===2?' ♥':'')).join(', '):' · a gift: you haven\'t learned who loves it yet'}</small></div>`}).join(''):'<p class="small">Empty.</p>'}</div></div>`},
@@ -15299,6 +15997,7 @@ const APPS_AFTER={
    ov(`<div class="card"><h3>${ok?'Solved':'That doesn\'t hold up'}</h3><p>${ok?esc(MYST[m].n)+': '+esc(MYST[m].opts[MYST[m].a]):'The clues don\'t prove it, or the answer\'s wrong. You asked around while you were checking, and people noticed.'}</p><div class="row"><button class="btn pri" id="cok">OK</button></div></div>`);$('ov').classList.remove('phoneov','mapov','appov');
    $('cok').onclick=()=>{closeOv();if(ok&&SC['solved_'+m]!==undefined){closePhone();run(scr('solved_'+m),hub)}else{phApp='cases';drawApp(from==='phone')}}}},
  story(){$('ov').querySelectorAll('[data-sd]').forEach(b=>b.onclick=()=>{PH.sday=+b.dataset.sd;redraw()})},
+ echo(){const b=$('erw');if(b)b.onclick=()=>{if(!b.dataset.c){b.dataset.c=1;b.textContent='Tap again: lose everything since this morning';return}rewindDay()}},
  achieve(){$('ov').querySelectorAll('[data-at]').forEach(b=>b.onclick=()=>{PH.atab=b.dataset.at;redraw()})},
  saves(){savesPanel($('spanel'),'phone',redraw)},
  settings(){$('stf').onclick=()=>{S.fast=!S.fast;redraw()};$('stdbg').onclick=()=>{closeOv();dbgOpen()};
@@ -15437,7 +16136,7 @@ function dbgDraw(){
   <div class="dbl">${beatList().map(b=>`<button class="dbi" data-b="${b.id}"><b>Day ${b.d} · ${SLOTN[b.i]}</b><small>${esc(b.t)}</small></button>`).join('')}<button class="dbi" data-b="__end"><b>Day 7 · the end</b><small>Play everything through to an ending</small></button></div>`;
  if(DBG.tab==='tp'){const net=MAPNET[WD.reg]?Object.values(AREAS):[];const g={};for(const a of Object.values(AREAS)){if(a.hide)continue;(g[areaGroup(a)]=g[areaGroup(a)]||[]).push(a)}
   body=`<label class="small"><input type="checkbox" id="dbgOpenAll" ${window.__allOpen?'checked':''}> Ignore area locks</label>`+AGROUPS.filter(k=>g[k]).map(k=>`<div class="dbh">${esc(k)}</div><div class="dbg2">${g[k].map(a=>`<button class="dbi" data-tp="${a.k}"><b>${esc(a.n)}</b><small>${esc(levelName(a.reg,a.sp[3]||0))}${areaLock(a.k)?' · locked now':''}</small></button>`).join('')}</div>`).join('')}
- if(DBG.tab==='give')body=`<div class="dbg2">${[['meet','Meet all 21'],['aff20','+20 affection, everyone met'],['aff100','Max affection, everyone met'],['clues','Every clue'],['solve','Solve every mystery'],['skill','Skill +100'],['clout','Clout +100'],['exp0','Exposure to 0'],['exp95','Exposure to 95'],['cred','+£200'],['items','Every item'],['visit','Visit every area'],['slot','Next part of the day'],['day','End the day'],['restore','Restore session (harem mode)']].map(x=>`<button class="dbi" data-g="${x[0]}"><b>${x[1]}</b></button>`).join('')}</div>
+ if(DBG.tab==='give')body=`<div class="dbg2">${[['meet','Meet all 21'],['aff20','+20 affection, everyone met'],['aff100','Max affection, everyone met'],['clues','Every clue'],['solve','Solve every mystery'],['skill','Skill +100'],['clout','Clout +100'],['exp0','Exposure to 0'],['exp95','Exposure to 95'],['cred','+£200'],['items','Every item'],['visit','Visit every area'],['slot','Next part of the day'],['day','End the day'],['restore','Enter the loop (time control)']].map(x=>`<button class="dbi" data-g="${x[0]}"><b>${x[1]}</b></button>`).join('')}</div>
   <div class="dbh">Advance someone's story by one scene (plays it)</div><div class="dbg2">${ROM.map(g=>`<button class="dbi" data-adv="${g}"><b>${CH[g].name}</b><small>${scn(g)}/${ROUTES[g].n} · ♥ ${aff(g)}</small></button>`).join('')}</div>`;
  if(DBG.tab==='scene'){const ks=Object.keys(SC).sort();body=`<input class="inp" id="dbgQ" placeholder="Filter scenes" value="${esc(DBG.q||'')}"><div class="dbg2">${ks.filter(k=>!DBG.q||k.includes(DBG.q)).slice(0,300).map(k=>`<button class="dbi" data-sc="${k}"><b>${k}</b></button>`).join('')}</div>`}
  if(DBG.tab==='end')body=`<p class="small">Plays the ending's epilogue and shows its card. Ends this run.</p><div class="dbg2">${ENDORDER.map(k=>`<button class="dbi" data-end="${k}"><b>${esc(ENDINFO[k][0])}</b><small>${META.ends[k]?'seen':''}</small></button>`).join('')}</div>`;
@@ -15467,7 +16166,7 @@ function dbgGive(k){
  if(k==='visit')Object.keys(AREAS).forEach(a=>S.visited[a]=1);
  if(k==='slot'){closePhone();if(S.slot===5)endDay();else nextSlot();return}
  if(k==='day'){closePhone();endDay();return}
- if(k==='restore')S.restore=true;
+ if(k==='restore'){S.loop=1;S.unl.echo=1}
  hud();save();toast('Done','var(--mint)')}
 async function dbgJump(id){
  const h=S.h,hang=DBG.hang;closePhone();
@@ -15484,7 +16183,7 @@ addEventListener('keydown',e=>{if((e.key==='F9'||e.key==='`')&&S&&!$('title').cl
 
 /* ============ SAVE SLOTS ============ */
 const NSLOT=5;
-const slotKey=i=>i==='auto'?'opsec3_save':'opsec3_slot_'+i;
+const slotKey=i=>'opsec5_p'+PROF+'_'+(i==='auto'?'auto':'slot_'+i);
 function readSlot(i){try{const t=LS.get(slotKey(i));return t?JSON.parse(t):null}catch(e){return null}}
 function delSlot(i){try{localStorage.removeItem(slotKey(i))}catch(e){}}
 function stamp(){if(G.ok&&S.inWorld)S.pos=[WD.reg,WD.x,WD.z,WD.yaw,WD.y];S.savedAt=Date.now();S.where=(WD.area&&AREAS[WD.area])?AREAS[WD.area].n:(S.day===0?'Home':'')}
@@ -15532,7 +16231,7 @@ function resumeGame(s){
  // credits became money; gifts became ordinary things
  if(S.money===undefined){S.money=(S.cred||0)+20;delete S.cred;if(S.unl.cred)S.unl.money=1}for(const k in S.inv)if(!ITEMS[k])delete S.inv[k];for(const g in S.gifted)if(S.gifted[g]===true)S.gifted[g]=1;
  // quit during the prologue: it's one scene, so it starts again
- if(S.day===0){const h=S.h,r=S.restore,sb=S.f.sessionbak;S=fresh(h);S.restore=r;if(sb)S.f.sessionbak=1;S.resume='pro';startPrologue();return}
+ if(S.day===0){const h=S.h,r=S.f.canrewind;S=fresh(h);if(r)S.f.canrewind=1;S.resume='pro';startPrologue();return}
  if(!WD.touch&&window.THREE)tryLock();
  initWorld(()=>{
  if(S.pos&&G.ok&&G.regions[S.pos[0]])teleport(S.pos[0],S.pos[1],S.pos[2],S.pos[3],S.pos[4]||0);else if(G.ok)teleportArea(S.wakeAt||'room1337');

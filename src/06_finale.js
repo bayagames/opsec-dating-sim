@@ -28,7 +28,6 @@ function roomMenu(){
  run([{bg:'hotel'},{hide:1},{unlock:'room'},N('Room 1337. The minibar hums. The bed crunches. Your laptop waits.'),C(
   {t:'Hunt a bug bounty',hint:isFree()?'Terminal minigame · money · uses the '+SLOTN[S.slot].toLowerCase():curBeat()?blockedMsg():'Not now',then:()=>{bugBounty();Q=[];onDone=null;return[]}},
   {t:'Triage your inbox',hint:S.room['inbox'+S.day]?'Done today':'Free · phishing minigame · a clean run lowers Exposure',if:()=>!S.room['inbox'+S.day],then:()=>{S.room['inbox'+S.day]=1;return[{game:'phish'}]}},
-  {t:'Restore session.bak',if:()=>S.f.sessionbak&&!S.restore,then:()=>scr('restore')},
   {t:S.slot===5?'Go to bed':'Lie down for a while',hint:S.slot===5?'Ends the day':isFree()?'Uses the '+SLOTN[S.slot].toLowerCase()+' · Exposure −10':'',if:()=>S.day>=1&&(isFree()||S.slot===5&&!curBeat()),then:()=>{if(S.slot===5){Q=[];onDone=null;endDay();return[]}restSlot();Q=[];onDone=null;return[]}},
   {t:'Look out of the window',then:()=>[N(pick(['The city glitters. Somewhere out there, Proof is closed for the night, and a tiny croissant is drawn on a stack of empty paper bags.','A pigeon on the ledge stares at you. You stare back. Neither of you blinks.','From up here, four thousand glowing badges look like fireflies.','The Lumen logo on the con\'s roof turns and turns. From here it looks like an eye.']))]},
   {t:'Leave',then:[]})],hub);
@@ -55,7 +54,6 @@ function keynoteScore(){let s=S.pscore||0;
  if(!S.solved.m6)s-=3;
  if(S.f.mira_data)s+=2;if(clue('locker'))s+=2;if(S.f.dave_inside)s+=1;if(clue('lifescore'))s+=1;
  return s}
-const haremReady=()=>S.restore&&ROM.every(g=>loved(g))&&Object.keys(MYST).every(m=>S.solved[m]);
 function endingKey(){
  if(haremReady())return'harem';
  if(S.f.end)return S.f.end;
@@ -77,31 +75,49 @@ function endingKey(){
  if(!romCount())return ROM.filter(g=>scn(g)>=2).length>=6?'opensource':'notfound';
  return'disclosure'}
 function finishEnding(k){
- S.ending=k;S.inWorld=0;WD.active=false;if(typeof vcShow==='function')vcShow(false);if(document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}if(typeof updBlur==='function')updBlur();META.ends[k]=1;META.runs=(META.runs||0)+1;saveMeta();ach('end_'+k);if(!S.fails)ach('survivor');if(S.foot<=5)ach('ghostfoot');
- LS.set('opsec3_save','');
+ S.ending=k;S.inWorld=0;WD.active=false;if(typeof vcShow==='function')vcShow(false);if(document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}if(typeof updBlur==='function')updBlur();META.ends[k]=1;META.runs=(META.runs||0)+1;saveMeta();const learned=typeof recordEnding==='function'&&!S.replay?recordEnding(k):[];ach('end_'+k);if(!S.fails)ach('survivor');if(S.foot<=5)ach('ghostfoot');
+ LS.set(slotKey('auto'),'');
  const E=ENDINFO[k],seen=Object.keys(META.ends).length;
  const who=ROM.filter(loved);const face=k==='harem'?null:(S.partner||who[0]);
- // a fragment of something, on every ending card, for anyone paying attention
- const frag=['73','65','73','73','69','6f','6e','2e','62','61','6b','00'][(ENDORDER.indexOf(k))%12];
- ov(`<div class="card" style="text-align:center">${face?`<div style="width:150px;height:170px;margin:0 auto">${head(lookOf(face),'h')}</div>`:''}<p class="small">${{true:'TRUE ENDING',good:'ENDING',mixed:'ENDING',bad:'BAD ENDING'}[E[2]]}</p><h3 style="font-size:40px">${esc(E[0])}</h3><p>${esc(E[1])}</p><p>${seen}/${ENDORDER.length} endings found.</p>
- <p class="small">${RANKS.skill[rank('skill')]} · ${RANKS.clout[rank('clout')]} · ${who.length} in love · ${Object.keys(S.solved).length}/12 mysteries · ${S.clues.length} clues</p><p class="small term" style="opacity:.35">0x${frag}</p>
+ ov(`<div class="card" style="text-align:center">${face?`<div style="width:150px;height:170px;margin:0 auto">${head(lookOf(face),'h')}</div>`:''}<p class="small">${{true:'TRUE ENDING',good:'ENDING',mixed:'ENDING',bad:'BAD ENDING',secret:'SECRET ENDING'}[E[2]]}</p><h3 style="font-size:40px">${esc(E[0])}</h3><p>${esc(E[1])}</p><p>${seen}/${ENDORDER.length} endings found.</p>
+ <p class="small">${RANKS.skill[rank('skill')]} · ${RANKS.clout[rank('clout')]} · ${who.length} in love · ${Object.keys(S.solved).length}/12 mysteries · ${S.clues.length} clues</p>${learned.length?`<div class="ehints"><p class="small"><b>You learned something</b></p>${learned.map(h=>`<p class="hint ${h.riddle?'riddle':''}">${h.riddle?'<b>?</b> ':''}${esc(h.t)}</p>`).join('')}<p class="small">All your hints are in Postgame, on the title screen.</p></div>`:''}
  <div class="row" style="justify-content:center"><button class="btn pri" id="eT">Title screen</button></div></div>`);
  $('eT').onclick=()=>{closeOv();titleScreen()};
+ if(k==='harem'){META.loopClosed=1;saveMeta()}
 }
-/* ---- title ---- */
+/* ---- title: choose a file, then play ---- */
+function achPct(){const all=Object.keys(ACH).length;return all?Math.round(Object.keys(META.ach).filter(k=>ACH[k]).length/all*100):0}
 function titleScreen(){
- show('title');$('tmain').style.display='flex';$('tname').style.display='none';
+ show('title');$('tname').style.display='none';
  const fl=['ellie2','nyx','ada','priya','juno','kitc','rin','bea','mira','saoirse','sunny','tilly','petra','astrid','yuki','vesper','delphine','noor','fern','wren','pia'],ex=['h','s','h','n','h','s','b','s','n','s','h','b','h','n','s','s','n','n','h','h','n'];
  $('heads').innerHTML=fl.map((g,i)=>`<span>${head(g,ex[i])}</span>`).join('');
- const sv=LS.get('opsec3_save');$('bCont').disabled=!sv;$('bLoad').disabled=!['auto',1,2,3,4,5].some(k=>readSlot(k));
+ if(!PROF){filesScreen();return}
+ fileMenu();
+}
+function filesScreen(){PROF=0;$('tmain').style.display='none';const el=$('tprof');el.style.display='flex';
+ const card=n=>{const p=readProf(n);if(!p)return`<button class="pfile empty" data-n="${n}"><h4>File ${n}</h4><span class="small">Empty. Start here.</span></button>`;
+  const m=p.meta||{},all=Object.keys(ACH).length,a=Object.keys(m.ach||{}).filter(k=>ACH[k]).length,e=Object.keys(m.ends||{}).length;
+  return`<button class="pfile" data-n="${n}"><h4>${esc(p.name||'File '+n)}</h4><span class="pct">${Math.round(a/all*100)}%</span><span class="small">${a}/${all} achievements · ${e}/${ENDORDER.length} endings · ${m.runs||0} runs${m.loop?' · ∞':''}</span><span class="small">${p.last?'Last played '+fmtTime(p.last):''}</span><span class="btn del" data-del="${n}">Delete file</span></button>`};
+ el.innerHTML=`<p class="small">Choose a file. Each one keeps its own runs, saves and achievements.</p><div class="pfiles">${[1,2,3].map(card).join('')}</div>`;
+ el.querySelectorAll('.pfile').forEach(b=>b.onclick=e=>{const d=e.target.closest('[data-del]');if(d){e.stopPropagation();if(!d.dataset.c){d.dataset.c=1;d.textContent='Tap again to delete everything in this file';return}
+   const n=d.dataset.del;try{for(const k of Object.keys(localStorage))if(k===profKey(n)||k.startsWith(profKey(n)+'_'))localStorage.removeItem(k)}catch(e){}filesScreen();return}
+  const n=+b.dataset.n;if(!readProf(n)){loadProf(n);saveMeta()}else loadProf(n);fileMenu()})}
+function fileMenu(){$('tprof').style.display='none';$('tmain').style.display='flex';
+ const e=Object.keys(META.ends).length;
+ $('tfile').innerHTML=`<b style="color:var(--butter)">${esc(META.name||'File '+PROF)}</b> · ${achPct()}% · ${e}/${ENDORDER.length} endings`;
+ $('bLoad').disabled=!['auto',1,2,3,4,5].some(k=>readSlot(k));
+ $('bPost').style.display=e?'':'none';
 }
 $('bNew').onclick=()=>{$('tmain').style.display='none';$('tname').style.display='flex';$('hIn').focus()};
 $('bBack').onclick=titleScreen;
+$('bFiles').onclick=filesScreen;
+$('bAch').onclick=()=>{if(typeof achScreen==='function')achScreen()};
+$('bPost').onclick=()=>{if(typeof postgame==='function')postgame()};
 $('bGo').onclick=()=>{
  const h=($('hIn').value||'').trim().replace(/[<>&"{}]/g,'')||'n00b';
- S=fresh(h);if(META.runs)ach('newgame');
- // every route and every mystery, done at least once, in any run: there's a file waiting on your laptop
- if(ROM.every(g=>META.routes[g])&&Object.keys(MYST).every(m=>META.solved[m]))S.f.sessionbak=1;
+ S=fresh(h);META.lastH=h;saveMeta();if(META.runs)ach('newgame');
+ // the loop: once you know, you can say the word at the very start
+ if(META.secret)S.f.canrewind=1;
  S.resume='pro';startPrologue();
 };
 function startPrologue(){
@@ -110,6 +126,3 @@ function startPrologue(){
  initWorld(()=>{S.day=0;S.slot=0;S.wakeAt='flat';snapDay();if(G.ok){S.inWorld=1;teleportArea('flat')}hub()});
 }
 $('hIn').addEventListener('keydown',e=>{if(e.key==='Enter')$('bGo').click()});
-$('bCont').onclick=()=>{const s=readSlot('auto');if(s&&s.h)resumeGame(s)};
-$('bLoad').onclick=()=>savesScreen();
-$('bEnds').onclick=()=>{const s=META.ends;ov(`<div class="card"><h3>Endings ${Object.keys(s).length}/${ENDORDER.length}</h3><div class="endlist">${ENDORDER.map(k=>`<div class="${s[k]?'':'no'}">${s[k]?esc(ENDINFO[k][0]):'???'}</div>`).join('')}</div><p class="small">${ENDORDER.length} ways for the week to end. Who you love is your own business, and shows up in all of them.</p><div class="row"><button class="btn pri" id="ex">Close</button></div></div>`);$('ex').onclick=closeOv};

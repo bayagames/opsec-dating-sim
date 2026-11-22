@@ -8,7 +8,7 @@ function sceneWhy(g){const R=ROUTES[g],i=scn(g);if(!R||i>=R.n)return null;const 
  if(SC[g+i]===undefined)return'their story moves on in the main plot';
  if(typeof ROUTEBLOCK!=='undefined'&&ROUTEBLOCK[g]){const b=ROUTEBLOCK[g]();if(b)return b}
  {const sa=typeof sceneArea==='function'&&sceneArea(g+i);if(sa&&AREAS[sa]&&typeof areaLock==='function'&&areaLock(sa))return'not yet'}
- if(day()<r.d&&!(S.restore&&META.routes[g]))return'their story continues on Day '+r.d;
+ if(day()<(S.loop?Math.max(1,r.d-2):r.d)&&!(S.loop&&META.routes[g]))return'their story continues on Day '+r.d;
  if(aff(g)<r.a)return'needs ♥ '+r.a+' (you have '+aff(g)+')';
  if(r.sk&&rank('skill')<r.sk)return'needs Skill rank '+r.sk+' ('+RANKS.skill[r.sk]+')';
  if(r.cl&&rank('clout')<r.cl)return'needs Clout rank '+r.cl+' ('+RANKS.clout[r.cl]+')';
@@ -36,8 +36,9 @@ function startBeat(b0){if(beatBusy)return;beatBusy=true;const b=beatStep(b0);S.i
   if(S.noAdvance||!b0.adv){delete S.noAdvance;save();hub();return}if(b0.adv==='day'){endDay();return}nextSlot()})}
 function addSlotLog(t){if(!S||!t)return;S.slog=S.slog||{};const k=S.day+':'+S.slot;(S.slog[k]=S.slog[k]||[]).push(t)}
 /* time moves only here */
-function spend(kind,what){S.acts=(S.acts||0)+1;addSlotLog(what||({hang:'Time with someone',lead:'Worked a lead',talk:'A talk',ctf:'CTF practice',bounty:'Bug bounty',rest:'Rested',wait:'Let it go by'}[kind]||kind));
- if(S.restore&&!S.oc&&S.day>=1){S.oc=1;toast('Overclocked: one more thing this '+SLOTN[S.slot].toLowerCase(),'var(--mint)');save();hub();return}
+function spend(kind,what){if(S.epilogue){S.slot=(S.slot+1)%6;save();hub();return}S.acts=(S.acts||0)+1;addSlotLog(what||({hang:'Time with someone',lead:'Worked a lead',talk:'A talk',ctf:'CTF practice',bounty:'Bug bounty',rest:'Rested',wait:'Let it go by'}[kind]||kind));
+ // the loop: time stretches, each part of the day holds more
+ if(S.loop&&(S.oc||0)<LOOPOC&&S.day>=1){S.oc=(S.oc||0)+1;toast('Time stretches: '+(LOOPOC+1-S.oc)+' more this '+SLOTN[S.slot].toLowerCase(),'var(--mint)');save();hub();return}
  nextSlot()}
 function nextSlot(){S.oc=0;S.slot++;if(S.slot>5){endDay();return}evMissCheck();tqFlush();save();setTimeout(evSoonToast,600);toast(SLOTN[S.slot],'var(--dim)');if(typeof sfx==='function')sfx('advance');hub()}
 function endDay(){
@@ -119,7 +120,7 @@ function riskRoll(r,caught){
 /* ---- the case board ---- */
 function solveMyst(m,answer,picks){const M=MYST[m];
  const ok=answer===M.a&&picks.length===3&&picks.every(c=>M.ev.includes(c));
- if(ok){S.solved[m]=1;META.solved[m]=1;saveMeta();fx({skill:M.xp});ach('first_solve');ach('solve_'+m);if(Object.keys(MYST).every(k=>S.solved[k]))ach('all_solved');addSum('Solved: '+M.n+'. '+M.opts[M.a]+'.')}
+ if(ok){S.solved[m]=1;META.solved[m]=1;saveMeta();fx({skill:M.xp});ach('first_solve');ach('solve_'+m);if(baseMyst().every(k=>S.solved[k]))ach('all_solved');addSum('Solved: '+M.n+'. '+M.opts[M.a]+'.')}
  else{S.wrong=(S.wrong||0)+1;fx({exp:8})}
  return ok}
 /* the clues you hold that could speak to a mystery (some are red herrings) */

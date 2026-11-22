@@ -194,7 +194,7 @@ const saveSettings=()=>{try{localStorage.setItem('opsec_settings',JSON.stringify
 let CURBG=null;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const LS={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
-const save=()=>LS.set('opsec3_save',JSON.stringify(S));
+const save=()=>{if(PROF)LS.set(slotKey('auto'),JSON.stringify(S))};
 const endsSeen=()=>{try{return JSON.parse(LS.get('opsec2_endings')||'[]')}catch(e){return[]}};
 const $=id=>document.getElementById(id);
 const sub=t=>String(t).replace(/\{=([^}]*)\}/g,(m,e)=>{const r=ev(e);return r===undefined||r===false?'':r}).replace(/\{h\}/g,S?S.h:'you').replace(/\{H\}/g,S?S.h.toUpperCase():'YOU');
@@ -316,6 +316,7 @@ const TUT={
  time:['Time','Each day has six parts: Morning, Midday, Afternoon, Evening, Night and Late night. Time only moves when you do something that takes it. Some parts of the day belong to the story: the green light shows where. The rest are yours: spend each one with someone, on a lead, at a talk, or however you like. Walking, talking, shopping and your phone are free. You can\'t do everything. Choose.'],
  hang:['Spending time','Walk up to someone and choose Spend time to use the current part of the day with them. Their next scene needs them to like you enough, and sometimes it needs the right day, or enough Skill or Clout. Talking shop is free, once a day each.'],
  money:['Money','Brindle pays a per diem every morning. You can earn more from bug bounties on your laptop, minigames, the CTF, and shifts (the info desk, the hotel bar, Proof). Shops are spread around: the Con Store, the Byte Café, the hotel boutique, the bar, the station kiosk. Gifts are ordinary things, and everyone feels differently about each one. You find out by giving, by getting closer, or by asking the wrong people.'],
+ echo:['Echo','You remember. Your phone has a new app, Echo: it lists everyone and everything left, and lets you rewind the day to this morning. Each part of the day now holds six things instead of one, people can take three times as much of you, and nobody\'s story waits as long for its day.'],
  room:['Room 1337','Your hotel room. The laptop runs bug bounties for money, and the bed ends the day. Your phone can call it a night from anywhere.'],
  clues:['The case board','Someone at this con is watching everyone, and there\'s more going on than that. Clues go onto the case board in your phone. Leads there cost time, and some are risky. When you have the evidence, pick the answer and the three clues that prove it. Get it wrong and people notice you asking.']
 };

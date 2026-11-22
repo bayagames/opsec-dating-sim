@@ -55,7 +55,7 @@ const prefKnown=(g,i)=>!!(S.pk&&S.pk[g]&&S.pk[g][i]);
 /* getting closer: people mention what they love (scene 2 and scene 4 each give one away) */
 function prefReveal(g,n){const loves=GIFTS.filter(i=>prefOf(g,i)===2&&!prefKnown(g,i));for(const i of loves.slice(0,n||1)){prefKnow(g,i);if(S.unl.aff)toast(CH[g].name+' loves: '+ITEMS[i].n,CH[g].col)}}
 /* ---- money ---- */
-function earn(v,why){if(!v)return;S.money=Math.max(0,(S.money||0)+v);if(v>0)META_note('earned',v);if(S.unl.money||S.unl.cred)toast((v>0?'+':'−')+'£'+Math.abs(v)+(why?' · '+why:''),v>0?'var(--butter)':'var(--dim)');if(S.money>=200)ach('rich');hud()}
+function earn(v,why){if(!v)return;S.money=Math.max(0,(S.money||0)+v);if(v>0)META_note('earned',v);if(S.unl.money||S.unl.cred)toast((v>0?'+':'−')+'£'+Math.abs(v)+(why?' · '+why:''),v>0?'var(--butter)':'var(--dim)');if(S.money>=200)ach('rich');if(META.stats&&META.stats.earned>=500)ach('money500');hud()}
 function META_note(k,v){if(typeof META==='undefined')return;META.stats=META.stats||{};META.stats[k]=(META.stats[k]||0)+v}
 /* ---- the shops ---- */
 const SHOPS={
