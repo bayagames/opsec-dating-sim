@@ -141,7 +141,7 @@ function buildSite(){
  Z('hotelL2',-264,-24,-128,-4,11,16.5,['lobby','liftH','pool','gym','spa','garden','plaza']);
  Z('pool',-174,-64,-128,-24,9.4,16.5,['gym','terrace']);Z('gym',-200,-64,-174,-24,11,16.5,[]);Z('spa',-264,-64,-200,-24,11,16.5,[]);
  // the Link: ground floor and the Skybridge over it
- Z('link',-128,-22,-110,-12,Y0,5.5,['promenade','foyer','garden','terrace','skybridge']);Z('skybridge',-128,-22,-110,-12,5.5,11.4,['hotelL1','foyer','garden','terrace','link']);
+ Z('link',-128,-22,-110,-12,Y0,5.5,['promenade','foyer','garden','terrace','skybridge']);Z('skybridge',-128,-22,-110,-12,5.5,11.4,['hotelL1','foyer','garden','terrace','link','lane','plaza','lobby','hotelL2','hallC','badgelab']);
  // the con: foyer, Hall C, ring, courtyard
  Z('foyer',-110,-24,-64,68,Y0,16.5,['plaza','garden','link','skybridge','hallC','badgelab','ringW','ringS','food','courtyard','ringW2','ringS2','lobby']);
  Z('hallC',-110,-64,-64,-24,Y0,10.55,['foyer','ringW']);Z('badgelab',-110,-64,-64,-24,10.55,16.5,['foyer','ringW2']);
@@ -165,7 +165,7 @@ function buildSite(){
  const VG=['lockpick','ctf','soc','carhack','ics','soceng','aero'],V1=['wsA','wsB','hwv','creator','arcade','tabletop','film'];
  Z('vcorr',158,-54,168,34,Y0,5.5,['neConc','seConc','vcorr1'].concat(VG));Z('vcorr1',158,-54,168,34,5.5,11,['vcorr','seConc1','neConc'].concat(V1));
  Z('lockpick',134,-54,158,-30,Y0,5.5,[]);Z('ctf',134,-30,158,0,Y0,5.5,[]);Z('soc',134,0,158,20,Y0,5.5,[]);
- Z('carhack',168,-64,196,-36,Y0,5.5,[]);Z('ics',168,-36,196,-10,Y0,5.5,[]);Z('soceng',168,-10,196,16,Y0,5.5,[]);Z('aero',168,16,196,34,Y0,5.5,[]);
+ Z('carhack',168,-64,196,-36,Y0,5.5,[]);Z('ics',168,-36,196,-10,Y0,5.5,[]);Z('soceng',168,-10,196,16,Y0,5.5,[]);Z('aero',168,16,196,34,Y0,5.5,['seConc','seConc1']);
  Z('wsA',134,-54,158,-30,5.5,11,[]);Z('wsB',134,-30,158,-8,5.5,11,[]);Z('hwv',134,-8,158,20,5.5,11,[]);
  Z('creator',168,-64,196,-40,5.5,11,[]);Z('arcade',168,-40,196,-16,5.5,11,[]);Z('tabletop',168,-16,196,10,5.5,11,[]);Z('film',168,10,196,34,5.5,11,[]);
  Z('seConc',56,20,158,34,Y0,5.5,['ringS','ringE','expo','vcorr','chill','seConc1']);Z('seConc1',56,20,158,34,5.5,11,['ringS','ringE','expo','vcorr1','quiet']);
@@ -180,7 +180,7 @@ function buildSite(){
  // everything outside the buildings (facades, roofs, the tower, the city): seen only from places with windows or sky
  Z('outside',-600,-600,600,600,-20,400,['plaza','plazaE','garden','lane','terrace','link','skybridge','courtyard','roof','skygarden','foyer','lobby','food','seConc','seConc1','vcorr','vcorr1','ringN','ringE','ringS','ringW','ringN2','ringE2','ringS2','ringW2','pool','ramp','cosplay','hotelL1','hotelL2','promenade','boutique','badgelab','lumenlounge','bar']);
  // hubs: open concourses and corridors; a room that sees one also sees what it opens onto
- for(const n of['lobby','promenade','foyer','courtyard','ringN','ringW','ringE','ringS','ringN2','ringW2','ringE2','ringS2','neConc','neConc2','seConc','seConc1','vcorr','vcorr1','hotelL1','hotelL2','plaza','service','staffW','staffE','liftH','garden','lane','link','skybridge'])G.zones.con.find(q=>q.n===n).hub=true;
+ for(const n of['lobby','promenade','foyer','courtyard','ringN','ringW','ringE','ringS','ringN2','ringW2','ringE2','ringS2','neConc','neConc2','seConc','seConc1','vcorr','vcorr1','hotelL1','hotelL2','plaza','service','staffW','staffE','liftH','garden','lane','link','skybridge','terrace'])G.zones.con.find(q=>q.n===n).hub=true;
  G.zones.con.find(q=>q.n==='outside').bg=true;
  G.wallNT=true;placed(HX,buildHotel);buildCore();buildHalls();buildEast();buildSouth();buildUnder();G.wallNT=false;siteAreas();
 }
