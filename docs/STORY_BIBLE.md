@@ -133,24 +133,57 @@ Kit's helmet footage, Juno's audience, Rin's source standing up, Vesper naming t
 men away, Noor and Saoirse's story and court order together. Then the roof: Suite 1313, or, for an informant, Krall
 on the plant deck, where you die unless someone who loves you comes up the stairs.
 
-## Endings (26)
-1 Everything Connected (true harem) · 2 Responsible Disclosure · 3 Half Measures · 4 Front Page · 5 Injunction ·
-6 Kill Switch · 7 Ghost Protocol (leave with Mira) · 8 Double Agent (with Vesper) · 9 Whistleblower (Delphine) ·
-10 Found (Jonah testifies) · 11 Signal (the broadcast) · 12 Blackout (Sunny cuts everything) · 13 The Graph
-(Lumen wins) · 14 Scapegoat (framed) · 15 Sold Out · 16 Proof (go home with Ellie, Day 5) · 17 Larp Exposed ·
-18 Open Source (friends) · 19 404: Partner Not Found · 20 Last Train · 21 Data Dump · 22 Trojan Horse ·
-23 Rollback · 24 Double-Cross · 25 Informant · 26 Last Login (you don't survive).
+## Endings (28)
+1 Everything Connected (true, closes the loop) · 2 Responsible Disclosure · 3 Half Measures · 4 Front Page ·
+5 Injunction · 6 Kill Switch · 7 Ghost Protocol (leave with Mira) · 8 Double Agent (with Vesper) · 9 Whistleblower
+(Delphine) · 10 Found (Jonah testifies) · 11 Signal (the broadcast) · 12 Blackout (Sunny cuts everything) · 13 The
+Graph (Lumen wins) · 14 Scapegoat (framed) · 15 Sold Out · 16 Proof (go home with Ellie, Day 5) · 17 Larp Exposed ·
+18 Open Source (friends) · 19 404: Partner Not Found · 20 Last Train · 21 Data Dump · 22 Trojan Horse · 23 Rollback ·
+24 Double-Cross · 25 Informant · 26 Last Login (you don't survive) · 27 The Big Score (the crew steals LANTERN-02) ·
+28 Zero Day (secret). Everything Connected only exists inside the loop.
 Every ending runs in four parts: the outcome (`SC.end_<k>`); the final night with everyone whose route you finished
 (`SC.epi_<g>`, 04l, all of them, with `epi_many` if they find out about each other); a playable aftermath that jumps
 forward in time (`SC.after_<k>`, 04m/04n/04p); and a line for each person you love, still with you (`ROMAFTER`).
+Each ending card teaches up to two hints (`HINTS`, 06c); the first ones about the secret are riddles.
 
-## The hidden way to everyone
-Persistent meta records every route finished and every mystery solved across runs. Once every route and every
-mystery has been done at least once, a new run's prologue flat has `session.bak` on your laptop. Restoring it:
-people whose route you've finished before jump to their last scene as soon as you meet them (and it isn't held to
-its usual day), mysteries you've solved before keep their clues, and you get "overclocked" days (two activities per
-free slot). Finish all 21 last scenes and solve all 12 mysteries in that run, and Day 7 becomes Everything Connected.
-The ending cards carry hex fragments that spell `session.bak`.
+## The new storylines (04q_loop.js)
+**The Big Score.** Meet three of the crew (Nyx, Petra, Kit, Tilly, Yuki) and get two of them to their second
+scene: on Friday at midday Nyx asks you to steal LANTERN-02 out of Suite 1313 that night. Friday late night is the
+heist (Kit's tabards, Tilly's cloned card, Yuki's camera loop, Nyx's picks, Petra's van; Vesper sells you out unless
+you've warned her). The box is printing what you'll do a minute before you do it. Saturday's council has the
+machine on the table and a new plan; Sunday's keynote has nothing to show.
+**Zero Day (secret).** On the Day 1 train, ask Astrid if anything else is up there (a burst every seven days, ending
+in your handle). After midnight from Wednesday, find badge 1337-0000 in the hotel pool, in your handwriting: "SAT ·
+PULL THE PLUG · DON'T LET HER GO UP THE STAIRS". With both, Saturday's council offers a plan nobody wrote. Sunday:
+ORACLE, the second box in 1313, knows your loop count; Halberd blacks out the Quarter and sets the 13th floor on
+fire to frame the con; Ashgrove shoots Victor; Mira goes up the stairs to kill the master radio and doesn't come down.
+Three days later, a message from yourself: at the very start of the next run, open the laptop and type rewind.
+**The loop (true route).** ORACLE doesn't predict: it receives its own future, and every Sunday it sends the week
+back to the moment it first indexed you (the 3 AM forum post). Typing rewind in the prologue flat makes you aware:
+each part of the day holds six things, people take three times as much of you a day, stories run up to two days
+early, and the Echo app lists who and what is left and can rewind the day to that morning. Three loop mysteries:
+The Signal (m13), Badge 0000 (m14), ORACLE (m15), from loop-only leads (Astrid, the pool, Pia, Tilly, Wren, Jonah in
+the tunnel, 1313, Mira). With all 21 in love and all 15 solved, the keynote becomes key_loop: everyone at once,
+ORACLE has no prediction, twenty-two hands on one switch; then Everything Connected, with every arc concluded.
+Afterwards the postgame opens The Week After: free roam, nothing to do, everyone to see.
+**People stepping in** (`INJ`): at the copycat post, the burglary, the framing, the raid and Krall's arrest, people
+you're close to step in and change what happens (a clue, less Exposure, your laptop hidden, Rin saved).
+
+## Cutscenes
+`[cut shot cast...]` moves the camera to a fixed shot (`CUTS`, 09c) with the cast on their marks; `[cut off]` ends
+it (it also ends with the conversation). The world stays sharp and the dialogue sits in the middle without a
+portrait. Used for the Hall A moments: the opening ceremony, WHISPER's broadcast, the finals, the keynotes.
+
+## Money and gifts (03c_economy.js)
+Money instead of credits: a £20 per diem each morning, bug bounties, minigames, shifts (info desk, bar, Proof),
+selling back. Shops: Con Store, Byte Café, Halcyon Boutique, the bar, Paper & Co (station), Proof; PEOPLEFINDR sells
+what people like (£15, Exposure +4). Gifts are everyday things; everyone loves two, likes a few, dislikes two
+(`GPREF`). One gift a day each. Preferences are learned by giving, at scenes 2 and 4, or from PEOPLEFINDR.
+
+## Save files and postgame
+Three files (profiles), each with its own meta (achievements, endings and their versions, hints, scenes seen, the
+loop) and its own run saves. No Continue. Postgame (06c): the week as a tree, endings with versions and why, hints,
+scene replay (sandboxed, nothing kept), achievements with a percentage, and The Week After once the loop is closed.
 
 ## Routes
 Six scenes each (0-5): meeting, four hangouts and the last scene. They were written as eight shorter scenes plus a
@@ -169,6 +202,7 @@ Thresholds: scene 1 at 5, 2 at 15, 3 at 26, 4 at 38, the last at 50 (Day 5 or la
 `python3 build.py`, serve the folder (`python3 -m http.server 8123`), then:
 - `node tools/storytest.js 12` plays twelve full runs with four strategies in a few seconds (endings, route depth, texts, errors, missing scenes)
 - `node tools/storytest.js ends` plays every ending with every possible partner to its ending card
+- `node tools/storytest.js routes` plays the secret route, the crew's heist and the loop (to Everything Connected)
 - in game, F9 or the backtick key opens the debug menu (jump to any beat, any ending, set stats)
 
 ## Script format (src/03a_script.js)

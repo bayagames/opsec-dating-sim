@@ -244,7 +244,7 @@ function next(){
  if(st.unlock)return unlock(st.unlock,next);
  if(st.chapter!==undefined)return chapterCard(st.chapter,next);
  if(st.choice)return choose(st.choice);
- if(st.game)return GAMES[st.game](st,()=>next());
+ if(st.game){if(S.replay)return next();return GAMES[st.game](st,()=>next())}
  if(st.end)return finishEnding(st.end);
  say(st);
 }
