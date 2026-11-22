@@ -30,11 +30,11 @@ Source lives in `src/`. To rebuild `index.html` after editing:
 - `08_level.js`    textures and materials
 - `08b_level.js`   level helpers + home (flat and bakery)
 - `08i_site.js`    the site: textures, builder helpers (floors with holes, stair shells, escalators, booths, chandeliers) and the visibility zones (which part of the building can see which)
-- `08j_hotel.js`   the Halcyon Hotel: atrium lobby, promenade, bar and terrace, grill, kitchen, back rooms; mezzanine, ballroom, Lumen Lounge, meeting rooms, library; pool, gym, spa; tower and facades
-- `08k_core.js`    the convention core: the Foyer atrium with registration, the Lumen booth, escalators and skybridge; the three-level Ring; the courtyard and bar terrace
+- `08j_hotel.js`   the Halcyon Hotel, drawn on its own plan and placed 64 m west of it: atrium lobby with a glass front onto its garden, promenade, bar and its terrace in the lane, grill, kitchen, back rooms; mezzanine, ballroom, Lumen Lounge, meeting rooms, library; pool, gym, spa; tower and facades
+- `08k_core.js`    the convention core: the Foyer atrium with registration, the cloakroom, the Lumen booth and escalators; the Link and Skybridge to the hotel; Hall C and the Badge Lab; the three-level Ring; the courtyard
 - `08l_halls.js`   Hall A (the arena), Hall B, backstage, staff corridors, security, stores, MDF, service corridor, Con Ops/press/speakers, kitchen, break room, loading dock
 - `08m_east.js`    the Expo Hall, the south-east concourse, Village Row (two storeys of villages and workshops)
-- `08n_south.js`   food court and Sky Garden, cosplay hall, chill-out, nap pods, quiet room, the plaza and the outside of the buildings
+- `08n_south.js`   food court and Sky Garden, cosplay hall, chill-out, nap pods, quiet room, the plaza, the boulevard and the city blocks round the site, the Halcyon Garden, and the outside of the buildings
 - `08o_under.js`   car park, NOC, plant room and laundry, hotel basement, service tunnel, the con roof, and the named areas
 - `08d_tower.js`   hotel 13th floor + hotel roof
 - `08a_kit.js`     shared props (desks, chairs, monitors, plants, lamps, beams) sized in metres
@@ -51,13 +51,16 @@ Source lives in `src/`. To rebuild `index.html` after editing:
 - `99_boot.js`     startup
 
 ## Map
-Two buildings joined at the Foyer (ground) and a glass skybridge (Level 1). The Halcyon Hotel is west:
-lobby, café, bar with a courtyard terrace, luggage room, Level 1 (meeting rooms, gym, Lumen Lounge),
-basement (car park, network ops, plant room, service tunnel), the 13th floor and the roof. The Convention
-Centre is east: the Ring around an open courtyard, Hall A and Hall B, Vendor Hall, Village Row, Food
-Court, Cosplay Hall, Chill-out, back of house (service corridor, security, MDF, loading dock) and
-Level 1 (gallery, workshops, hardware hacking, Creator Corner, Retro Arcade, Con Ops, press, quiet room).
-Areas open as the story needs them (`GATES` in `09a_place.js`).
+Two separate buildings across a lane, joined by the Link: a glazed two-storey bridge building from the
+hotel's Promenade to the con's Foyer, with the Skybridge on its upper floor. The Halcyon Hotel is west:
+lobby, café, the bar and its terrace in the lane, the Grill, luggage room, Level 1 (ballroom, meeting
+rooms, library, Lumen Lounge), Level 2 (pool, gym, spa), the 13th floor and the roof, with its garden
+between its glass front and the Foyer. The Convention Centre is east: the Foyer, Hall C and the Badge Lab,
+the Ring around an open courtyard, Hall A and Hall B, the Expo Hall, Village Row, Food Court, Cosplay
+Hall, Chill-out, back of house (service corridor, security, MDF, loading dock) and Level 1 (gallery,
+workshops, hardware hacking, Creator Corner, Retro Arcade, Con Ops, press, quiet room). Underneath:
+the car park, network ops, the plant room and the service tunnel. Areas open as the story needs them
+(`GATES` in `09a_place.js`).
 
 ## Controls
 Desktop: WASD/arrows to walk, Shift to run, mouse to look, E to interact, M for map. The mouse is captured from the moment you press Begin/Continue and stays captured in the 3D world, including during conversations (a drawn cursor appears for choices). Esc or P opens the phone and frees the mouse; closing it steps you straight back in.

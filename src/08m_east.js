@@ -51,7 +51,7 @@ function buildEast(){
  }
  /* ================= SOUTH-EAST CONCOURSE (two levels) ================= */
  {sFloor(56,20,158,34,0,MT.carpetCon);W('h',20,56,134,0,L1,WC,1);W('h',34,56,80,0,L1,WC,-1);W('h',34,80,158,0,L1,GL,-1);
-  sFloor(56,20,158,34,L1,MT.carpetGallery,[[158-3,20,158,30]],.45,MT.ceilDark);sCeil(56,20,158,34,L2-.45,MT.ceilDark);
+  sFloor(56,20,158,34,L1,MT.carpetGallery,[[155,22,158,32]],.45,MT.ceilDark);sCeil(56,20,158,34,L2-.45,MT.ceilDark);
   W('h',20,56,134,L1,1,WC,1);W('h',34,56,80,L1,L2-L1,WC,-1);W('h',34,80,158,L1,L2-L1,GL,-1);
   for(let x=60;x<158;x+=10){downl(x,L1-.45,27,'#ffe8f0',8,.55);lightPanel(x,L2-.45,27,2,1,'#f0f0ff',10,.6)}
   for(let x=84;x<158;x+=4.6)box(x-.06,0,34.05,x+.06,L2,34.5,CH,{col:false});
@@ -65,7 +65,8 @@ function buildEast(){
   // west wall (x 158): G from z -54 to 20 (the SE concourse is open beyond), L1 likewise; east wall (x 168) the full length on both floors
   W('v',X0,Z0,20,0,L1,MT.panel,1);W('v',X0,Z0,20,L1,L2-L1,MT.panel,1);W('v',X1,Z0,Z1,0,L1,MT.panel,-1);W('v',X1,Z0,Z1,L1,L2-L1,MT.panel,-1);W('h',Z1,X0,X1,0,L2,GL,-1);
   stairs(158.2,-32,161.2,-22,0,L1,'z+',MT.carpetGrey,{nose:MT.plain('#ffd166')});railing(161.2,-32,161.2,-22,0,{y2:L1,m:CH,glass:GL});railing(161.2,-32,161.2,-22,L1,{m:CH,glass:GL});railing(158.2,-32,161.2,-32,L1,{m:CH,glass:GL});
-  stairs(155,20,158,30,0,L1,'z+',MT.carpetGrey,{nose:MT.plain('#ffd166'),sides:1});railing(155,20,155,30,0,{y2:L1,m:CH,glass:GL});railing(158,20,158,30,0,{y2:L1,m:CH,glass:GL});railing(155,20,155,30,L1,{m:CH,glass:GL});railing(158,20,158,30,L1,{m:CH,glass:GL});colBox(155,29,158,30,0,4);
+  // the south stair starts 2 m clear of the SOC's wall, so you can walk onto it from the concourse or the corridor
+  stairs(155,22,158,32,0,L1,'z+',MT.carpetGrey,{nose:MT.plain('#ffd166'),sides:1});railing(155,22,155,32,0,{y2:L1,m:CH,glass:GL});railing(158,22,158,32,0,{y2:L1,m:CH,glass:GL});railing(155,22,155,32,L1,{m:CH,glass:GL});railing(158,22,158,32,L1,{m:CH,glass:GL});railing(155,22,158,22,L1,{m:CH,glass:GL});
   colBox(158.2,-23,161.2,-22,0,4);railing(158,-54,168,-54,L1,{m:CH,glass:GL});
   for(let z=Z0+4;z<Z1;z+=8){lightPanel(163,L1-.45,z,1.2,1.2,'#f0f4ff',9,.6);lightPanel(163,L2-.45,z,1.2,1.2,'#f0f4ff',9,.6)}
   for(let z=Z0;z<Z1;z+=4){box(162.8,L1-.47,z+.4,163.2,L1-.45,z+3.6,MT.glow('#8affc1',1.4),{col:false,b:1})}

@@ -399,7 +399,7 @@ input[type=text],input:not([type]),textarea{cursor:text!important}
 body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 input,textarea{-webkit-user-select:text;user-select:text}
 img,svg,canvas{-webkit-user-drag:none;user-drag:none}
-#loading{position:absolute;inset:0;z-index:80;display:none;place-items:center;background:#07040af2;text-align:center}#loading.on{display:grid}#loading .k{font:18px 'VT323',monospace;color:var(--coral)}#loading b{display:block;font:34px 'VT323',monospace;color:var(--butter);margin:4px 0 12px}.lbar{width:min(320px,70vw);height:8px;border-radius:4px;background:#ffffff1a;overflow:hidden}.lbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--coral),var(--butter));transition:width .2s}#loading small{display:block;margin-top:8px;color:var(--dim);font:16px 'VT323',monospace}
+#loading{position:fixed;inset:0;z-index:80;display:none;place-items:center;justify-items:center;background:#07040af2;text-align:center}#loading>div{display:flex;flex-direction:column;align-items:center}#loading.on{display:grid}#loading .k{font:18px 'VT323',monospace;color:var(--coral)}#loading b{display:block;font:34px 'VT323',monospace;color:var(--butter);margin:4px 0 12px}.lbar{width:min(320px,70vw);margin:0 auto;height:8px;border-radius:4px;background:#ffffff1a;overflow:hidden}.lbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--coral),var(--butter));transition:width .2s}#loading small{display:block;margin-top:8px;color:var(--dim);font:16px 'VT323',monospace}
 #vcur{position:fixed;left:0;top:0;width:22px;height:22px;margin:-2px 0 0 -2px;z-index:500;pointer-events:none;display:none;background:no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22'%3E%3Cpath d='M2 2 L2 18 L6.5 13.8 L9.6 20.4 L12.6 19 L9.6 12.6 L15.6 12.6Z' fill='%23f6eefc' stroke='%231b1026' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E");filter:drop-shadow(0 2px 3px #0008)}
 .ch.vhover{border-color:var(--butter);background:#352349;translate:5px 0;box-shadow:0 6px 18px #0009,-4px 0 0 var(--butter)}
 .btn.vhover:not(:disabled){translate:0 -2px;box-shadow:0 6px 16px #0007;filter:brightness(1.12)}
@@ -467,7 +467,7 @@ img,svg,canvas{-webkit-user-drag:none;user-drag:none}
   <div class="ov" id="ov"></div>
   <div id="card"></div>
   <div id="toasts"></div>
-  <div id="loading"><div><div class="k">PREPARING THE CON</div><b>Baking the lights</b><div class="lbar"><i id="loadBar"></i></div><small id="loadPct">0%</small></div></div>
+  <div id="loading"><div><b>Loading...</b><div class="lbar"><i id="loadBar"></i></div><small id="loadPct">0%</small></div></div>
   <div id="fade"></div>
   <div id="vcur"></div>
 </div>
@@ -2321,7 +2321,7 @@ const QUALITY={
 };
 /* the look, in one place: emissive gain is compressed above 1 so signs and fixtures read as lit without
    blooming into fog; bloom only catches what is genuinely bright */
-const LOOK={exposure:1.12,hemi:3.2,fill:.5,env:{home:.6,con:.5,f13:.55,office:.7,station:.7},bloomStr:.26,bloomRad:.62,bloomThr:1.05,ao:.85,sat:1.12,con:1.07,vig:.12,light:7.6,reach:1.3,bake:1.7,bakeFill:.3,bakeEnv:.4};
+const LOOK={exposure:1.05,hemi:3.2,fill:.5,env:{home:.6,con:.5,f13:.55,office:.7,station:.7},bloomStr:.17,bloomRad:.42,bloomThr:1.3,ao:.85,sat:1.1,con:1.08,vig:.12,light:7.6,reach:1.3,bake:1.7,bakeFill:.2,bakeEnv:.4};
 /* ---- textures: every texture gets its own canvas; small non-repeating ones are packed into atlases later ---- */
 function tex(key,w,h,paint){
  if(G.tx[key])return key;
@@ -2338,6 +2338,14 @@ function soloTex(key){
 /* ---- geometry building ---- */
 let BR=null;
 function region(name,o){G.regions[name]={groups:{},fog:o.fog,fr:o.fr||[8,60],amb:null,day:!!o.day,lmPages:o.lmPages,lmCap:o.lmCap};G.ftag=G.ftag||{};G.ftag[name]=[];G.boxes[name]=[];G.walls[name]=[];G.lights[name]=[];G.surf[name]=[];G.zones[name]=[];BR=name}
+/* build a part of a level in its own plan, then place it dx metres along x: the Halcyon is drawn on its plan and
+   stands west of the con. Faces, lights, collision, floors and footstep tags are offset as they're made; the wall
+   outlines, map rooms and doorways it registered are moved after (its walls only see its own doorways, in plan
+   coordinates, while it's being built) */
+function placed(dx,fn){const reg=BR,nW=G.walls[reg].length,nM=(MAPR[reg]||[]).length,D0=DOORS[reg]||[],o0=G.ox||0;G.ox=o0+dx;DOORS[reg]=[];
+ try{fn()}finally{G.ox=o0}
+ for(const w of G.walls[reg].slice(nW)){w[0]+=dx;w[2]+=dx}for(const r of(MAPR[reg]||[]).slice(nM)){r.x0+=dx;r.x1+=dx}
+ for(const d of DOORS[reg]){if(d.o==='v')d.at+=dx;else d.c+=dx}DOORS[reg]=D0.concat(DOORS[reg])}
 /* ---- visibility zones: a region can be cut into boxes ("the hotel lobby", "Hall A", "the car park"). Every face is
    filed under the zone it faces into, so its merged mesh never straddles two zones, and each zone lists the zones you
    can see from inside it. Standing in a zone (or within a metre of one) draws only those: the rest of a huge building
@@ -2345,7 +2353,8 @@ function region(name,o){G.regions[name]={groups:{},fog:o.fog,fr:o.fr||[8,60],amb
 function zone(name,x0,z0,x1,z1,y0,y1,see,hub){G.zones[BR].push({n:name,hub:!!hub,x0:Math.min(x0,x1),z0:Math.min(z0,z1),x1:Math.max(x0,x1),z1:Math.max(z0,z1),y0,y1,see:see||[],v:(Math.abs(x1-x0)*Math.abs(z1-z0)*(y1-y0))})}
 function zoneOf(reg,x,y,z,m){const Z=G.zones[reg];if(!Z||!Z.length)return -1;m=m||0;let b=-1,bv=1e30;for(let i=0;i<Z.length;i++){const q=Z[i];if(x>=q.x0-m&&x<=q.x1+m&&z>=q.z0-m&&z<=q.z1+m&&y>=q.y0-m&&y<q.y1+m&&q.v<bv){bv=q.v;b=i}}return b}
 function zonesAt(reg,x,y,z,m){const Z=G.zones[reg],o=[];if(!Z)return o;for(let i=0;i<Z.length;i++){const q=Z[i];if(x>=q.x0-m&&x<=q.x1+m&&z>=q.z0-m&&z<=q.z1+m&&y>=q.y0-m&&y<q.y1+m)o.push(i)}return o}
-function addLight(x,y,z,col,range,inten){G.lights[BR].push([x,y,z,col[0],col[1],col[2],range,inten||1])}
+/* dn: a ceiling fitting that shines downward (see the bake) */
+function addLight(x,y,z,col,range,inten,dn){G.lights[BR].push([x+(G.ox||0),y,z,col[0],col[1],col[2],range,inten||1,dn?1:0])}
 function grp(m,cx,cz,cy,n,pts){
  const R=G.regions[BR],t=m.t||'white',kind=m.glass?'glass':m.e?'emit':(m.cut?'cut':'lit');
  const prof=m.e?'':(m.r!==undefined?m.r:.85)+':'+(m.m||0);
@@ -2356,13 +2365,14 @@ function grp(m,cx,cz,cy,n,pts){
  return R.groups[k]||(R.groups[k]={t,kind,prof,zi,r:m.r,m:m.m||0,p:[],n:[],u:[],c:[],l:[],q:[]});
 }
 function quad(a,b,c,d,m,uw,vh){
+ if(G.ox){a=[a[0]+G.ox,a[1],a[2]];b=[b[0]+G.ox,b[1],b[2]];c=[c[0]+G.ox,c[1],c[2]];d=[d[0]+G.ox,d[1],d[2]]}
  const e1=[b[0]-a[0],b[1]-a[1],b[2]-a[2]],e2=[d[0]-a[0],d[1]-a[1],d[2]-a[2]];
  let nx=e1[1]*e2[2]-e1[2]*e2[1],ny=e1[2]*e2[0]-e1[0]*e2[2],nz=e1[0]*e2[1]-e1[1]*e2[0];const nl=Math.hypot(nx,ny,nz);
  if(!(nl>1e-7))return; // zero-area quads give NaN normals, which bloom smears across the screen
  nx/=nl;ny/=nl;nz/=nl;
  const cx=(a[0]+c[0])/2,cz=(a[2]+c[2])/2;const g=grp(m,cx,cz,(a[1]+c[1])/2,[nx,ny,nz],(Math.hypot(e1[0],e1[2])>3||Math.hypot(e2[0],e2[2])>3)?[a,b,c,d]:null);
  const T=G.tx[m.t||'white'];if(T){T.used=true;if(uw>1.01||vh>1.01||uw<0||vh<0)T.rep=true}
- const col=m.c||[1,1,1];const gk0=m.e?(m.k!==undefined?m.k:(m.t==='white'||!m.t?1.9:1.05)):1,gk=gk0>1?1+(gk0-1)*.55:gk0;
+ const col=m.c||[1,1,1];const gk0=m.e?(m.k!==undefined?m.k:(m.t==='white'||!m.t?1.9:1.05)):1,gk=gk0>1?1+(gk0-1)*.3:gk0;
  const lc=[lin(col[0])*gk,lin(col[1])*gk,lin(col[2])*gk];
  // breakpoints along the vertical edge so walls darken towards the floor (cheap baked AO)
  let ss=[0,1],ts=[0,1];
@@ -2381,16 +2391,17 @@ function quad(a,b,c,d,m,uw,vh){
 }
 /* a single triangle (gables, spires, hips): quads above can only be parallelograms. UVs run along a->b and a->c */
 function tri(a,b,c,m,uw,vh){
+ if(G.ox){a=[a[0]+G.ox,a[1],a[2]];b=[b[0]+G.ox,b[1],b[2]];c=[c[0]+G.ox,c[1],c[2]]}
  const e1=[b[0]-a[0],b[1]-a[1],b[2]-a[2]],e2=[c[0]-a[0],c[1]-a[1],c[2]-a[2]];
  let nx=e1[1]*e2[2]-e1[2]*e2[1],ny=e1[2]*e2[0]-e1[0]*e2[2],nz=e1[0]*e2[1]-e1[1]*e2[0];const nl=Math.hypot(nx,ny,nz);if(!(nl>1e-7))return;nx/=nl;ny/=nl;nz/=nl;
  const g=grp(m,(a[0]+b[0]+c[0])/3,(a[2]+b[2]+c[2])/3,(a[1]+b[1]+c[1])/3,[nx,ny,nz]);const T=G.tx[m.t||'white'];if(T){T.used=true;if(uw>1.01||vh>1.01)T.rep=true}
  uw=uw===undefined?1:uw;vh=vh===undefined?1:vh;
- const col=m.c||[1,1,1],gk0=m.e?(m.k!==undefined?m.k:(m.t==='white'||!m.t?1.9:1.05)):1,gk=gk0>1?1+(gk0-1)*.55:gk0,lc=[lin(col[0])*gk,lin(col[1])*gk,lin(col[2])*gk];
+ const col=m.c||[1,1,1],gk0=m.e?(m.k!==undefined?m.k:(m.t==='white'||!m.t?1.9:1.05)):1,gk=gk0>1?1+(gk0-1)*.3:gk0,lc=[lin(col[0])*gk,lin(col[1])*gk,lin(col[2])*gk];
  if(G.qlog)G.qlog.push([BR,nx,ny,nz,nx*a[0]+ny*a[1]+nz*a[2],Math.min(a[0],b[0],c[0]),Math.min(a[1],b[1],c[1]),Math.min(a[2],b[2],c[2]),Math.max(a[0],b[0],c[0]),Math.max(a[1],b[1],c[1]),Math.max(a[2],b[2],c[2]),(m.t||'white')+(m.e?'*':'')+(m.glass?'g':'')+'t']);
  const lmq=!m.e&&!m.glass?(G.qd[BR]||(G.qd[BR]=[])).push({w:Math.hypot(...e1)*G.lmK,h:Math.hypot(...e2)*G.lmK,z:g.zi})-1:-1,nk=m.cut?2:1;
  for(const[p,s,t]of[[a,0,0],[b,1,0],[c,0,1]]){g.p.push(p[0],p[1],p[2]);g.n.push(nx*nk,ny*nk,nz*nk);g.u.push(uw*s,vh*t);g.c.push(lc[0],lc[1],lc[2]);g.l.push(s,t);g.q.push(lmq)}
 }
-function colBox(x0,z0,x1,z1,y0,y1){G.boxes[BR].push([Math.min(x0,x1),Math.min(z0,z1),Math.max(x0,x1),Math.max(z0,z1),y0,y1])}
+function colBox(x0,z0,x1,z1,y0,y1){const o=G.ox||0;G.boxes[BR].push([Math.min(x0,x1)+o,Math.min(z0,z1),Math.max(x0,x1)+o,Math.max(z0,z1),y0,y1])}
 function box(x0,y0,z0,x1,y1,z1,m,o){
  o=o||{};const s=(m.side||m),t=(m.top||m),bt=(m.bottom||m);
  const sc=x=>x*(s.s||.5);
@@ -2414,15 +2425,15 @@ function panel(cx,y,cz,w,h,dir,m){
  if(dir==='w')quad([cx,y,cz-hw],[cx,y,cz+hw],[cx,y+h,cz+hw],[cx,y+h,cz-hw],m,1,1);
 }
 /* every floor remembers what it's made of, so footsteps can sound like it */
-function ftag(x0,z0,x1,z1,y,m,st){if(G.ftag&&G.ftag[BR]&&m)G.ftag[BR].push([Math.min(x0,x1),Math.min(z0,z1),Math.max(x0,x1),Math.max(z0,z1),y,m.t||'white',st?1:0,m.m||0])}
+function ftag(x0,z0,x1,z1,y,m,st){const o=G.ox||0;if(G.ftag&&G.ftag[BR]&&m)G.ftag[BR].push([Math.min(x0,x1)+o,Math.min(z0,z1),Math.max(x0,x1)+o,Math.max(z0,z1),y,m.t||'white',st?1:0,m.m||0])}
 function floorQ(x0,z0,x1,z1,y,m){ftag(x0,z0,x1,z1,y,m);quad([x0,y,z1],[x1,y,z1],[x1,y,z0],[x0,y,z0],m,(x1-x0)*m.s,(z1-z0)*m.s)}
 function ceilQ(x0,z0,x1,z1,y,m){quad([x0,y,z0],[x1,y,z0],[x1,y,z1],[x0,y,z1],m,(x1-x0)*m.s,(z1-z0)*m.s)}
 function cross(x,y,z,w,h,m){const hw=w/2;
  quad([x-hw,y,z],[x+hw,y,z],[x+hw,y+h,z],[x-hw,y+h,z],m,1,1);quad([x+hw,y,z],[x-hw,y,z],[x-hw,y+h,z],[x+hw,y+h,z],m,1,1);
  quad([x,y,z+hw],[x,y,z-hw],[x,y+h,z-hw],[x,y+h,z+hw],m,1,1);quad([x,y,z-hw],[x,y,z+hw],[x,y+h,z+hw],[x,y+h,z-hw],m,1,1)}
 /* walkable surfaces: flat or ramp (ya at min coord of ax, yb at max) */
-function surf(x0,z0,x1,z1,y){G.surf[BR].push({x0:Math.min(x0,x1),z0:Math.min(z0,z1),x1:Math.max(x0,x1),z1:Math.max(z0,z1),y})}
-function ramp(x0,z0,x1,z1,ya,yb,ax){G.surf[BR].push({x0,z0,x1,z1,ya,yb,ax})}
+function surf(x0,z0,x1,z1,y){const o=G.ox||0;G.surf[BR].push({x0:Math.min(x0,x1)+o,z0:Math.min(z0,z1),x1:Math.max(x0,x1)+o,z1:Math.max(z0,z1),y})}
+function ramp(x0,z0,x1,z1,ya,yb,ax){const o=G.ox||0;G.surf[BR].push({x0:x0+o,z0,x1:x1+o,z1,ya,yb,ax})}
 /* stairs: dir = direction of ascent: 'x+','x-','z+','z-' */
 function stairs(x0,z0,x1,z1,y0,y1,dir,m,o){
  o=o||{};const n=Math.max(2,Math.round((y1-y0)/.19)),dh=(y1-y0)/n;const ax=dir[0],up=dir[1]==='+';
@@ -2431,10 +2442,13 @@ function stairs(x0,z0,x1,z1,y0,y1,dir,m,o){
   if(ax==='x'){box(x0+a,o.solid===false?top-.12:y0,z0,x0+a+dl,top,z1,m,{col:false,nz0:1,nz1:o.sides?0:1});const ex=up?x0+a:x0+a+dl;box(ex-.025,top-.03,z0,ex+.025,top+.005,z1,nose,{col:false,nz0:1,nz1:1})}
   else{box(x0,o.solid===false?top-.12:y0,z0+a,x1,top,z0+a+dl,m,{col:false,nx0:1,nx1:o.sides?0:1});const ez=up?z0+a:z0+a+dl;box(x0,top-.03,ez-.025,x1,top+.005,ez+.025,nose,{col:false,nx0:1,nx1:1})}}
  ftag(x0,z0,x1,z1,Math.max(y0,y1),m.top||m,1);
- // a solid flight can't be walked into from below or the side: stepped blocks under it, each no higher than the
- // lowest tread above it, so someone climbing never touches them
- if(G.stairCol&&o.solid!==false&&Math.abs(y1-y0)>1.2){const k=8,lo=Math.min(y0,y1);for(let i=0;i<k;i++){const a0=i/k,a1=(i+1)/k;const hA=up?y0+(y1-y0)*a0:y1+(y0-y1)*(1-a1);const hmin=up?hA:y0+(y1-y0)*(1-a1);
-   const h=(up?y0+(y1-y0)*a0:y0+(y1-y0)*(1-a1))-lo;if(h<.6)continue;if(ax==='x')colBox(x0+L*a0,z0,x0+L*a1,z1,lo,lo+h);else colBox(x0,z0+L*a0,x1,z0+L*a1,lo,lo+h)}}
+ // a solid flight can't be walked into from behind or the side: stepped blocks under it, each no higher than the
+ // lowest tread above it, so someone climbing never touches them. A floating flight (open risers) gets a slab of
+ // collision just under its treads instead: you can still walk under it where there's headroom, but not into it
+ if(o.noCol!==true&&Math.abs(y1-y0)>.7){const k=Math.max(4,Math.ceil(L/1.2)),lo=Math.min(y0,y1);for(let i=0;i<k;i++){const a0=i/k,a1=(i+1)/k;
+   // a hand's breadth below the treads, so a long stride up a steep flight never catches the next block
+   const hr=(up?y0+(y1-y0)*a0:y0+(y1-y0)*(1-a1))-lo;if(hr<.6)continue;const h=hr-.1,b0=o.solid===false?Math.max(lo,lo+h-.35):lo;
+   if(ax==='x')colBox(x0+L*a0,z0,x0+L*a1,z1,b0,lo+h);else colBox(x0,z0+L*a0,x1,z0+L*a1,b0,lo+h)}}
  if(ax==='x')ramp(x0,z0,x1,z1,up?y0:y1,up?y1:y0,'x');else ramp(x0,z0,x1,z1,up?y0:y1,up?y1:y0,'z');
 }
 function slab(x0,z0,x1,z1,y,th,m,mu){floorQ(x0,z0,x1,z1,y,m);ceilQ(x0,z0,x1,z1,y-th,mu||m);const e=mu||m;
@@ -2465,7 +2479,8 @@ function glInit(cv){
  // baked lightmaps are stored as 8-bit RGBM (rgb * a * range): decode where three reads the lightmap
  T.ShaderChunk.lights_fragment_maps=T.ShaderChunk.lights_fragment_maps.replace('vec3 lightMapIrradiance = lightMapTexel.rgb * lightMapIntensity;','vec3 lightMapIrradiance = lightMapTexel.rgb * lightMapTexel.a * '+BAKE.rgbm.toFixed(1)+' * lightMapIntensity;');
  G.scene=new T.Scene();
- G.cam=new T.PerspectiveCamera(70,1,.05,500);G.cam.rotation.order='YXZ';
+ // near plane at 8 cm: depth precision across the plaza matters more than nosing into a wall
+ G.cam=new T.PerspectiveCamera(70,1,.08,500);G.cam.rotation.order='YXZ';
  G.HK=LOOK.hemi;G.hemi=new T.HemisphereLight(0xffffff,0x222222,1);G.scene.add(G.hemi);
  G.fog=new T.Fog(0x000000,10,80);G.scene.fog=G.fog;
  G.aniso=Math.min(8,r.capabilities.getMaxAnisotropy());
@@ -2535,7 +2550,9 @@ function buildEnv(reg){
  sc.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)o.material.dispose()});
  return G.env[reg]=rt.texture;
 }
-const BUMP={brick:2.2,tile:1.2,tileDark:1.2,concrete:1.4,wood:1,woodDark:1,marble:.5,carpetCon:1.6,carpetHotel:1.6,carpetDark:1.6,carpetGrey:1.6,carpetGallery:1.4,wallHotel:.8,wallCon:.8,panel:1.2,pavers:2,gravel:2.4,grass:1.8,ceil:1,metal:.6,road:1.2,rug:1.4,fabric:1,linen:.6,pegs:1.2};
+/* relief from each texture's own pattern: kept gentle, the colour texture is a rough stand-in for a height map and
+   strong values turn every speck in it into grit */
+const BUMP={brick:1.1,tile:.6,tileDark:.6,concrete:.5,wood:.4,woodDark:.4,marble:.2,carpetCon:.6,carpetHotel:.6,carpetDark:.6,carpetGrey:.6,carpetGallery:.5,wallHotel:.3,wallCon:.3,panel:.5,pavers:1,gravel:1.2,grass:.8,ceil:.4,metal:.3,road:.5,rug:.5,fabric:.4,linen:.3,pegs:.6};
 /* materials are shared between regions and chunks: one per texture/kind/profile */
 function getMat(mk,lmk){
  const key=mk+'|'+(QUALITY[G.q].std?'s':'l')+(lmk?'|'+lmk:'');if(G.mats[key])return G.mats[key];
@@ -2761,20 +2778,24 @@ function anonSVG(v){
    4. gutters are dilated and the result is packed to 8-bit RGBM, which the materials read as a lightMap.
    So all light comes from the level's own sources, and every source casts shadows on everything in its reach.
    Characters and other moving things sample the same lights on the CPU (probeAt). */
-const BAKE={cube:320,fill:.16,soft:.22,rgbm:8};
+const BAKE={cube:320,fill:.11,soft:.22,rgbm:8};
 const PD12='const vec2 PD[12]=vec2[](vec2(-.326,-.406),vec2(-.840,-.074),vec2(-.696,.457),vec2(-.203,.621),vec2(.962,-.195),vec2(.473,-.480),vec2(.519,.767),vec2(.185,-.893),vec2(.507,.064),vec2(.896,.412),vec2(-.322,-.933),vec2(-.792,-.598));';
 function bakeOK(){const r=G.r;return !!(r&&r.capabilities.isWebGL2&&(r.extensions.has('EXT_color_buffer_half_float')||r.extensions.has('EXT_color_buffer_float')))}
 function bakeMats(){
  if(G.bk)return G.bk;const T=G.T;
  const vs='attribute vec2 lmuv;varying vec3 wp;varying vec3 wn;void main(){wp=position;wn=normal;gl_Position=vec4(lmuv*2.-1.,0.,1.);}';
  const cov=new T.ShaderMaterial({vertexShader:vs,fragmentShader:'varying vec3 wp;varying vec3 wn;void main(){gl_FragColor=vec4(0.,0.,0.,1.);}',side:T.DoubleSide,depthTest:false,depthWrite:false,blending:T.NoBlending});
- const light=new T.ShaderMaterial({uniforms:{lp:{value:new T.Vector3()},lc:{value:new T.Vector3()},lr:{value:1},far:{value:1},cube:{value:null},soft:{value:BAKE.soft},fillk:{value:BAKE.fill}},
+ const light=new T.ShaderMaterial({uniforms:{lp:{value:new T.Vector3()},lc:{value:new T.Vector3()},lr:{value:1},far:{value:1},cube:{value:null},soft:{value:BAKE.soft},fillk:{value:BAKE.fill},dn:{value:0}},
   vertexShader:vs,
-  fragmentShader:PD12+`uniform vec3 lp,lc;uniform float lr,far,soft,fillk;uniform samplerCube cube;varying vec3 wp;varying vec3 wn;
-  float vis(vec3 p,float d){vec3 dir=(p-lp)/d;vec3 t1=normalize(cross(dir,abs(dir.y)<.9?vec3(0.,1.,0.):vec3(1.,0.,0.)));vec3 t2=cross(dir,t1);
-   float r=soft*(.5+d*.08)/max(d,.3),bias=.035+d*.012,s=0.;for(int i=0;i<12;i++){vec2 o=PD[i]*r;float sd=textureCube(cube,dir+t1*o.x+t2*o.y).r*far;s+=sd>d-bias?1.:0.;}return s/12.;}
+  fragmentShader:PD12+`uniform vec3 lp,lc;uniform float lr,far,soft,fillk,dn;uniform samplerCube cube;varying vec3 wp;varying vec3 wn;
+  // the depth bias grows where the light grazes the surface: a cube texel covers a long strip of a wall seen edge-on,
+  // and a flat bias there leaves rings of false shadow round every light (acne)
+  float vis(vec3 p,float d,float ndl){vec3 dir=(p-lp)/d;vec3 t1=normalize(cross(dir,abs(dir.y)<.9?vec3(0.,1.,0.):vec3(1.,0.,0.)));vec3 t2=cross(dir,t1);
+   float r=soft*(.5+d*.08)/max(d,.3),bias=.035+d*.012+(1.-clamp(ndl,0.,1.))*(.03+d*.025),s=0.;for(int i=0;i<12;i++){vec2 o=PD[i]*r;float sd=textureCube(cube,dir+t1*o.x+t2*o.y).r*far;s+=sd>d-bias?1.:0.;}return s/12.;}
   void main(){vec3 n=normalize(wn);vec3 L=lp-wp;float d=length(L);if(d>lr)discard;vec3 l=L/d;float x=clamp(1.-d/lr,0.,1.),fall=x*x,ndl=dot(n,l);if(length(wn)>1.5&&ndl<0.){n=-n;ndl=-ndl;}
-   vec3 p=wp+n*.03;float sh=vis(p,length(p-lp));
+   // ceiling fittings (downlights, panels) shine down: what's level with or above them only gets a little spill
+   if(dn>.5)fall*=mix(.12,1.,smoothstep(-.05,.55,l.y));
+   vec3 p=wp+n*(.03+d*.006);float sh=vis(p,length(p-lp),ndl);
    gl_FragColor=vec4(lc*(max(ndl,0.)+fillk*(ndl*.5+.5))*fall*sh,0.);}`,
   side:T.DoubleSide,depthTest:false,depthWrite:false,blending:T.CustomBlending,blendEquation:T.AddEquation,blendSrc:T.OneFactor,blendDst:T.OneFactor,blendSrcAlpha:T.ZeroFactor,blendDstAlpha:T.OneFactor});
  const dist=new T.ShaderMaterial({uniforms:{lp:{value:new T.Vector3()},far:{value:1}},
@@ -2829,7 +2850,7 @@ function bakeLight(reg,i){
  BK.dist.uniforms.lp.value.set(l[0],l[1],l[2]);BK.dist.uniforms.far.value=far;
  const ac=r.autoClear,cc=r.getClearColor(new T.Color()),ca=r.getClearAlpha();
  r.setClearColor(0xffffff,1);r.autoClear=true;cam.update(r,R.bk.sh);
- const u=BK.light.uniforms;u.lp.value.set(l[0],l[1],l[2]);u.lc.value.set(lin(l[3]),lin(l[4]),lin(l[5])).multiplyScalar(l[7]*G.LK*(R.lk||1));u.lr.value=lr;u.far.value=far;u.cube.value=G.bkCubeRT.texture;
+ const u=BK.light.uniforms;u.lp.value.set(l[0],l[1],l[2]);u.lc.value.set(lin(l[3]),lin(l[4]),lin(l[5])).multiplyScalar(l[7]*G.LK*(R.lk||1));u.lr.value=lr;u.far.value=far;u.cube.value=G.bkCubeRT.texture;u.dn.value=l[8]?1:0;
  r.autoClear=false;
  for(let p=0;p<R.bk.rt.length;p++){let any=false;for(const b of R.bk.scn[p].children){const s=b.userData.bs;b.visible=Math.hypot(s.center.x-l[0],s.center.y-l[1],s.center.z-l[2])<s.radius+lr;any=any||b.visible}
   if(!any)continue;r.setRenderTarget(R.bk.rt[p]);r.render(R.bk.scn[p],R.bk.cam)}
@@ -2873,7 +2894,7 @@ const LMDB={db:null,open(){return new Promise(res=>{try{const q=indexedDB.open('
  put(k,v){if(!LMDB.db)return;try{const t=LMDB.db.transaction('lm','readwrite');t.objectStore('lm').put(v,k)}catch(e){}}};
 function lmKey(reg){const R=G.regions[reg],L=G.lights[reg]||[];let h=0;const add=v=>{h=(h*31+Math.round(v*100))|0};
  for(const l of L)l.forEach(add);const SU=G.sun&&G.sun[reg];if(SU)[...SU.d,...SU.c,SU.k,SU.half,...SU.c0].forEach(add);let verts=0;R.obj.traverse(o=>{if(o.isMesh&&o.userData.pg>=0){verts+=o.geometry.attributes.position.count;const a=o.geometry.attributes.lmuv.array;for(let i=0;i<a.length;i+=97)add(a[i]*1e4)}});
- return['v5',reg,R.lm.S,R.lm.pages,R.lm.D.toFixed(3),verts,h,G.LK,R.lk||1,LOOK.reach,BAKE.fill,BAKE.soft,BAKE.cube].join('|')}
+ return['v6',reg,R.lm.S,R.lm.pages,R.lm.D.toFixed(3),verts,h,G.LK,R.lk||1,LOOK.reach,BAKE.fill,BAKE.soft,BAKE.cube].join('|')}
 function lmApply(reg,pages){const T=G.T,R=G.regions[reg],S=R.lm.S;R.lmTex=pages.map(px=>{const t=new T.DataTexture(px,S,S,T.RGBAFormat,T.UnsignedByteType);t.minFilter=t.magFilter=T.LinearFilter;t.generateMipmaps=false;t.channel=1;t.colorSpace=T.NoColorSpace;t.needsUpdate=true;t.onUpdate=()=>{t.image={width:S,height:S,data:null}};return t});
  R.obj.traverse(o=>{if(o.isMesh&&o.userData.mk&&o.userData.pg>=0){o.userData.lmk=reg+':'+o.userData.pg;o.material=getMat(o.userData.mk,o.userData.lmk)}})}
 /* Lightmaps live per region, and only the place you're in (plus the one you just left, so hopping between the
@@ -2919,12 +2940,10 @@ function regionNeed(reg,show){
   if(!ok&&!R.lmSkip){G.baked=false;setQuality(G.q)}
   G.lmBusy=null;G.baking=false;lmUI(false);G.forceFrame=true;if(hadLock&&typeof relock==='function')setTimeout(relock,50)});
 }
-const LMNAME={home:'Home',office:'Brindle & Co',station:'Central Station',con:'The Halcyon & CTRL+ALT+CON',f13:'The Halcyon · 13th floor'};
 function lmUI(on,reg,cached,f){const e=$('loading');if(!e)return;e.classList.toggle('on',!!on);
  // the game view stays hidden while a bake runs: compositing a live canvas the GPU is busy baking into is slow and,
  // in some drivers, piles up memory
  const gl=$('gl');if(gl)gl.style.visibility=on?'hidden':'';if(!on)return;
- const k=e.querySelector('.k'),b=e.querySelector('b');if(k)k.textContent=(LMNAME[reg]||reg).toUpperCase();if(b)b.textContent=cached?'Loading':'Baking the lights (first visit only)';
  const p=Math.round((f||0)*100),bar=$('loadBar'),t=$('loadPct');if(bar)bar.style.width=p+'%';if(t)t.textContent=p+'%'}
 /* wait for the GPU to finish everything queued so far: finish() is a real round trip; the 1-pixel read alone isn't
    (it only waits for work on its own target), and without a true sync the queued bake work can pile up into gigabytes */
@@ -2933,7 +2952,7 @@ function bakeSync(){const T=G.T,r=G.r;if(!G.bkSyncRT){G.bkSyncRT=new T.WebGLRend
 /* light at a point, for things that move (characters, crowds, doors): every nearby source, no shadows */
 function probeAt(reg,x,y,z,out){
  const L=G.lights[reg]||[];let r=0,g=0,b=0;
- for(const l of L){const dx=l[0]-x,dy=l[1]-y,dz=l[2]-z,d=Math.hypot(dx,dy,dz),R=l[6]*LOOK.reach;if(d>=R)continue;const f=(1-d/R)*(1-d/R)*l[7]*G.LK*.55;r+=lin(l[3])*f;g+=lin(l[4])*f;b+=lin(l[5])*f}
+ for(const l of L){const dx=l[0]-x,dy=l[1]-y,dz=l[2]-z,d=Math.hypot(dx,dy,dz),R=l[6]*LOOK.reach;if(d>=R)continue;let f=(1-d/R)*(1-d/R)*l[7]*G.LK*.55;if(l[8])f*=.12+.88*Math.min(1,Math.max(0,(dy/(d||1)+.05)/.6));r+=lin(l[3])*f;g+=lin(l[4])*f;b+=lin(l[5])*f}
  out.r=r;out.g=g;out.b=b;return out;
 }
 
@@ -2961,7 +2980,7 @@ function paintTextures(){
  tex('woodDark',256,256,(c,w,h)=>{c.fillStyle='#3a2418';c.fillRect(0,0,w,h);for(let i=0;i<60;i++){c.strokeStyle=`rgba(255,220,180,${.03+rnd()*.05})`;c.beginPath();const y=rnd()*h;c.moveTo(0,y);c.bezierCurveTo(w*.3,y+(rnd()-.5)*10,w*.7,y+(rnd()-.5)*10,w,y);c.stroke()}c.fillStyle='#00000040';for(let i=0;i<4;i++)c.fillRect(0,i*64+63,w,1.5);grain(c,w,h,12)});
  tex('tile',256,256,(c,w,h)=>{for(let y=0;y<4;y++)for(let x=0;x<4;x++){const v=208+rnd()*16|0;c.fillStyle=`rgb(${v+8},${v+4},${v-4})`;c.fillRect(x*64,y*64,64,64);const g=c.createLinearGradient(x*64,y*64,x*64+64,y*64+64);g.addColorStop(0,'#ffffff18');g.addColorStop(1,'#00000010');c.fillStyle=g;c.fillRect(x*64,y*64,64,64)}c.fillStyle='#9a938a';for(let i=0;i<=4;i++){c.fillRect(i*64-1.5,0,3,h);c.fillRect(0,i*64-1.5,w,3)}grain(c,w,h,10)});
  tex('tileDark',256,256,(c,w,h)=>{for(let y=0;y<2;y++)for(let x=0;x<2;x++){const v=38+rnd()*10|0;c.fillStyle=`rgb(${v},${v+6},${v+14})`;c.fillRect(x*128,y*128,128,128)}c.fillStyle='#101318';for(let i=0;i<=2;i++){c.fillRect(i*128-2,0,4,h);c.fillRect(0,i*128-2,w,4)}blotch(c,w,h,12,'#ffffff',.04,20,60);grain(c,w,h,10)});
- tex('marble',512,512,(c,w,h)=>{c.fillStyle='#ebe5dc';c.fillRect(0,0,w,h);blotch(c,w,h,30,'#d8cfc2',.6,30,110);
+ tex('marble',512,512,(c,w,h)=>{c.fillStyle='#dcd5ca';c.fillRect(0,0,w,h);blotch(c,w,h,30,'#cbc2b4',.6,30,110);
   for(let i=0;i<14;i++){c.strokeStyle=rnd()<.7?'#a89c8e':'#c9a46a';c.globalAlpha=.18+rnd()*.32;c.lineWidth=.6+rnd()*2;c.beginPath();let x=rnd()*w,y=-10;c.moveTo(x,y);while(y<h+10){x+=(rnd()-.5)*44;y+=8+rnd()*22;c.lineTo(x,y)}c.stroke()}c.globalAlpha=1;
   c.fillStyle='#00000022';c.fillRect(0,0,w,2);c.fillRect(0,0,2,h);c.fillRect(0,255,w,1.5);c.fillRect(255,0,1.5,h);grain(c,w,h,8)});
  tex('wallCon',256,256,(c,w,h)=>{c.fillStyle='#4a3060';c.fillRect(0,0,w,h);blotch(c,w,h,16,'#3a2450',.5,20,60);for(let x=0;x<w;x+=64){c.fillStyle='#00000026';c.fillRect(x,0,2,h);c.fillStyle='#ffffff0d';c.fillRect(x+2,0,1,h)}c.fillStyle='#ff5d73';c.fillRect(0,200,w,6);c.fillStyle='#ff5d7344';c.fillRect(0,196,w,14);grain(c,w,h,12)});
@@ -3107,7 +3126,7 @@ function kBin(x,z,y,col){y=y||0;box(x-.15,y,z-.15,x+.15,y+.4,z+.15,MT.gloss(col|
 function kMug(x,y,z,col){box(x-.04,y,z-.04,x+.04,y+.095,z+.04,MT.gloss(col||'#e9e3da'),{col:false})}
 function kPaper(x,y,z,n){for(let i=0;i<(n||1);i++)box(x-.105+i*.01,y+i*.004,z-.148,x+.105+i*.01,y+i*.004+.003,z+.148,MT.plain('#f4f4f0'),{col:false})}
 // a hanging ceiling light panel (baked point light under it)
-function kPanelLight(x,y,z,w,d,col,rng,int){box(x-w/2,y-.04,z-d/2,x+w/2,y,z+d/2,MT.plain('#d8dce4'),{col:false,nt:1});box(x-w/2+.03,y-.045,z-d/2+.03,x+w/2-.03,y-.04,z+d/2-.03,MT.glow(col||'#f4f6ff',1.2),{col:false,b:1,nt:1});addLight(x,y-.35,z,hx(col||'#f4f6ff'),rng||7,int||.6)}
+function kPanelLight(x,y,z,w,d,col,rng,int){box(x-w/2,y-.04,z-d/2,x+w/2,y,z+d/2,MT.plain('#d8dce4'),{col:false,nt:1});box(x-w/2+.03,y-.045,z-d/2+.03,x+w/2-.03,y-.04,z+d/2-.03,MT.glow(col||'#f4f6ff',1.2),{col:false,b:1,nt:1});addLight(x,y-.35,z,hx(col||'#f4f6ff'),rng||7,int||.6,1)}
 // a pendant: flex, shade, glowing underside
 function kPendant(x,y,z,len,r,col,rng,int,shade){box(x-.006,y-len,z-.006,x+.006,y,z+.006,MT.plain('#222'),{col:false});box(x-r,y-len-.22,z-r,x+r,y-len,z+r,MT.plain(shade||'#1a1a20'),{col:false,nt:1});
  box(x-r+.02,y-len-.225,z-r+.02,x+r-.02,y-len-.215,z+r-.02,MT.glow(col||'#ffe2b0',1.3),{col:false,b:1,nt:1});addLight(x,y-len-.45,z,hx(col||'#ffe2b0'),rng||6,int||.7)}
@@ -3180,7 +3199,7 @@ function card(x,y,z,w,h,a,m){const c=Math.cos(a)*w/2,d=Math.sin(a)*w/2;quad([x-c
 function plant(x,z,s,y){s=s||1;y=y||0;box(x-.25*s,y,z-.25*s,x+.25*s,y+.5*s,z+.25*s,MT.gloss('#b0603a'));box(x-.22*s,y+.5*s,z-.22*s,x+.22*s,y+.52*s,z+.22*s,MT.plain('#3a2418'),{col:false});for(let i=0;i<3;i++)card(x,y+.38*s,z,1.1*s,1.4*s,i*Math.PI/3,MT.leaves)}
 function tree(x,z,y){y=y||0;box(x-.16,y,z-.16,x+.16,y+2.4,z+.16,MT.plain('#4a3020'));const a0=rnd()*3;for(let i=0;i<4;i++)card(x,y+1.5,z,3.4,3.4,a0+i*Math.PI/4,MT.leaves);for(let i=0;i<3;i++)card(x,y+2.7,z,2.4,2.4,a0+.4+i*Math.PI/3,MT.leaves)}
 function sofa(x,z,w,dir,c,y){y=y||0;const m=MT.fabric(c),d=.9;const hz=dir==='n'||dir==='s';const X0=hz?x-w/2:x-d/2,X1=hz?x+w/2:x+d/2,Z0=hz?z-d/2:z-w/2,Z1=hz?z+d/2:z+w/2;box(X0,y,Z0,X1,y+.45,Z1,m);const b={n:[X0,Z0,X1,Z0+.22],s:[X0,Z1-.22,X1,Z1],w:[X0,Z0,X0+.22,Z1],e:[X1-.22,Z0,X1,Z1]}[dir];box(b[0],y+.45,b[1],b[2],y+.9,b[3],m,{col:false})}
-function lightPanel(x,y,z,w,d,col,rng,int){box(x-w/2-.05,y-.03,z-d/2-.05,x+w/2+.05,y,z+d/2+.05,MT.plain('#2a2a30'),{col:false,nt:1});box(x-w/2,y-.07,z-d/2,x+w/2,y-.03,z+d/2,MT.glow(col||'#fff4e0'),{col:false,b:1,nt:1});addLight(x,y-.4,z,hx(col||'#fff4e0'),rng||10,int||.8)}
+function lightPanel(x,y,z,w,d,col,rng,int){box(x-w/2-.05,y-.03,z-d/2-.05,x+w/2+.05,y,z+d/2+.05,MT.plain('#2a2a30'),{col:false,nt:1});box(x-w/2,y-.07,z-d/2,x+w/2,y-.03,z+d/2,MT.glow(col||'#fff4e0'),{col:false,b:1,nt:1});addLight(x,y-.4,z,hx(col||'#fff4e0'),rng||10,int||.8,1)}
 function pendant(x,y,z,col,rng){box(x-.01,y-.9,z-.01,x+.01,y,z+.01,MT.plain('#222'),{col:false});box(x-.2,y-1.1,z-.2,x+.2,y-.9,z+.2,MT.glow(col||'#ffd98a'),{col:false,b:1});addLight(x,y-1.3,z,hx(col||'#ffd98a'),rng||6,.9)}
 function lamp(x,z,y,col){y=y||0;box(x-.06,y,z-.06,x+.06,y+3.6,z+.06,MT.plain('#2a2a30'));box(x-.25,y+3.6,z-.25,x+.25,y+3.9,z+.25,MT.glow(col||'#ffd98a'),{col:false,b:1});addLight(x,y+3.3,z,hx(col||'#ffd98a'),9,.9)}
 function screen(x,y,z,w,h,dir,m){panel(x,y,z,w,h,dir,m)}
@@ -3340,16 +3359,17 @@ function towerDetail(nb,sb){
   for(let x=214;x<246;x+=4)kPlanter(x,20.2,x+3.4,21.6,.6,y,MT.clad);
   for(const[a,b]of[[[254,y+1.6,-18.5],[254,y+1.6,9]],[[255,y+1.6,-8.5],[264,y+1.6,-8.5]],[[263.5,y+1.6,-8.5],[263.5,y+1.6,15]]])kBeam(a,b,.6,.6,MT.metal,[0,1,0]);
   for(const[x,z]of[[272,-18],[273.5,-15]]){box(x-.05,y,z-.05,x+.05,y+4.4,z+.05,MT.metal,{col:false});box(x-.25,y+3.2,z-.02,x+.25,y+4.2,z+.02,MT.plain('#d9d4cc'),{col:false})}}
- // ---- the convention centre below, lit (f13 x = site x + 404, z = site z + 44, y = site y - 56) ----
- {const X=x=>x+404,Z=z=>z+44,Y=y=>y-56,E=(c,k)=>mt('white',c,.5,1,{k:k||.6});const G0=G.lmK;
+ // ---- the hotel podium and the convention centre below, lit (f13 x = site x + 468, z = site z + 44, y = site y - 56) ----
+ {const X=x=>x+468,Z=z=>z+44,Y=y=>y-56,E=(c,k)=>mt('white',c,.5,1,{k:k||.6});const G0=G.lmK;
   const blk=(x0,z0,x1,z1,y0,y1,m,top)=>box(X(x0),Y(y0),Z(z0),X(x1),Y(y1),Z(z1),{side:m,top:top||E('#1a1826',.5)},{col:false});
   box(211.8,-39.5,-22.2,276.2,-.05,22.2,{side:MT.hfac,top:MT.hfac},{col:false,nt:1});
-  blk(-200,-64,-110,60,0,16.5,MT.hfac,E('#2a2630',.5));floorQ(X(-152),Z(4),X(-118),Z(60),Y(16.6),E('#ffd9a0',.9));
-  blk(-110,-4,-64,60,0,16.5,E('#3a2a5a',.7),E('#ff9fd0',.55));blk(-60,-136,50,-64,0,26,MT.cfac);kSign(X(-5),Y(19),Z(-63.9),60,6,'s','CTRL+ALT+CON · HALL A','#ff5d73','#120a14');
-  for(const r of[[-64,-64,56,-50],[-64,-24,-50,20],[40,-50,56,20],[-64,20,56,34]])blk(r[0],r[1],r[2],r[3],0,16.5,MT.cfac,E('#24222e',.5));
+  blk(-264,-64,-128,-4,0,16.5,MT.hfac,E('#2a2630',.5));blk(-264,-4,-174,60,0,16.5,MT.hfac,E('#2a2630',.5));floorQ(X(-216),Z(4),X(-182),Z(60),Y(16.6),E('#ffd9a0',.9));
+  floorQ(X(-174),Z(-12),X(-110),Z(60),Y(.08),E('#1f3a24',.4));blk(-128,-22,-110,-12,0,11,E('#3a3448',.6));
+  blk(-110,-24,-64,60,0,16.5,E('#3a2a5a',.7),E('#ff9fd0',.55));blk(-110,-64,-64,-24,0,16.5,MT.clad);blk(-60,-136,50,-64,0,26,MT.clad);kSign(X(-5),Y(19),Z(-63.9),60,6,'s','CTRL+ALT+CON · HALL A','#ff5d73','#120a14');
+  for(const r of[[-64,-64,56,-50],[-64,-50,-50,20],[40,-50,56,20],[-64,20,56,34]])blk(r[0],r[1],r[2],r[3],0,16.5,MT.clad,E('#24222e',.5));
   floorQ(X(-50),Z(-50),X(40),Z(20),Y(.1),E('#1f4a28',.35));for(let i=0;i<14;i++){const x=-44+((i*37)%84),z=-44+((i*53)%60);box(X(x)-.3,Y(3.2),Z(z)-.3,X(x)+.3,Y(3.8),Z(z)+.3,E('#ffd98a',1.4),{col:false})}
-  blk(56,-54,134,20,0,16.5,MT.cfac);blk(134,-64,196,34,0,11,MT.cfac);blk(-10,34,50,76,0,11,MT.cfac);blk(-64,34,-10,60,0,11,E('#4a3a2a',.6),E('#2a4a2a',.5));blk(56,-111,134,-64,0,16.5,MT.cfac);
-  floorQ(X(-215),Z(60),X(215),Z(100),Y(.05),E('#2a2830',.4));floorQ(X(-215),Z(100),X(215),Z(114),Y(.06),E('#1a1a20',.4));for(let x=-205;x<210;x+=18)box(X(x)-.3,Y(4.8),Z(98.6)-.3,X(x)+.3,Y(5.3),Z(98.6)+.3,E('#ffd98a',1.6),{col:false});
+  blk(56,-54,134,20,0,16.5,MT.clad);blk(134,-64,196,34,0,11,MT.clad);blk(-10,34,50,76,0,11,MT.clad);blk(-64,34,-10,60,0,11,E('#4a3a2a',.6),E('#2a4a2a',.5));blk(56,-111,134,-64,0,16.5,MT.clad);
+  floorQ(X(-300),Z(60),X(300),Z(100),Y(.05),E('#2a2830',.4));floorQ(X(-300),Z(100),X(300),Z(114),Y(.06),E('#1a1a20',.4));for(let x=-295;x<296;x+=18)if(x<-224||x>-176)box(X(x)-.3,Y(4.8),Z(98.6)-.3,X(x)+.3,Y(5.3),Z(98.6)+.3,E('#ffd98a',1.6),{col:false});
   box(X(-47),Y(0),Z(79.6),X(-27),Y(7.2),Z(80.4),E('#ff5d73',1.2),{col:false})}
 }
 
@@ -4221,19 +4241,20 @@ function buildStation(){
 
 /* ============ THE SITE: the Halcyon Hotel (west) + the CTRL+ALT+CON convention centre ============ */
 /* x grows east, z grows south. Ground y=0, Level 1 y=5.5, Level 2 y=11, basement y=-5, con roof y=16.5.
-   HOTEL (x -200..-64): a limestone-and-brass block with its own grand atrium lobby (reception, six lifts, the café,
-     a sweeping staircase), the Promenade along its north side, the Bar with a terrace onto the courtyard, the Grill,
-     the luggage room and back stairs; Level 1: mezzanine, the Grand Ballroom, meeting rooms, the Lumen Lounge and the
-     glass skybridge across the con Foyer; Level 2: the pool hall, spa and gym. The tower rises behind it.
-   CON (x -110..196): the Foyer (a three-storey glass atrium: registration, the Lumen mega-booth, escalators) opens
-     onto the Ring, a 14 m concourse round an open courtyard, double height with a balcony at Level 1 and its own
+   HOTEL (x -264..-128): its own limestone-and-brass building across a lane from the con, with a garden in front of
+     its east glass: the grand atrium lobby (reception, six lifts, the café, a sweeping staircase), the Promenade along
+     its north side, the Bar with its terrace in the lane, the Grill, the luggage room and back stairs; Level 1:
+     mezzanine, the Grand Ballroom, meeting rooms, the Lumen Lounge; Level 2: the pool hall, spa and gym. The tower
+     rises behind it. The Link (x -128..-110), a glazed two-storey bridge building, joins it to the con's Foyer.
+   CON (x -110..196): the Foyer (a three-storey glass atrium: registration, the Lumen mega-booth, escalators) and
+     Hall C off its north side open onto the Ring, a 14 m concourse round an open courtyard, double height with a balcony at Level 1 and its own
      floor at Level 2. Off the Ring: Hall A (the arena: 110 x 72 m, a seating bowl that climbs from the floor to
      Level 2), Hall B, the Expo Hall, Village Row (two storeys of villages and workshops), the food court, the cosplay
      hall and the chill-out. Behind everything: backstage, the staff corridor, the MDF, security, the service corridor,
      the kitchen and the loading dock. Below: the car park, the NOC, the plant room and laundry, the service tunnel. */
-const L1=5.5,L2=11,BY=-5,RFY=16.5,HAR=26,SITE=[-215,-175,215,135];
+const L1=5.5,L2=11,BY=-5,RFY=16.5,HAR=26,HX=-64,SITE=[-300,-175,300,135];
 function siteTextures(){
- tex('terrazzo',512,512,(c,w,h)=>{c.fillStyle='#d9d2c8';c.fillRect(0,0,w,h);blotch(c,w,h,20,'#cfc6ba',.5,30,90);
+ tex('terrazzo',512,512,(c,w,h)=>{c.fillStyle='#bdb5aa';c.fillRect(0,0,w,h);blotch(c,w,h,20,'#b2aa9e',.5,30,90);
   for(let i=0;i<2600;i++){const r=rnd(),col=r<.35?'#8a8478':r<.55?'#b8ab96':r<.7?'#ece6dc':r<.8?'#6a6a74':r<.9?'#c98a6a':'#5a7a8a';c.fillStyle=col;c.globalAlpha=.55+rnd()*.4;c.beginPath();c.ellipse(rnd()*w,rnd()*h,1+rnd()*3.5,1+rnd()*2.5,rnd()*3,0,7);c.fill()}
   c.globalAlpha=1;c.fillStyle='#a8a090';c.fillRect(0,0,w,2);c.fillRect(0,0,2,h);grain(c,w,h,8)});
  tex('limestone',256,256,(c,w,h)=>{c.fillStyle='#d8cdb8';c.fillRect(0,0,w,h);blotch(c,w,h,26,'#cbbfa6',.5,14,60);noise(c,w,h,1400,'#8a7a60',.12);
@@ -4262,8 +4283,9 @@ function siteTextures(){
   for(let i=0;i<16;i++){c.strokeStyle=rnd()<.7?'#d8cfc2':'#c9a46a';c.globalAlpha=.12+rnd()*.28;c.lineWidth=.6+rnd()*1.8;c.beginPath();let x=rnd()*w,y=-10;c.moveTo(x,y);while(y<h+10){x+=(rnd()-.5)*44;y+=8+rnd()*22;c.lineTo(x,y)}c.stroke()}c.globalAlpha=1;grain(c,w,h,8)});
  tex('hotelFac',256,256,(c,w,h)=>{c.fillStyle='#b8ab92';c.fillRect(0,0,w,h);blotch(c,w,h,16,'#a89a80',.4,10,40);for(let y=0;y<4;y++)for(let x=0;x<4;x++){const X=x*64+14,Y=y*64+10,on=rnd();
    c.fillStyle='#4a3e30';c.fillRect(X-3,Y-3,42,48);c.fillStyle=on<.45?'#ffd49a':on<.55?'#ffe8c8':on<.62?'#9fc4e0':'#1c1a24';c.fillRect(X,Y,36,42);if(on<.62){c.fillStyle='#ffffff28';c.fillRect(X,Y,36,6)}c.fillStyle='#4a3e30';c.fillRect(X+17,Y,2,42)}grain(c,w,h,8)});
- tex('conFac',256,256,(c,w,h)=>{c.fillStyle='#121220';c.fillRect(0,0,w,h);for(let x=0;x<8;x++){const on=rnd();c.fillStyle=on<.5?'#2a3050':on<.7?'#3a4a7a':'#1a1c2c';c.fillRect(x*32+3,4,26,h-8);if(on<.35){c.fillStyle='#ff5d7330';c.fillRect(x*32+3,4,26,h-8)}}
-  c.fillStyle='#5a5e70';for(let x=0;x<=8;x++)c.fillRect(x*32-2,0,4,h);c.fillRect(0,0,w,4);c.fillRect(0,h/2-2,w,4);grain(c,w,h,6)});
+ // the con's upper walls: big dark composite panels, a thin magenta light line every storey, no windows
+ tex('conFac',256,256,(c,w,h)=>{c.fillStyle='#1a1a26';c.fillRect(0,0,w,h);for(let y=0;y<2;y++)for(let x=0;x<2;x++){const v=rnd()*8;c.fillStyle=`rgb(${30+v|0},${30+v|0},${44+v|0})`;c.fillRect(x*128+3,y*128+3,122,122)}
+  c.fillStyle='#0c0c14';c.fillRect(0,0,w,3);c.fillRect(0,0,3,h);c.fillRect(0,127,w,3);c.fillRect(127,0,3,h);c.fillStyle='#ff5d7390';c.fillRect(0,236,w,4);grain(c,w,h,6)});
  tex('cladding',256,256,(c,w,h)=>{c.fillStyle='#3a3c48';c.fillRect(0,0,w,h);for(let y=0;y<4;y++)for(let x=0;x<2;x++){const v=rnd()*10;c.fillStyle=`rgb(${62+v|0},${64+v|0},${76+v|0})`;c.fillRect(x*128+2,y*64+2,124,60)}grain(c,w,h,6)});
  tex('screenBig',1024,512,(c,w,h)=>{const g=c.createRadialGradient(w/2,h/2,20,w/2,h/2,w*.6);g.addColorStop(0,'#2a1a5a');g.addColorStop(.6,'#0d0826');g.addColorStop(1,'#04030c');c.fillStyle=g;c.fillRect(0,0,w,h);
   c.strokeStyle='#ff5d7340';c.lineWidth=2;for(let i=0;i<14;i++){c.beginPath();c.moveTo(0,h*.7+i*14);c.lineTo(w,h*.55+i*22);c.stroke()}
@@ -4305,7 +4327,7 @@ function sCeil(x0,z0,x1,z1,y,m,holes){for(const r of rectsMinus(x0,z0,x1,z1,hole
 /* a run of identical lights */
 function lightRow(x0,z0,x1,z1,n,y,col,rng,int,w,d){for(let i=0;i<n;i++){const t=n>1?i/(n-1):.5;lightPanel(x0+(x1-x0)*t,y,z0+(z1-z0)*t,w||1.2,d||1.2,col,rng,int)}}
 /* a downlight: a small glowing disc flush with the ceiling, and its baked light */
-function downl(x,y,z,col,rng,int){box(x-.12,y-.02,z-.12,x+.12,y,z+.12,MT.glow(col||'#ffe8c8',1.4),{col:false,b:1,nt:1});addLight(x,y-.5,z,hx(col||'#ffe8c8'),rng||6,int||.6)}
+function downl(x,y,z,col,rng,int){box(x-.12,y-.02,z-.12,x+.12,y,z+.12,MT.glow(col||'#ffe8c8',1.4),{col:false,b:1,nt:1});addLight(x,y-.5,z,hx(col||'#ffe8c8'),rng||6,int||.6,1)}
 /* a chandelier: tiers of glowing crystal round a brass stem */
 function chandelier(x,y,z,r,col,stem){const g=MT.glow(col||'#ffe2b0',1.6),st=stem===undefined?1.2:stem;box(x-.02,y-st,z-.02,x+.02,y,z+.02,MT.brass,{col:false});
  for(let t=0;t<3;t++){const rr=r*(1-t*.28),yy=y-st-t*.45;for(let i=0;i<10;i++){const a=i/10*Math.PI*2+t*.3,px=x+Math.cos(a)*rr,pz=z+Math.sin(a)*rr;box(px-.05,yy-.32,pz-.05,px+.05,yy,pz+.05,g,{col:false,b:1})}
@@ -4341,32 +4363,34 @@ function buildSite(){
   pressWall:mt('pressWall',0,.5,0,{r:.6}),books:mt('bookshelf',0,1,0,{r:.8}),locker2:mt('locker2',0,.5,0,{r:.5,m:.3}),rugH:mt('carpetHotel','#d8c8b0',.4,0,{r:1})});
  region('con',{fog:[.07,.04,.1],fr:[30,190],lmPages:{high:8,medium:5,low:3},lmCap:9});G.regions.con.amb=[.36,.32,.42];G.regions.con.lk=1.15;
  const Z=zone,Y0=-.3;
- // outdoors
- Z('plaza',-215,60,215,140,-.3,80,['lobby','foyer','food','cosplay','boutique','ramp','seConc','seConc1','skygarden','plazaE']);Z('plazaE',80,34,215,60,-.3,80,['seConc','seConc1','cosplay','chill','naps','vcorr','vcorr1','aero','film']);
- // hotel: ground floor
- Z('lobby',-160,-4,-110,60,Y0,16.5,['promenade','foyer','plaza','hotelL1','hotelL2','luggage','hstairs','boutique','liftH']);
- Z('promenade',-200,-24,-64,-4,Y0,5.5,['lobby','foyer','ringW','bar','grill','liftH','kitchenH']);
- Z('liftH',-160,-36,-136,-24,Y0,16.5,['promenade','hotelL1','hotelL2']);
- Z('bar',-110,-64,-64,-24,Y0,5.5,['promenade','terrace']);
- Z('grill',-136,-64,-110,-24,Y0,5.5,['promenade','pdining']);
- Z('pdining',-160,-64,-136,-36,Y0,5.5,['grill','kitchenH']);
- Z('kitchenH',-200,-64,-160,-24,Y0,5.5,['promenade','pdining']);
- Z('backoffice',-200,-4,-180,20,Y0,5.5,['luggage']);Z('luggage',-180,-4,-160,20,Y0,5.5,['lobby','backoffice']);
- Z('hstairs',-200,20,-160,40,-6,5.5,['lobby','hotelB']);Z('boutique',-200,40,-160,60,Y0,5.5,['lobby','plaza']);
- // hotel: level 1, level 2
- Z('hotelL1',-200,-24,-64,-4,5.5,11,['lobby','liftH','ballroom','lumenlounge','meeting','library','foyer','ringW','hotelL2']);
- Z('ballroom',-110,-64,-80,-24,5.5,9.4,[]);Z('lumenlounge',-80,-64,-64,-24,5.5,9.1,[]);Z('meeting',-160,-64,-110,-24,5.5,8.9,[]);Z('library',-200,-64,-160,-24,5.5,10.55,[]);
- Z('hotelL2',-200,-24,-64,-4,11,16.5,['lobby','liftH','pool','gym','spa','foyer','ringW2']);
- Z('pool',-110,-64,-64,-24,9.4,16.5,['gym']);Z('gym',-136,-64,-110,-24,11,16.5,[]);Z('spa',-200,-64,-136,-24,11,16.5,[]);
- // the con: foyer, ring, courtyard
- Z('foyer',-110,-4,-64,68,Y0,16.5,['plaza','ringW','ringS','food','courtyard','ringW2','ringS2']);
- Z('terrace',-64,-50,-50,-24,Y0,11,['courtyard','ringN','ringW']);
- Z('courtyard',-50,-50,40,20,-3,60,['ringN','ringE','ringS','ringW','ringN2','ringE2','ringS2','ringW2','skyterrace','roof']);
- const RG=['courtyard','ringN','ringE','ringS','ringW','ringN2','ringE2','ringS2','ringW2','skyterrace','terrace'];
- Z('ringN',-64,-64,56,-50,Y0,11,RG.concat(['hallA','staffE','staffW','neConc','expo']));Z('ringW',-64,-24,-50,20,Y0,11,RG.concat(['foyer']));
+ // outdoors: the plaza and the boulevard, the hotel garden and the lane between the buildings, the bar terrace
+ Z('plaza',-300,60,300,140,-.3,80,['lobby','foyer','food','cosplay','boutique','ramp','seConc','seConc1','skygarden','plazaE','garden','hotelL1','hotelL2']);Z('plazaE',80,34,300,60,-.3,80,['seConc','seConc1','cosplay','chill','naps','vcorr','vcorr1','aero','film']);
+ Z('garden',-174,-4,-110,60,-.3,80,['plaza','lobby','foyer','promenade','link','skybridge','hotelL1','hotelL2','terrace','lane']);Z('lane',-128,-12,-110,-4,-.3,80,['garden','link','skybridge','foyer','plaza','promenade','hotelL1','hotelL2']);
+ Z('terrace',-128,-64,-110,-22,-.3,80,['bar','garden','link','skybridge','hotelL1','hotelL2','lumenlounge','pool']);
+ // the hotel (world coordinates: its plan is HX west of these numbers' plan values)
+ Z('lobby',-224,-4,-174,60,Y0,16.5,['promenade','garden','plaza','hotelL1','hotelL2','luggage','hstairs','boutique','liftH','foyer']);
+ Z('promenade',-264,-24,-128,-4,Y0,5.5,['lobby','garden','link','bar','grill','liftH','kitchenH']);
+ Z('liftH',-224,-36,-200,-24,Y0,16.5,['promenade','hotelL1','hotelL2']);
+ Z('bar',-174,-64,-128,-24,Y0,5.5,['promenade','terrace']);
+ Z('grill',-200,-64,-174,-24,Y0,5.5,['promenade','pdining']);
+ Z('pdining',-224,-64,-200,-36,Y0,5.5,['grill','kitchenH']);
+ Z('kitchenH',-264,-64,-224,-24,Y0,5.5,['promenade','pdining']);
+ Z('backoffice',-264,-4,-244,20,Y0,5.5,['luggage']);Z('luggage',-244,-4,-224,20,Y0,5.5,['lobby','backoffice']);
+ Z('hstairs',-264,20,-224,40,-6,5.5,['lobby','hotelB']);Z('boutique',-264,40,-224,60,Y0,5.5,['lobby','plaza']);
+ Z('hotelL1',-264,-24,-128,-4,5.5,11,['lobby','liftH','ballroom','lumenlounge','meeting','library','garden','skybridge','hotelL2','plaza']);
+ Z('ballroom',-174,-64,-144,-24,5.5,9.4,[]);Z('lumenlounge',-144,-64,-128,-24,5.5,9.1,['terrace']);Z('meeting',-224,-64,-174,-24,5.5,8.9,[]);Z('library',-264,-64,-224,-24,5.5,10.55,[]);
+ Z('hotelL2',-264,-24,-128,-4,11,16.5,['lobby','liftH','pool','gym','spa','garden','plaza']);
+ Z('pool',-174,-64,-128,-24,9.4,16.5,['gym','terrace']);Z('gym',-200,-64,-174,-24,11,16.5,[]);Z('spa',-264,-64,-200,-24,11,16.5,[]);
+ // the Link: ground floor and the Skybridge over it
+ Z('link',-128,-22,-110,-12,Y0,5.5,['promenade','foyer','garden','terrace','skybridge']);Z('skybridge',-128,-22,-110,-12,5.5,11.4,['hotelL1','foyer','garden','terrace','link']);
+ // the con: foyer, Hall C, ring, courtyard
+ Z('foyer',-110,-24,-64,68,Y0,16.5,['plaza','garden','link','skybridge','hallC','badgelab','ringW','ringS','food','courtyard','ringW2','ringS2','lobby']);
+ Z('hallC',-110,-64,-64,-24,Y0,10.55,['foyer','ringW']);Z('badgelab',-110,-64,-64,-24,10.55,16.5,['foyer','ringW2']);
+ Z('courtyard',-50,-50,40,20,-3,60,['ringN','ringE','ringS','ringW','ringN2','ringE2','ringS2','ringW2','roof']);
+ const RG=['courtyard','ringN','ringE','ringS','ringW','ringN2','ringE2','ringS2','ringW2'];
+ Z('ringN',-64,-64,56,-50,Y0,11,RG.concat(['hallA','staffE','staffW','neConc','expo']));Z('ringW',-64,-50,-50,20,Y0,11,RG.concat(['foyer','hallC']));
  Z('ringE',40,-50,56,20,Y0,11,RG.concat(['expo','neConc','seConc','seConc1']));Z('ringS',-64,20,56,34,Y0,11,RG.concat(['foyer','food','cosplay','chill','quiet','seConc','seConc1']));
- Z('ringN2',-64,-64,56,-50,11,16.5,RG.concat(['hallA','neConc2','expo']));Z('ringW2',-64,-24,-50,20,11,16.5,RG.concat(['foyer']));Z('ringE2',40,-50,56,20,11,16.5,RG);Z('ringS2',-64,20,56,34,11,16.5,RG.concat(['skygarden']));
- Z('skyterrace',-64,-50,-50,-24,11,16.5,RG.concat(['hotelL2']));
+ Z('ringN2',-64,-64,56,-50,11,16.5,RG.concat(['hallA','neConc2','expo']));Z('ringW2',-64,-50,-50,20,11,16.5,RG.concat(['foyer','badgelab']));Z('ringE2',40,-50,56,20,11,16.5,RG);Z('ringS2',-64,20,56,34,11,16.5,RG.concat(['skygarden']));
  // halls and back of house
  Z('hallA',-60,-136,50,-64,Y0,26,['ringN','ringN2','backstage','courtyard']);Z('backstage',-40,-150,30,-136,Y0,5,['hallA','service']);
  Z('staffW',-64,-150,-60,-64,Y0,4,['ringN','security','stores','service']);Z('security',-110,-100,-64,-64,Y0,4,[]);Z('stores',-110,-150,-64,-100,Y0,4,['service']);
@@ -4390,16 +4414,16 @@ function buildSite(){
  Z('food',-64,34,-10,60,Y0,11,['ringS','foyer','plaza','cosplay']);Z('skygarden',-64,34,-10,60,11,24,['ringS2','plaza','foyer']);
  Z('cosplay',-10,34,50,76,Y0,11,['ringS','food']);Z('chill',50,34,80,56,Y0,5.5,['ringS','naps']);Z('naps',50,56,80,72,Y0,3.4,[]);Z('quiet',50,34,80,56,5.5,11,['ringS']);
  // underground
- Z('carpark',-160,-54,-64,60,-6,-.4,['noc','hotelB','plant','tunnel','ramp']);Z('ramp',-72,60,-64,92,-6,4,['plaza']);Z('noc',-64,-24,-30,10,-6,-.4,[]);
- Z('plant',-200,-54,-160,20,-6,-.4,['hotelB']);Z('hotelB',-200,20,-160,54,-6,-.4,['hstairs']);Z('tunnel',-100,-60,140,-54,-6,-.4,['dock']);Z('tunnelN',134,-122,140,-60,-6,-.4,['tunnel','dock']);
+ Z('carpark',-224,-54,-64,60,-6,-.4,['noc','hotelB','plant','tunnel','ramp']);Z('ramp',-72,60,-64,92,-6,4,['plaza']);Z('noc',-64,-24,-30,10,-6,-.4,[]);
+ Z('plant',-264,-54,-224,20,-6,-.4,['hotelB','carpark']);Z('hotelB',-264,20,-224,54,-6,-.4,['hstairs','carpark']);Z('tunnel',-100,-60,140,-54,-6,-.4,['dock']);Z('tunnelN',134,-122,140,-60,-6,-.4,['tunnel','dock']);
  // the con roof
- Z('roof',40,-54,134,20,15,40,['courtyard','ringN2','ringE2','ringS2','ringW2','skyterrace','plaza','expo']);
+ Z('roof',40,-54,134,20,15,40,['courtyard','ringN2','ringE2','ringS2','ringW2','plaza','expo']);
  // everything outside the buildings (facades, roofs, the tower, the city): seen only from places with windows or sky
- Z('outside',-400,-400,400,400,-20,400,['plaza','plazaE','courtyard','roof','skyterrace','skygarden','terrace','foyer','lobby','food','seConc','seConc1','vcorr','vcorr1','ringN','ringE','ringS','ringW','ringN2','ringE2','ringS2','ringW2','pool','ramp','cosplay','hotelL1','hotelL2','promenade','boutique']);
+ Z('outside',-600,-600,600,600,-20,400,['plaza','plazaE','garden','lane','terrace','link','skybridge','courtyard','roof','skygarden','foyer','lobby','food','seConc','seConc1','vcorr','vcorr1','ringN','ringE','ringS','ringW','ringN2','ringE2','ringS2','ringW2','pool','ramp','cosplay','hotelL1','hotelL2','promenade','boutique','badgelab','lumenlounge','bar']);
  // hubs: open concourses and corridors; a room that sees one also sees what it opens onto
- for(const n of['lobby','promenade','foyer','courtyard','ringN','ringW','ringE','ringS','ringN2','ringW2','ringE2','ringS2','neConc','neConc2','seConc','seConc1','vcorr','vcorr1','hotelL1','hotelL2','plaza','service','staffW','staffE','liftH','terrace','skyterrace'])G.zones.con.find(q=>q.n===n).hub=true;
+ for(const n of['lobby','promenade','foyer','courtyard','ringN','ringW','ringE','ringS','ringN2','ringW2','ringE2','ringS2','neConc','neConc2','seConc','seConc1','vcorr','vcorr1','hotelL1','hotelL2','plaza','service','staffW','staffE','liftH','garden','lane','link','skybridge'])G.zones.con.find(q=>q.n===n).hub=true;
  G.zones.con.find(q=>q.n==='outside').bg=true;
- G.wallNT=true;G.stairCol=true;buildHotel();buildCore();buildHalls();buildEast();buildSouth();buildUnder();G.wallNT=false;G.stairCol=false;siteAreas();
+ G.wallNT=true;placed(HX,buildHotel);buildCore();buildHalls();buildEast();buildSouth();buildUnder();G.wallNT=false;siteAreas();
 }
 /* the underside and the two side stringers of a stair that floats above the floor (seen from below or the side) */
 function stairShell(x0,z0,x1,z1,ya,yb,dir,m,th){th=th||.35;const ax=dir[0],up=dir[1]==='+';
@@ -4409,25 +4433,26 @@ function stairShell(x0,z0,x1,z1,ya,yb,dir,m,th){th=th||.35;const ax=dir[0],up=di
  else{const xl=up?x0:x1,xh=up?x1:x0;const A=[xl,ya-th,z0],B=[xl,ya-th,z1],C=[xh,yb-th,z1],Dd=[xh,yb-th,z0];if(up)quad(B,A,Dd,C,m,Math.abs(x1-x0)/2,(z1-z0)/2);else quad(A,B,C,Dd,m,Math.abs(x1-x0)/2,(z1-z0)/2);
   for(const[z,s]of[[z0,-1],[z1,1]]){const p=[[xl,ya-th,z],[xh,yb-th,z],[xh,yb+.06,z],[xl,ya+.06,z]];const n=(up?1:-1)*s;if(n>0)quad(p[0],p[1],p[2],p[3],m,Math.abs(x1-x0)/2,.3);else quad(p[1],p[0],p[3],p[2],m,Math.abs(x1-x0)/2,.3)}}}
 
-/* ============ THE HALCYON HOTEL (west block of the site) ============ */
-/* Ground: the atrium lobby (x -160..-110, z -4..60: reception on the west wall, the grand staircase, the café in the
-   south-east corner, a piano, three chandeliers under a skylight 16.5 m up), the Promenade along the north
-   (x -200..-64, z -24..-4) with the lift lobby, the Bar (x -110..-64) and its terrace door, the Grill and its private
-   dining room, the hotel kitchen, and the back rooms behind reception (back office, luggage, back stairs, boutique).
-   Level 1: galleries round the atrium, the mezzanine corridor, the Grand Ballroom, the Lumen Lounge, two meeting rooms,
-   the library, and the glass skybridge across the con Foyer. Level 2: galleries, the pool hall, the gym, the spa. */
+/* ============ THE HALCYON HOTEL (its own building, west of the con) ============ */
+/* Drawn on its own plan: buildSite places it HX (64 m) west, so plan x -200..-64 stands at world x -264..-128.
+   Every coordinate in this file is a plan coordinate; content placed in the world (09a_place) uses world ones.
+   Ground: the atrium lobby (plan x -160..-110, z -4..60: reception on the west wall, the grand staircase, the café in
+   the south-east corner by the garden glass, a piano, three chandeliers under a skylight 16.5 m up), the Promenade
+   along the north (x -200..-64, z -24..-4) with the lift lobby and, at its east end, the doors to the Link (the glazed
+   bridge building across the lane to the con), the Bar (x -110..-64) and its terrace in the lane, the Grill and its
+   private dining room, the hotel kitchen, and the back rooms behind reception (back office, luggage, back stairs,
+   boutique). Level 1: galleries round the atrium, the mezzanine corridor and the Skybridge door, the Grand Ballroom,
+   the Lumen Lounge, two meeting rooms, the library. Level 2: galleries, the pool hall, the gym, the spa. */
 function buildHotel(){
  const D=door,W=wallLine,LIM=MT.lime,WP=MT.wpan,MAR=MT.marble,CPT=MT.carpetHotel,COF=MT.coffer,BR_=MT.brass,MD=MT.mdark;
  const mr=o=>{(MAPR.con=MAPR.con||[]).push({x0:o.x0,z0:o.z0,x1:o.x1,z1:o.z1,y:o.y||0,n:o.n||'',c:o.c||'#5a4a3a'})};
  /* ---------- doors (before the walls that hold them) ---------- */
- gap('v',-110,25,30,5);                       // lobby <-> con foyer, the big gap
- gap('h',-4,-87,20,5);                        // promenade <-> foyer
- gap('v',-64,-14,16,5);                       // promenade <-> ring west
- D('h',-24,-87,6,3.4);D('v',-64,-37,4,3);       // bar from the promenade; bar -> terrace
+ D('v',-110,30,4,3.2);                         // lobby -> the garden (the forecourt between the hotel and the con)
+ D('v',-64,-17,6,3.2);D('v',-64,-17,4,3,L1);    // promenade / mezzanine -> the Link and the Skybridge over it
+ D('h',-24,-87,6,3.4);D('v',-64,-37,4,3);       // bar from the promenade; bar -> its terrace
  D('h',-24,-123,5,3.2);D('v',-136,-50,2,2.6);D('v',-160,-44,1.6,2.4);D('h',-24,-185,1.6,2.4); // grill, private dining, kitchen pass, kitchen staff door
  D('v',-160,8,1.6,2.4);D('v',-180,4,1.2,2.3);D('v',-160,30,1.6,2.4);D('v',-160,50,4,3.2); // luggage, back office, back stairs, boutique
   // level 1
- D('v',-110,8,4,3,L1);                          // skybridge
  D('h',-24,-95,4,3.4,L1);D('h',-24,-72,2,2.6,L1);D('h',-24,-123,2,2.6,L1);D('h',-24,-185,2.4,2.8,L1);
  D('v',-136,-50,1.6,2.4,L1);
  // level 2
@@ -4437,7 +4462,8 @@ function buildHotel(){
  sFloor(-160,-4,-110,60,0,MAR);
  for(let x=-150;x<=-120;x+=10)floorQ(x-.06,-4,x+.06,60,.004,MT.plain('#b89c74'));
  W('v',-160,-4,60,0,L1,LIM,1);W('v',-160,-4,60,L1,L2-L1,LIM,1);W('v',-160,-4,60,L2,16.5-L2,LIM,1);
- W('v',-110,-4,60,0,L1,LIM,-1);W('v',-110,-4,60,L1,L2-L1,LIM,-1);W('v',-110,-4,60,L2,16.5-L2,LIM,-1);
+ // the east facade: three storeys of glass onto the garden, stone piers outside, the garden door by the lounge
+ W('v',-110,-4,60,0,16.5,MT.glass,-1);for(const z of[1.5,13,24,37,48,58.5])column(-109.6,z,0,16.5,.7,LIM,null);
  // south facade: a three-storey glass wall with stone piers, the revolving door and two side doors
  D('h',60,-135,4.4,3.2);D('h',60,-147,2.4,2.8);D('h',60,-123,2.4,2.8);
  W('h',60,-160,-110,0,16.5,MT.glass,-1);
@@ -4490,14 +4516,16 @@ function buildHotel(){
   for(const x of[-125,-121])kPendant(x,3.5,cz+.35,1.3,.22,'#ffd98a',5,.7,'#c9a46a');for(const[x,z]of[[-124,52],[-120,52]])kPendant(x,3.5,z,1.2,.2,'#ffd98a',5,.55,'#c9a46a');
   for(const[tx,tz]of[[-126,50],[-122,50],[-126,54.5],[-122,54.5],[-118,52]]){box(tx-.4,.74,tz-.4,tx+.4,.78,tz+.4,MD,{col:false});box(tx-.04,0,tz-.04,tx+.04,.74,tz+.04,BR_,{col:false});colBox(tx-.4,tz-.4,tx+.4,tz+.4,0,.78);kStool(tx-.75,tz,.46,MT.fabric('#6a3a4a'));kStool(tx+.75,tz,.46,MT.fabric('#6a3a4a'))}}
  // wall sconces on the stone piers
- for(const z of[8,20,32,44,56]){box(-159.8,2.6,z-.12,-159.65,3,z+.12,MT.glow('#ffe2b0',1.5),{col:false});if(z<9||z>41)box(-110.35,2.6,z-.12,-110.2,3,z+.12,MT.glow('#ffe2b0',1.5),{col:false})}
+ for(const z of[8,20,32,44,56])box(-159.8,2.6,z-.12,-159.65,3,z+.12,MT.glow('#ffe2b0',1.5),{col:false});
  addLight(-135,3,10,[1,.84,.62],14,.7);addLight(-135,3,40,[1,.84,.62],14,.7);addLight(-148,3,30,[1,.84,.62],10,.6);addLight(-122,3,30,[1,.84,.62],10,.6);addLight(-122,3,52,[1,.8,.58],9,.8);
  mr({x0:-160,z0:-4,x1:-110,z1:60,n:'Hotel Lobby',c:'#5a4a3a'});
  // ---- the promenade: a marble gallery along the north, the lift lobby, the doors to the bar and the grill ----
  sFloor(-200,-24,-64,-4,0,MAR);quad([-198,.012,-11],[-66,.012,-11],[-66,.012,-17],[-198,.012,-17],mt('carpetHotel',0,.5,0,{r:1}),66,3);
  sCeil(-200,-24,-64,-4,L1-.45,COF);
  W('h',-24,-200,-160,0,L1,WP,1);W('h',-24,-136,-64,0,L1,WP,1);W('v',-200,-24,-4,0,L1,WP,1);
- W('h',-4,-200,-160,0,L1,WP,-1);W('h',-4,-110,-64,0,L1,LIM,-1);
+ W('h',-4,-200,-160,0,L1,WP,-1);W('h',-4,-110,-64,0,L1,MT.glass,-1);W('v',-64,-24,-4,0,L1,LIM,-1);
+ for(const x of[-104,-92,-80,-70])column(x,-3.7,0,L1-.45,.5,LIM,null);
+ kSign(-64.22,3.9,-17,5,.5,'w','THE LINK · CTRL+ALT+CON →','#ffe0a0','#2a1a12');
  for(let x=-196;x<=-68;x+=8){if(x>-161&&x<-109||Math.abs(x+87)<4)continue;box(x-.3,0,-23.8,x+.3,L1-.45,-23.5,LIM);box(x-.35,L1-.8,-23.85,x+.35,L1-.45,-23.45,BR_,{col:false})}
  for(const x of[-192,-176,-168,-104,-96,-78,-70])kOnWall('h',-23.8,1,x,2.4,1.4,1.6,MT.morning);
  for(let x=-194;x<=-66;x+=8)downl(x,L1-.45,-14,'#ffe2b0',7,.55);
@@ -4522,9 +4550,23 @@ function buildHotel(){
  for(const[x,z]of[[-94,-44],[-84,-44],[-74,-44],[-94,-34],[-84,-34],[-74,-34]]){box(x-.5,.72,z-.5,x+.5,.76,z+.5,MD,{col:false});box(x-.05,0,z-.05,x+.05,.72,z+.05,BR_,{col:false});colBox(x-.5,z-.5,x+.5,z+.5,0,.76);
   for(const[dx,f]of[[-1,'e'],[1,'w']]){const cx=x+dx*.95;box(cx-.35,0,z-.35,cx+.35,.42,z+.35,MT.fabric('#6a3a2a'));box(dx<0?cx-.35:cx+.17,.42,z-.35,dx<0?cx-.17:cx+.35,.82,z+.35,MT.fabric('#6a3a2a'),{col:false})}}
  kOnWall('v',-109.8,1,-30,3.6,1.8,2,MT.keyscreen);kOnWall('v',-64.2,-1,-30,2.4,2,1.3,mt(signTex('HAPPY HOUR 5-7','#ff9a5c','#241510',256,128),0,1,1,{k:1.2}));
- kSign(-64.22,3.12,-37,3.6,.45,'w','TERRACE · COURTYARD →','#ff9a5c','#241510');
+ kSign(-64.22,3.12,-37,3.6,.45,'w','TERRACE →','#ff9a5c','#241510');
  addLight(-88,3.4,-44,[1,.62,.36],18,.95);addLight(-88,3.4,-30,[1,.62,.36],14,.8);addLight(-107,3,-40,[1,.62,.36],10,.75);addLight(-74,3.4,-40,[1,.62,.36],10,.7);
  mr({x0:-110,z0:-64,x1:-64,z1:-24,n:'Hotel Bar',c:'#5a3a2a'});
+ // ---- the bar terrace: a timber deck in the lane between the hotel and the con, walled at the far end, open to the sky ----
+ {const x0=-64,x1=-46,z0=-64,z1=-22;floorQ(x0,z0+.2,x1,z1,.05,MT.timber);surf(x0,z0+.2,x1,z1,.05);box(x0,0,z1-.02,x1,.05,z1,MT.timber,{col:false,nt:1});
+  W('h',-64,-64,-46,0,3.2,LIM,1);box(-64,3.2,-64,-46,3.45,-63.6,LIM,{col:false});
+  // planters along the garden wall with olive trees, a living wall on the con's side (its wall is the con's)
+  for(const x of[-61,-55,-49]){kPlanter(x-2.2,-63.7,x+2.2,-62.3,.75,0,LIM);kPlant(x-1,-63,1.5,.75,'#3a2418');kPlant(x+1,-63,1.5,.75,'#3a2418')}
+  for(let z=-60;z<-23;z+=4){box(-46.32,0,z-.04,-46.2,3.6,z+.04,MT.woodDark,{col:false});card(-46.5,.3,z+2,3.6,3.2,Math.PI/2,MT.leaves)}box(-46.32,3.6,-61,-46.2,3.7,-23,MT.woodDark,{col:false});
+  // tables under festoon lights strung between the two buildings, patio heaters, a lounge corner with a fire table
+  for(const[x,z]of[[-60,-55],[-54,-55],[-60,-47],[-54,-47],[-60,-39],[-54,-31]]){table(x,z,1.1,1.1,MT.plain('#2a2026'),.74,.05);chair(x-.8,z,'w',MT.plain('#c9a46a'),.05);chair(x+.8,z,'e',MT.plain('#c9a46a'),.05)}
+  for(const z of[-51,-35]){box(-50.6,.05,z-.25,-50.1,.15,z+.25,MT.metal,{col:false});box(-50.4,.15,z-.06,-50.3,2.25,z+.06,MT.metal,{col:false});colBox(-50.6,z-.25,-50.1,z+.25,0,2.3);box(-50.75,2.25,z-.4,-49.95,2.55,z+.4,MT.glow('#ff9a5c',1.2),{col:false})}
+  {const cx=-50,cz=-27;quad([cx-3.2,.062,cz+3.6],[cx+3.2,.062,cz+3.6],[cx+3.2,.062,cz-3.2],[cx-3.2,.062,cz-3.2],MT.rugH,2,2);sofa(cx,cz+2.4,3,'s','#3a3a44',.05);sofa(cx-2.4,cz,2.6,'w','#3a3a44',.05);
+   box(cx-1,.05,cz-.6,cx+1,.45,cz+.6,LIM);box(cx-.8,.45,cz-.4,cx+.8,.47,cz+.4,MT.plain('#14121a'),{col:false});box(cx-.7,.47,cz-.12,cx+.7,.62,cz+.12,MT.glow('#ff9a5c',1.3),{col:false});addLight(cx,.9,cz,[1,.6,.3],6,.8)}
+  for(let k=0;k<5;k++){const z=-58+k*8.4;for(let i=1;i<12;i++){const t=i/12,x=x0+(x1-x0)*t,y=4.4-Math.sin(t*Math.PI)*.7;box(x-.05,y-.05,z-.05,x+.05,y+.05,z+.05,MT.glow('#ffd98a',1.6),{col:false})}}
+  for(const z of[-56,-42,-28])addLight(-55,3.4,z,[1,.76,.48],11,.7);
+  mr({x0,z0,x1,z1,n:'Bar terrace',c:'#4a3a2a'})}
  // ---- the Grill + private dining ----
  sFloor(-136,-64,-110,-24,0,MT.wood);sCeil(-136,-64,-110,-24,L1-.45,COF);W('v',-136,-64,-36,0,L1,WP,1);W('h',-64,-136,-110,0,L1,WP,1);
  {box(-134,0,-63.8,-112,1.1,-62.4,MT.chrome);box(-134,1.1,-63.8,-112,1.16,-62.4,MT.plain('#e9e3da'),{col:false});kOnWall('h',-63.8,1,-123,20,1.6,1.4,MT.oven,2,1.4);
@@ -4577,13 +4619,14 @@ function buildHotelUp(){
   if(y===L1)sFloor(-199.8,-24,-64,-4,y,CPT);else{sFloor(-199.8,-24,-64,-4,y,CPT,[[-199.8,-22,-193.8,-8]],.45,COF);sCeil(-199.8,-24,-64,-4,16.1,COF)}
   const h=y===L1?L2-y:16.5-y;
   W('h',-24,-200,-160,y,h,WP,1);W('h',-24,-136,-64,y,h,WP,1);W('v',-200,-24,-4,y,h,WP,1);W('h',-4,-200,-160,y,h,LIM,-1);
-  W('h',-4,-110,-64,y,1,LIM,-1);W('h',-4,-110,-64,y+1,h-1,GL,-1);
+  W('h',-4,-110,-64,y,1,LIM,-1);W('h',-4,-110,-64,y+1,h-1,GL,-1);W('v',-64,-24,-4,y,h,WP,-1);
+  if(y===L1)kSign(-64.22,y+3.3,-17,4.4,.45,'w','SKYBRIDGE · CON LEVEL 1 →','#ffe0a0','#2a1a12');
   for(const x of[-196,-188,-180,-172,-164,-104,-96,-80,-68]){if(Math.abs(x+87)<3||Math.abs(x+95)<3||Math.abs(x+72)<2||Math.abs(x+185)<2.4)continue;box(x-.3,y,-23.8,x+.3,y+h-.1,-23.5,LIM);box(x-.35,y+2.4,-23.5,x+.35,y+2.9,-23.35,MT.glow('#ffe2b0',1.4),{col:false})}
   for(let x=-194;x<=-66;x+=8)downl(x,y+(y===L1?h-.45:h-.4),-14,'#ffe2b0',7,.5);
   quad([-190,y+.012,-11],[-66,y+.012,-11],[-66,y+.012,-17],[-190,y+.012,-17],MT.rugH,62,3);
   for(let i=0;i<3;i++){const x=-180+i*8;box(x,y,-5.6,x+2.4,y+.45,-4.8,{side:WP,top:MT.fabric('#6a3a4a')});kOnWall('h',-4.2,-1,x+1.2,1.8,y+1.4,1.2,MT.morning)}
   for(const x of[-190,-175])kSign(x,y+2.5,-4.22,1.6,.3,'n','STAFF ONLY','#ffe0a0','#2a1a12');for(const x of[-190,-175])kOnWall('h',-4.2,-1,x,1,y,2.2,MT.door);
-  kPlant(-108,-6,1.3,y,'#2a2026');kPlant(-66,-22,1.3,y,'#2a2026');
+  kPlant(-108,-6,1.3,y,'#2a2026');kPlant(-66,-22.4,1.3,y,'#2a2026');kPlant(-66,-5.6,1.3,y,'#2a2026');
   lifts(y);
   // the atrium galleries at this level: armchairs by the balustrade, plants, doors to staff rooms on the west wall
   for(const z of[16,30,44]){for(const[x,f]of[[-157.5,'e']]){box(x-.45,y,z-.45,x+.45,y+.45,z+.45,MT.fabric('#3a4a5a'));box(x-.45,y+.45,z-.45,x-.27,y+.9,z+.45,MT.fabric('#3a4a5a'),{col:false})}
@@ -4668,23 +4711,25 @@ function buildHotelUp(){
 }
 /* ---------------- the outside of the hotel: stone skins, the tower, the porte-cochère, the roof ---------------- */
 /* a facade skin just outside a wall line, with rectangular holes (doors, glazing) left open */
-function skin(o,at,a0,a1,y0,y1,m,dir,holes){const R=rectsMinus(a0,y0,a1,y1,holes||[]),k=m.s||.125;
+function skin(o,at,a0,a1,y0,y1,m,dir,holes){const R=rectsMinus(a0,y0,a1,y1,holes||[]),k=m.s||.125;at+=dir*.04;
  for(const r of R){const[a,b,c,d]=r;if(o==='h'){if(dir>0)quad([a,b,at],[c,b,at],[c,d,at],[a,d,at],m,(c-a)*k,(d-b)*k);else quad([c,b,at],[a,b,at],[a,d,at],[c,d,at],m,(c-a)*k,(d-b)*k)}
   else{if(dir>0)quad([at,b,c],[at,b,a],[at,d,a],[at,d,c],m,(c-a)*k,(d-b)*k);else quad([at,b,a],[at,b,c],[at,d,c],[at,d,a],m,(c-a)*k,(d-b)*k)}}}
 function buildHotelOut(){
  const LIM=MT.lime,HF=MT.hfac,BR_=MT.brass,G0=G.lmK;
  G.lmK=.45;
- // south: stone over the boutique, the lobby glass is its own wall; west and north: windows above the ground floor
- skin('h',60.02,-200,-160,0,5.5,LIM,1,[]);for(let x=-198;x<-160;x+=4)box(x,5.5,60.02,x+2.4,15.6,60.12,MT.plain('#3a2e26'),{col:false});
- skin('h',60.02,-200,-160,5.5,16.5,HF,1,[]);
- skin('v',-200.02,-64,60,0,16.5,LIM,-1,[]);skin('v',-200.04,-64,60,5.6,16.2,HF,-1,[]);
- skin('h',-64.02,-200,-64,0,16.5,LIM,-1,[[-110,0,-64,5.2]]);skin('h',-64.04,-200,-110,5.6,16.2,HF,-1,[]);skin('h',-64.04,-110,-64,5.6,16.2,HF,-1,[]);
- // east, over the bar terrace (the bar's own wall below, with its door)
- skin('v',-63.98,-64,-24,5.5,16.5,LIM,1,[]);skin('v',-63.96,-64,-24,6,10.6,HF,1,[]);
- for(const y of[5.5,11,16.5]){box(-200.4,y-.25,-64.4,-199.98,y,60.4,LIM,{col:false});box(-200.4,y-.25,60.02,-160,y,60.4,LIM,{col:false});box(-200.4,y-.25,-64.4,-64,y,-64.02,LIM,{col:false})}
+ // stone below and between, a band of lit windows on the upper floors: each face is one plane, the window band a hole in
+ // the stone (stacked skins a couple of centimetres apart shimmer against each other from across the plaza)
+ const face=(o,at,a0,a1,dir,holes,band)=>{skin(o,at,a0,a1,0,16.5,LIM,dir,holes.concat(band?[[band[0],band[1],band[2],band[3]]]:[]));if(band)skin(o,at,band[0],band[2],band[1],band[3],HF,dir,[])};
+ face('h',60.02,-200,-160,1,[],[-200,5.5,-160,16.5]);for(let x=-198;x<-160;x+=4)box(x,5.5,60.08,x+2.4,15.6,60.18,MT.plain('#3a2e26'),{col:false});
+ face('v',-200.02,-64,60,-1,[],[-64,5.6,60,16.2]);
+ face('h',-64.02,-200,-64,-1,[],[-200,5.6,-64,16.2]);
+ // east, onto the lane: the bar's terrace door, the Link built against the promenade's end, windows over the terrace
+ face('v',-63.98,-64,-4,1,[[-39,0,-35,3],[-22,0,-12,L2+.1]],[-62,6,-26,10.6]);
+ for(const y of[5.5,11,16.5]){box(-200.4,y-.25,-64.4,-199.98,y,60.4,LIM,{col:false});box(-200.4,y-.25,60.02,-160,y,60.4,LIM,{col:false});box(-200.4,y-.25,-64.4,-64,y,-64.02,LIM,{col:false});
+  for(const[z0,z1]of y<L2+1?[[-64.4,-22.1],[-11.9,-3.6]]:[[-64.4,-3.6]])box(-63.98,y-.25,z0,-63.6,y,z1,LIM,{col:false});box(-110,y-.25,-3.98,-63.98,y,-3.6,LIM,{col:false})}
  // the podium roof: gravel, a stone parapet, plant on top, the atrium skylight and the pool glass left open
- for(const r of rectsMinus(-200,-64,-110,60,[[-152,4,-118,60],[-195,-62,-125,-26]]))floorQ(r[0],r[1],r[2],r[3],16.52,MT.gravel);floorQ(-110,-64,-64,-24,16.52,MT.glass);
- for(const[a,b,c,d]of[[-200.4,-64.4,-64,-64],[-200.4,60,-110,60.4],[-200.4,-64,-200,60]])box(a,16.5,b,c,17.6,d,LIM,{col:false});
+ for(const r of rectsMinus(-200,-64,-110,60,[[-152,4,-118,60],[-195,-62,-125,-26]]))floorQ(r[0],r[1],r[2],r[3],16.52,MT.gravel);floorQ(-110,-64,-64,-24,16.52,MT.glass);floorQ(-110,-24,-64,-4,16.52,MT.gravel);
+ for(const[a,b,c,d]of[[-200.4,-64.4,-64,-64],[-200.4,60,-110,60.4],[-200.4,-64,-200,60],[-64,-64.4,-63.6,-3.6],[-110,-4,-64,-3.6],[-110.4,-4,-110,60.4]])box(a,16.5,b,c,17.6,d,LIM,{col:false});
  for(const[x,z,w,d]of[[-150,-20,5,3],[-140,-12,4,4],[-120,-18,3,3],[-180,-10,6,3],[-176,30,4,4],[-185,48,3,3]])box(x,16.52,z,x+w,18.1,z+d,{side:MT.metal,top:MT.fan},{col:false});
  // the tower: 25 storeys of lit windows, a setback crown with the name, red aviation lights
  G.lmK=.12;
@@ -4702,12 +4747,15 @@ function buildHotelOut(){
  G.lmK=G0;
 }
 
-/* ============ THE CON CORE: the Foyer, the Ring, the courtyard, the bar terrace ============ */
-/* Foyer (x -110..-64, z -4..60): a three-storey glass atrium. Registration on the west, the info desk, the Lumen
-   mega-booth in the middle, escalators up the east side to the Level 1 and Level 2 galleries, the glass skybridge
-   from the hotel mezzanine across the void. The Ring is a 14 m concourse round the open courtyard (x -50..40,
-   z -50..20): double height at ground level with a 4 m balcony on its outer walls at Level 1, and a floor of its own
-   at Level 2 with glass on the courtyard side. Hall A opens off Ring North at all three levels. */
+/* ============ THE CON CORE: the Foyer, the Link to the hotel, Hall C, the Ring, the courtyard ============ */
+/* Foyer (x -110..-64, z -24..60): a three-storey glass atrium. Its west wall looks across the lane and the hotel's
+   garden at the Halcyon; the Link (x -128..-110, z -22..-12), a glazed two-storey bridge building, is the one way
+   through to the hotel: ground floor from the Promenade, the Skybridge above from the hotel mezzanine to the Foyer's
+   north gallery. Registration on the west, the cloakroom and the lifts on the north wall, the info desk, the Lumen
+   mega-booth, escalators up the east side to the Level 1 and Level 2 galleries. Hall C (x -110..-64, z -64..-24,
+   double height, the Badge Lab over it) opens off the Foyer and Ring West. The Ring is a 14 m concourse round the
+   open courtyard (x -50..40, z -50..20): double height at ground level with a 4 m balcony on its outer walls at
+   Level 1, and a floor of its own at Level 2 with glass on the courtyard side. Hall A opens off Ring North. */
 function buildCore(){
  const D=door,W=wallLine,GL=MT.glass,TZ=MT.terr,WC=MT.wallCon,CC=MT.carpetCon,CG=MT.carpetGallery,CH=MT.chrome;
  const mr=(x0,z0,x1,z1,y,n,c)=>(MAPR.con=MAPR.con||[]).push({x0,z0,x1,z1,y,n,c:c||'#5a2a4a'});
@@ -4715,42 +4763,58 @@ function buildCore(){
  gap('h',60,-88,12,4);D('h',68,-88,6,3);                                   // vestibule: inner gap, outer doors
  D('v',-64,40,4,3.2);D('v',-64,54,4,3.2);                                  // foyer -> food court
  for(const c of[-10,20])D('h',-50,c,3,3);for(const c of[-30,10])D('h',20,c,3,3);D('v',-50,0,3,3);for(const c of[-20,5])D('v',40,c,3,3); // ring <-> courtyard glass doors
- D('h',-50,-57,3,3);D('h',-24,-57,3,3);gap('v',-50,-37,3,2.4);              // terrace <-> ring north / ring west / courtyard
+ D('v',-50,-37,3,3);                                                      // ring west <-> courtyard
+ D('v',-110,-17,6,3.2);D('v',-110,-17,4,3,L1);                             // the Link and the Skybridge into the Foyer
+ D('h',-24,-96,4,3.4);D('h',-24,-78,4,3.4);D('v',-64,-44,4,3.4);D('v',-64,-30,4,3.4);D('v',-64,-37,3,3,L2); // Hall C (Foyer, Ring West), the Badge Lab
  D('h',-64,-55,4,3.6);D('h',-64,45,4,3.6);D('h',-64,-62,1.6,2.4);D('h',-64,53,2,2.4); // hall A side aisles; staff corridors
  for(const c of[-30,-5,20]){D('h',-64,c,3,3,L1);D('h',-64,c,3,3,L2)}        // hall A at levels 1 and 2
  D('v',56,-38,8,4.5);D('v',56,-8,8,4.5);                                   // expo hall
  D('h',34,-37,6,4);D('h',34,5,6,4.5);D('h',34,35,4,3.4);D('h',34,53,3,3);    // food court, cosplay x2, chill-out
- gap('h',-50,-57,6,3,L2);gap('h',-24,-57,6,3,L2);gap('h',34,-37,20,4.4,L1);D('h',34,53,2,2.6,L1);D('h',34,-37,6,3,L2);       // food court mezzanine, quiet room, sky garden
+ gap('h',34,-37,20,4.4,L1);D('h',34,53,2,2.6,L1);D('h',34,-37,6,3,L2);       // food court mezzanine, quiet room, sky garden
  /* ================= FOYER ================= */
- sFloor(-110,-4,-64,60,0,TZ);sFloor(-96,60,-80,68,0,TZ);quad([-94,.012,67.5],[-82,.012,67.5],[-82,.012,61],[-94,.012,61],MT.carpetGrey,4,2);
- for(let x=-104;x<=-70;x+=11.5)floorQ(x-.08,-4,x+.08,60,.004,MT.plain('#8a8478'));for(let z=6;z<=56;z+=12.5)floorQ(-110,z-.08,-64,z+.08,.004,MT.plain('#8a8478'));
+ sFloor(-110,-24,-64,60,0,TZ);sFloor(-96,60,-80,68,0,TZ);quad([-94,.012,67.5],[-82,.012,67.5],[-82,.012,61],[-94,.012,61],MT.carpetGrey,4,2);
+ for(let x=-104;x<=-70;x+=11.5)floorQ(x-.08,-24,x+.08,60,.004,MT.plain('#8a8478'));for(let z=-19;z<=56;z+=12.5)floorQ(-110,z-.08,-64,z+.08,.004,MT.plain('#8a8478'));
  // the south curtain wall: 16.5 m of glass with steel fins, and the glass vestibule
  W('h',60,-110,-64,0,16.5,GL,-1);for(let x=-108;x<=-66;x+=4.6){if(x>-97&&x<-79)continue;box(x-.06,0,60.05,x+.06,16.5,60.6,CH,{col:false})}
  W('v',-96,60,68,0,4,GL,1);W('v',-80,60,68,0,4,GL,-1);W('h',68,-96,-80,0,4,GL,-1);ceilQ(-96,60,-80,68,4,MT.ceilDark);box(-96.3,4,59.8,-79.7,4.4,68.3,MT.plain('#1b1026'),{col:false});
  kSign(-88,4.42,68.31,14,.9,'s','CTRL+ALT+CON · ENTRANCE','#ff5d73','#1b1026');lightPanel(-88,4,64,4,2,'#fff4e0',9,.8);
  kSign(-88,4.5,59.78,8,.6,'n','FOYER · REGISTRATION · THE HALCYON →','#ffd166','#1b1026');
+ // the west wall: glass onto the lane and the hotel garden, solid round the Link doors and behind registration, steel fins outside
+ W('v',-110,-24,-4,0,L1,WC,1);W('v',-110,-4,42,0,L1,GL,1);W('v',-110,42,60,0,L1,WC,1);W('v',-110,-24,60,L1,16.5-L1,GL,1);
+ for(let z=-1.5;z<=56;z+=4.6)box(-110.6,0,z-.06,-110.05,16.5,z+.06,CH,{col:false});
+ kSign(-109.78,3.9,-17,6,.55,'e','THE LINK · HALCYON HOTEL','#ffe0a0','#1b1026');kSign(-109.78,L1+3.3,-17,5,.5,'e','SKYBRIDGE · HALCYON MEZZANINE','#ffe0a0','#1b1026');
+ // the north wall: Hall C's doors, the lifts, the cloakroom; Level 1 runs along it as the north gallery from the Skybridge
+ W('h',-24,-110,-64,0,L1,WC,-1);W('h',-24,-110,-64,L1,L2-L1,WC,-1);W('h',-24,-110,-64,L2,16.5-L2,GL,-1);
+ for(const x of[-96,-78]){kSign(x,3.75,-23.78,4.6,.5,'s','HALL C · TRACK 3','#7cc4ff','#1b1026');box(x-2.2,3.4,-23.8,x+2.2,3.52,-23.7,MT.glow('#7cc4ff',1.1),{col:false})}
+ {box(-92,0,-23.8,-82,2.6,-23.2,MT.woodDark);for(let i=0;i<14;i++)box(-91.6+i*.7,1.1,-23.2,-91.1+i*.7,1.9,-22.8,MT.fabric(['#2a2a34','#3a4a5a','#5a2a3a','#1b1026','#c9a46a'][i%5]),{col:false});
+  box(-92,0,-21.8,-82,1.05,-21,{side:MT.plain('#7cc4ff'),top:MT.plain('#f6eefc')});kSign(-87,1.15,-20.98,6,.5,'s','CLOAKROOM · BAG DROP · £2','#1b1026','#7cc4ff');kSign(-87,2.9,-23.18,6,.55,'s','CLOAKROOM','#7cc4ff','#1b1026');
+  for(const x of[-90,-84])downl(x,4.2,-22,'#fff4e8',8,.6);box(-92.2,4.2,-24,-81.8,4.35,-20.8,MT.clad,{col:false,b:1})}
  // east side: wall to the food court below Level 2, glass to the sky garden above
  W('v',-64,34,60,0,L1,WC,-1);W('v',-64,34,60,L1,L2-L1,WC,-1);W('v',-64,34,60,L2,16.5-L2,GL,-1);
  // the glass roof on a steel grid
- ceilQ(-110,-4,-64,60,16.5,GL);for(let x=-110;x<=-64;x+=5.75)box(x-.08,15.9,-4,x+.08,16.5,60,MT.plain('#2a2a34'),{col:false,b:1});for(let z=-4;z<=60;z+=8)box(-110,15.9,z-.08,-64,16.5,z+.08,MT.plain('#2a2a34'),{col:false,b:1});
+ ceilQ(-110,-24,-64,60,16.5,GL);for(let x=-110;x<=-64;x+=5.75)box(x-.08,15.9,-24,x+.08,16.5,60,MT.plain('#2a2a34'),{col:false,b:1});for(let z=-20;z<=60;z+=8)box(-110,15.9,z-.08,-64,16.5,z+.08,MT.plain('#2a2a34'),{col:false,b:1});
  // galleries: Level 1 and 2 along the east side, an escalator landing at each, railings on every open edge
- sFloor(-72,-4,-64,60,L1,CG,[],.45,MT.ceilDark);sFloor(-82,22,-72,30,L1,CG,[],.45,MT.ceilDark);
- sFloor(-72,-4,-64,60,L2,CG,[],.45,MT.ceilDark);sFloor(-82,4,-72,12,L2,CG,[],.45,MT.ceilDark);sCeil(-72,-4,-64,60,16.1,MT.ceilDark);
- for(const y of[L1,L2]){const lz=y===L1?[22,30]:[4,12];railing(-72,-4,-72,lz[0],y,{m:CH,glass:GL});railing(-72,lz[1],-72,60,y,{m:CH,glass:GL});railing(-82,lz[0],-82,lz[1],y,{m:CH,glass:GL});
-  if(y===L1){railing(-82,30,-80,30,y,{m:CH,glass:GL})}else{railing(-82,4,-72,4,y,{m:CH,glass:GL});railing(-82,12,-80,12,y,{m:CH,glass:GL})}
-  railing(-72,60,-64,60,y,{m:CH});for(let z=0;z<60;z+=8)downl(-68,y-.45,z,'#f4f0ff',7,.45)}
+ sFloor(-72,-24,-64,60,L1,CG,[],.45,MT.ceilDark);sFloor(-82,22,-72,30,L1,CG,[],.45,MT.ceilDark);sFloor(-110,-24,-72,-14,L1,CG,[],.45,MT.ceilDark);
+ sFloor(-72,-24,-64,60,L2,CG,[],.45,MT.ceilDark);sFloor(-82,4,-72,12,L2,CG,[],.45,MT.ceilDark);sCeil(-72,-24,-64,60,16.1,MT.ceilDark);
+ for(const y of[L1,L2]){const lz=y===L1?[22,30]:[4,12];railing(-72,y===L1?-14:-24,-72,lz[0],y,{m:CH,glass:GL});railing(-72,lz[1],-72,60,y,{m:CH,glass:GL});railing(-82,lz[0],-82,lz[1],y,{m:CH,glass:GL});
+  if(y===L1){railing(-82,30,-80,30,y,{m:CH,glass:GL});railing(-110,-14,-72,-14,y,{m:CH,glass:GL});for(let x=-106;x<-72;x+=8)downl(x,y-.45,-19,'#f4f0ff',7,.45)}else{railing(-82,4,-72,4,y,{m:CH,glass:GL});railing(-82,12,-80,12,y,{m:CH,glass:GL})}
+  railing(-72,60,-64,60,y,{m:CH});for(let z=-20;z<60;z+=8)downl(-68,y-.45,z,'#f4f0ff',7,.45)}
  railing(-82,22,-80,22,L1,{m:CH,glass:GL});
  // escalators: ground -> L1 (rising north to the L1 landing), L1 -> L2 (rising north again)
  escalator(-80,30,-72,40,0,L1,'z-');escalator(-80,12,-72,22,L1,L2,'z-',{solid:false});stairShell(-80,12,-72,22,L1,L2,'z-',MT.clad,.4);
  tri([-80.02,0,40],[-80.02,L1,30],[-80.02,0,30],MT.clad,5,2);tri([-71.98,0,30],[-71.98,L1,30],[-71.98,0,40],MT.clad,5,2);
  for(const[a,b,ya,yb]of[[40,30,0,L1],[22,12,L1,L2]])kBeam([-76,ya+.9,a],[-76,yb+.9,b],.3,.12,MT.clad,[1,0,0]);
  kSign(-76,L1+3.2,40.02,6,.55,'s','↑ LEVEL 1 · WORKSHOPS · VILLAGES','#8affc1','#1b1026');kSign(-76,L2+3,22.02,6,.55,'s','↑ LEVEL 2 · HALL A BALCONY · CON OPS','#8affc1','#1b1026');
- // the skybridge from the hotel mezzanine, glazed on both sides, across the void to the east gallery
- {const y=L1,z0=6,z1=10;floorQ(-110,z0,-72,z1,y,MT.terr);surf(-110,z0,-72,z1,y);ceilQ(-110,z0,-72,z1,y-.4,MT.plain('#2a2a34'));
-  quad([-110,y-.4,z0],[-72,y-.4,z0],[-72,y,z0],[-110,y,z0],MT.clad,9,.2);quad([-72,y-.4,z1],[-110,y-.4,z1],[-110,y,z1],[-72,y,z1],MT.clad,9,.2);
-  for(const z of[z0,z1]){gwall('h',z,-110,-72,y,3,z===z0?1:-1);box(-110,y+3,Math.min(z,z+(z===z0?.15:-.15)),-72,y+3.2,Math.max(z,z+(z===z0?.15:-.15)),CH,{col:false})}
-  ceilQ(-110,z0,-72,z1,y+3.2,GL);quad([-110,y+3.21,z1],[-72,y+3.21,z1],[-72,y+3.21,z0],[-110,y+3.21,z0],GL,1,1);for(let x=-108;x<-72;x+=4){downl(x,y+3.18,8,'#f4f8ff',5,.35)}
-  kSign(-73,y+2.5,8,3.6,.4,'w','HALCYON HOTEL →','#ffe0a0','#1b1026');kSign(-109.98,y+2.6,8,3.6,.4,'e','CONVENTION · FOYER →','#ff5d73','#1b1026');mr(-110,z0,-72,z1,y,'Skybridge','#3a2a4a')}
+ // the Link: two storeys of glass across the lane. Ground floor: the Promenade's doors to the Foyer's. Level 1: the
+ // Skybridge, the hotel mezzanine to the Foyer's north gallery. Solid on the bar terrace side below, glass above.
+ {const x0=-128,x1=-110,z0=-22,z1=-12;sFloor(x0,z0,x1,z1,0,TZ);sFloor(x0,z0,x1,z1,L1,MT.carpetGrey,[],.45,MT.ceilDark);ceilQ(x0,z0,x1,z1,L2-.45,MT.ceilDark);
+  W('h',z0,x0,x1,0,L1,WC,1);W('h',z0,x0,x1,L1,L2-L1,GL,1);W('h',z1,x0,x1,0,L1,GL,-1);W('h',z1,x0,x1,L1,L2-L1,GL,-1);
+  box(x0+.08,L2-.45,z0-.1,x1,L2+.4,z1+.1,{side:MT.clad,top:MT.gravel},{col:false});box(x0+.08,L1-.45,z1-.06,x1,L1+.05,z1+.1,MT.clad,{col:false});box(x0+.08,L1-.45,z0-.1,x1,L1+.05,z0+.06,MT.clad,{col:false});
+  quad([x0+4,.012,z1-1],[x1-4,.012,z1-1],[x1-4,.012,z0+1],[x0+4,.012,z0+1],MT.carpetGrey,4,2);
+  for(const y of[0,L1]){for(let x=x0+3;x<x1;x+=4)downl(x,y===0?L1-.45:L2-.45,(z0+z1)/2,'#fff4e8',6,.45);kPlant(x0+1.4,z0+1,1.3,y,'#2a2026');kPlant(x1-1.4,z0+1,1.3,y,'#2a2026')}
+  kOnWall('h',z0+.2,1,(x0+x1)/2,4,1.3,1.6,MT.mapBoard);box(-121,0,-14,-117,.45,-13.4,{side:MT.clad,top:MT.woodDark});
+  kSign((x0+x1)/2,3.6,z0+.22,9,.5,'s','← HALCYON HOTEL · · · CTRL+ALT+CON →','#ffe0a0','#1b1026');kSign((x0+x1)/2,L1+2.9,z0+.22,6,.45,'s','SKYBRIDGE','#ffe0a0','#1b1026');
+  mr(x0,z0,x1,z1,0,'The Link','#3a2a4a');mr(x0,z0,x1,z1,L1,'Skybridge','#3a2a4a')}
  // registration on the west wall: a long counter, badge printers, lanyard boxes, the sign, queue belts
  {const x0=-107.6;box(x0,0,44,x0+1.2,1.05,58,{side:MT.plain('#ff5d73'),top:MT.plain('#f6eefc')});box(x0+1.2,.05,44,x0+1.25,1,58,MT.plain('#1b1026'),{col:false});
   for(let i=0;i<6;i++){const z=45.5+i*2.2;kMonitor(x0+.5,1.05,z,'e',MT.dash,.4);box(x0+.15,1.05,z+.5,x0+.55,1.3,z+.9,MT.plain('#2a2a30'),{col:false});box(x0+.6,1.05,z-.8,x0+1.05,1.2,z-.4,MT.plain(['#ffd166','#8affc1','#ff5d73'][i%3]),{col:false})}
@@ -4786,49 +4850,85 @@ function buildCore(){
  for(const[x,z,r]of[[-98,38,0],[-90,38,0],[-70,8,1],[-70,18,1]]){if(r)box(x-.35,0,z-1.6,x+.35,.45,z+1.6,{side:MT.clad,top:MT.woodDark});else box(x-1.6,0,z-.35,x+1.6,.45,z+.35,{side:MT.clad,top:MT.woodDark})}
  box(-66.4,0,-1.2,-65.6,2.4,1.2,MT.plain('#1b1026'));kOnWall('v',-66.4,-1,0,2,.6,1.5,MT.mapBoard);
  for(const[x,z]of[[-90,40],[-108,22],[-90,2],[-108,14]]){box(x-.1,0,z-.1,x+.1,6,z+.1,MT.plain('#2a2a34'),{col:false});box(x-.3,6,z-.3,x+.3,6.3,z+.3,MT.glow('#fff0f8',1.6),{col:false,b:1});addLight(x,5.6,z,[1,.94,.98],13,.75)}
- for(const[x,z]of[[-98,-2],[-78,-2],[-98,30],[-78,46]])addLight(x,12,z,[.92,.88,1],22,.7);
+ for(const[x,z]of[[-98,-2],[-78,-2],[-98,30],[-78,46],[-96,-18],[-80,-18]])addLight(x,12,z,[.92,.88,1],22,.7);
  // the lifts on the north wall (two cars; they serve G, L1, L2 and the car park)
- for(const x of[-106,-102]){kOnWall('h',-4,1,x,1.6,0,2.5,mt('lift',0,1,0,{r:.25,m:.7}));box(x-.9,2.5,-4,x+.9,2.62,-3.95,CH,{col:false})}kSign(-104,2.9,-3.98,4,.4,'s','LIFTS · ALL LEVELS · CAR PARK','#8affc1','#1b1026');
- mr(-110,-4,-64,60,0,'Foyer','#4a3a5a');mr(-96,60,-80,68,0,'Entrance','#3a2a4a');mr(-72,-4,-64,60,L1,'','#3a2a4a');mr(-82,22,-72,30,L1,'','#3a2a4a');mr(-72,-4,-64,60,L2,'','#3a2a4a');mr(-82,4,-72,12,L2,'','#3a2a4a');
+ for(const x of[-106,-102]){kOnWall('h',-23.8,1,x,1.6,0,2.5,mt('lift',0,1,0,{r:.25,m:.7}));box(x-.9,2.5,-23.8,x+.9,2.62,-23.75,CH,{col:false})}kSign(-104,2.9,-23.78,4,.4,'s','LIFTS · ALL LEVELS · CAR PARK','#8affc1','#1b1026');
+ for(const[x,z]of[[-100,-9],[-76,-9]])box(x-1.6,0,z-.35,x+1.6,.45,z+.35,{side:MT.clad,top:MT.woodDark});kPlanter(-89.4,-10.4,-86.6,-7.6,.7,0,MT.clad);card(-88,.7,-9,3.6,4.2,.4,MT.leaves);card(-88,.7,-9,3.6,4.2,.4+Math.PI/2,MT.leaves);card(-88,2.8,-9,3,3,1.2,MT.leaves);
+ mr(-110,-24,-64,60,0,'Foyer','#4a3a5a');mr(-96,60,-80,68,0,'Entrance','#3a2a4a');mr(-72,-24,-64,60,L1,'','#3a2a4a');mr(-82,22,-72,30,L1,'','#3a2a4a');mr(-110,-24,-72,-14,L1,'','#3a2a4a');mr(-72,-24,-64,60,L2,'','#3a2a4a');mr(-82,4,-72,12,L2,'','#3a2a4a');
+ buildHallC();
  buildRing();buildCourtyard();
+}
+/* ================= HALL C + the Badge Lab (x -110..-64, z -64..-24) ================= */
+/* where the old hotel wing stood: a double-height talk hall (Track 3) with its stage on the north wall, doors from the
+   Foyer and from Ring West; the Badge Lab over it on Level 2, glazed onto the Foyer atrium, its door off Ring West */
+function buildHallC(){
+ const W=wallLine,WC=MT.wallCon,X0=-110,X1=-64,Z0=-64,Z1=-24,CH=MT.chrome;
+ const mr=(x0,z0,x1,z1,y,n,c)=>(MAPR.con=MAPR.con||[]).push({x0,z0,x1,z1,y,n,c:c||'#2a3a5a'});
+ sFloor(X0,Z0,X1,Z1,0,MT.carpetCon);
+ W('v',X0,Z0+.2,Z1-.2,0,16.5,WC,1);W('h',Z0,X0,X1,0,16.5,WC,1);for(const[y,h]of[[0,L1],[L1,L2-L1],[L2,16.5-L2]])W('v',X1,Z0+.2,Z1-.2,y,h,WC,-1);
+ // acoustic panels on the side walls, the stage and its screen, a lectern, two loudspeaker stacks
+ for(let z=-60;z<-26;z+=4){kOnWall('v',X0+.2,1,z,3,1.2,6,MT.acou,1,2);kOnWall('v',X1-.2,-1,z,3,1.2,6,MT.acou,1,2)}
+ box(-100,0,Z0+.2,-74,1,-57,{side:MT.plain('#1a1420'),top:MT.woodDark},{walk:1});for(const x of[-98,-76])stairs(x-1.2,-57,x+1.2,-55.2,0,1,'z-',MT.woodDark,{sides:1});
+ kOnWall('h',Z0+.2,1,-87,26,1,9.6,MT.drape,6,9.6);box(-98.4,2.2,Z0+.2,-75.6,9.6,Z0+.36,MT.plain('#0a0a10'),{col:false});kOnWall('h',Z0+.36,1,-87,22,2.4,7,MT.screenBig);
+ box(-89,1,-59.6,-88,2.1,-58.8,MT.woodDark);box(-89.1,2.1,-59.7,-87.9,2.16,-58.7,MT.woodDark,{col:false});box(-88.6,2.16,-59.5,-88.4,2.4,-59.3,MT.plain('#222'),{col:false});
+ for(const x of[-101.5,-72.5]){box(x-.7,0,-60.6,x+.7,3.2,-59.2,MT.plain('#14141a'));for(let k=0;k<3;k++)box(x-.5,.4+k*.95,-59.18,x+.5,1.1+k*.95,-59.16,MT.plain('#2a2a34'),{col:false})}
+ kSign(-87,9.9,Z0+.22,14,1,'s','HALL C · TRACK 3','#7cc4ff','#1b1026');
+ // seats in two blocks with a centre aisle and side aisles to the Ring doors; an AV desk at the back
+ for(let k=0;k<18;k++){const z=-51+k*1.15,c=k%2?'#2a3a5a':'#24304a';seatRow(-106,-89,z,0,'s',c);seatRow(-85,-69,z,0,'s',c)}
+ box(-91,0,-27.4,-83,1.05,-26.4,{side:MT.plain('#1a1420'),top:MT.plain('#2a2a34')});for(let k=0;k<3;k++)kMonitor(-89.4+k*1.6,1.05,-26.7,'n',[MT.dash,MT.code,MT.scope][k],.5);
+ // lights: a truss over the stage with spots, rows of panels over the seats, step lights on the aisles
+ box(-102,8.6,-59.2,-72,8.9,-58.8,MT.metal,{col:false,b:1});for(let i=0;i<8;i++){const x=-100+i*3.7;box(x-.18,8.2,-59.2,x+.18,8.6,-58.8,MT.plain('#1a1a20'),{col:false});box(x-.12,8.18,-59.18,x+.12,8.2,-58.82,MT.glow('#fff0d8',1.2),{col:false})}
+ for(const x of[-95,-87,-79])addLight(x,8,-56,[1,.92,.8],15,.95);
+ for(const z of[-48,-38,-30])for(const x of[-100,-87,-74])lightPanel(x,L2-.45,z,2.4,1.2,'#f0f0ff',13,.6);
+ for(let z=-50;z<-28;z+=3)for(const x of[-87,-107.4,-67.6])box(x-.1,0,z-.05,x+.1,.06,z+.05,MT.glow('#7cc4ff',1.2),{col:false});
+ sFloor(X0,Z0,X1,Z1,L2,MT.carpetGrey,[],.45,MT.acou);mr(X0,Z0,X1,Z1,0,'Hall C');
+ /* ---- Level 2: the Badge Lab ---- */
+ {const y=L2;sCeil(X0,Z0,X1,Z1,16.1,MT.ceil);
+  for(let r=0;r<4;r++){const z=-58+r*8;for(const[a,b]of[[-106,-90],[-86,-70]]){box(a,y,z-.6,b,y+.9,z+.6,{side:MT.plain('#2a2a34'),top:MT.plain('#e9e3da')});
+    for(let k=0;k<4;k++){const x=a+2+k*4;box(x-.3,y+.9,z-.25,x+.3,y+.98,z+.05,MT.plain('#1a4a2a'),{col:false});box(x+.5,y+.9,z-.2,x+.75,y+1.1,z,MT.plain('#d8dce4'),{col:false});box(x-.08,y+.98,z+.1,x+.08,y+1.2,z+.3,MT.glow(['#8affc1','#ff5d73','#7cc4ff','#ffd166'][k],1.2),{col:false})}
+    kStool(a+2,z+1.1,.66,MT.plain('#3a3a44'),y);kStool(b-2,z+1.1,.66,MT.plain('#3a3a44'),y)}}
+  kOnWall('h',Z0+.2,1,-87,14,y+1.4,2.4,MT.scoreBig);kSign(-87,y+4,Z0+.22,10,.8,'s','BADGE LAB · SOLDER · FLASH · HACK','#8affc1','#1b1026');
+  for(let i=0;i<6;i++)box(-108+i*1.4,y,-63.6,-107+i*1.4,y+2.2,-62.4,MT.plain(['#3a5a8a','#2a2a34','#5a3a6a'][i%3]));
+  for(const z of[-56,-44,-32])for(const x of[-98,-78])lightPanel(x,16.1,z,2.4,1.2,'#f4f8ff',11,.7);
+  mr(X0,Z0,X1,Z1,y,'Badge Lab','#1a3a2a')}
+ // outside: cladding over the west wall onto the lane (the bar terrace sits against it), the roof
+ skin('v',X0-.02,Z0,Z1,0,16.5,MT.clad,-1,[]);box(X0-.5,16.5,Z0,X0,17.4,Z1,MT.clad,{col:false});floorQ(X0,Z0,X1,Z1,16.52,MT.gravel);
 }
 /* ================= THE RING ================= */
 function buildRing(){
  const W=wallLine,GL=MT.glass,WC=MT.wallCon,CC=MT.carpetCon,CG=MT.carpetGallery,CH=MT.chrome;
  const mr=(x0,z0,x1,z1,y,n,c)=>(MAPR.con=MAPR.con||[]).push({x0,z0,x1,z1,y,n,c:c||'#5a2a4a'});
  // ground floors
- sFloor(-64,-64,56,-50,0,CC);sFloor(-64,-24,-50,20,0,CC);sFloor(40,-50,56,20,0,CC);sFloor(-64,20,56,34,0,CC);
+ sFloor(-64,-64,56,-50,0,CC);sFloor(-64,-50,-50,20,0,CC);sFloor(40,-50,56,20,0,CC);sFloor(-64,20,56,34,0,CC);
  // outer walls, one level at a time (doors at the same spot on different levels need separate runs)
  const lv=[[0,L1],[L1,L2-L1],[L2,16.5-L2]];
  for(const[y,h]of lv){W('h',-64,-64,56,y,h,WC,1);W('h',34,-64,56,y,h,WC,-1)}
  W('v',56,-54,20,0,L1,WC,-1);for(const y of[L1,L2]){W('v',56,-54,20,y,1,WC,-1);W('v',56,-54,20,y+1,(y===L1?L2:16.5)-y-1,GL,-1)}
  // inner glass to the courtyard, both storeys
- for(const[y,h]of[[0,L2],[L2,16.5-L2]]){gwall('h',-50,-50,40,y,h,-1);gwall('h',20,-50,40,y,h,1);gwall('v',-50,-24,20,y,h,-1);gwall('v',40,-50,20,y,h,1)}
- // the terrace's north and south walls (doors onto the ring), glass where the terrace meets the courtyard is a balustrade
- W('h',-50,-64,-50,0,L2,WC,-1);W('h',-24,-64,-50,0,L2,WC,1);W('h',-50,-64,-50,L2,16.5-L2,GL,-1);W('h',-24,-64,-50,L2,16.5-L2,GL,1);
+ for(const[y,h]of[[0,L2],[L2,16.5-L2]]){gwall('h',-50,-50,40,y,h,-1);gwall('h',20,-50,40,y,h,1);gwall('v',-50,-50,20,y,h,-1);gwall('v',40,-50,20,y,h,1)}
  // Level 1 balcony along the outer walls, and the L2 floor over the whole ring (its underside is the ring's ceiling)
- const BAL=[[-64,-64,56,-60],[52,-60,56,34],[-64,30,52,34],[-64,-24,-60,30]];
+ const BAL=[[-64,-64,56,-60],[52,-60,56,34],[-64,30,52,34],[-64,-60,-60,30]];
  for(const r of BAL)sFloor(r[0],r[1],r[2],r[3],L1,CG,[],.45,MT.ceilDark);
- sFloor(-64,-64,56,-50,L2,CG,[],.45,MT.acou);sFloor(-64,-24,-50,20,L2,CG,[],.45,MT.acou);sFloor(40,-50,56,20,L2,CG,[[46,-10,50,0]],.45,MT.acou);sFloor(-64,20,56,34,L2,CG,[],.45,MT.acou);
- sCeil(-64,-64,56,-50,16.1,MT.acou);sCeil(-64,-24,-50,20,16.1,MT.acou);sCeil(40,-50,56,20,16.1,MT.acou);sCeil(-64,20,56,34,16.1,MT.acou);
+ sFloor(-64,-64,56,-50,L2,CG,[],.45,MT.acou);sFloor(-64,-50,-50,20,L2,CG,[],.45,MT.acou);sFloor(40,-50,56,20,L2,CG,[[46,-10,50,0]],.45,MT.acou);sFloor(-64,20,56,34,L2,CG,[],.45,MT.acou);
+ sCeil(-64,-64,56,-50,16.1,MT.acou);sCeil(-64,-50,-50,20,16.1,MT.acou);sCeil(40,-50,56,20,16.1,MT.acou);sCeil(-64,20,56,34,16.1,MT.acou);
  // balcony railings
- railing(-64,-60,10,-60,L1,{m:CH,glass:GL});railing(14,-60,52,-60,L1,{m:CH,glass:GL});railing(52,-60,52,0,L1,{m:CH,glass:GL});railing(50,0,52,0,L1,{m:CH,glass:GL});railing(52,3,52,30,L1,{m:CH,glass:GL});railing(-60,30,52,30,L1,{m:CH,glass:GL});railing(-60,-24,-60,30,L1,{m:CH,glass:GL});
+ railing(-60,-60,10,-60,L1,{m:CH,glass:GL});railing(14,-60,52,-60,L1,{m:CH,glass:GL});railing(52,-60,52,0,L1,{m:CH,glass:GL});railing(50,0,52,0,L1,{m:CH,glass:GL});railing(52,3,52,30,L1,{m:CH,glass:GL});railing(-60,30,52,30,L1,{m:CH,glass:GL});railing(-60,-60,-60,30,L1,{m:CH,glass:GL});
  // stairs: ground -> balcony in Ring North (landing at the west end), balcony -> Level 2 in Ring East
  stairs(14,-59.5,26,-55.5,0,L1,'x-',CC,{nose:MT.plain('#ffd166'),sides:1});sFloor(10,-60,14,-55.5,L1,CG,[],.45,MT.ceilDark);railing(26,-55.5,14,-55.5,0,{y2:L1,m:CH,glass:GL});railing(10,-55.5,14,-55.5,L1,{m:CH,glass:GL});railing(10,-60,10,-55.5,L1,{m:CH,glass:GL});railing(26,-59.5,14,-59.5,0,{y2:L1,m:CH});
  box(14,0,-59.62,26,L1-.45,-59.52,MT.clad,{col:false});colBox(14,-59.5,15.5,-55.5,0,3);
  stairs(46,-10,50,0,L1,L2,'z-',CG,{nose:MT.plain('#ffd166'),solid:false});stairShell(46,-10,50,0,L1,L2,'z-',MT.clad,.35);sFloor(46,0,52,3,L1,CG,[],.45,MT.ceilDark);railing(46,0,46,-10,L1,{y2:L2,m:CH,glass:GL});railing(50,0,50,-10,L1,{y2:L2,m:CH});railing(46,3,52,3,L1,{m:CH,glass:GL});railing(46,0,46,3,L1,{m:CH,glass:GL});
  railing(46,-10,46,0,L2,{m:CH,glass:GL});railing(50,-10,50,0,L2,{m:CH,glass:GL});railing(46,0,50,0,L2,{m:CH,glass:GL});
  // lights: big drum pendants in the double-height ring, downlights under the balcony and on Level 2
- for(let x=-56;x<=50;x+=12){kPendant(x,L2-.45,-55.5,2.4,.7,'#ffe8f0',17,1,'#2a1f36')}for(const z of[-44,-28,8])kPendant(44,L2-.45,z,2.4,.7,'#ffe8f0',14,.85,'#2a1f36');for(let x=-56;x<=34;x+=12)kPendant(x,L2-.45,26,2.4,.7,'#ffe8f0',14,.85,'#2a1f36');for(let z=-16;z<=14;z+=10)kPendant(-57,L2-.45,z,2.4,.7,'#ffe8f0',12,.8,'#2a1f36');
- for(let x=-60;x<=52;x+=8)downl(x,L1-.45,-62,'#ffe0d0',7,.45);for(let x=-60;x<=50;x+=8)downl(x,L1-.45,32,'#ffe0d0',7,.45);for(let z=-56;z<=28;z+=8)downl(54,L1-.45,z,'#ffe0d0',7,.45);for(let z=-20;z<=28;z+=8)downl(-62,L1-.45,z,'#ffe0d0',7,.45);
- for(let x=-56;x<=50;x+=10)lightPanel(x,16.1,-57,2.6,1.2,'#f0f0ff',12,.65);for(let x=-56;x<=50;x+=10)lightPanel(x,16.1,27,2.6,1.2,'#f0f0ff',12,.65);for(let z=-44;z<=14;z+=10)lightPanel(48,16.1,z,1.2,2.6,'#f0f0ff',12,.65);for(let z=-18;z<=14;z+=10)lightPanel(-57,16.1,z,1.2,2.6,'#f0f0ff',12,.65);
+ for(let x=-56;x<=50;x+=12){kPendant(x,L2-.45,-55.5,2.4,.7,'#ffe8f0',17,1,'#2a1f36')}for(const z of[-44,-28,8])kPendant(44,L2-.45,z,2.4,.7,'#ffe8f0',14,.85,'#2a1f36');for(let x=-56;x<=34;x+=12)kPendant(x,L2-.45,26,2.4,.7,'#ffe8f0',14,.85,'#2a1f36');for(let z=-44;z<=14;z+=10)kPendant(-57,L2-.45,z,2.4,.7,'#ffe8f0',12,.8,'#2a1f36');
+ for(let x=-60;x<=52;x+=8)downl(x,L1-.45,-62,'#ffe0d0',7,.45);for(let x=-60;x<=50;x+=8)downl(x,L1-.45,32,'#ffe0d0',7,.45);for(let z=-56;z<=28;z+=8)downl(54,L1-.45,z,'#ffe0d0',7,.45);for(let z=-52;z<=28;z+=8)downl(-62,L1-.45,z,'#ffe0d0',7,.45);
+ for(let x=-56;x<=50;x+=10)lightPanel(x,16.1,-57,2.6,1.2,'#f0f0ff',12,.65);for(let x=-56;x<=50;x+=10)lightPanel(x,16.1,27,2.6,1.2,'#f0f0ff',12,.65);for(let z=-44;z<=14;z+=10)lightPanel(48,16.1,z,1.2,2.6,'#f0f0ff',12,.65);for(let z=-48;z<=14;z+=10)lightPanel(-57,16.1,z,1.2,2.6,'#f0f0ff',12,.65);
  // banners hanging in the double height, door signs, posters, benches, plants, charging pillars
  for(const[x,z,c]of[[-40,-56,'#ff5d73'],[-14,-56,'#8affc1'],[8,-56,'#7cc4ff'],[32,-56,'#ffd166'],[44,-36,'#ff8fc8'],[44,14,'#c9b6ff'],[30,27,'#2bf0ff'],[0,27,'#ff9a5c'],[-30,27,'#9be36b']]){
   box(x-.02,7.4,z-.02,x+.02,L2-.45,z+.02,MT.plain('#222'),{col:false});box(x-1.1,3.6,z-.05,x+1.1,7.4,z+.05,MT.fabric(c),{col:false});box(x-1.15,7.35,z-.08,x+1.15,7.45,z+.08,MT.metal,{col:false})}
  const ds=(x,y,z,d,t,c)=>kSign(x,y,z,Math.min(7,t.length*.32+1.2),.7,d,t,c||'#ffd166','#1b1026');
  ds(-55,4.2,-63.78,'s','HALL A · FLOOR','#ff5d73');ds(45,4.2,-63.78,'s','HALL A · FLOOR','#ff5d73');ds(-5,L1+3.4,-63.78,'s','HALL A · LEVEL 1 SEATING','#ff5d73');ds(-5,L2+3.6,-63.78,'s','HALL A · BALCONY','#ff5d73');
  ds(55.78,5,-38,'w','EXPO HALL · VENDORS','#ffd166');ds(55.78,5,-8,'w','EXPO HALL · CON STORE','#ffd166');ds(-37,4.6,33.78,'n','FOOD COURT','#ffb347');ds(5,5.2,33.78,'n','COSPLAY HALL','#2bf0ff');ds(53,3.6,33.78,'n','CHILL-OUT','#c9b6ff');
- ds(-57,3.4,-50.22,'n','BAR TERRACE','#ff9a5c');ds(-57,3.4,-23.78,'s','BAR TERRACE','#ff9a5c');ds(-62,2.7,-63.78,'s','STAFF','#8a8a94');ds(53,2.7,-63.78,'s','STAFF','#8a8a94');
+ for(const z of[-44,-30])ds(-63.78,4.4,z,'e','HALL C · TRACK 3','#7cc4ff');ds(-63.78,L2+3.2,-37,'e','BADGE LAB','#8affc1');ds(-62,2.7,-63.78,'s','STAFF','#8a8a94');ds(53,2.7,-63.78,'s','STAFF','#8a8a94');
  ds(30,4.3,-63.78,'s','VILLAGES · HALL B →','#8affc1');ds(55.78,L1+2.9,0,'w','← VILLAGE ROW L1','#8affc1');kSign(-37,L1+4.45,33.78,6,.5,'n','FOOD COURT TERRACE','#ffb347','#1b1026');ds(53,L1+2.9,33.78,'n','QUIET ROOM','#c9b6ff');ds(-37,L2+3.4,33.78,'n','SKY GARDEN','#9be36b');
  
  for(const[x,z,d,i]of[[-20,-63.78,'s',4],[30,-63.78,'s',2],[55.78,-24,'w',3],[-20,33.78,'n',1],[25,33.78,'n',5],[55.78,12,'w',4]])panel(x,1.2,z,.9,1.2,d,MT.poster(i));
@@ -4836,16 +4936,13 @@ function buildRing(){
  for(const x of[-44,-28,-2,34])box(x-1.4,0,-61.2,x+1.4,.45,-60.6,{side:MT.clad,top:MT.woodDark});for(const x of[-46,-20,26])box(x-1.4,0,31.2,x+1.4,.45,31.8,{side:MT.clad,top:MT.woodDark});for(const z of[-40,-16])box(53.2,0,z-1.4,53.8,.45,z+1.4,{side:MT.clad,top:MT.woodDark});
  for(const[x,z]of[[-62,-52],[54,-52],[54,32],[-62,32],[54,18],[-52,-22],[-52,18]])kPlant(x,z,1.5,0,'#2a1f36');
  for(const[x,z]of[[-10,-61],[20,31],[53,-25]]){box(x-.3,0,z-.3,x+.3,1.3,z+.3,MT.plain('#1b1026'));box(x-.32,1.05,z-.32,x+.32,1.2,z+.32,MT.glow('#8affc1',1.4),{col:false})}
- // Level 2: the sky terrace over the bar terrace (open air), timber, planters, string lights, a view down into the courtyard
- {const y=L2;sFloor(-64,-50,-50,-24,y,MT.timber,[],.45,MT.timber);railing(-50,-50,-50,-24,y,{m:CH,glass:GL});
-  for(const z of[-46,-36,-28]){kPlanter(-63.6,z-1.6,-61.8,z+1.6,.7,y,MT.clad)}for(const z of[-44,-32])box(-58.5,y,z-1.2,-57.5,y+.45,z+1.2,{side:MT.timber,top:MT.timber});
-  for(let z=-49;z<=-25;z+=2)box(-56.5,y+3.6+Math.sin(z*.5)*.1,z-.04,-56.4,y+3.68+Math.sin(z*.5)*.1,z+.04,MT.glow('#ffd166',2.2),{col:false});for(const z of[-49,-25])box(-56.5,y,z-.05,-56.4,y+3.7,z+.05,MT.plain('#222'),{col:false});addLight(-57,y+3,-37,[1,.8,.45],12,.6);
-  mr(-64,-50,-50,-24,y,'Sky terrace','#2a3a2a')}
- mr(-64,-64,56,-50,0,'Ring · North');mr(-64,-24,-50,20,0,'Ring · West');mr(40,-50,56,20,0,'Ring · East');mr(-64,20,56,34,0,'Ring · South');
+ // Ring West, Level 2: benches along the glass over the courtyard
+ for(const z of[-40,-14,6])box(-53.6,L2,z-1.4,-53,L2+.45,z+1.4,{side:MT.clad,top:MT.woodDark});
+ mr(-64,-64,56,-50,0,'Ring · North');mr(-64,-50,-50,20,0,'Ring · West');mr(40,-50,56,20,0,'Ring · East');mr(-64,20,56,34,0,'Ring · South');
  for(const r of BAL)mr(r[0],r[1],r[2],r[3],L1,'','#3a2a4a');mr(10,-60,14,-55.5,L1,'','#3a2a4a');mr(46,0,52,3,L1,'','#3a2a4a');
- mr(-64,-64,56,-50,L2,'Level 2 · Ring','#3a2a4a');mr(-64,-24,-50,20,L2,'','#3a2a4a');mr(40,-50,56,20,L2,'','#3a2a4a');mr(-64,20,56,34,L2,'','#3a2a4a');
+ mr(-64,-64,56,-50,L2,'Level 2 · Ring','#3a2a4a');mr(-64,-50,-50,20,L2,'','#3a2a4a');mr(40,-50,56,20,L2,'','#3a2a4a');mr(-64,20,56,34,L2,'','#3a2a4a');
 }
-/* ================= THE COURTYARD (open sky) + the bar terrace ================= */
+/* ================= THE COURTYARD (open sky) ================= */
 function buildCourtyard(){
  const cy=(x0,z0,x1,z1,m)=>{floorQ(x0,z0,x1,z1,0,m);surf(x0,z0,x1,z1,0)};
  const AX0=-14,AZ0=-24,AX1=4,AZ1=-6; // the sunken amphitheatre
@@ -4874,13 +4971,6 @@ function buildCourtyard(){
  // a food truck parked on the paving by Ring East (closed for the night, but lit)
  {const x=31,z=4;box(x-1.3,.4,z-3.4,x+1.3,3.2,z+3.4,MT.gloss('#ff5d73'));box(x-1.35,1.2,z-2.6,x-1.29,2.4,z+1.6,MT.glow('#ffd98a',1.2),{col:false});box(x-2.6,2.4,z-2.6,x-1.3,2.5,z+1.6,MT.plain('#ffd166'),{col:false,b:1});
   for(const dz of[-2.4,2.4])for(const dx of[-1.2,1.1])box(x+dx-.1,0,z+dz-.4,x+dx+.1,.7,z+dz+.4,MT.plain('#14121a'),{col:false});kSign(x-1.36,2.6,z-.5,4,.5,'w','TACO 2 THE FUTURE','#ffd166','#1b1026');addLight(x-2,2.2,z,[1,.85,.55],7,.8)}
- // the bar terrace (outside, on the courtyard's west edge, under the sky terrace): timber deck, tables, heaters, festoon lights
- {const x0=-64,z0=-50,x1=-50,z1=-24;floorQ(x0,z0,x1,z1,.05,MT.timber);surf(x0,z0,x1,z1,.05);
-  railing(-50,-50,-50,-38.5,0,{m:MT.chrome,glass:MT.glass});railing(-50,-35.5,-50,-24,0,{m:MT.chrome,glass:MT.glass});
-  for(const[x,z]of[[-60,-46],[-55,-42],[-60,-36],[-55,-30],[-60,-28]]){table(x,z,1.2,1.2,MT.plain('#2a2026'));chair(x-.8,z,'w',MT.plain('#c9a46a'));chair(x+.8,z,'e',MT.plain('#c9a46a'))}
-  for(const z of[-44,-32]){box(-52.6,0,z-.25,-52.1,.1,z+.25,MT.metal,{col:false});box(-52.4,.1,z-.06,-52.3,2.2,z+.06,MT.metal,{col:false});box(-52.7,2.2,z-.35,-52,2.5,z+.35,MT.glow('#ff9a5c',1.4),{col:false})}
-  for(let x=-63;x<=-51;x+=1.5){for(const z of[-44,-32])box(x-.05,4.4+Math.sin(x)*.08,z-.05,x+.05,4.5+Math.sin(x)*.08,z+.05,MT.glow('#ffd98a',2.2),{col:false})}
-  addLight(-57,3.6,-44,[1,.75,.45],11,.75);addLight(-57,3.6,-30,[1,.75,.45],11,.75);(MAPR.con=MAPR.con||[]).push({x0,z0,x1,z1,y:0,n:'Bar terrace',c:'#4a3a2a'})}
 }
 
 /* ============ HALL A (the arena), HALL B, and everything behind them ============ */
@@ -5101,7 +5191,7 @@ function buildEast(){
  }
  /* ================= SOUTH-EAST CONCOURSE (two levels) ================= */
  {sFloor(56,20,158,34,0,MT.carpetCon);W('h',20,56,134,0,L1,WC,1);W('h',34,56,80,0,L1,WC,-1);W('h',34,80,158,0,L1,GL,-1);
-  sFloor(56,20,158,34,L1,MT.carpetGallery,[[158-3,20,158,30]],.45,MT.ceilDark);sCeil(56,20,158,34,L2-.45,MT.ceilDark);
+  sFloor(56,20,158,34,L1,MT.carpetGallery,[[155,22,158,32]],.45,MT.ceilDark);sCeil(56,20,158,34,L2-.45,MT.ceilDark);
   W('h',20,56,134,L1,1,WC,1);W('h',34,56,80,L1,L2-L1,WC,-1);W('h',34,80,158,L1,L2-L1,GL,-1);
   for(let x=60;x<158;x+=10){downl(x,L1-.45,27,'#ffe8f0',8,.55);lightPanel(x,L2-.45,27,2,1,'#f0f0ff',10,.6)}
   for(let x=84;x<158;x+=4.6)box(x-.06,0,34.05,x+.06,L2,34.5,CH,{col:false});
@@ -5115,7 +5205,8 @@ function buildEast(){
   // west wall (x 158): G from z -54 to 20 (the SE concourse is open beyond), L1 likewise; east wall (x 168) the full length on both floors
   W('v',X0,Z0,20,0,L1,MT.panel,1);W('v',X0,Z0,20,L1,L2-L1,MT.panel,1);W('v',X1,Z0,Z1,0,L1,MT.panel,-1);W('v',X1,Z0,Z1,L1,L2-L1,MT.panel,-1);W('h',Z1,X0,X1,0,L2,GL,-1);
   stairs(158.2,-32,161.2,-22,0,L1,'z+',MT.carpetGrey,{nose:MT.plain('#ffd166')});railing(161.2,-32,161.2,-22,0,{y2:L1,m:CH,glass:GL});railing(161.2,-32,161.2,-22,L1,{m:CH,glass:GL});railing(158.2,-32,161.2,-32,L1,{m:CH,glass:GL});
-  stairs(155,20,158,30,0,L1,'z+',MT.carpetGrey,{nose:MT.plain('#ffd166'),sides:1});railing(155,20,155,30,0,{y2:L1,m:CH,glass:GL});railing(158,20,158,30,0,{y2:L1,m:CH,glass:GL});railing(155,20,155,30,L1,{m:CH,glass:GL});railing(158,20,158,30,L1,{m:CH,glass:GL});colBox(155,29,158,30,0,4);
+  // the south stair starts 2 m clear of the SOC's wall, so you can walk onto it from the concourse or the corridor
+  stairs(155,22,158,32,0,L1,'z+',MT.carpetGrey,{nose:MT.plain('#ffd166'),sides:1});railing(155,22,155,32,0,{y2:L1,m:CH,glass:GL});railing(158,22,158,32,0,{y2:L1,m:CH,glass:GL});railing(155,22,155,32,L1,{m:CH,glass:GL});railing(158,22,158,32,L1,{m:CH,glass:GL});railing(155,22,158,22,L1,{m:CH,glass:GL});
   colBox(158.2,-23,161.2,-22,0,4);railing(158,-54,168,-54,L1,{m:CH,glass:GL});
   for(let z=Z0+4;z<Z1;z+=8){lightPanel(163,L1-.45,z,1.2,1.2,'#f0f4ff',9,.6);lightPanel(163,L2-.45,z,1.2,1.2,'#f0f4ff',9,.6)}
   for(let z=Z0;z<Z1;z+=4){box(162.8,L1-.47,z+.4,163.2,L1-.45,z+3.6,MT.glow('#8affc1',1.4),{col:false,b:1})}
@@ -5287,15 +5378,40 @@ function buildPlaza(){
  const G0=G.lmK;G.lmK=.45;
  const pz=(x0,z0,x1,z1,m)=>{floorQ(x0,z0,x1,z1,0,m||MT.pavers);surf(x0,z0,x1,z1,0)};
  // pavement in front of everything, the boulevard, the far pavement; the plaza east, by the villages
- pz(-215,60,-156,100);pz(-156,76,-114,100);pz(-72,92,-64,100);pz(-114,60,-96,100);pz(-96,68,-80,100);pz(-80,60,-72,100);pz(-64,60,-10,100);pz(-10,76,80,100);pz(80,72,215,100);pz(50,72,80,76);pz(80,34,215,72);pz(196,-64,215,34);
- surf(-156,60,-114,76,0);
- pz(-215,100,215,114,MT.road);pz(-215,114,215,124);
- for(let x=-210;x<210;x+=6)floorQ(x,106.85,x+3,107.15,.02,MT.plain('#e9e3da'));
- for(const z of[100,114])box(-215,0,z-.15,215,.15,z+.15,MT.plain('#9a9aa8'),{col:false});
+ pz(-296,60,-220,100);surf(-220,60,-178,76,0);pz(-220,76,-178,100);pz(-178,60,-96,100);pz(-96,68,-80,100);pz(-80,60,-72,100);pz(-72,92,-64,100);pz(-64,60,-10,100);pz(-10,76,80,100);pz(80,72,296,100);pz(50,72,80,76);pz(80,34,215,72);pz(215,56,296,72);pz(196,-64,215,34);
+ pz(-296,100,296,114,MT.road);pz(-296,114,296,124);
+ // past the barriers the boulevard runs on between city blocks to a junction (seen, not walked; lit coarsely)
+ G.lmK=.08;
+ for(const[x0,x1]of[[-470,-296],[296,470]]){floorQ(x0,100,x1,114,0,MT.road);floorQ(x0,114,x1,124,0,MT.pavers);floorQ(x0,56,x1,100,0,MT.pavers)}
+ for(let x=-466;x<466;x+=6)floorQ(x,106.85,x+3,107.15,.02,MT.plain('#e9e3da'));
+ for(const z of[100,114])box(-470,0,z-.15,470,.15,z+.15,MT.plain('#9a9aa8'),{col:false});
+ G.lmK=.45;
  // lawns, trees and benches along the front, light poles
- for(const[x0,x1]of[[-200,-162],[-108,-76],[-58,-16],[-4,46],[84,150]]){floorQ(x0,84,x1,92,.03,MT.grass);box(x0-.15,0,83.85,x1+.15,.3,84.1,MT.plain('#9a9aa8'),{col:false});box(x0-.15,0,91.9,x1+.15,.3,92.15,MT.plain('#9a9aa8'),{col:false});
+ for(const[x0,x1]of[[-290,-226],[-170,-104],[-58,-16],[-4,46],[84,150],[160,226],[236,290]]){floorQ(x0,84,x1,92,.03,MT.grass);box(x0-.15,0,83.85,x1+.15,.3,84.1,MT.plain('#9a9aa8'),{col:false});box(x0-.15,0,91.9,x1+.15,.3,92.15,MT.plain('#9a9aa8'),{col:false});
   for(let x=x0+5;x<x1-3;x+=10)tree(x,88)}
- for(let x=-205;x<210;x+=18){if(x>-160&&x<-112)continue;kStreetLamp(x,98.6,0);box(x-.3,5,98.3,x+.3,5.3,98.9,MT.glow('#ffd98a',1.6),{col:false,b:1});addLight(x,4.8,98.6,[1,.85,.6],12,.75)}
+ for(let x=-457;x<466;x+=18){if(x>-224&&x<-176)continue;kStreetLamp(x,98.6,0);box(x-.3,5,98.3,x+.3,5.3,98.9,MT.glow('#ffd98a',1.3),{col:false,b:1});addLight(x,4.8,98.6,[1,.85,.6],12,.75)}
+ // the road closures at either end of the plaza: barriers across pavement and road, cones, a police van, the sign
+ for(const X of[-296,296]){const s=Math.sign(X);for(let z=60.4;z<124;z+=2.2){box(X-.12,0,z,X+.12,.95,z+1.8,MT.plain('#f4f4f0'),{col:false});box(X-.13,.55,z,X+.13,.85,z+1.8,MT.hazard,{col:false})}
+  colBox(X-.2,56,X+.2,124,0,4);for(const z of[103,106,109,112])box(X+s*1.6-.18,0,z-.18,X+s*1.6+.18,.7,z+.18,MT.plain('#ff8a3a'),{col:false});
+  car(X+s*7,104.5,'x','#e9eef5',{plate:'POLICE'});box(X+s*7-1.1,1.55,103.9,X+s*7+1.1,1.75,105.1,MT.glow('#5ab4ff',1.4),{col:false});
+  for(const z of[89.5,94.5])box(X+s*.3-.05,0,z-.05,X+s*.3+.05,2.2,z+.05,MT.plain('#3a3a44'),{col:false});box(X+s*.26-.04,1.35,89.5,X+s*.26+.04,2.15,94.5,MT.plain('#3a3a44'),{col:false});
+  kSign(X+s*.21,1.4,92,4.6,.7,s>0?'w':'e','ROAD CLOSED · EVENT TRAFFIC','#1b1026','#ffd166')}
+ // the side street past the hotel's west wall (deliveries), gated at the plaza
+ floorQ(-296,-175,-264,60,0,MT.road);for(let z=-170;z<56;z+=6)floorQ(-280.15,z,-279.85,z+3,.02,MT.plain('#e9e3da'));
+ for(let x=-295;x<-264;x+=2.3){box(x,0,59.7,x+.08,2.2,59.9,MT.plain('#2a2a30'),{col:false})}box(-296,2.1,59.7,-264,2.2,59.9,MT.plain('#2a2a30'),{col:false});box(-296,.9,59.72,-264,1,59.88,MT.plain('#2a2a30'),{col:false});colBox(-296,59.6,-264,60,0,4);
+ kSign(-280,2.35,59.95,6,.55,'s','HALCYON · DELIVERIES · NO ENTRY','#ffd166','#2a2a30');for(const z of[-120,-60,0,48]){kStreetLamp(-297,z,0);addLight(-297,4.8,z,[1,.85,.6],12,.6)}
+ // city blocks closing the view: west of the side street, east of the con, along the far side, and across both ends
+ G.lmK=.06;
+ const BLK=[[-470,-175,-298,-90,38],[-470,-84,-298,-20,64],[-470,-14,-298,54,26],[217,-175,300,-110,46],[217,-104,300,-40,30],[217,-34,300,54,22],[306,-175,470,-40,72],[306,-34,470,54,34],
+  [-520,40,-480,140,60],[480,40,520,140,52]];
+ for(const[x0,z0,x1,z1,h]of BLK){box(x0,0,z0,x1,h,z1,{side:MT.facade,top:MT.plain('#1a1826')},{col:false});box(x0-.02,0,z0-.02,x1+.02,4,z1+.02,MT.plain('#2a2630'),{col:false,nt:1});
+  for(let x=x0+3;x<x1-6;x+=12)box(x,.4,z1+.03,x+8,3.4,z1+.05,MT.glow(['#ffd98a','#9fd4ff','#ff9fd0','#fff4e0'][((x/12)|0)&3],.5),{col:false});box(x0-.4,h,z0-.4,x1+.4,h+.8,z1+.4,MT.plain('#2a2630'),{col:false,nt:1})}
+ G.lmK=.45;
+ // the ground the district stands on, round the site (inside it every yard and street has its own floor)
+ {const g0=G.lmK;G.lmK=.02;for(const r of rectsMinus(-700,-600,700,700,[[-296,-175,296,124]]))floorQ(r[0],r[1],r[2],r[3],-.02,MT.plain('#1c1a22'));G.lmK=g0}
+ // the service yard behind the hotel and the con's west side (deliveries, bins, the hotel's loading bay)
+ floorQ(-264,-175,-110,-64.4,0,MT.road);for(const[x,z]of[[-250,-70],[-244,-70],[-200,-70],[-150,-70]])box(x-1.2,0,z-.8,x+1.2,1.4,z+.8,MT.plain(['#2a4a2a','#3a3a44'][((x/50)|0)&1]),{col:false});
+ buildGarden();
  for(let x=-60;x<-14;x+=4)box(x-.12,0,60.5,x+.12,.9,60.74,MT.plain('#3a3a44'));
  // the car park ramp, between the foyer and the food court, going down under the foyer
  {const x0=-72,x1=-64,zt=92,zb=60;ramp(x0,zb,x1,zt,BY,0,'z');quad([x0,BY,zb],[x0,0,zt],[x1,0,zt],[x1,BY,zb],MT.road,.5,8);
@@ -5312,9 +5428,11 @@ function buildPlaza(){
  {const x=-20,z=72;box(x-1.5,0,z-.75,x+1.5,1,z+.75,MT.plain('#3a2418'));box(x-1.3,1,z-.55,x+1.3,1.4,z+.3,MT.chrome,{col:false});box(x-.05,1,z-.05,x+.05,2.8,z+.05,MT.plain('#888'),{col:false});
   box(x-1.9,2.8,z-1.4,x+1.9,2.92,z+1.4,MT.plain('#ff5d73'),{col:false,b:1});addLight(x,2.5,z,[1,.85,.6],6,.9);kSign(x,.2,z+.76,2.8,.6,'s','BEAN THERE · COFFEE','#ffd9a0','#3a2418')}
  // the far side of the boulevard: shopfronts and towers
- for(let x=-210;x<210;x+=24){const h=14+((x*7)%5+5)%5*9,w=22,si=(Math.round(x/24)+40)%8;box(x,0,124,x+w,h,140,{side:MT.facade,top:MT.plain('#1a1826')},{col:false});box(x+1,0,123.9,x+w-1,3.6,124,MT.glow(['#ffd98a','#9fd4ff','#ff9fd0','#fff4e0'][si%4],.6),{col:false});
+ G.lmK=.1;
+ for(let x=-470;x<450;x+=24){const h=14+((x*7)%5+5)%5*9,w=22,si=(Math.round(x/24)+40)%8;box(x,0,124,x+w,h,140,{side:MT.facade,top:MT.plain('#1a1826')},{col:false});box(x+1,0,123.9,x+w-1,3.6,124,MT.glow(['#ffd98a','#9fd4ff','#ff9fd0','#fff4e0'][si%4],.6),{col:false});
   kSign(x+w/2,3.9,123.88,10,.9,'n',['NOODLE BAR','PHONE REPAIRS','24H PHARMACY','LAUNDRETTE','KEBABS','PRINT SHOP','CORNER SHOP','VAPE & VINYL'][si],'#ffd166','#1b1026')}
- colBox(-215,124,215,125,0,5);colBox(-215.5,-175,-215,140,0,5);colBox(215,-175,215.5,140,0,5);
+ colBox(-296,124,296,125,0,5);colBox(215,-175,215.5,56,0,5);
+ G.lmK=.45;
  // the outside of the con: cladding over walls seen from the street, Hall A's box rising over the Ring roof
  G.lmK=.25;
  skin('h',76.02,-10,50,0,L2,MT.clad,1,[]);kSign(20,4,76.05,30,4.5,'s','COSPLAY HALL · CONTEST DAY 3','#2bf0ff','#1c2133');
@@ -5329,40 +5447,49 @@ function buildPlaza(){
  for(const r of[[110,-64,168,-54],[134,-54,196,34],[56,20,134,34],[168,-64,196,-54],[-10,34,50,76],[50,34,80,56]])floorQ(r[0],r[1],r[2],r[3],11.02,MT.gravel);
  for(const[r,y]of[[[50,56,80,72],3.42],[[-110,-158,176,-150],4.02],[[-110,-150,-64,-64],4.02],[[50,-150,62,-64],4.02],[[62,-150,134,-111],4.42],[[110,-111,134,-64],4.42],[[-40,-150,30,-136],5.02],[[-64,-150,-60,-64],4.02]])floorQ(r[0],r[1],r[2],r[3],y,MT.gravel);floorQ(134,-150,176,-64,10.02,MT.gravel);
  G.lmK=G0;
- skyline(0,-20,250,340,46,-2,SITE);
+ skyline(0,-20,330,520,64,-2,[-530,-200,530,165]);
+}
+
+/* ---------------- the Halcyon Garden: between the hotel's glass east front and the con's Foyer ---------------- */
+/* x -174..-110, z -12..60: a paved garden open to the plaza, with lawns, a long reflecting pool, trees, benches and
+   lamps; the hotel lobby's garden door on its west side; the Link crossing the lane at its north end */
+function buildGarden(){
+ const G0=G.lmK;G.lmK=.45;const P=MT.pavers,LW=MT.grass;
+ const LAWNS=[[-170,-1,-154,25],[-170,35,-154,55],[-130,-1,-114,55]],POOL=[-148,6,-136,48];
+ for(const r of rectsMinus(-174,-4,-110,60,LAWNS.concat([POOL])))floorQ(r[0],r[1],r[2],r[3],0,P);floorQ(-128,-12,-110,-4,0,P);surf(-174,-4,-110,60,0);surf(-128,-12,-110,-4,0);
+ for(const[x0,z0,x1,z1]of LAWNS){floorQ(x0,z0,x1,z1,.02,LW);for(const[a,b,c,d]of[[x0-.12,z0-.12,x1+.12,z0],[x0-.12,z1,x1+.12,z1+.12],[x0-.12,z0,x0,z1],[x1,z0,x1+.12,z1]])box(a,0,b,c,.12,d,MT.plain('#9a9aa8'),{col:false})}
+ // the reflecting pool: a stone rim, dark water, a row of little jets lit from below
+ {const[x0,z0,x1,z1]=POOL;floorQ(x0,z0,x1,z1,-.4,MT.mdark);for(const[a,b,c,d]of[[x0-.4,z0-.4,x1+.4,z0],[x0-.4,z1,x1+.4,z1+.4],[x0-.4,z0,x0,z1],[x1,z0,x1+.4,z1]])box(a,0,b,c,.45,d,MT.lime);
+  quad([x0,.25,z1],[x1,.25,z1],[x1,.25,z0],[x0,.25,z0],mt('water','#3a5670',.4,1,{k:.5}),3,10);colBox(x0,z0,x1,z1,0,.6);
+  for(let z=z0+3;z<z1-1;z+=4){box(-142.1,.25,z-.1,-141.9,.32,z+.1,MT.glow('#7cd4ff',1.4),{col:false});box(-142.02,.32,z-.02,-141.98,1.1,z+.02,MT.plain('#cfe8f4'),{col:false})}
+  addLight(-142,.6,14,[.5,.8,1],8,.6);addLight(-142,.6,40,[.5,.8,1],8,.6)}
+ // trees on the lawns, benches facing the pool, low lamps along the paths, uplights under the trees
+ for(const[x,z]of[[-162,6],[-162,18],[-162,44],[-122,6],[-122,22],[-122,38],[-122,50]]){tree(x,z);box(x-.15,.02,z+.8,x+.15,.1,z+1.1,MT.glow('#ffd98a',1.2),{col:false});addLight(x,.6,z+1,[1,.85,.6],5,.5)}
+ for(const[x,z,f]of[[-151.4,14,'e'],[-151.4,30,'e'],[-132.6,20,'w'],[-132.6,38,'w']]){const bx=f==='e'?[x-.35,x+.35]:[x-.35,x+.35];box(bx[0],0,z-1.4,bx[1],.45,z+1.4,{side:MT.clad,top:MT.woodDark});box(f==='e'?x-.35:x+.2,.45,z-1.4,f==='e'?x-.2:x+.35,.9,z+1.4,MT.woodDark,{col:false})}
+ for(const[x,z]of[[-150,0],[-134,0],[-150,54],[-134,54],[-172,37],[-112,-2],[-112,24]])lamp(x,z,0,'#ffd98a');
+ // the stone that names the place, at the garden's mouth on the plaza; bike racks in the lane; planters by the con's glass
+ box(-146,0,57.4,-138,1.2,58.4,MT.lime);kSign(-142,.25,58.42,7,.8,'s','THE HALCYON · GARDEN','#ffe0a0','#2a1a12');kSign(-142,.25,57.38,7,.8,'n','THE HALCYON · GARDEN','#ffe0a0','#2a1a12');
+ for(let i=0;i<6;i++){const x=-126+i*2.2;box(x-.03,0,-10.6,x+.03,.8,-9.4,MT.chrome,{col:false});box(x-.03,.74,-10.6,x+.03,.8,-9.4,MT.chrome,{col:false})}colBox(-126.3,-10.7,-114.7,-9.3,0,.8);
+ for(const z of[2,18,34])kPlanter(-113.4,z-1.4,-110.8,z+1.4,.6,0,MT.clad);
+ (MAPR.con=MAPR.con||[]).push({x0:-174,z0:-12,x1:-110,z1:60,y:0,n:'Halcyon Garden',c:'#2a4a2a'});
+ G.lmK=G0;
 }
 
 /* ============ UNDERGROUND, THE CON ROOF, THE NAMED AREAS ============ */
-/* Basement (y -5): the car park under the hotel and the Foyer (x -160..-64, z -54..60) with the ramp from the plaza,
-   the Network Operations Centre (x -64..-30, z -24..10), the plant room and hotel laundry (x -200..-160, z -54..20),
-   the hotel basement at the foot of the back stairs (x -200..-160, z 20..54), and the service tunnel (z -60..-54) from
+/* Basement (y -5): the car park under the Foyer, the hotel garden and the hotel's east end (x -224..-64, z -54..60)
+   with the ramp from the plaza, the Network Operations Centre (x -64..-30, z -24..10), the plant room and hotel
+   laundry (x -264..-224, z -54..20),
+   the hotel basement at the foot of the back stairs (x -264..-224, z 20..54), and the service tunnel (z -60..-54) from
    the car park's north wall to the loading dock. The con roof (y 16.5) over the Expo Hall is walkable: fire stairs
    from the dock, the antenna mast with the listening post. */
 function buildUnder(){
  const D=door,W=wallLine,CO=MT.concrete,CE=-.4,H=CE-BY;
  const mr=(x0,z0,x1,z1,n,c)=>(MAPR.con=MAPR.con||[]).push({x0,z0,x1,z1,y:BY,n,c:c||'#3a3a3a'});
- D('v',-64,-8,2,2.4,BY);D('v',-160,-20,3,2.6,BY);D('v',-160,40,3,2.6,BY);D('h',20,-180,2,2.4,BY);D('h',-54,-90,3,2.6,BY);gap('h',60,-68,8,4.2,BY);
- /* ---------- car park ---------- */
- {const X0=-160,X1=-64,Z0=-54,Z1=60;sFloor(X0,Z0,X1,Z1,BY,MT.park);G.lmK=.6;ceilQ(X0,Z0,X1,Z1,CE,CO);G.lmK=1;
-  W('v',X0,Z0,Z1,BY,H,CO,1);W('v',X1,Z0,Z1,BY,H,CO,-1);W('h',Z0,X0,X1,BY,H,CO,1);W('h',Z1,X0,X1,BY,H,CO,-1);
-  for(let x=-152;x<-64;x+=12)for(let z=-46;z<60;z+=12){if(x>-73&&z>48)continue;box(x-.35,BY,z-.35,x+.35,CE,z+.35,CO);box(x-.36,BY+.8,z-.36,x+.36,BY+1.1,z+.36,MT.plain('#ffd166'),{col:false})}
-  // parking bays in rows, aisles between them, arrows; cars in about two bays out of three
-  const cc=['#2a3a5a','#8a8a94','#3a1a1a','#e9e3da','#2a4a2a','#5a4a3a','#14141a','#7a2a2a'];let ci=0;
-  for(const zr of[-50,-32,-14,4,22,40]){for(let x=-158;x<-66;x+=3){floorQ(x,zr,x+.1,zr+5.6,BY+.01,MT.plain('#e9e3da'))}floorQ(-158,zr+5.6,-66,zr+5.7,BY+.01,MT.plain('#e9e3da'));
-   for(let x=-156.5;x<-67;x+=3){if(Math.abs(x+113)<1.6&&zr===4)continue;if(((x*7+zr*3)|0)%3!==0)car(x,zr+2.8,'z',cc[(ci++)%cc.length],{y:BY})}}
-  car(-113,6.8,'z','#0d0d14',{plate:'PRIV4CY',y:BY});
-  for(const z of[-41,-23,-5,13,31,49])for(let x=-150;x<-66;x+=16){floorQ(x,z-.3,x+2.4,z+.3,BY+.012,MT.plain('#e9e3da'))}
-  for(let x=-154;x<-66;x+=12)for(const z of[-50,-40,-22,-4,14,32,50,57]){box(x-.6,CE-.12,z-.12,x+.6,CE,z+.12,MT.glow('#ffb24a',1.6),{col:false,b:1});addLight(x,CE-.6,z,[1,.64,.3],14,.85)}
-  kSign(-112,CE-.9,59.78,10,.6,'n','P · HALCYON GUESTS + VIPs ONLY','#ffd166','#2a2a30');kSign(-64.22,BY+2.6,-8,3,.45,'w','NOC →','#8affc1','#2a2a30');kSign(-90,BY+2.7,-53.78,4,.45,'s','SERVICE TUNNEL · STAFF','#ffd166','#2a2a30');
-  for(const x of[-106,-102]){kOnWall('h',Z0+.2,1,x,1.6,BY,2.5,mt('lift',0,1,0,{r:.25,m:.7}))}kSign(-104,BY+2.8,Z0+.22,4,.4,'s','LIFTS · FOYER','#8affc1','#2a2a30');
-  box(-80,BY,58.4,-78.6,BY+1.6,59.6,MT.plain('#2a2a34'));box(-79.95,BY+.9,58.38,-78.65,BY+1.4,58.4,MT.glow('#8affc1',1.4),{col:false});
-  mr(X0,Z0,X1,Z1,'Car park','#3a3a3a')}
- /* ---------- the Network Operations Centre ---------- */
- {const X0=-64,X1=-30,Z0=-24,Z1=10;sFloor(X0,Z0,X1,Z1,BY,MT.tileDark);ceilQ(X0,Z0,X1,Z1,CE,MT.ceilDark);W('v',X0,Z0,Z1,BY,H,MT.plain('#4a4a54'),1);W('v',X1,Z0,Z1,BY,H,MT.plain('#4a4a54'),-1);W('h',Z0,X0,X1,BY,H,MT.plain('#4a4a54'),1);W('h',Z1,X0,X1,BY,H,MT.plain('#4a4a54'),-1);
-  for(let i=0;i<8;i++){rack(-58+i*3,-22.6,'s',BY);rack(-58+i*3,-19.4,'n',BY)}box(-60,BY+2.6,-23.8,-34,BY+2.8,-18,MT.metal,{col:false,b:1});
-  for(let i=0;i<3;i++){const x=-55+i*9;table(x,4,5,1.2,MT.plain('#1a1a24'),.76,BY);for(let k=0;k<3;k++)kMonitor(x-1.6+k*1.6,BY+.76,3.7,'s',[MT.dash,MT.code,MT.scope][k],.5);for(let k=0;k<2;k++)kChair(x-.8+k*1.6,5.1,'n',BY,'#2a2a34')}
-  kOnWall('h',Z1-.2,-1,-47,16,BY+.8,2.4,MT.dash,4,2.4);kSign(-47,BY+3.4,Z1-.22,8,.5,'n','NETWORK OPERATIONS · CTRL+ALT+CON','#8affc1','#1a2a24');
-  addLight(-47,CE-.5,-21,[.4,1,.8],14,.9);addLight(-47,CE-.5,4,[.5,.8,1],12,.8);addLight(-36,CE-.5,-8,[.5,.8,1],10,.6);mr(X0,Z0,X1,Z1,'Network Ops','#1a3a3a')}
+ D('v',-64,-8,2,2.4,BY);D('h',-54,-90,3,2.6,BY);gap('h',60,-68,8,4.2,BY);
+ /* ---------- the hotel's basement: drawn on the hotel's plan, placed with it; built first so the car park's west
+   wall (world x -224) finds the two doorways through to it ---------- */
+ placed(HX,()=>{const mr=(x0,z0,x1,z1,n,c)=>(MAPR.con=MAPR.con||[]).push({x0,z0,x1,z1,y:BY,n,c:c||'#3a3a3a'});
+ D('v',-160,-20,3,2.6,BY);D('v',-160,40,3,2.6,BY);D('h',20,-180,2,2.4,BY);
  /* ---------- plant room + laundry, and the hotel basement ---------- */
  {const X0=-200,X1=-160;sFloor(X0,-54,X1,20,BY,CO);ceilQ(X0,-54,X1,20,CE,CO);W('v',X0,-54,54,BY,H,CO,1);W('h',-54,X0,X1,BY,H,CO,1);W('v',X1,-54,54,BY,H,CO,-1);W('h',20,X0,X1,BY,H,CO,-1);
   for(let i=0;i<5;i++){const z=-50+i*6;box(-198,BY,z,-193,BY+2.4,z+4,MT.metal);box(-196,BY+2.4,z+1.5,-195,CE,z+2.5,MT.metal,{col:false});box(-193.02,BY+1.6,z+1.6,-193,BY+1.9,z+2.4,MT.glow('#ff5d73',2),{col:false})}
@@ -5376,6 +5503,28 @@ function buildUnder(){
   box(-196,BY,38,-190,BY+.01,38.05,MT.plain('#ffd166'),{col:false});kOnWall('h',53.8,-1,-170,1.8,BY,2.5,MT.elev);kSign(-170,BY+2.7,53.78,2.4,.4,'n','SERVICE LIFT','#ffd166','#2a2a30');
   for(let i=0;i<3;i++){const x=-186+i*4;box(x,BY,48,x+2.4,BY+1.6,52,MT.metal,{col:false});colBox(x,48,x+2.4,52,BY,BY+1.6);for(let k=0;k<3;k++)box(x+.2,BY+.2+k*.45,48.2,x+2.2,BY+.5+k*.45,51.8,MT.linen,{col:false})}
   addLight(-180,CE-.6,36,[1,.9,.7],12,.9);mr(X0,20,X1,54,'Hotel basement')}
+ });
+ /* ---------- car park ---------- */
+ {const X0=-224,X1=-64,Z0=-54,Z1=60;sFloor(X0,Z0,X1,Z1,BY,MT.park);G.lmK=.6;ceilQ(X0,Z0,X1,Z1,CE,CO);G.lmK=1;
+  W('v',X0,Z0,Z1,BY,H,CO,1);W('v',X1,Z0,Z1,BY,H,CO,-1);W('h',Z0,X0,X1,BY,H,CO,1);W('h',Z1,X0,X1,BY,H,CO,-1);
+  for(let x=-212;x<-64;x+=12)for(let z=-46;z<60;z+=12){if(x>-73&&z>48)continue;box(x-.35,BY,z-.35,x+.35,CE,z+.35,CO);box(x-.36,BY+.8,z-.36,x+.36,BY+1.1,z+.36,MT.plain('#ffd166'),{col:false})}
+  // parking bays in rows, aisles between them, arrows; cars in about two bays out of three
+  const cc=['#2a3a5a','#8a8a94','#3a1a1a','#e9e3da','#2a4a2a','#5a4a3a','#14141a','#7a2a2a'];let ci=0;
+  for(const zr of[-50,-32,-14,4,22,40]){for(let x=-218;x<-66;x+=3){floorQ(x,zr,x+.1,zr+5.6,BY+.01,MT.plain('#e9e3da'))}floorQ(-218,zr+5.6,-66,zr+5.7,BY+.01,MT.plain('#e9e3da'));
+   for(let x=-216.5;x<-67;x+=3){if(Math.abs(x+113)<1.6&&zr===4)continue;if(((x*7+zr*3)|0)%3!==0)car(x,zr+2.8,'z',cc[(ci++)%cc.length],{y:BY})}}
+  car(-113,6.8,'z','#0d0d14',{plate:'PRIV4CY',y:BY});
+  for(const z of[-41,-23,-5,13,31,49])for(let x=-214;x<-66;x+=16){floorQ(x,z-.3,x+2.4,z+.3,BY+.012,MT.plain('#e9e3da'))}
+  for(let x=-218;x<-66;x+=12)for(const z of[-50,-40,-22,-4,14,32,50,57]){box(x-.6,CE-.12,z-.12,x+.6,CE,z+.12,MT.glow('#ffb24a',1.6),{col:false,b:1});addLight(x,CE-.6,z,[1,.64,.3],14,.85)}
+  kSign(-112,CE-.9,59.78,10,.6,'n','P · CON + HALCYON GUESTS','#ffd166','#2a2a30');kSign(-64.22,BY+2.6,-8,3,.45,'w','NOC →','#8affc1','#2a2a30');kSign(-90,BY+2.7,-53.78,4,.45,'s','SERVICE TUNNEL · STAFF','#ffd166','#2a2a30');
+  for(const x of[-106,-102]){kOnWall('h',Z0+.2,1,x,1.6,BY,2.5,mt('lift',0,1,0,{r:.25,m:.7}))}kSign(-104,BY+2.8,Z0+.22,4,.4,'s','LIFTS · FOYER','#8affc1','#2a2a30');
+  box(-80,BY,58.4,-78.6,BY+1.6,59.6,MT.plain('#2a2a34'));box(-79.95,BY+.9,58.38,-78.65,BY+1.4,58.4,MT.glow('#8affc1',1.4),{col:false});
+  mr(X0,Z0,X1,Z1,'Car park','#3a3a3a')}
+ /* ---------- the Network Operations Centre ---------- */
+ {const X0=-64,X1=-30,Z0=-24,Z1=10;sFloor(X0,Z0,X1,Z1,BY,MT.tileDark);ceilQ(X0,Z0,X1,Z1,CE,MT.ceilDark);W('v',X0,Z0,Z1,BY,H,MT.plain('#4a4a54'),1);W('v',X1,Z0,Z1,BY,H,MT.plain('#4a4a54'),-1);W('h',Z0,X0,X1,BY,H,MT.plain('#4a4a54'),1);W('h',Z1,X0,X1,BY,H,MT.plain('#4a4a54'),-1);
+  for(let i=0;i<8;i++){rack(-58+i*3,-22.6,'s',BY);rack(-58+i*3,-19.4,'n',BY)}box(-60,BY+2.6,-23.8,-34,BY+2.8,-18,MT.metal,{col:false,b:1});
+  for(let i=0;i<3;i++){const x=-55+i*9;table(x,4,5,1.2,MT.plain('#1a1a24'),.76,BY);for(let k=0;k<3;k++)kMonitor(x-1.6+k*1.6,BY+.76,3.7,'s',[MT.dash,MT.code,MT.scope][k],.5);for(let k=0;k<2;k++)kChair(x-.8+k*1.6,5.1,'n',BY,'#2a2a34')}
+  kOnWall('h',Z1-.2,-1,-47,16,BY+.8,2.4,MT.dash,4,2.4);kSign(-47,BY+3.4,Z1-.22,8,.5,'n','NETWORK OPERATIONS · CTRL+ALT+CON','#8affc1','#1a2a24');
+  addLight(-47,CE-.5,-21,[.4,1,.8],14,.9);addLight(-47,CE-.5,4,[.5,.8,1],12,.8);addLight(-36,CE-.5,-8,[.5,.8,1],10,.6);mr(X0,Z0,X1,Z1,'Network Ops','#1a3a3a')}
  /* ---------- the service tunnel ---------- */
  {sFloor(-100,-60,140,-54,BY,CO);ceilQ(-100,-60,140,-54,CE,CO);W('h',-60,-100,134,BY,H,CO,1);W('h',-54,-64,140,BY,H,CO,-1);W('v',-100,-60,-54,BY,H,CO,1);
   sFloor(134,-110,140,-60,BY,CO);ceilQ(134,-64,140,-60,CE,CO);W('v',134,-110,-60,BY,H,CO,1);W('v',140,-110,-54,BY,H,CO,-1);
@@ -5396,24 +5545,27 @@ function buildUnder(){
 function siteAreas(){
  const A=(k,n,r,sp,bg,o)=>area(k,n,'con',r,sp,bg,o),PI=Math.PI,G1={y0:4,y1:10},G2={y0:9.5,y1:15.5},B={y0:-7,y1:-2};
  // outside
- A('plaza','Arrival Plaza',[-215,60,215,140],[-88,74,0,0],'con',{out:1});A('vestibule','Convention Entrance',[-96,60,-80,68],[-88,64.5,0,0],'con',{sub:1});
- // hotel ground floor
- A('lobby','Hotel Lobby',[-160,-4,-110,60],[-135,54,0,0],'lobby',{y1:4});A('cafe','Halcyon Café',[-129,42,-110,60],[-122,49,PI,0],'lobby',{sub:1,y1:4});
- A('promenade','The Promenade',[-200,-24,-64,-4],[-120,-14,PI/2,0],'lobby',{y1:4});A('lifts','Hotel lifts',[-160,-36,-136,-24],[-148,-26,0,0],'lobby',{sub:1,y1:4});
- A('bar','Hotel Bar',[-110,-64,-64,-24],[-88,-30,0,0],'bar',{y1:4});A('grill','The Grill',[-136,-64,-110,-24],[-123,-28,0,0],'bar',{y1:4});A('pdining','Private dining',[-160,-64,-136,-36],[-140,-44,PI/2,0],'bar',{y1:4});
- A('hkitchen','Hotel kitchen',[-200,-64,-160,-24],[-185,-27,0,0],'lobby',{y1:4,hide:1});A('luggage','Luggage room',[-180,-4,-160,20],[-163,8,-PI/2,0],'lobby',{y1:4});A('backoffice','Hotel back office',[-200,-4,-180,20],[-188,4,-PI/2,0],'lobby',{y1:4,hide:1});
- A('backstairs','Back stairs',[-200,20,-160,40],[-170,30,-PI/2,0],'lobby',{hide:1,y0:-1,y1:4});A('boutique','Halcyon Boutique',[-200,40,-160,60],[-163,50,-PI/2,0],'lobby',{y1:4});
- A('terrace','Bar Terrace',[-64,-50,-50,-24],[-57,-27,0,.05],'bar',{out:1,y1:4});
+ A('plaza','Arrival Plaza',[-300,60,300,140],[-88,74,0,0],'con',{out:1});A('vestibule','Convention Entrance',[-96,60,-80,68],[-88,64.5,0,0],'con',{sub:1});
+ A('garden','Halcyon Garden',[-174,-12,-110,60],[-142,52,0,0],'lobby',{out:1});
+ // hotel ground floor (world coordinates: the hotel is drawn on its plan and placed HX west)
+ A('lobby','Hotel Lobby',[-224,-4,-174,60],[-199,54,0,0],'lobby',{y1:4});A('cafe','Halcyon Café',[-193,42,-174,60],[-186,49,PI,0],'lobby',{sub:1,y1:4});
+ A('promenade','The Promenade',[-264,-24,-128,-4],[-184,-14,PI/2,0],'lobby',{y1:4});A('lifts','Hotel lifts',[-224,-36,-200,-24],[-212,-26,0,0],'lobby',{sub:1,y1:4});
+ A('bar','Hotel Bar',[-174,-64,-128,-24],[-152,-30,0,0],'bar',{y1:4});A('grill','The Grill',[-200,-64,-174,-24],[-187,-28,0,0],'bar',{y1:4});A('pdining','Private dining',[-224,-64,-200,-36],[-204,-44,PI/2,0],'bar',{y1:4});
+ A('hkitchen','Hotel kitchen',[-264,-64,-224,-24],[-249,-27,0,0],'lobby',{y1:4,hide:1});A('luggage','Luggage room',[-244,-4,-224,20],[-227,8,-PI/2,0],'lobby',{y1:4});A('backoffice','Hotel back office',[-264,-4,-244,20],[-252,4,-PI/2,0],'lobby',{y1:4,hide:1});
+ A('backstairs','Back stairs',[-264,20,-224,40],[-234,30,-PI/2,0],'lobby',{hide:1,y0:-1,y1:4});A('boutique','Halcyon Boutique',[-264,40,-224,60],[-227,50,-PI/2,0],'lobby',{y1:4});
+ A('terrace','Bar Terrace',[-128,-64,-110,-22],[-119,-24.5,0,.05],'bar',{out:1,y1:4});
  // hotel level 1 + 2
- A('mezz','Hotel Mezzanine',[-160,-4,-110,60],[-114,20,PI/2,L1],'lobby',G1);A('hotelL1','Mezzanine corridor',[-200,-24,-64,-4],[-130,-14,PI/2,L1],'lobby',G1);
- A('ballroom','Grand Ballroom',[-110,-64,-80,-24],[-95,-27,0,L1],'lobby',G1);A('lumenlounge','The Lumen Lounge',[-80,-64,-64,-24],[-72,-27,0,L1],'lobby',G1);
- A('meeting','Meeting rooms',[-160,-64,-110,-24],[-123,-27,0,L1],'lobby',G1);A('library','Hotel library',[-200,-64,-160,-24],[-185,-27,0,L1],'lobby',G1);
- A('hotelL2','Hotel · Level 2',[-200,-24,-64,-4],[-130,-14,PI/2,L2],'lobby',G2);A('gym','Gym',[-136,-64,-110,-24],[-123,-27,0,L2],'lobby',G2);A('pool','Pool',[-110,-64,-64,-24],[-87,-27,0,L2],'lobby',G2);A('spa','The Spa',[-200,-64,-136,-24],[-185,-25.6,0,L2],'lobby',G2);
- A('skybridge','Skybridge',[-110,6,-72,10],[-100,8,-PI/2,L1],'lobby',Object.assign({sub:1},G1));
- // the con: foyer, ring, courtyard
- A('foyer','The Foyer',[-110,-4,-64,60],[-90,40,0,0],'con');A('foyerG','Foyer galleries',[-82,-4,-64,60],[-68,36,PI/2,L1],'con',G1);A('foyerG2','Foyer · Level 2',[-82,-4,-64,60],[-68,30,PI/2,L2],'con',G2);
- A('walkway','Ring · West',[-64,-24,-50,20],[-57,0,0,0],'con');A('ringN','Ring · North',[-64,-64,56,-50],[-20,-57,-PI/2,0],'con');A('ringE','Ring · East',[40,-50,56,20],[48,-20,0,0],'con');A('ringS','Ring · South',[-64,20,56,34],[0,27,-PI/2,0],'con');
- A('gallery','Ring balcony',[-64,-64,56,34],[0,-62,-PI/2,L1],'con',G1);A('ring2','Ring · Level 2',[-64,-64,56,34],[-20,-57,-PI/2,L2],'con',G2);A('skyterrace','Sky terrace',[-64,-50,-50,-24],[-57,-30,0,L2],'con',Object.assign({out:1},G2));
+ A('mezz','Hotel Mezzanine',[-224,-4,-174,60],[-178,20,PI/2,L1],'lobby',G1);A('hotelL1','Mezzanine corridor',[-264,-24,-128,-4],[-194,-14,PI/2,L1],'lobby',G1);
+ A('ballroom','Grand Ballroom',[-174,-64,-144,-24],[-159,-27,0,L1],'lobby',G1);A('lumenlounge','The Lumen Lounge',[-144,-64,-128,-24],[-136,-27,0,L1],'lobby',G1);
+ A('meeting','Meeting rooms',[-224,-64,-174,-24],[-187,-27,0,L1],'lobby',G1);A('library','Hotel library',[-264,-64,-224,-24],[-249,-27,0,L1],'lobby',G1);
+ A('hotelL2','Hotel · Level 2',[-264,-24,-128,-4],[-194,-14,PI/2,L2],'lobby',G2);A('gym','Gym',[-200,-64,-174,-24],[-187,-27,0,L2],'lobby',G2);A('pool','Pool',[-174,-64,-128,-24],[-151,-27,0,L2],'lobby',G2);A('spa','The Spa',[-264,-64,-200,-24],[-249,-25.6,0,L2],'lobby',G2);
+ // the Link between the buildings
+ A('link','The Link',[-128,-22,-110,-12],[-122,-17,-PI/2,0],'lobby',{y1:4});A('skybridge','Skybridge',[-128,-22,-110,-12],[-122,-17,-PI/2,L1],'lobby',Object.assign({sub:1},G1));
+ // the con: foyer, Hall C, ring, courtyard
+ A('foyer','The Foyer',[-110,-24,-64,60],[-90,40,0,0],'con');A('foyerG','Foyer galleries',[-110,-24,-64,60],[-68,36,PI/2,L1],'con',G1);A('foyerG2','Foyer · Level 2',[-82,-24,-64,60],[-68,30,PI/2,L2],'con',G2);
+ A('hallC','Hall C · Track 3',[-110,-64,-64,-24],[-66.5,-37,PI/2,0],'stage');A('badgelab','Badge Lab',[-110,-64,-64,-24],[-67,-37,PI/2,L2],'con',G2);
+ A('walkway','Ring · West',[-64,-50,-50,20],[-57,0,0,0],'con');A('ringN','Ring · North',[-64,-64,56,-50],[-20,-57,-PI/2,0],'con');A('ringE','Ring · East',[40,-50,56,20],[48,-20,0,0],'con');A('ringS','Ring · South',[-64,20,56,34],[0,27,-PI/2,0],'con');
+ A('gallery','Ring balcony',[-64,-64,56,34],[0,-62,-PI/2,L1],'con',G1);A('ring2','Ring · Level 2',[-64,-64,56,34],[-20,-57,-PI/2,L2],'con',G2);
  A('courtyard','Courtyard',[-50,-50,40,20],[-40,0,-PI/2,0],'con',{out:1,y0:-3});
  // halls and back of house
  A('hallA','Hall A · Main Stage',[-60,-136,50,-64],[-55,-67,0,0],'stage',{y1:13});A('backstage','Backstage',[-40,-150,30,-136],[-5,-139,PI,1.6],'stage',{hide:1});
@@ -5436,8 +5588,8 @@ function siteAreas(){
  A('food','Food Court',[-64,34,-10,60],[-37,37,PI,0],'con');A('fcterrace','Food Court Terrace',[-64,34,-10,42],[-37,36,PI,L1],'con',Object.assign({sub:1},G1));A('skygarden','Sky Garden',[-64,34,-10,60],[-37,36,PI,L2],'con',Object.assign({out:1},G2));
  A('cosplay','Cosplay Hall',[-10,34,50,76],[5,37,PI,0],'cos');A('lounge','Chill-out Lounge',[50,34,80,56],[53,37,PI,0],'chill');A('naps','Nap pods',[50,56,80,72],[65,58,PI,0],'chill');A('quiet','Quiet room',[50,34,80,56],[53,37,PI,L1],'chill',G1);
  // underground + roof
- A('basement','Hotel basement',[-200,20,-160,54],[-175,45,-PI/2,BY],'lobby',Object.assign({hide:1},B));A('carpark','Car park',[-160,-54,-64,60],[-104,-50,PI,BY],'con',B);
- A('noc','Network Operations Centre',[-64,-24,-30,10],[-62,-8,-PI/2,BY],'soc',B);A('plant','Plant Room & Laundry',[-200,-54,-160,20],[-163,-20,PI/2,BY],'con',B);A('tunnel','Service tunnel',[-100,-60,140,-54],[-90,-57,-PI/2,BY],'con',B);A('tunnelN','Service tunnel',[134,-110,140,-60],[137,-63,0,BY],'con',Object.assign({sub:1},B));
+ A('basement','Hotel basement',[-264,20,-224,54],[-239,45,-PI/2,BY],'lobby',Object.assign({hide:1},B));A('carpark','Car park',[-224,-54,-64,60],[-104,-50,PI,BY],'con',B);
+ A('noc','Network Operations Centre',[-64,-24,-30,10],[-62,-8,-PI/2,BY],'soc',B);A('plant','Plant Room & Laundry',[-264,-54,-224,20],[-227,-20,PI/2,BY],'con',B);A('tunnel','Service tunnel',[-100,-60,140,-54],[-90,-57,-PI/2,BY],'con',B);A('tunnelN','Service tunnel',[134,-110,140,-60],[137,-63,0,BY],'con',Object.assign({sub:1},B));
  A('conroof','Convention Centre roof',[56,-54,134,20],[124,-49,PI/2,RFY],'roof',{y0:15,y1:24,out:1,fog:[.1,.08,.18],fr:[60,320]});
 }
 
@@ -5623,13 +5775,13 @@ function objective(){
  }else if(S.ch===1){
   if(!S.f.d1_badge)o={t:'Pick up your badge at Registration (the Foyer\'s west wall).',reg:'con',x:-105.2,z:53.4,y:0};
   else if(!S.f.d1_open)o={t:'The opening ceremony is starting. Find a seat in Hall A (north side of the Ring).',reg:'con',x:-5,z:-79.5,y:2.75};
-  else if(!S.f.d1_checkin)o={t:'Check in at the Halcyon Hotel: reception, through the big gap on the Foyer\'s west side.',reg:'con',x:-154.4,z:22.5,y:0};
+  else if(!S.f.d1_checkin)o={t:'Check in at the Halcyon Hotel: through the Link off the Foyer\'s north-west corner, then the Promenade to reception.',reg:'con',x:-218.4,z:22.5,y:0};
   else if(!S.f.d1_room)o={t:'Drop your bag in Room 1337 (the hotel lifts, off the Promenade → 13th floor).',reg:'f13',x:273.6,z:14.2,y:0};
-  else o={t:'Explore the con. When you\'re ready, end the day at the Hotel Bar (off the Promenade).',reg:'con',x:-88,z:-58.2,y:0};
+  else o={t:'Explore the con. When you\'re ready, end the day at the Hotel Bar (off the Promenade).',reg:'con',x:-152,z:-58.2,y:0};
  }else o={2:{t:'When you\'re done, head up to Room 1337 for the night.',reg:'f13',x:273.6,z:14.2,y:0},3:{t:'When you\'re ready: Room 1337. Everyone\'s coming over.',reg:'f13',x:273.6,z:14.2,y:0},4:{t:'Finish what you started. Then find Marge on the Hall A stage.',reg:'con',x:-5,z:-121,y:1.6}}[S.ch]||null;
  // different building? point at the way there
  if(o&&o.reg!==WD.reg){
-  if(o.reg==='f13'&&WD.reg==='con')o=Object.assign({},o,{reg:'con',x:-148,z:-27,y:WD.y>8?L2:WD.y>3?L1:0});
+  if(o.reg==='f13'&&WD.reg==='con')o=Object.assign({},o,{reg:'con',x:-212,z:-27,y:WD.y>8?L2:WD.y>3?L1:0});
   else if(o.reg==='con'&&WD.reg==='f13')o=Object.assign({},o,{reg:'f13',x:243,z:-9.4,y:0});
   else if(o.reg==='con'&&WD.reg==='station')o=Object.assign({},o,{reg:'station',x:734,z:4.4,y:0});
  }
@@ -5712,6 +5864,15 @@ function gateObj(g){
  if(g.kind==='rope'){const n=Math.max(1,Math.round(L/2.4));
   for(let i=0;i<=n;i++){const t=i/n,p=new T.Mesh(new T.CylinderGeometry(.045,.06,1,10),G.gm.post);p.position.set(g.x0+dx*t,g.y+.5,g.z0+dz*t);grp.add(p);const b=new T.Mesh(new T.CylinderGeometry(.16,.18,.04,14),G.gm.post);b.position.set(p.position.x,g.y+.02,p.position.z);grp.add(b)}
   for(let i=0;i<n;i++){const t=(i+.5)/n,seg=L/n,r=new T.Mesh(new T.BoxGeometry(seg,.05,.05),G.gm.rope);r.position.set(g.x0+dx*t,g.y+.86,g.z0+dz*t);r.rotation.y=-ang;grp.add(r)}}
+ else if(g.kind==='glass'){
+  // a pair of glass doors in chrome frames with push bars, sized to the doorway (the revolving door has its own drum)
+  if(g.label==='Revolving door')return grp;
+  const f=fitGate(g);let w=L,h=2.6,cx=(g.x0+g.x1)/2,cz=(g.z0+g.z1)/2,y=g.y,a=-ang;if(f){w=f.w-.02;h=f.h-.01;cx=f.cx;cz=f.cz;y=f.y;a=f.o==='h'?0:-Math.PI/2}
+  G.gm.glass=G.gm.glass||new T.MeshStandardMaterial({color:0x9fb8c8,transparent:true,opacity:.28,roughness:.05,metalness:.2,depthWrite:false});
+  const fr=(bw,bh,px,py)=>{const m=new T.Mesh(new T.BoxGeometry(bw,bh,.06),G.gm.post);m.position.set(px,py,0);return m},leaf=new T.Group();leaf.position.set(cx,y,cz);leaf.rotation.y=a;
+  for(const s of[-1,1]){const lx=s*w/4,lw=w/2-.02;leaf.add(fr(.06,h,lx-lw/2+.03,h/2),fr(.06,h,lx+lw/2-.03,h/2),fr(lw,.06,lx,h-.03),fr(lw,.12,lx,.06));
+   const gl=new T.Mesh(new T.BoxGeometry(lw-.1,h-.16,.02),G.gm.glass);gl.position.set(lx,h/2+.03,0);leaf.add(gl);const bar=fr(lw*.6,.05,lx,1.05);bar.position.z=.06;leaf.add(bar)}
+  grp.add(leaf)}
  else{const f=fitGate(g);let w=L,h=g.kind==='card'||g.label==='The bar'?2.6:2.4,cx=(g.x0+g.x1)/2,cz=(g.z0+g.z1)/2,y=g.y,a=-ang;
   if(f){w=f.w-.02;h=f.h-.01;cx=f.cx;cz=f.cz;y=f.y;a=f.o==='h'?0:-Math.PI/2}
   const d=new T.Mesh(new T.BoxGeometry(w,h,.07),G.gm.door);d.position.set(cx,y+h/2,cz);d.rotation.y=a;grp.add(d);
@@ -5808,7 +5969,7 @@ try{document.fonts&&document.fonts.load('20px VT323')}catch(e){}
 
 /* ============ WORLD CONTENT: who stands where, what you can use, what's locked ============ */
 const BG2AREA={train:'platform',con:'foyer',lock:'lockpick',ctf:'ctf',soc:'soc',stream:'creator',hotel:'room1337',roof:'plantdeck',stage:'hallA',keynote:'hallA',vendor:'vendor',flat:'flat',bakery:'bakery',cos:'cosplay',chill:'lounge',bar:'bar',lobby:'lobby',office:'office'};
-const FAR={home:330,con:260,f13:460,office:440,station:600};
+const FAR={home:330,con:1400,f13:900,office:440,station:600};
 /* Day 1 onboarding steps: badge → opening ceremony → hotel check-in → drop your bag → (the whole con) */
 const d1=k=>S&&(S.ch>1||(S.ch===1&&!!S.f['d1_'+k]));
 const onboarding=()=>S&&(S.ch===0||(S.ch===1&&!S.f.d1_room));
@@ -5823,7 +5984,7 @@ const NPCLINES={
  ringN:['Hall A doors are on this side. The queue for the keynote will start here on Sunday. Probably Friday.','I walked the whole Ring twice looking for Hall B. It was behind me both times.'],
  ringE:['Village Row is through there. Every door is a different rabbit hole.','The courtyard\'s the only place in the building where your phone gets real signal. Suspicious, honestly.'],
  ringS:['The cosplay hall is basically a film set. A man in full armour held the door for me.','Food court. Courtyard. Food court. Courtyard. That\'s my whole weekend.'],
- walkway:['The bar terrace opens onto this walk. Shortcut to the courtyard. Tell no one.'],
+ walkway:['Hall C\'s doors are on this side. Track 3. That\'s where the talks with the best titles go.','Courtyard door\'s right there. Shortcut to the fresh air. Tell no one.'],
  gallery:['Best people-watching in the building. That man has dropped his badge three times.','From up here the con looks almost organised. Almost.','You can go the whole way round up here. I\'ve done six laps. For my health.'],
  courtyard:['Fresh air. I forgot this existed.','Somebody threw a phone in the fountain. It was a burner. I think.','That tree has better uptime than my homelab.'],
  hallA:['Saving seats for the keynote. Yes, all of these.','The AV team here are wizards. Respect the AV team.','The back rows are so high up you can see the speaker\'s bald spot. And their notes.'],
@@ -5851,8 +6012,8 @@ const NPCLINES={
  speakers:['The speaker lounge has real biscuits. Do not tell the attendees.'],
  quiet:['...','(they mouth "sorry" and go back to breathing)'],
  plaza:['Taxi driver asked if I was "one of the hacker lot". I said no. He said "sure".','The big CTRL+ALT+CON sign was sponsored by Lumen. Someone put a sticker over the logo. Iconic.'],
- terrace:['Best seat in the hotel. You can see the whole courtyard and none of the queues.'],
- skybridge:['A glass bridge between a hotel and a con. Peak architecture. Peak vertigo.'],
+ terrace:['Best seat in the hotel. Fairy lights, a heater, and a wall between you and four thousand hackers.','You can hear Hall C through that wall. Someone in there just said "and that\'s why you never trust the printer".'],
+ skybridge:['A glass bridge between a hotel and a con. Peak architecture. Mild vertigo.'],link:['Hotel that way, con that way. I\'ve been standing in the middle for ten minutes deciding.'],garden:['The hotel garden. Grass, a fountain and, at last, no lanyards.'],hallC:['Track 3 talks are the weird ones. "I hacked my cat flap." Packed.'],badgelab:['I\'ve soldered my badge to my badge. I\'m not sure how. It still lights up.'],
  hotelL1:['The gym looks out over the pool. Nobody at this con has used either.'],
  carpark:['Down here it smells like petrol and secrets.','That black car with the PRIV4CY plate? Lumen. Of course it\'s Lumen.'],
  noc:['Fourteen hundred devices on the con network. Three hundred are named "iPhone".','If the con goes offline, we go offline. Then we go home.'],
@@ -5877,9 +6038,9 @@ const ROLELINES={
  Partygoer:['WELCOME TO 1336. We ordered fries six hours ago. We have since ordered more fries.','Somebody brought a soldering iron to a party. That somebody is me.','Don\'t mind us. We\'re reverse-engineering the TV. The TV is winning.']
 };
 function genCrowd(){
- const spots={foyer:[[-96,40],[-76,10],[-104,4],[-70,48,0,1],[-92,6],[-80,54]],vestibule:[[-92,62,0,1]],foyerG:[[-68,16,L1],[-68,44,L1,1]],foyerG2:[[-68,24,L2]],skybridge:[[-90,8,L1]],
+ const spots={foyer:[[-96,40],[-76,10],[-104,4],[-70,48,0,1],[-92,6],[-80,54]],vestibule:[[-92,62,0,1]],foyerG:[[-68,16,L1],[-68,44,L1,1]],foyerG2:[[-68,24,L2]],skybridge:[[-116,-16,L1]],link:[[-121,-15.2],[-114,-19,0,1]],garden:[[-150,40],[-130,20,0,1],[-160,10]],hallC:[[-87,-44,0,1],[-108,-38,0,1],[-66.6,-46,0,1],[-87,-29.2]],badgelab:[[-98,-48.4,L2,1],[-78,-40.4,L2,1],[-80,-30,L2]],
   ringN:[[-40,-57],[-8,-55],[22,-53],[40,-57,0,1],[-30,-61,0,1],[4,-61]],ringE:[[47,-30],[48,4],[52.4,-16,0,1]],ringS:[[-40,28],[0,30],[30,26],[-20,30.4,0,1]],walkway:[[-57,-10],[-56,8]],gallery:[[-20,-62,L1,1],[30,-62,L1],[54,-20,L1],[0,32,L1],[-62,0,L1,1]],ring2:[[-30,-57,L2],[20,-57,L2,1],[48,-10,L2],[-10,27,L2]],
-  courtyard:[[-40,-30],[16,-24],[34,-4],[-36,12],[10,10],[-5,-12,-1.2,1],[24,-30.6,0,1],[-34,-21.8,0,1]],skyterrace:[[-57,-40,L2,1]],
+  courtyard:[[-40,-30],[16,-24],[34,-4],[-36,12],[10,10],[-5,-12,-1.2,1],[24,-30.6,0,1],[-34,-21.8,0,1]],
   hallA:[[-5,-100,0,1],[-5,-108],[38,-104],[-25,-83.05,1.65,1],[15,-77.65,3.3,1],[-5,-76.75,3.575,1],[-55,-80],[45,-74],[-20,-67,L1],[25,-67,L2,1],[-25,-80.5,8.875,1]],hallB:[[86,-74,0,1],[75,-70],[86,-96,0,1]],
   vendor:[[66,-27],[86,-14],[110,-27],[96,-14,0,1],[76,2],[120,-14],[62,-46],[100,-45,0,1],[122,-38,0,1],[90,2.5,0,1]],constore:[[63,10]],seconc:[[90,27],[130,27,0,1]],seconc1:[[100,27,L1],[70,30,L1,1]],
   villagerow:[[163,-30],[163,0],[163,20,0,1]],vrL1:[[163,-20,L1],[163,10,L1,1]],lockpick:[[145,-38.8,0,1],[140,-44.5],[152,-34]],ctf:[[139,-25.2,0,1],[152,-2.2,0,1],[141,-14]],soc:[[143.9,4,0,1],[151.9,10,0,1],[154,18]],
@@ -5888,11 +6049,11 @@ function genCrowd(){
   tabletop:[[176,-11.2,L1,1],[186,-.4,L1,1],[180,-6,L1]],film:[[183,12.2,L1,1],[178,32,L1,1]],conops:[[66,-98,L2],[71,-84,L2,1]],press:[[85.2,-94.7,L2,1]],speakers:[[101,-86,L2]],quiet:[[60,46.6,L2-5.5,1]],
   food:[[-56,49.6+.9,0,1],[-38,44],[-26,52],[-47,54.2+.9,0,1],[-60,58,0,1]],fcterrace:[[-45,40.6,L1,1],[-30,39.5,L1]],skygarden:[[-36,42,L2],[-46,53.1,L2,1]],
   cosplay:[[2,46],[30,50],[18,50,.6,1],[42,64],[-4,64,0,1],[11.9,54,0,1],[24.1,58,0,1]],lounge:[[58,40,0,1],[70,48]],naps:[[64,60]],
-  lobby:[[-140,40],[-128,22],[-148,26.6,0,1],[-122,33.4,0,1],[-145,8],[-150,46.4,0,1]],cafe:[[-126,50.75,0,1],[-119.6,52,0,1]],mezz:[[-114,44,L1],[-156,22,L1]],hotelL1:[[-150,-12,L1],[-90,-16,L1,1]],
-  promenade:[[-176,-12],[-130,-20],[-80,-10,0,1]],bar:[[-100.5,-57.6,0,1],[-84,-57.6,0,1],[-94,-42.8,0,1],[-74,-32.8,0,1],[-104.6,-45.8,0,1],[-80,-50]],terrace:[[-62.6,-36,0.05,1],[-55,-46]],
-  grill:[[-125,-55.05,0,1],[-114,-31.05,0,1],[-128,-44]],ballroom:[[-95,-40,L1],[-102.6,-49.6,L1,1]],meeting:[[-127.6,-50.2,L1,1]],library:[[-181,-31,L1,1],[-176,-44,L1]],
-  pool:[[-99,-26.6,L2,1],[-80,-30,L2]],gym:[[-113.7,-55,L2,1],[-125,-40,L2]],spa:[[-157,-58.8,L2,1],[-180,-40,L2]],plaza:[[-90,74],[-60,72],[-6,95.6,0,1],[24,97.4,0,1],[-30,90],[-140,80],[120,76]],
-  carpark:[[-120,-26,BY],[-90,13,BY]],noc:[[-55,5.9,BY,1],[-46,6.6,BY,1]],plant:[[-175,-20,BY]],security:[[-80,-75]],dock:[[150,-100]],service:[[20,-154]],
+  lobby:[[-204,40],[-192,22],[-212,26.6,0,1],[-186,33.4,0,1],[-209,8],[-214,46.4,0,1]],cafe:[[-190,50.75,0,1],[-183.6,52,0,1]],mezz:[[-178,44,L1],[-220,22,L1]],hotelL1:[[-214,-12,L1],[-154,-16,L1,1]],
+  promenade:[[-240,-12],[-194,-20],[-144,-10,0,1]],bar:[[-164.5,-57.6,0,1],[-148,-57.6,0,1],[-158,-42.8,0,1],[-138,-32.8,0,1],[-168.6,-45.8,0,1],[-144,-50]],terrace:[[-124.8,-47,.05,1],[-117.2,-31,.05,1],[-119,-40]],
+  grill:[[-189,-55.05,0,1],[-178,-31.05,0,1],[-192,-44]],ballroom:[[-159,-40,L1],[-166.6,-49.6,L1,1]],meeting:[[-191.6,-50.2,L1,1]],library:[[-245,-31,L1,1],[-240,-44,L1]],
+  pool:[[-163,-26.6,L2,1],[-144,-30,L2]],gym:[[-177.7,-55,L2,1],[-189,-40,L2]],spa:[[-221,-58.8,L2,1],[-244,-40,L2]],plaza:[[-90,74],[-60,72],[-6,95.6,0,1],[24,97.4,0,1],[-30,90],[-140,80],[120,76]],
+  carpark:[[-120,-26,BY],[-90,13,BY]],noc:[[-55,5.9,BY,1],[-46,6.6,BY,1]],plant:[[-239,-20,BY]],security:[[-80,-75]],dock:[[150,-100]],service:[[20,-154]],
   station:[[720,30],[750,40],[715,34.6,0,1],[760,28.6,0,1],[740,26]],platform:[[720,14.5],[750,9.6],[730,16,0,1],[760,14.5],[727.5,-4]],office:[[514.3,3.4,0,1],[520.7,12.3,0,1],[510,6.5],[528,9]]};
  let i=0;
  for(const a in spots)for(const p of spots[a]){
@@ -5901,8 +6062,8 @@ function genCrowd(){
   i++;
  }
  const R=(role,reg,x,z,y,ar,v)=>WD.npcs.push({id:'r'+(i++),v:v===undefined?7:v,role,reg,x,z,y:y||0,hx:x,hz:z,ar,tx:x,tz:z,wait:0,still:true});
- R('Volunteer','con',-109,47,0,'foyer',3);R('Volunteer','con',-109,55,0,'foyer',5);R('Info','con',-88,50,0,'foyer',2);R('Doorman','con',-139.5,62.4,0,'plaza');
- R('Receptionist','con',-158.6,18,0,'lobby',4);R('Receptionist','con',-158.6,27,0,'lobby',6);R('Barista','con',-122,43.6,0,'cafe',1);R('Security','con',-96,-92.4,0,'security');
+ R('Volunteer','con',-109,47,0,'foyer',3);R('Volunteer','con',-109,55,0,'foyer',5);R('Info','con',-88,50,0,'foyer',2);R('Doorman','con',-203.5,62.4,0,'plaza');
+ R('Receptionist','con',-222.6,18,0,'lobby',4);R('Receptionist','con',-222.6,27,0,'lobby',6);R('Barista','con',-186,43.6,0,'cafe',1);R('Security','con',-96,-92.4,0,'security');
  R('Engineer','con',-55,6.6,BY,'noc',0);R('Engineer','con',-37,6.6,BY,'noc',2);
  for(const[x,z]of[[260,17],[262.6,17.4],[260.2,17.2],[263,14.6]])R('Partygoer','f13',x,z,0,'room1336',(x*7|0)%7);
  R('Commuter','station',727,9,0,'platform',2);R('Commuter','station',744,13,0,'platform',5);R('Coworker','office',502.6,1.7,0,'office',4);
@@ -5918,30 +6079,29 @@ function placeGates(){
  gate('con','rope',-109.6,43,-64.6,43,0,()=>d1('badge'),()=>'A volunteer with a lanyard the size of a seatbelt: "Badge first! Registration\'s right there."');
  gate('con','rope',-64.8,51.6,-64.8,56.4,0,()=>d1('badge'),()=>'"Badge first," says a volunteer, who has said "badge first" four hundred times today.');
  // before the opening ceremony: the way to Hall A (Foyer, Ring West, Ring North, the hall's floor doors) stays open, everything else is roped
- ropeC(-109.4,10.4,-109.4,39.6);ropeC(-64.8,51.6,-64.8,56.4);ropeC(-96.6,-3.4,-77.4,-3.4);ropeC(-63.4,-23.6,-63.4,-4.4);ropeC(-80,40.6,-72,40.6);ropeC(-64.8,38,-64.8,42);
+ ropeC(-109.4,-20.4,-109.4,-13.6);ropeC(-64.8,51.6,-64.8,56.4);ropeC(-98.4,-23.4,-93.6,-23.4);ropeC(-80.4,-23.4,-75.6,-23.4);ropeC(-63.4,-46.4,-63.4,-41.6);ropeC(-63.4,-32.4,-63.4,-27.6);ropeC(-80,40.6,-72,40.6);ropeC(-64.8,38,-64.8,42);
  ropeC(56.4,-63.6,56.4,-54.4);ropeC(56.4,20.4,56.4,33.6);ropeC(55.6,-42,55.6,-34);ropeC(55.6,-12,55.6,-4);
  ropeC(-40,33.6,-34,33.6);ropeC(2,33.6,8,33.6);ropeC(33,33.6,37,33.6);ropeC(51.5,33.6,54.5,33.6);ropeC(26.6,-59.4,26.6,-55.6);
- for(const c of[-10,20])ropeC(c-1.5,-49.6,c+1.5,-49.6);for(const c of[-30,10])ropeC(c-1.5,19.6,c+1.5,19.6);ropeC(-49.6,-1.5,-49.6,1.5);for(const c of[-20,5])ropeC(39.6,c-1.5,39.6,c+1.5);
+ for(const c of[-10,20])ropeC(c-1.5,-49.6,c+1.5,-49.6);for(const c of[-30,10])ropeC(c-1.5,19.6,c+1.5,19.6);ropeC(-49.6,-1.5,-49.6,1.5);ropeC(-49.6,-38.5,-49.6,-35.5);for(const c of[-20,5])ropeC(39.6,c-1.5,39.6,c+1.5);
  for(const c of[-30,-5,20])ropeC(c-1.5,-64.6,c+1.5,-64.6,L1);
  // the bar (and its terrace) open once you've dropped your bag
  const barOpen=()=>d1('room'),barMsg=()=>'A sign on a stand: "BAR OPENS 7PM · HOTEL GUESTS: CHECK IN FIRST". It\'s not seven yet. Go and find your room.';
- gate('con','door',-90,-24,-84,-24,0,barOpen,barMsg,'The bar');gate('con','door',-64,-39,-64,-35,0,barOpen,barMsg,'Bar terrace');
- gate('con','door',-58.5,-50,-55.5,-50,0,barOpen,barMsg,'Bar terrace');gate('con','door',-58.5,-24,-55.5,-24,0,barOpen,barMsg,'Bar terrace');gate('con','rope',-49.6,-38.5,-49.6,-35.5,0,barOpen,barMsg,'Bar terrace');
+ gate('con','door',-154,-24,-148,-24,0,barOpen,barMsg,'The bar');
  // outside, once you're checked in
  const outMsg=()=>'You could go outside. But you\'ve only just arrived, and the opening ceremony is the whole point of being here.';
- gate('con','door',-91,68,-85,68,0,()=>d1('checkin'),outMsg,'Convention doors');gate('con','door',-137.2,60,-132.8,60,0,()=>d1('checkin'),outMsg,'Revolving door');
- gate('con','door',-148.2,60,-145.8,60,0,()=>d1('checkin'),outMsg,'Hotel doors');gate('con','door',-124.2,60,-121.8,60,0,()=>d1('checkin'),outMsg,'Hotel doors');
+ const outG=(x0,z0,x1,z1,o,l)=>{gate('con','glass',x0,z0,x1,z1,0,()=>d1('checkin'),outMsg,l);GATES[GATES.length-1].out=o};
+ outG(-91,68,-85,68,[0,1],'Convention doors');outG(-201.2,60,-196.8,60,[0,1],'Revolving door');outG(-212.2,60,-209.8,60,[0,1],'Hotel doors');outG(-188.2,60,-185.8,60,[0,1],'Hotel doors');outG(-174,28,-174,32,[1,0],'Garden doors');
  // basement fire stairs: from day 2
  gate('con','rope',-71.6,91.4,-64.4,91.4,0,()=>S.ch>=2,()=>'A barrier arm and a sign: "CAR PARK · HALCYON GUESTS · OPENS 6AM". It\'s late. Tomorrow.','Car park barrier');
- gate('con','door',-160,29.2,-160,30.8,0,()=>S.ch>=2,()=>'"FIRE STAIRS · B". A sign underneath: "Guests: emergencies only." Maybe tomorrow, when you\'re less new.','Fire stairs');
+ gate('con','door',-224,29.2,-224,30.8,0,()=>S.ch>=2,()=>'"FIRE STAIRS · B". A sign underneath: "Guests: emergencies only." Maybe tomorrow, when you\'re less new.','Fire stairs');
  // luggage room: Nyx can show you how
- gate('con','door',-160,7.2,-160,8.8,0,()=>!!S.f.luggage,()=>null,'Luggage room');
+ gate('con','door',-224,7.2,-224,8.8,0,()=>!!S.f.luggage,()=>null,'Luggage room');
  // staff keycard doors (Nyx's route, chapter 2): every way into the back of house
  const card=()=>!!S.f.keycard,cardMsg=()=>'STAFF ONLY. You tap nothing against the reader, because you have nothing. It blinks red at you, smugly.';
  gate('con','card',-62.8,-64,-61.2,-64,0,card,cardMsg);gate('con','card',52,-64,54,-64,0,card,cardMsg);gate('con','card',121.2,-64,122.8,-64,0,card,cardMsg,'Kitchen');
  gate('con','card',-6.5,-136,-3.5,-136,1.6,card,cardMsg,'Backstage');gate('con','card',84.5,-111,87.5,-111,.8,card,cardMsg,'Backstage');gate('con','card',-91.5,-54,-88.5,-54,BY,card,cardMsg,'Service tunnel');
  // the Lumen Lounge
- gate('con','door',-73,-24,-71,-24,L1,()=>S.ch>=4&&(S.f.met_bea||S.f.dave_helped),()=>S.ch<4?'LUMEN LOUNGE · INVITE ONLY. The door has a card reader and, somehow, an attitude.':'Locked. You\'d need someone with a staff key. Someone like a bartender. Or a former Lumen intern.','Lumen Lounge');
+ gate('con','door',-137,-24,-135,-24,L1,()=>S.ch>=4&&(S.f.met_bea||S.f.dave_helped),()=>S.ch<4?'LUMEN LOUNGE · INVITE ONLY. The door has a card reader and, somehow, an attitude.':'Locked. You\'d need someone with a staff key. Someone like a bartender. Or a former Lumen intern.','Lumen Lounge');
  // hotel 13th floor + roof
  gate('home','door',-306,5.6,-306,6.4,7.1,()=>false,()=>'Ellie\'s flat. Locked, obviously. A sticky note on the door: "GONE TO WORK (DOWNSTAIRS) (OBVIOUSLY)".','Flat 2');
  gate('home','door',-306,5.6,-306,6.4,10.3,()=>false,()=>'FLAT 3. Locked. Behind the door, very faintly, a cat is watching you through the letterbox.','Flat 3');
@@ -5950,7 +6110,12 @@ function placeGates(){
  gate('f13','door',268,-.7,268,.7,0,()=>false,()=>'ALARMED · EMERGENCY ONLY. You are not having an emergency. Yet.','Fire exit');
  gate('f13','door',248,-1,248,1,TOP,()=>!!S.f.roof_open,()=>'MAINTENANCE · STAFF ONLY. The fence rattles in the wind. On the other side: air-con units, a water tank and, maybe, a footprint.','Maintenance door');
 }
-function gateClosedAt(reg,x,z,y,r){const a=y+.4,b=y+1.75;for(const g of GATES){if(g.reg!==reg||g.open())continue;const q=gateBox(g);if(x+r>q[0]&&x-r<q[2]&&z+r>q[1]&&z-r<q[3]&&q[5]>a&&q[4]<b)return true}return false}
+/* a door that only keeps you in (g.out: the direction of outside) opens once you've stood just outside it, and stays
+   open until you're clear of it on the way in: arrive by taxi or fast travel and you can always get back indoors,
+   but walking up to it from inside doesn't let you out */
+function gateClosedAt(reg,x,z,y,r){const a=y+.4,b=y+1.75;for(const g of GATES){if(g.reg!==reg||g.open())continue;
+  if(g.out){const cx=(g.x0+g.x1)/2,cz=(g.z0+g.z1)/2,s=(WD.x-cx)*g.out[0]+(WD.z-cz)*g.out[1],lat=Math.abs((WD.x-cx)*g.out[1]-(WD.z-cz)*g.out[0]),hl=Math.hypot(g.x1-g.x0,g.z1-g.z0)/2;
+   if(s>0&&s<6&&lat<hl+2)g.pass=true;else if(s<-(r+.75)||Math.hypot(WD.x-cx,WD.z-cz)>9)g.pass=false;if(g.pass)continue}const q=gateBox(g);if(x+r>q[0]&&x-r<q[2]&&z+r>q[1]&&z-r<q[3]&&q[5]>a&&q[4]<b)return true}return false}
 function gateAct(g){
  if(g.label==='Luggage room'){
   if(S.f.met_nyx&&S.stage.nyx>=1)return run([N('The luggage room. Locked with a pin-tumbler lock that has seen better decades. You hear Nyx in your head: "Tension first. Then listen."'),{game:'timing',kind:'pins',n:3,who:'nyx'},()=>{S.f.luggage=1;return[N('Click. The door swings open onto a wall of suitcases and one very large flight case with a Lumen logo on it.')]}],hub);
@@ -5964,21 +6129,21 @@ function placeWorld(){
  const ch=()=>S?S.ch:0;
  const C=(id,reg,x,z,when,o)=>WCH.push(Object.assign({id,reg,x,z,y:0,when},o||{}));
  C('ellie','home',-299,3.7,()=>ch()===0);
- C('ellie','con',-119.6,56.8,()=>ch()>=3&&ch()<5);
+ C('ellie','con',-183.6,56.8,()=>ch()>=3&&ch()<5);
  C('nyx','con',145,-44.5,()=>ch()>=1);
  C('ada','con',146,-6.8,()=>ch()>=1);
  C('priya','con',146,13,()=>ch()>=1);
  C('juno','con',189,-57,()=>ch()>=1,{y:L1+.25});
  C('kit','con',18,66.8,()=>ch()>=1,{spr:()=>(S.stage.kit<1||S.ch===3)?'kitc':'kit'});
  C('rin','con',64,37.4,()=>ch()>=2);
- C('bea','con',-88,-61.4,()=>ch()>=1);
+ C('bea','con',-152,-61.4,()=>ch()>=1);
  C('mira','f13',270.8,-2.2,()=>ch()>=3&&S.f.roof_open,{y:TOP});
  C('dave','con',-81.5,22,()=>ch()===1);
  C('dave','con',106,-27,()=>ch()>=2&&ch()<5,{spr:()=>'davex'});
  C('marge','con',75.6,-90,()=>ch()>=1&&ch()<4,{y:L2});
  C('marge','con',-5,-121,()=>ch()===4,{y:1.6});
  C('victor','con',-100,33.4,()=>ch()>=1&&ch()<3);
- C('victor','con',-94,-39,()=>ch()===3);
+ C('victor','con',-158,-39,()=>ch()===3);
  C('linda','office',537.4,2.4,()=>ch()===0);
  C('gary','office',521,8.6,()=>ch()===0);
  genCrowd();placeGates();
@@ -6071,14 +6236,14 @@ function placeWorld(){
  int('con',78.2,36.4,()=>'Stare into a lava lamp',N1('The blob rises. The blob falls. You lose four minutes and gain inner peace.'));
  int('con',61.7,64.6,()=>'Borrow a nap pod',N1('You lie down in a pod that hums like a spaceship. Ten minutes later you wake up with a seatbelt mark on your face and the clarity of a monk.'));
  /* ---- hotel ---- */
- int('con',-154.4,22.5,()=>S.ch===1&&S.f.d1_open&&!S.f.d1_checkin?'Check in at reception':'Talk to reception',()=>{if(S.ch===1&&!S.f.d1_checkin){if(!S.f.d1_open)return run([{w:'Receptionist',np:1,t:'Check-in for CTRL+ALT+CON guests opens after the opening ceremony. Hall A, in the convention centre. Through the big gap.'}],hub);return run(D1_CHECKIN(),hub)}run([N('"Room 1337? Ah. Thirteenth floor. You\'re the third person to ask if we did that on purpose." They don\'t answer the question.')],hub)});
- int('con',-148,-27,()=>'Call the lift',()=>liftMenu());
- int('con',-122,46.4,()=>'Order a flat white',N1('A flat white in a cup that says "HALCYON". The barista writes your handle on it, then crosses it out and draws a little skull. "Opsec," she says.'));
- int('con',-104.5,-29.5,()=>'Watch the bar TV',()=>run([N(S.ch>=3?'Breaking news ticker: "Questions grow over popular privacy app." The whole bar goes quiet to read it.':'A muted football match. Somebody has changed the subtitles to Linux error messages.')],hub));
- int('con',-51.2,-44,()=>'Lean on the terrace rail',N1('From the terrace you can see straight across the courtyard: the big tree, the fountain, and through the glass, the whole Ring lit up like an aquarium of hoodies.'));
- int('con',-166,38.6,()=>S.ch>=2?'Service lift':null,()=>serviceLift());
- int('con',-170,52.4,()=>S.ch>=2?'Service lift':null,()=>serviceLift(),{y:BY});
- int('con',-168,17.6,()=>S.f.luggage?'Look at the Lumen flight case':null,()=>run([N('A flight case stencilled LUMEN · SAFESPHERE DEMO PODS · SPARE APs. Inside, in foam, six small white boxes. Five are labelled. One slot is empty.'),...(S.clues.includes('evil_twin')?[N('The missing one is in the ceiling above registration. You\'d bet your badge on it.')]:[N('Wi-Fi access points. Lumen brought spare Wi-Fi access points to a con that already has Wi-Fi.'),{unlock:'clues'},FX({clue:'evil_twin'})])],hub));
+ int('con',-218.4,22.5,()=>S.ch===1&&S.f.d1_open&&!S.f.d1_checkin?'Check in at reception':'Talk to reception',()=>{if(S.ch===1&&!S.f.d1_checkin){if(!S.f.d1_open)return run([{w:'Receptionist',np:1,t:'Check-in for CTRL+ALT+CON guests opens after the opening ceremony. Hall A, in the convention centre. Through the big gap.'}],hub);return run(D1_CHECKIN(),hub)}run([N('"Room 1337? Ah. Thirteenth floor. You\'re the third person to ask if we did that on purpose." They don\'t answer the question.')],hub)});
+ int('con',-212,-27,()=>'Call the lift',()=>liftMenu());
+ int('con',-186,46.4,()=>'Order a flat white',N1('A flat white in a cup that says "HALCYON". The barista writes your handle on it, then crosses it out and draws a little skull. "Opsec," she says.'));
+ int('con',-168.5,-29.5,()=>'Watch the bar TV',()=>run([N(S.ch>=3?'Breaking news ticker: "Questions grow over popular privacy app." The whole bar goes quiet to read it.':'A muted football match. Somebody has changed the subtitles to Linux error messages.')],hub));
+ int('con',-119,-46,()=>'Look up at the tower',N1('Twenty-five storeys of lit windows climbing out of the lane, the name in gold at the top, a red light blinking on the roof. Somewhere up there is Room 1337 and your bag. Down here: festoon lights, a patio heater, and the con\'s wall humming with bass from Hall C.'));
+ int('con',-230,38.6,()=>S.ch>=2?'Service lift':null,()=>serviceLift());
+ int('con',-234,52.4,()=>S.ch>=2?'Service lift':null,()=>serviceLift(),{y:BY});
+ int('con',-232,17.6,()=>S.f.luggage?'Look at the Lumen flight case':null,()=>run([N('A flight case stencilled LUMEN · SAFESPHERE DEMO PODS · SPARE APs. Inside, in foam, six small white boxes. Five are labelled. One slot is empty.'),...(S.clues.includes('evil_twin')?[N('The missing one is in the ceiling above registration. You\'d bet your badge on it.')]:[N('Wi-Fi access points. Lumen brought spare Wi-Fi access points to a con that already has Wi-Fi.'),{unlock:'clues'},FX({clue:'evil_twin'})])],hub));
  /* ---- level 1 ---- */
  int('con',0,-60.6,()=>'Lean on the railing',N1('From the gallery you can see the whole Ring: lanyards flowing round the courtyard like a slow river. Someone below drops a badge. Someone else picks it up and reads the name aloud. Opsec, everyone.'),{y:L1});
  int('con',146,-19,()=>'Sit in on the workshop',once('ws',()=>[N(pick(['"Threat Modelling for People Who Hate Meetings." Step one: who wants your stuff? Step two: what happens if they get it? You take notes.','A live demo: the speaker finds four people\'s home towns from one holiday photo. The room goes very quiet.','"Your password manager is the one egg basket worth having." Somebody in the front row applauds alone.'])),FX({skill:2})],'The speaker is answering a question that is really a forty-minute statement. You slip back out.'),{y:L1});
@@ -6093,10 +6258,10 @@ function placeWorld(){
  int('con',86,-100,()=>'Press room',N1('Three journalists, one coffee machine, and a sign: "PLEASE DO NOT PHOTOGRAPH ATTENDEES WITHOUT CONSENT". A man photographs the sign.'),{y:L2});
  int('con',101,-102.6,()=>'Speaker lounge biscuits',N1('Real biscuits. Chocolate ones. You take one and walk out at a normal speed, as if you are a speaker. Nobody stops you. You are, for one biscuit, a speaker.'),{y:L2});
  int('con',64,44.5,()=>'Sit in the quiet room',once('qr',()=>[N('You sit. You breathe. You put your phone face-down. Somewhere far below, four thousand people are arguing about tabs. In here, nothing.'),FX({exp:-2})],'You sit for another minute. It\'s still nice.'),{y:L1});
- int('con',-51.2,-37,()=>'Look over the courtyard',N1('From the terrace, the courtyard is a green square in a glass box. The big tree, the amphitheatre, the fountain, and two people in cloaks having what looks like a very serious duel with foam swords.'),{y:L2});
- int('con',-111.2,-44,()=>'Look through the glass at the pool',N1('The hotel pool, glowing blue. One person is swimming slow lengths in a CTRL+ALT+CON hoodie. You have so many questions.'),{y:L2});
- int('con',-123,-61.4,()=>'Read the meeting room slides',N1('"LUMEN PARTNER BREAKFAST · SafeSphere 2 roadmap". Somebody forgot to close the projector. The next slide is titled "Monetising the Social Graph".'),{y:L1});
- int('con',-76,-59.8,()=>S.ch>=4?'Look at the papers on the bar':null,()=>run([N('A glossy folder on the Lumen Lounge bar. "KEYNOTE RUN-SHEET · CONFIDENTIAL".'),...(S.clues.includes('runsheet')?[N('The same run-sheet Dave showed you. Same plan. Same Monday launch.')]:[N('"SafeSphere 2: contact graph. Launch all regions Monday." You photograph it. Your hands are steady. Mostly.'),{unlock:'clues'},FX({clue:'runsheet'})])],hub),{y:L1});
+ int('con',-50.8,-30,()=>'Look out over the courtyard',N1('From up here the courtyard is a green square in a glass box. The big tree, the amphitheatre, the fountain, and two people in cloaks having what looks like a very serious duel with foam swords.'),{y:L2});
+ int('con',-175.2,-44,()=>'Look through the glass at the pool',N1('The hotel pool, glowing blue. One person is swimming slow lengths in a CTRL+ALT+CON hoodie. You have so many questions.'),{y:L2});
+ int('con',-187,-61.4,()=>'Read the meeting room slides',N1('"LUMEN PARTNER BREAKFAST · SafeSphere 2 roadmap". Somebody forgot to close the projector. The next slide is titled "Monetising the Social Graph".'),{y:L1});
+ int('con',-140,-59.8,()=>S.ch>=4?'Look at the papers on the bar':null,()=>run([N('A glossy folder on the Lumen Lounge bar. "KEYNOTE RUN-SHEET · CONFIDENTIAL".'),...(S.clues.includes('runsheet')?[N('The same run-sheet Dave showed you. Same plan. Same Monday launch.')]:[N('"SafeSphere 2: contact graph. Launch all regions Monday." You photograph it. Your hands are steady. Mostly.'),{unlock:'clues'},FX({clue:'runsheet'})])],hub),{y:L1});
  /* ---- back of house ---- */
  int('con',-90,-97.4,()=>'Watch the CCTV wall',()=>run([N(S.ch>=2?'Fifteen screens. One is paused on the bar from last night: you can see Victor leaning over the counter towards Bea. A sticky note under the screen: "LUMEN ASKED FOR THIS FOOTAGE AGAIN. NO WARRANT. NO."':'Fifteen screens. The Foyer, the Ring, the bar, the car park. On one of them, a man is trying to pick up a free tote bag with his feet. Security is watching him very closely.')],hub));
  int('con',59,-97.6,()=>'Look at the box on the core switch',()=>run([N('Between the racks, plugged straight into the con\'s core switch: a small white box with a Lumen asset sticker and a hand-written label: "temp · do not unplug · V.H."'),...(S.clues.includes('evil_twin')?[N('The other end of the fake Wi-Fi. Nyx and Priya will want a photo.')]:[N('Lumen hardware, inside the con\'s own network. That\'s not sponsorship. That\'s a wiretap with a logo.'),{unlock:'clues'},FX({clue:'evil_twin'})])],hub));
@@ -6107,17 +6272,17 @@ function placeWorld(){
  /* ---- basement ---- */
  int('con',-113,3.4,()=>'Look at the black car',N1('A long black car, very clean, very quiet. The plate reads PRIV4CY. On the dashboard: a SafeSphere air freshener, shaped like a shield.'),{y:BY});
  int('con',-47,6.8,()=>'Talk to the network engineers',()=>run([{w:'Engineer',np:1,t:S.ch>=3?'You want to trace WHISPER? Join the queue. Every upload goes out through an access point we don\'t own. Somewhere up high. Roof height.':pick(ROLELINES.Engineer)},...(S.f.met_priya?[N('A sticky note on a monitor: "PRIYA — your rogue AP list, printed. Don\'t lose it."')]:[])],hub),{y:BY});
- int('con',-182,-1.2,()=>'Hide among the laundry carts',N1('Warm towels, the smell of starch, and the hum of fifty machines. Nobody would look for you here. You think about staying until Monday.'),{y:BY});
+ int('con',-246,-1.2,()=>'Hide among the laundry carts',N1('Warm towels, the smell of starch, and the hum of fifty machines. Nobody would look for you here. You think about staying until Monday.'),{y:BY});
  int('con',FOODPOS[4].x,FOODPOS[4].z,()=>'Order dumplings',N1('Six dumplings in a paper boat. The chef folds them faster than you can watch. "Mind, they\'re hot," he says, as you burn your mouth.'));
  int('con',FOODPOS[5].x,FOODPOS[5].z,()=>'Get a cold brew',N1('Cold brew in a can with a QR code on it. You don\'t scan it. The barista nods: "Good instinct."'));
- for(const y of[L1,L2])int('con',-148,-27,()=>'Call the lift',()=>liftMenu(),{y});
- int('con',-104,-2.6,()=>'Call the lift',()=>conLift());for(const y of[L1,L2])int('con',-68,-1.2,()=>'Call the lift',()=>conLift(),{y});int('con',-104,-52.4,()=>'Call the lift',()=>conLift(),{y:BY});
- int('con',-149.6,49.6,()=>'Play the lobby piano',N1('You play the four notes of the only song you know. The piano, which is a MIDI device, plays the rest of the song for you. Somebody in the lobby claps. You bow, as if you meant it.'));
- int('con',-179,-26.4,()=>'Warm up by the library fire',N1('Leather chairs, shelves to the ceiling, a fire that is definitely gas but commits to the bit. A book on the arm of a chair: "Social Engineering: The Art of Human Hacking". Someone has left a bookmark at chapter one. Ominous.'),{y:L1});
- int('con',-95,-56.6,()=>'Look at the ballroom stage',N1('A banner: "LUMEN PARTNER GALA · TONIGHT". The tables are laid for two hundred. Every place card has a SafeSphere logo and a QR code. You turn one face-down. Then all of them on your table.'),{y:L1});
- int('con',-165.2,-53.4,()=>'Peek into the sauna',N1('A wall of heat and a man in a CTRL+ALT+CON towel reading a printed RFC. "It\'s the only place nobody asks me about my day job," he says.'),{y:L2});
+ for(const y of[L1,L2])int('con',-212,-27,()=>'Call the lift',()=>liftMenu(),{y});
+ int('con',-104,-22.6,()=>'Call the lift',()=>conLift());for(const y of[L1,L2])int('con',-68,-1.2,()=>'Call the lift',()=>conLift(),{y});int('con',-104,-52.4,()=>'Call the lift',()=>conLift(),{y:BY});
+ int('con',-213.6,49.6,()=>'Play the lobby piano',N1('You play the four notes of the only song you know. The piano, which is a MIDI device, plays the rest of the song for you. Somebody in the lobby claps. You bow, as if you meant it.'));
+ int('con',-243,-26.4,()=>'Warm up by the library fire',N1('Leather chairs, shelves to the ceiling, a fire that is definitely gas but commits to the bit. A book on the arm of a chair: "Social Engineering: The Art of Human Hacking". Someone has left a bookmark at chapter one. Ominous.'),{y:L1});
+ int('con',-159,-56.6,()=>'Look at the ballroom stage',N1('A banner: "LUMEN PARTNER GALA · TONIGHT". The tables are laid for two hundred. Every place card has a SafeSphere logo and a QR code. You turn one face-down. Then all of them on your table.'),{y:L1});
+ int('con',-229.2,-53.4,()=>'Peek into the sauna',N1('A wall of heat and a man in a CTRL+ALT+CON towel reading a printed RFC. "It\'s the only place nobody asks me about my day job," he says.'),{y:L2});
  int('con',-5,-68,()=>'Look down at the stage',N1('From the top of the bowl the stage is a glowing postage stamp under a screen the size of a house. Two thousand seats. Tonight every one of them will be full.'),{y:L2});
- int('con',-70,40,()=>'Look up at the atrium',N1('Three storeys of glass, a giant hanging sign, the Lumen logo turning like a lighthouse, and a skybridge with people crossing it like ants on a twig.'));
+ int('con',-70,40,()=>'Look up at the atrium',N1('Three storeys of glass, a giant hanging sign, the Lumen logo turning like a lighthouse, and through the west wall the Halcyon across its garden, every window lit, the Skybridge a bright line between the two buildings.'));
  int('con',96,6.4,()=>'Sit in the charging lounge',N1('Twelve sockets, forty people, one extension lead with a hand-written sign: "THIS IS NOT A HONEYPOT". It is clearly a honeypot.'));
  int('con',173,23.4,()=>'Try the cockpit simulator',N1('You land a passenger jet on the second try. The volunteer tells you the first try was a crash. You decide the first try was a test of the software.'));
  int('con',180,-12.6,()=>'Watch a board game',N1('Six strangers are playing a game where you have to guess who the traitor is. Everyone is accusing the one person who is actually a professional red-teamer. They are right.'),{y:L1});
@@ -6153,9 +6318,9 @@ function liftMenu(){
  const here=WD.reg,lv=here==='con'?(WD.y<-2?'B':WD.y>8?'2':WD.y>3?'1':'G'):'13',go=(r,x,z,yaw,y)=>()=>{fadeTp(()=>teleport(r,x,z,yaw,y));return[]};
  if(S.ch===1&&!S.f.d1_checkin)return run([N('You press the button. A little screen asks you to tap your room key. You don\'t have a room key yet. Reception first.')],hub);
  run([{hide:1},N(here==='con'?'The lift arrives with a soft ding. Muzak. A mirror. The panel: B, G, 1, 2, and then a long gap to 13.':'The lift arrives with a soft ding. Muzak. A mirror. You look tired, but in a cool way.'),C(
-  {t:'G · Lobby',if:()=>lv!=='G',then:go('con',-148,-27,Math.PI,0)},
-  {t:'1 · Mezzanine · Ballroom · Meeting rooms',if:()=>lv!=='1',then:go('con',-148,-27,Math.PI,L1)},
-  {t:'2 · Pool · Spa · Gym',if:()=>lv!=='2',then:go('con',-148,-27,Math.PI,L2)},
+  {t:'G · Lobby',if:()=>lv!=='G',then:go('con',-212,-27,Math.PI,0)},
+  {t:'1 · Mezzanine · Ballroom · Meeting rooms',if:()=>lv!=='1',then:go('con',-212,-27,Math.PI,L1)},
+  {t:'2 · Pool · Spa · Gym',if:()=>lv!=='2',then:go('con',-212,-27,Math.PI,L2)},
   {t:'13 · Room 1337',if:()=>lv!=='13',then:go('f13',243,-10.2,0,0)},
   {t:'B · Car park',if:()=>S.ch>=2&&lv!=='B',then:go('con',-104,-51,Math.PI,BY)},
   {t:'Stay here',then:[]})],hub);
@@ -6164,13 +6329,13 @@ function liftMenu(){
 function conLift(){
  const lv=WD.y<-2?'B':WD.y>8?'2':WD.y>3?'1':'G',go=(x,z,yaw,y)=>()=>{fadeTp(()=>teleport('con',x,z,yaw,y));return[]};
  run([{hide:1},N('A glass lift. Someone has stuck a sticker over the "door close" button that says "placebo".'),C(
-  {t:'G · Foyer',if:()=>lv!=='G',then:go(-104,-1.6,Math.PI,0)},{t:'1 · Foyer gallery',if:()=>lv!=='1',then:go(-68,0,Math.PI,L1)},{t:'2 · Level 2',if:()=>lv!=='2',then:go(-68,0,Math.PI,L2)},
+  {t:'G · Foyer',if:()=>lv!=='G',then:go(-104,-21.6,Math.PI,0)},{t:'1 · Foyer gallery',if:()=>lv!=='1',then:go(-68,0,Math.PI,L1)},{t:'2 · Level 2',if:()=>lv!=='2',then:go(-68,0,Math.PI,L2)},
   {t:'B · Car park',if:()=>S.ch>=2&&lv!=='B',then:go(-104,-51,Math.PI,BY)},{t:'Stay here',then:[]})],hub);
 }
 function serviceLift(){
  run([N('A steel box that smells of laundry and old coffee.'),C(
-  {t:'Ground · back stairs',if:()=>WD.y<-2,then:()=>{fadeTp(()=>teleport('con',-166,37.4,0,0));return[]}},
-  {t:'B · basement',if:()=>WD.y>-2,then:()=>{fadeTp(()=>teleport('con',-170,51.2,0,BY));return[]}},
+  {t:'Ground · back stairs',if:()=>WD.y<-2,then:()=>{fadeTp(()=>teleport('con',-230,37.4,0,0));return[]}},
+  {t:'B · basement',if:()=>WD.y>-2,then:()=>{fadeTp(()=>teleport('con',-234,51.2,0,BY));return[]}},
   {t:'Stay here',then:[]})],hub);
 }
 function trainMenu(){
@@ -6522,7 +6687,7 @@ const AREA_AUD={flat:['home','home'],stairs:['home','home'],bakery:['home','bake
  workshopA:['con','room'],workshop:['con','room'],hwv:['con','room'],creator:['con','room'],arcade:['arcade','arcade'],conops:['con','room'],press:['con','room'],speakers:['hotel','room'],quiet:['night',null],
  basement:['tense','hotel'],carpark:['tense','hotel'],noc:['tense','room'],plant:['tense','hotel'],tunnel:['tense','hotel'],conroof:['night','wind'],
  promenade:['hotel','lobby'],lifts:['hotel','lobby'],grill:['bar','bar'],pdining:['bar','bar'],hkitchen:['tense','hotel'],backoffice:['hotel','hotel'],boutique:['hotel','lobby'],ballroom:['hotel','lobby'],library:['hotel','room'],
- hotelL2:['hotel','hotel'],pool:['night','hotel'],spa:['night',null],foyerG:['con','hum'],foyerG2:['con','hum'],ring2:['con','hum'],skyterrace:['night','garden'],hallBback:['tense','hotel'],stores:['tense','hotel'],
+ hotelL2:['hotel','hotel'],pool:['night','hotel'],spa:['night',null],foyerG:['con','hum'],foyerG2:['con','hum'],ring2:['con','hum'],link:['hotel','lobby'],garden:['night','garden'],hallC:['con','hum'],badgelab:['con','hum'],hallBback:['tense','hotel'],stores:['tense','hotel'],
  kitchenC:['tense','hotel'],breakroom:['tense','room'],neconc:['con','hum'],neconc2:['con','hum'],constore:['con','hum'],demostage:['con','hum'],seconc:['con','hum'],seconc1:['con','hum'],aero:['con','room'],
  tabletop:['con','room'],film:['night','room'],skygarden:['night','garden'],tunnelN:['tense','hotel'],
  corridor:['hotel','hotel'],room1337:['hotel','hotel'],room1336:['party','bar'],housekeeping:['hotel','hotel'],stairwell:['hotel','hotel'],roof:['night','wind'],plantdeck:['night','wind']};
@@ -6771,7 +6936,7 @@ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest
 titleScreen();
 // build the world and bake its lighting while the title screen is up, so Begin is usually instant
 setTimeout(()=>{try{initWorld()}catch(e){console.error(e)}},250);
-window.__dbg={getLoop,get G(){return G},get WD(){return WD},setQuality,get AU(){return AU},SETTINGS,phone,closePhone,sfx,initWorld,INTS,get baked(){return G.baked},get ready(){return G.ready},resumeGame,startCh0,show,setBG,L,N,C,CH,charAct,WCH,INTS,get S(){return S},set S(v){S=v},go,hub,run,advance,ROUTES,fresh,WD,G,teleport,teleportArea,AREAS,phone,newScenes,objective,doInteract,interactCheck,candidates,worldLive,fullSVG,heightAt,blockedAt,levelOf};
+window.__dbg={getLoop,get G(){return G},get WD(){return WD},GATES,setQuality,get AU(){return AU},SETTINGS,phone,closePhone,sfx,initWorld,INTS,get baked(){return G.baked},get ready(){return G.ready},resumeGame,startCh0,show,setBG,L,N,C,CH,charAct,WCH,INTS,get S(){return S},set S(v){S=v},go,hub,run,advance,ROUTES,fresh,WD,G,teleport,teleportArea,AREAS,phone,newScenes,objective,doInteract,interactCheck,candidates,worldLive,fullSVG,heightAt,blockedAt,levelOf};
 
 }
 </script>

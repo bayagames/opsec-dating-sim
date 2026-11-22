@@ -76,15 +76,40 @@ function buildPlaza(){
  const G0=G.lmK;G.lmK=.45;
  const pz=(x0,z0,x1,z1,m)=>{floorQ(x0,z0,x1,z1,0,m||MT.pavers);surf(x0,z0,x1,z1,0)};
  // pavement in front of everything, the boulevard, the far pavement; the plaza east, by the villages
- pz(-215,60,-156,100);pz(-156,76,-114,100);pz(-72,92,-64,100);pz(-114,60,-96,100);pz(-96,68,-80,100);pz(-80,60,-72,100);pz(-64,60,-10,100);pz(-10,76,80,100);pz(80,72,215,100);pz(50,72,80,76);pz(80,34,215,72);pz(196,-64,215,34);
- surf(-156,60,-114,76,0);
- pz(-215,100,215,114,MT.road);pz(-215,114,215,124);
- for(let x=-210;x<210;x+=6)floorQ(x,106.85,x+3,107.15,.02,MT.plain('#e9e3da'));
- for(const z of[100,114])box(-215,0,z-.15,215,.15,z+.15,MT.plain('#9a9aa8'),{col:false});
+ pz(-296,60,-220,100);surf(-220,60,-178,76,0);pz(-220,76,-178,100);pz(-178,60,-96,100);pz(-96,68,-80,100);pz(-80,60,-72,100);pz(-72,92,-64,100);pz(-64,60,-10,100);pz(-10,76,80,100);pz(80,72,296,100);pz(50,72,80,76);pz(80,34,215,72);pz(215,56,296,72);pz(196,-64,215,34);
+ pz(-296,100,296,114,MT.road);pz(-296,114,296,124);
+ // past the barriers the boulevard runs on between city blocks to a junction (seen, not walked; lit coarsely)
+ G.lmK=.08;
+ for(const[x0,x1]of[[-470,-296],[296,470]]){floorQ(x0,100,x1,114,0,MT.road);floorQ(x0,114,x1,124,0,MT.pavers);floorQ(x0,56,x1,100,0,MT.pavers)}
+ for(let x=-466;x<466;x+=6)floorQ(x,106.85,x+3,107.15,.02,MT.plain('#e9e3da'));
+ for(const z of[100,114])box(-470,0,z-.15,470,.15,z+.15,MT.plain('#9a9aa8'),{col:false});
+ G.lmK=.45;
  // lawns, trees and benches along the front, light poles
- for(const[x0,x1]of[[-200,-162],[-108,-76],[-58,-16],[-4,46],[84,150]]){floorQ(x0,84,x1,92,.03,MT.grass);box(x0-.15,0,83.85,x1+.15,.3,84.1,MT.plain('#9a9aa8'),{col:false});box(x0-.15,0,91.9,x1+.15,.3,92.15,MT.plain('#9a9aa8'),{col:false});
+ for(const[x0,x1]of[[-290,-226],[-170,-104],[-58,-16],[-4,46],[84,150],[160,226],[236,290]]){floorQ(x0,84,x1,92,.03,MT.grass);box(x0-.15,0,83.85,x1+.15,.3,84.1,MT.plain('#9a9aa8'),{col:false});box(x0-.15,0,91.9,x1+.15,.3,92.15,MT.plain('#9a9aa8'),{col:false});
   for(let x=x0+5;x<x1-3;x+=10)tree(x,88)}
- for(let x=-205;x<210;x+=18){if(x>-160&&x<-112)continue;kStreetLamp(x,98.6,0);box(x-.3,5,98.3,x+.3,5.3,98.9,MT.glow('#ffd98a',1.6),{col:false,b:1});addLight(x,4.8,98.6,[1,.85,.6],12,.75)}
+ for(let x=-457;x<466;x+=18){if(x>-224&&x<-176)continue;kStreetLamp(x,98.6,0);box(x-.3,5,98.3,x+.3,5.3,98.9,MT.glow('#ffd98a',1.3),{col:false,b:1});addLight(x,4.8,98.6,[1,.85,.6],12,.75)}
+ // the road closures at either end of the plaza: barriers across pavement and road, cones, a police van, the sign
+ for(const X of[-296,296]){const s=Math.sign(X);for(let z=60.4;z<124;z+=2.2){box(X-.12,0,z,X+.12,.95,z+1.8,MT.plain('#f4f4f0'),{col:false});box(X-.13,.55,z,X+.13,.85,z+1.8,MT.hazard,{col:false})}
+  colBox(X-.2,56,X+.2,124,0,4);for(const z of[103,106,109,112])box(X+s*1.6-.18,0,z-.18,X+s*1.6+.18,.7,z+.18,MT.plain('#ff8a3a'),{col:false});
+  car(X+s*7,104.5,'x','#e9eef5',{plate:'POLICE'});box(X+s*7-1.1,1.55,103.9,X+s*7+1.1,1.75,105.1,MT.glow('#5ab4ff',1.4),{col:false});
+  for(const z of[89.5,94.5])box(X+s*.3-.05,0,z-.05,X+s*.3+.05,2.2,z+.05,MT.plain('#3a3a44'),{col:false});box(X+s*.26-.04,1.35,89.5,X+s*.26+.04,2.15,94.5,MT.plain('#3a3a44'),{col:false});
+  kSign(X+s*.21,1.4,92,4.6,.7,s>0?'w':'e','ROAD CLOSED · EVENT TRAFFIC','#1b1026','#ffd166')}
+ // the side street past the hotel's west wall (deliveries), gated at the plaza
+ floorQ(-296,-175,-264,60,0,MT.road);for(let z=-170;z<56;z+=6)floorQ(-280.15,z,-279.85,z+3,.02,MT.plain('#e9e3da'));
+ for(let x=-295;x<-264;x+=2.3){box(x,0,59.7,x+.08,2.2,59.9,MT.plain('#2a2a30'),{col:false})}box(-296,2.1,59.7,-264,2.2,59.9,MT.plain('#2a2a30'),{col:false});box(-296,.9,59.72,-264,1,59.88,MT.plain('#2a2a30'),{col:false});colBox(-296,59.6,-264,60,0,4);
+ kSign(-280,2.35,59.95,6,.55,'s','HALCYON · DELIVERIES · NO ENTRY','#ffd166','#2a2a30');for(const z of[-120,-60,0,48]){kStreetLamp(-297,z,0);addLight(-297,4.8,z,[1,.85,.6],12,.6)}
+ // city blocks closing the view: west of the side street, east of the con, along the far side, and across both ends
+ G.lmK=.06;
+ const BLK=[[-470,-175,-298,-90,38],[-470,-84,-298,-20,64],[-470,-14,-298,54,26],[217,-175,300,-110,46],[217,-104,300,-40,30],[217,-34,300,54,22],[306,-175,470,-40,72],[306,-34,470,54,34],
+  [-520,40,-480,140,60],[480,40,520,140,52]];
+ for(const[x0,z0,x1,z1,h]of BLK){box(x0,0,z0,x1,h,z1,{side:MT.facade,top:MT.plain('#1a1826')},{col:false});box(x0-.02,0,z0-.02,x1+.02,4,z1+.02,MT.plain('#2a2630'),{col:false,nt:1});
+  for(let x=x0+3;x<x1-6;x+=12)box(x,.4,z1+.03,x+8,3.4,z1+.05,MT.glow(['#ffd98a','#9fd4ff','#ff9fd0','#fff4e0'][((x/12)|0)&3],.5),{col:false});box(x0-.4,h,z0-.4,x1+.4,h+.8,z1+.4,MT.plain('#2a2630'),{col:false,nt:1})}
+ G.lmK=.45;
+ // the ground the district stands on, round the site (inside it every yard and street has its own floor)
+ {const g0=G.lmK;G.lmK=.02;for(const r of rectsMinus(-700,-600,700,700,[[-296,-175,296,124]]))floorQ(r[0],r[1],r[2],r[3],-.02,MT.plain('#1c1a22'));G.lmK=g0}
+ // the service yard behind the hotel and the con's west side (deliveries, bins, the hotel's loading bay)
+ floorQ(-264,-175,-110,-64.4,0,MT.road);for(const[x,z]of[[-250,-70],[-244,-70],[-200,-70],[-150,-70]])box(x-1.2,0,z-.8,x+1.2,1.4,z+.8,MT.plain(['#2a4a2a','#3a3a44'][((x/50)|0)&1]),{col:false});
+ buildGarden();
  for(let x=-60;x<-14;x+=4)box(x-.12,0,60.5,x+.12,.9,60.74,MT.plain('#3a3a44'));
  // the car park ramp, between the foyer and the food court, going down under the foyer
  {const x0=-72,x1=-64,zt=92,zb=60;ramp(x0,zb,x1,zt,BY,0,'z');quad([x0,BY,zb],[x0,0,zt],[x1,0,zt],[x1,BY,zb],MT.road,.5,8);
@@ -101,9 +126,11 @@ function buildPlaza(){
  {const x=-20,z=72;box(x-1.5,0,z-.75,x+1.5,1,z+.75,MT.plain('#3a2418'));box(x-1.3,1,z-.55,x+1.3,1.4,z+.3,MT.chrome,{col:false});box(x-.05,1,z-.05,x+.05,2.8,z+.05,MT.plain('#888'),{col:false});
   box(x-1.9,2.8,z-1.4,x+1.9,2.92,z+1.4,MT.plain('#ff5d73'),{col:false,b:1});addLight(x,2.5,z,[1,.85,.6],6,.9);kSign(x,.2,z+.76,2.8,.6,'s','BEAN THERE · COFFEE','#ffd9a0','#3a2418')}
  // the far side of the boulevard: shopfronts and towers
- for(let x=-210;x<210;x+=24){const h=14+((x*7)%5+5)%5*9,w=22,si=(Math.round(x/24)+40)%8;box(x,0,124,x+w,h,140,{side:MT.facade,top:MT.plain('#1a1826')},{col:false});box(x+1,0,123.9,x+w-1,3.6,124,MT.glow(['#ffd98a','#9fd4ff','#ff9fd0','#fff4e0'][si%4],.6),{col:false});
+ G.lmK=.1;
+ for(let x=-470;x<450;x+=24){const h=14+((x*7)%5+5)%5*9,w=22,si=(Math.round(x/24)+40)%8;box(x,0,124,x+w,h,140,{side:MT.facade,top:MT.plain('#1a1826')},{col:false});box(x+1,0,123.9,x+w-1,3.6,124,MT.glow(['#ffd98a','#9fd4ff','#ff9fd0','#fff4e0'][si%4],.6),{col:false});
   kSign(x+w/2,3.9,123.88,10,.9,'n',['NOODLE BAR','PHONE REPAIRS','24H PHARMACY','LAUNDRETTE','KEBABS','PRINT SHOP','CORNER SHOP','VAPE & VINYL'][si],'#ffd166','#1b1026')}
- colBox(-215,124,215,125,0,5);colBox(-215.5,-175,-215,140,0,5);colBox(215,-175,215.5,140,0,5);
+ colBox(-296,124,296,125,0,5);colBox(215,-175,215.5,56,0,5);
+ G.lmK=.45;
  // the outside of the con: cladding over walls seen from the street, Hall A's box rising over the Ring roof
  G.lmK=.25;
  skin('h',76.02,-10,50,0,L2,MT.clad,1,[]);kSign(20,4,76.05,30,4.5,'s','COSPLAY HALL · CONTEST DAY 3','#2bf0ff','#1c2133');
@@ -118,5 +145,30 @@ function buildPlaza(){
  for(const r of[[110,-64,168,-54],[134,-54,196,34],[56,20,134,34],[168,-64,196,-54],[-10,34,50,76],[50,34,80,56]])floorQ(r[0],r[1],r[2],r[3],11.02,MT.gravel);
  for(const[r,y]of[[[50,56,80,72],3.42],[[-110,-158,176,-150],4.02],[[-110,-150,-64,-64],4.02],[[50,-150,62,-64],4.02],[[62,-150,134,-111],4.42],[[110,-111,134,-64],4.42],[[-40,-150,30,-136],5.02],[[-64,-150,-60,-64],4.02]])floorQ(r[0],r[1],r[2],r[3],y,MT.gravel);floorQ(134,-150,176,-64,10.02,MT.gravel);
  G.lmK=G0;
- skyline(0,-20,250,340,46,-2,SITE);
+ skyline(0,-20,330,520,64,-2,[-530,-200,530,165]);
+}
+
+/* ---------------- the Halcyon Garden: between the hotel's glass east front and the con's Foyer ---------------- */
+/* x -174..-110, z -12..60: a paved garden open to the plaza, with lawns, a long reflecting pool, trees, benches and
+   lamps; the hotel lobby's garden door on its west side; the Link crossing the lane at its north end */
+function buildGarden(){
+ const G0=G.lmK;G.lmK=.45;const P=MT.pavers,LW=MT.grass;
+ const LAWNS=[[-170,-1,-154,25],[-170,35,-154,55],[-130,-1,-114,55]],POOL=[-148,6,-136,48];
+ for(const r of rectsMinus(-174,-4,-110,60,LAWNS.concat([POOL])))floorQ(r[0],r[1],r[2],r[3],0,P);floorQ(-128,-12,-110,-4,0,P);surf(-174,-4,-110,60,0);surf(-128,-12,-110,-4,0);
+ for(const[x0,z0,x1,z1]of LAWNS){floorQ(x0,z0,x1,z1,.02,LW);for(const[a,b,c,d]of[[x0-.12,z0-.12,x1+.12,z0],[x0-.12,z1,x1+.12,z1+.12],[x0-.12,z0,x0,z1],[x1,z0,x1+.12,z1]])box(a,0,b,c,.12,d,MT.plain('#9a9aa8'),{col:false})}
+ // the reflecting pool: a stone rim, dark water, a row of little jets lit from below
+ {const[x0,z0,x1,z1]=POOL;floorQ(x0,z0,x1,z1,-.4,MT.mdark);for(const[a,b,c,d]of[[x0-.4,z0-.4,x1+.4,z0],[x0-.4,z1,x1+.4,z1+.4],[x0-.4,z0,x0,z1],[x1,z0,x1+.4,z1]])box(a,0,b,c,.45,d,MT.lime);
+  quad([x0,.25,z1],[x1,.25,z1],[x1,.25,z0],[x0,.25,z0],mt('water','#3a5670',.4,1,{k:.5}),3,10);colBox(x0,z0,x1,z1,0,.6);
+  for(let z=z0+3;z<z1-1;z+=4){box(-142.1,.25,z-.1,-141.9,.32,z+.1,MT.glow('#7cd4ff',1.4),{col:false});box(-142.02,.32,z-.02,-141.98,1.1,z+.02,MT.plain('#cfe8f4'),{col:false})}
+  addLight(-142,.6,14,[.5,.8,1],8,.6);addLight(-142,.6,40,[.5,.8,1],8,.6)}
+ // trees on the lawns, benches facing the pool, low lamps along the paths, uplights under the trees
+ for(const[x,z]of[[-162,6],[-162,18],[-162,44],[-122,6],[-122,22],[-122,38],[-122,50]]){tree(x,z);box(x-.15,.02,z+.8,x+.15,.1,z+1.1,MT.glow('#ffd98a',1.2),{col:false});addLight(x,.6,z+1,[1,.85,.6],5,.5)}
+ for(const[x,z,f]of[[-151.4,14,'e'],[-151.4,30,'e'],[-132.6,20,'w'],[-132.6,38,'w']]){const bx=f==='e'?[x-.35,x+.35]:[x-.35,x+.35];box(bx[0],0,z-1.4,bx[1],.45,z+1.4,{side:MT.clad,top:MT.woodDark});box(f==='e'?x-.35:x+.2,.45,z-1.4,f==='e'?x-.2:x+.35,.9,z+1.4,MT.woodDark,{col:false})}
+ for(const[x,z]of[[-150,0],[-134,0],[-150,54],[-134,54],[-172,37],[-112,-2],[-112,24]])lamp(x,z,0,'#ffd98a');
+ // the stone that names the place, at the garden's mouth on the plaza; bike racks in the lane; planters by the con's glass
+ box(-146,0,57.4,-138,1.2,58.4,MT.lime);kSign(-142,.25,58.42,7,.8,'s','THE HALCYON · GARDEN','#ffe0a0','#2a1a12');kSign(-142,.25,57.38,7,.8,'n','THE HALCYON · GARDEN','#ffe0a0','#2a1a12');
+ for(let i=0;i<6;i++){const x=-126+i*2.2;box(x-.03,0,-10.6,x+.03,.8,-9.4,MT.chrome,{col:false});box(x-.03,.74,-10.6,x+.03,.8,-9.4,MT.chrome,{col:false})}colBox(-126.3,-10.7,-114.7,-9.3,0,.8);
+ for(const z of[2,18,34])kPlanter(-113.4,z-1.4,-110.8,z+1.4,.6,0,MT.clad);
+ (MAPR.con=MAPR.con||[]).push({x0:-174,z0:-12,x1:-110,z1:60,y:0,n:'Halcyon Garden',c:'#2a4a2a'});
+ G.lmK=G0;
 }

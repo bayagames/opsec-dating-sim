@@ -7,20 +7,24 @@
    4. gutters are dilated and the result is packed to 8-bit RGBM, which the materials read as a lightMap.
    So all light comes from the level's own sources, and every source casts shadows on everything in its reach.
    Characters and other moving things sample the same lights on the CPU (probeAt). */
-const BAKE={cube:320,fill:.16,soft:.22,rgbm:8};
+const BAKE={cube:320,fill:.11,soft:.22,rgbm:8};
 const PD12='const vec2 PD[12]=vec2[](vec2(-.326,-.406),vec2(-.840,-.074),vec2(-.696,.457),vec2(-.203,.621),vec2(.962,-.195),vec2(.473,-.480),vec2(.519,.767),vec2(.185,-.893),vec2(.507,.064),vec2(.896,.412),vec2(-.322,-.933),vec2(-.792,-.598));';
 function bakeOK(){const r=G.r;return !!(r&&r.capabilities.isWebGL2&&(r.extensions.has('EXT_color_buffer_half_float')||r.extensions.has('EXT_color_buffer_float')))}
 function bakeMats(){
  if(G.bk)return G.bk;const T=G.T;
  const vs='attribute vec2 lmuv;varying vec3 wp;varying vec3 wn;void main(){wp=position;wn=normal;gl_Position=vec4(lmuv*2.-1.,0.,1.);}';
  const cov=new T.ShaderMaterial({vertexShader:vs,fragmentShader:'varying vec3 wp;varying vec3 wn;void main(){gl_FragColor=vec4(0.,0.,0.,1.);}',side:T.DoubleSide,depthTest:false,depthWrite:false,blending:T.NoBlending});
- const light=new T.ShaderMaterial({uniforms:{lp:{value:new T.Vector3()},lc:{value:new T.Vector3()},lr:{value:1},far:{value:1},cube:{value:null},soft:{value:BAKE.soft},fillk:{value:BAKE.fill}},
+ const light=new T.ShaderMaterial({uniforms:{lp:{value:new T.Vector3()},lc:{value:new T.Vector3()},lr:{value:1},far:{value:1},cube:{value:null},soft:{value:BAKE.soft},fillk:{value:BAKE.fill},dn:{value:0}},
   vertexShader:vs,
-  fragmentShader:PD12+`uniform vec3 lp,lc;uniform float lr,far,soft,fillk;uniform samplerCube cube;varying vec3 wp;varying vec3 wn;
-  float vis(vec3 p,float d){vec3 dir=(p-lp)/d;vec3 t1=normalize(cross(dir,abs(dir.y)<.9?vec3(0.,1.,0.):vec3(1.,0.,0.)));vec3 t2=cross(dir,t1);
-   float r=soft*(.5+d*.08)/max(d,.3),bias=.035+d*.012,s=0.;for(int i=0;i<12;i++){vec2 o=PD[i]*r;float sd=textureCube(cube,dir+t1*o.x+t2*o.y).r*far;s+=sd>d-bias?1.:0.;}return s/12.;}
+  fragmentShader:PD12+`uniform vec3 lp,lc;uniform float lr,far,soft,fillk,dn;uniform samplerCube cube;varying vec3 wp;varying vec3 wn;
+  // the depth bias grows where the light grazes the surface: a cube texel covers a long strip of a wall seen edge-on,
+  // and a flat bias there leaves rings of false shadow round every light (acne)
+  float vis(vec3 p,float d,float ndl){vec3 dir=(p-lp)/d;vec3 t1=normalize(cross(dir,abs(dir.y)<.9?vec3(0.,1.,0.):vec3(1.,0.,0.)));vec3 t2=cross(dir,t1);
+   float r=soft*(.5+d*.08)/max(d,.3),bias=.035+d*.012+(1.-clamp(ndl,0.,1.))*(.03+d*.025),s=0.;for(int i=0;i<12;i++){vec2 o=PD[i]*r;float sd=textureCube(cube,dir+t1*o.x+t2*o.y).r*far;s+=sd>d-bias?1.:0.;}return s/12.;}
   void main(){vec3 n=normalize(wn);vec3 L=lp-wp;float d=length(L);if(d>lr)discard;vec3 l=L/d;float x=clamp(1.-d/lr,0.,1.),fall=x*x,ndl=dot(n,l);if(length(wn)>1.5&&ndl<0.){n=-n;ndl=-ndl;}
-   vec3 p=wp+n*.03;float sh=vis(p,length(p-lp));
+   // ceiling fittings (downlights, panels) shine down: what's level with or above them only gets a little spill
+   if(dn>.5)fall*=mix(.12,1.,smoothstep(-.05,.55,l.y));
+   vec3 p=wp+n*(.03+d*.006);float sh=vis(p,length(p-lp),ndl);
    gl_FragColor=vec4(lc*(max(ndl,0.)+fillk*(ndl*.5+.5))*fall*sh,0.);}`,
   side:T.DoubleSide,depthTest:false,depthWrite:false,blending:T.CustomBlending,blendEquation:T.AddEquation,blendSrc:T.OneFactor,blendDst:T.OneFactor,blendSrcAlpha:T.ZeroFactor,blendDstAlpha:T.OneFactor});
  const dist=new T.ShaderMaterial({uniforms:{lp:{value:new T.Vector3()},far:{value:1}},
@@ -75,7 +79,7 @@ function bakeLight(reg,i){
  BK.dist.uniforms.lp.value.set(l[0],l[1],l[2]);BK.dist.uniforms.far.value=far;
  const ac=r.autoClear,cc=r.getClearColor(new T.Color()),ca=r.getClearAlpha();
  r.setClearColor(0xffffff,1);r.autoClear=true;cam.update(r,R.bk.sh);
- const u=BK.light.uniforms;u.lp.value.set(l[0],l[1],l[2]);u.lc.value.set(lin(l[3]),lin(l[4]),lin(l[5])).multiplyScalar(l[7]*G.LK*(R.lk||1));u.lr.value=lr;u.far.value=far;u.cube.value=G.bkCubeRT.texture;
+ const u=BK.light.uniforms;u.lp.value.set(l[0],l[1],l[2]);u.lc.value.set(lin(l[3]),lin(l[4]),lin(l[5])).multiplyScalar(l[7]*G.LK*(R.lk||1));u.lr.value=lr;u.far.value=far;u.cube.value=G.bkCubeRT.texture;u.dn.value=l[8]?1:0;
  r.autoClear=false;
  for(let p=0;p<R.bk.rt.length;p++){let any=false;for(const b of R.bk.scn[p].children){const s=b.userData.bs;b.visible=Math.hypot(s.center.x-l[0],s.center.y-l[1],s.center.z-l[2])<s.radius+lr;any=any||b.visible}
   if(!any)continue;r.setRenderTarget(R.bk.rt[p]);r.render(R.bk.scn[p],R.bk.cam)}
@@ -119,7 +123,7 @@ const LMDB={db:null,open(){return new Promise(res=>{try{const q=indexedDB.open('
  put(k,v){if(!LMDB.db)return;try{const t=LMDB.db.transaction('lm','readwrite');t.objectStore('lm').put(v,k)}catch(e){}}};
 function lmKey(reg){const R=G.regions[reg],L=G.lights[reg]||[];let h=0;const add=v=>{h=(h*31+Math.round(v*100))|0};
  for(const l of L)l.forEach(add);const SU=G.sun&&G.sun[reg];if(SU)[...SU.d,...SU.c,SU.k,SU.half,...SU.c0].forEach(add);let verts=0;R.obj.traverse(o=>{if(o.isMesh&&o.userData.pg>=0){verts+=o.geometry.attributes.position.count;const a=o.geometry.attributes.lmuv.array;for(let i=0;i<a.length;i+=97)add(a[i]*1e4)}});
- return['v5',reg,R.lm.S,R.lm.pages,R.lm.D.toFixed(3),verts,h,G.LK,R.lk||1,LOOK.reach,BAKE.fill,BAKE.soft,BAKE.cube].join('|')}
+ return['v6',reg,R.lm.S,R.lm.pages,R.lm.D.toFixed(3),verts,h,G.LK,R.lk||1,LOOK.reach,BAKE.fill,BAKE.soft,BAKE.cube].join('|')}
 function lmApply(reg,pages){const T=G.T,R=G.regions[reg],S=R.lm.S;R.lmTex=pages.map(px=>{const t=new T.DataTexture(px,S,S,T.RGBAFormat,T.UnsignedByteType);t.minFilter=t.magFilter=T.LinearFilter;t.generateMipmaps=false;t.channel=1;t.colorSpace=T.NoColorSpace;t.needsUpdate=true;t.onUpdate=()=>{t.image={width:S,height:S,data:null}};return t});
  R.obj.traverse(o=>{if(o.isMesh&&o.userData.mk&&o.userData.pg>=0){o.userData.lmk=reg+':'+o.userData.pg;o.material=getMat(o.userData.mk,o.userData.lmk)}})}
 /* Lightmaps live per region, and only the place you're in (plus the one you just left, so hopping between the
@@ -165,12 +169,10 @@ function regionNeed(reg,show){
   if(!ok&&!R.lmSkip){G.baked=false;setQuality(G.q)}
   G.lmBusy=null;G.baking=false;lmUI(false);G.forceFrame=true;if(hadLock&&typeof relock==='function')setTimeout(relock,50)});
 }
-const LMNAME={home:'Home',office:'Brindle & Co',station:'Central Station',con:'The Halcyon & CTRL+ALT+CON',f13:'The Halcyon · 13th floor'};
 function lmUI(on,reg,cached,f){const e=$('loading');if(!e)return;e.classList.toggle('on',!!on);
  // the game view stays hidden while a bake runs: compositing a live canvas the GPU is busy baking into is slow and,
  // in some drivers, piles up memory
  const gl=$('gl');if(gl)gl.style.visibility=on?'hidden':'';if(!on)return;
- const k=e.querySelector('.k'),b=e.querySelector('b');if(k)k.textContent=(LMNAME[reg]||reg).toUpperCase();if(b)b.textContent=cached?'Loading':'Baking the lights (first visit only)';
  const p=Math.round((f||0)*100),bar=$('loadBar'),t=$('loadPct');if(bar)bar.style.width=p+'%';if(t)t.textContent=p+'%'}
 /* wait for the GPU to finish everything queued so far: finish() is a real round trip; the 1-pixel read alone isn't
    (it only waits for work on its own target), and without a true sync the queued bake work can pile up into gigabytes */
@@ -179,6 +181,6 @@ function bakeSync(){const T=G.T,r=G.r;if(!G.bkSyncRT){G.bkSyncRT=new T.WebGLRend
 /* light at a point, for things that move (characters, crowds, doors): every nearby source, no shadows */
 function probeAt(reg,x,y,z,out){
  const L=G.lights[reg]||[];let r=0,g=0,b=0;
- for(const l of L){const dx=l[0]-x,dy=l[1]-y,dz=l[2]-z,d=Math.hypot(dx,dy,dz),R=l[6]*LOOK.reach;if(d>=R)continue;const f=(1-d/R)*(1-d/R)*l[7]*G.LK*.55;r+=lin(l[3])*f;g+=lin(l[4])*f;b+=lin(l[5])*f}
+ for(const l of L){const dx=l[0]-x,dy=l[1]-y,dz=l[2]-z,d=Math.hypot(dx,dy,dz),R=l[6]*LOOK.reach;if(d>=R)continue;let f=(1-d/R)*(1-d/R)*l[7]*G.LK*.55;if(l[8])f*=.12+.88*Math.min(1,Math.max(0,(dy/(d||1)+.05)/.6));r+=lin(l[3])*f;g+=lin(l[4])*f;b+=lin(l[5])*f}
  out.r=r;out.g=g;out.b=b;return out;
 }

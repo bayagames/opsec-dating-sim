@@ -12,7 +12,7 @@ const QUALITY={
 };
 /* the look, in one place: emissive gain is compressed above 1 so signs and fixtures read as lit without
    blooming into fog; bloom only catches what is genuinely bright */
-const LOOK={exposure:1.12,hemi:3.2,fill:.5,env:{home:.6,con:.5,f13:.55,office:.7,station:.7},bloomStr:.26,bloomRad:.62,bloomThr:1.05,ao:.85,sat:1.12,con:1.07,vig:.12,light:7.6,reach:1.3,bake:1.7,bakeFill:.3,bakeEnv:.4};
+const LOOK={exposure:1.05,hemi:3.2,fill:.5,env:{home:.6,con:.5,f13:.55,office:.7,station:.7},bloomStr:.17,bloomRad:.42,bloomThr:1.3,ao:.85,sat:1.1,con:1.08,vig:.12,light:7.6,reach:1.3,bake:1.7,bakeFill:.2,bakeEnv:.4};
 /* ---- textures: every texture gets its own canvas; small non-repeating ones are packed into atlases later ---- */
 function tex(key,w,h,paint){
  if(G.tx[key])return key;
@@ -29,6 +29,14 @@ function soloTex(key){
 /* ---- geometry building ---- */
 let BR=null;
 function region(name,o){G.regions[name]={groups:{},fog:o.fog,fr:o.fr||[8,60],amb:null,day:!!o.day,lmPages:o.lmPages,lmCap:o.lmCap};G.ftag=G.ftag||{};G.ftag[name]=[];G.boxes[name]=[];G.walls[name]=[];G.lights[name]=[];G.surf[name]=[];G.zones[name]=[];BR=name}
+/* build a part of a level in its own plan, then place it dx metres along x: the Halcyon is drawn on its plan and
+   stands west of the con. Faces, lights, collision, floors and footstep tags are offset as they're made; the wall
+   outlines, map rooms and doorways it registered are moved after (its walls only see its own doorways, in plan
+   coordinates, while it's being built) */
+function placed(dx,fn){const reg=BR,nW=G.walls[reg].length,nM=(MAPR[reg]||[]).length,D0=DOORS[reg]||[],o0=G.ox||0;G.ox=o0+dx;DOORS[reg]=[];
+ try{fn()}finally{G.ox=o0}
+ for(const w of G.walls[reg].slice(nW)){w[0]+=dx;w[2]+=dx}for(const r of(MAPR[reg]||[]).slice(nM)){r.x0+=dx;r.x1+=dx}
+ for(const d of DOORS[reg]){if(d.o==='v')d.at+=dx;else d.c+=dx}DOORS[reg]=D0.concat(DOORS[reg])}
 /* ---- visibility zones: a region can be cut into boxes ("the hotel lobby", "Hall A", "the car park"). Every face is
    filed under the zone it faces into, so its merged mesh never straddles two zones, and each zone lists the zones you
    can see from inside it. Standing in a zone (or within a metre of one) draws only those: the rest of a huge building
@@ -36,7 +44,8 @@ function region(name,o){G.regions[name]={groups:{},fog:o.fog,fr:o.fr||[8,60],amb
 function zone(name,x0,z0,x1,z1,y0,y1,see,hub){G.zones[BR].push({n:name,hub:!!hub,x0:Math.min(x0,x1),z0:Math.min(z0,z1),x1:Math.max(x0,x1),z1:Math.max(z0,z1),y0,y1,see:see||[],v:(Math.abs(x1-x0)*Math.abs(z1-z0)*(y1-y0))})}
 function zoneOf(reg,x,y,z,m){const Z=G.zones[reg];if(!Z||!Z.length)return -1;m=m||0;let b=-1,bv=1e30;for(let i=0;i<Z.length;i++){const q=Z[i];if(x>=q.x0-m&&x<=q.x1+m&&z>=q.z0-m&&z<=q.z1+m&&y>=q.y0-m&&y<q.y1+m&&q.v<bv){bv=q.v;b=i}}return b}
 function zonesAt(reg,x,y,z,m){const Z=G.zones[reg],o=[];if(!Z)return o;for(let i=0;i<Z.length;i++){const q=Z[i];if(x>=q.x0-m&&x<=q.x1+m&&z>=q.z0-m&&z<=q.z1+m&&y>=q.y0-m&&y<q.y1+m)o.push(i)}return o}
-function addLight(x,y,z,col,range,inten){G.lights[BR].push([x,y,z,col[0],col[1],col[2],range,inten||1])}
+/* dn: a ceiling fitting that shines downward (see the bake) */
+function addLight(x,y,z,col,range,inten,dn){G.lights[BR].push([x+(G.ox||0),y,z,col[0],col[1],col[2],range,inten||1,dn?1:0])}
 function grp(m,cx,cz,cy,n,pts){
  const R=G.regions[BR],t=m.t||'white',kind=m.glass?'glass':m.e?'emit':(m.cut?'cut':'lit');
  const prof=m.e?'':(m.r!==undefined?m.r:.85)+':'+(m.m||0);
@@ -47,13 +56,14 @@ function grp(m,cx,cz,cy,n,pts){
  return R.groups[k]||(R.groups[k]={t,kind,prof,zi,r:m.r,m:m.m||0,p:[],n:[],u:[],c:[],l:[],q:[]});
 }
 function quad(a,b,c,d,m,uw,vh){
+ if(G.ox){a=[a[0]+G.ox,a[1],a[2]];b=[b[0]+G.ox,b[1],b[2]];c=[c[0]+G.ox,c[1],c[2]];d=[d[0]+G.ox,d[1],d[2]]}
  const e1=[b[0]-a[0],b[1]-a[1],b[2]-a[2]],e2=[d[0]-a[0],d[1]-a[1],d[2]-a[2]];
  let nx=e1[1]*e2[2]-e1[2]*e2[1],ny=e1[2]*e2[0]-e1[0]*e2[2],nz=e1[0]*e2[1]-e1[1]*e2[0];const nl=Math.hypot(nx,ny,nz);
  if(!(nl>1e-7))return; // zero-area quads give NaN normals, which bloom smears across the screen
  nx/=nl;ny/=nl;nz/=nl;
  const cx=(a[0]+c[0])/2,cz=(a[2]+c[2])/2;const g=grp(m,cx,cz,(a[1]+c[1])/2,[nx,ny,nz],(Math.hypot(e1[0],e1[2])>3||Math.hypot(e2[0],e2[2])>3)?[a,b,c,d]:null);
  const T=G.tx[m.t||'white'];if(T){T.used=true;if(uw>1.01||vh>1.01||uw<0||vh<0)T.rep=true}
- const col=m.c||[1,1,1];const gk0=m.e?(m.k!==undefined?m.k:(m.t==='white'||!m.t?1.9:1.05)):1,gk=gk0>1?1+(gk0-1)*.55:gk0;
+ const col=m.c||[1,1,1];const gk0=m.e?(m.k!==undefined?m.k:(m.t==='white'||!m.t?1.9:1.05)):1,gk=gk0>1?1+(gk0-1)*.3:gk0;
  const lc=[lin(col[0])*gk,lin(col[1])*gk,lin(col[2])*gk];
  // breakpoints along the vertical edge so walls darken towards the floor (cheap baked AO)
  let ss=[0,1],ts=[0,1];
@@ -72,16 +82,17 @@ function quad(a,b,c,d,m,uw,vh){
 }
 /* a single triangle (gables, spires, hips): quads above can only be parallelograms. UVs run along a->b and a->c */
 function tri(a,b,c,m,uw,vh){
+ if(G.ox){a=[a[0]+G.ox,a[1],a[2]];b=[b[0]+G.ox,b[1],b[2]];c=[c[0]+G.ox,c[1],c[2]]}
  const e1=[b[0]-a[0],b[1]-a[1],b[2]-a[2]],e2=[c[0]-a[0],c[1]-a[1],c[2]-a[2]];
  let nx=e1[1]*e2[2]-e1[2]*e2[1],ny=e1[2]*e2[0]-e1[0]*e2[2],nz=e1[0]*e2[1]-e1[1]*e2[0];const nl=Math.hypot(nx,ny,nz);if(!(nl>1e-7))return;nx/=nl;ny/=nl;nz/=nl;
  const g=grp(m,(a[0]+b[0]+c[0])/3,(a[2]+b[2]+c[2])/3,(a[1]+b[1]+c[1])/3,[nx,ny,nz]);const T=G.tx[m.t||'white'];if(T){T.used=true;if(uw>1.01||vh>1.01)T.rep=true}
  uw=uw===undefined?1:uw;vh=vh===undefined?1:vh;
- const col=m.c||[1,1,1],gk0=m.e?(m.k!==undefined?m.k:(m.t==='white'||!m.t?1.9:1.05)):1,gk=gk0>1?1+(gk0-1)*.55:gk0,lc=[lin(col[0])*gk,lin(col[1])*gk,lin(col[2])*gk];
+ const col=m.c||[1,1,1],gk0=m.e?(m.k!==undefined?m.k:(m.t==='white'||!m.t?1.9:1.05)):1,gk=gk0>1?1+(gk0-1)*.3:gk0,lc=[lin(col[0])*gk,lin(col[1])*gk,lin(col[2])*gk];
  if(G.qlog)G.qlog.push([BR,nx,ny,nz,nx*a[0]+ny*a[1]+nz*a[2],Math.min(a[0],b[0],c[0]),Math.min(a[1],b[1],c[1]),Math.min(a[2],b[2],c[2]),Math.max(a[0],b[0],c[0]),Math.max(a[1],b[1],c[1]),Math.max(a[2],b[2],c[2]),(m.t||'white')+(m.e?'*':'')+(m.glass?'g':'')+'t']);
  const lmq=!m.e&&!m.glass?(G.qd[BR]||(G.qd[BR]=[])).push({w:Math.hypot(...e1)*G.lmK,h:Math.hypot(...e2)*G.lmK,z:g.zi})-1:-1,nk=m.cut?2:1;
  for(const[p,s,t]of[[a,0,0],[b,1,0],[c,0,1]]){g.p.push(p[0],p[1],p[2]);g.n.push(nx*nk,ny*nk,nz*nk);g.u.push(uw*s,vh*t);g.c.push(lc[0],lc[1],lc[2]);g.l.push(s,t);g.q.push(lmq)}
 }
-function colBox(x0,z0,x1,z1,y0,y1){G.boxes[BR].push([Math.min(x0,x1),Math.min(z0,z1),Math.max(x0,x1),Math.max(z0,z1),y0,y1])}
+function colBox(x0,z0,x1,z1,y0,y1){const o=G.ox||0;G.boxes[BR].push([Math.min(x0,x1)+o,Math.min(z0,z1),Math.max(x0,x1)+o,Math.max(z0,z1),y0,y1])}
 function box(x0,y0,z0,x1,y1,z1,m,o){
  o=o||{};const s=(m.side||m),t=(m.top||m),bt=(m.bottom||m);
  const sc=x=>x*(s.s||.5);
@@ -105,15 +116,15 @@ function panel(cx,y,cz,w,h,dir,m){
  if(dir==='w')quad([cx,y,cz-hw],[cx,y,cz+hw],[cx,y+h,cz+hw],[cx,y+h,cz-hw],m,1,1);
 }
 /* every floor remembers what it's made of, so footsteps can sound like it */
-function ftag(x0,z0,x1,z1,y,m,st){if(G.ftag&&G.ftag[BR]&&m)G.ftag[BR].push([Math.min(x0,x1),Math.min(z0,z1),Math.max(x0,x1),Math.max(z0,z1),y,m.t||'white',st?1:0,m.m||0])}
+function ftag(x0,z0,x1,z1,y,m,st){const o=G.ox||0;if(G.ftag&&G.ftag[BR]&&m)G.ftag[BR].push([Math.min(x0,x1)+o,Math.min(z0,z1),Math.max(x0,x1)+o,Math.max(z0,z1),y,m.t||'white',st?1:0,m.m||0])}
 function floorQ(x0,z0,x1,z1,y,m){ftag(x0,z0,x1,z1,y,m);quad([x0,y,z1],[x1,y,z1],[x1,y,z0],[x0,y,z0],m,(x1-x0)*m.s,(z1-z0)*m.s)}
 function ceilQ(x0,z0,x1,z1,y,m){quad([x0,y,z0],[x1,y,z0],[x1,y,z1],[x0,y,z1],m,(x1-x0)*m.s,(z1-z0)*m.s)}
 function cross(x,y,z,w,h,m){const hw=w/2;
  quad([x-hw,y,z],[x+hw,y,z],[x+hw,y+h,z],[x-hw,y+h,z],m,1,1);quad([x+hw,y,z],[x-hw,y,z],[x-hw,y+h,z],[x+hw,y+h,z],m,1,1);
  quad([x,y,z+hw],[x,y,z-hw],[x,y+h,z-hw],[x,y+h,z+hw],m,1,1);quad([x,y,z-hw],[x,y,z+hw],[x,y+h,z+hw],[x,y+h,z-hw],m,1,1)}
 /* walkable surfaces: flat or ramp (ya at min coord of ax, yb at max) */
-function surf(x0,z0,x1,z1,y){G.surf[BR].push({x0:Math.min(x0,x1),z0:Math.min(z0,z1),x1:Math.max(x0,x1),z1:Math.max(z0,z1),y})}
-function ramp(x0,z0,x1,z1,ya,yb,ax){G.surf[BR].push({x0,z0,x1,z1,ya,yb,ax})}
+function surf(x0,z0,x1,z1,y){const o=G.ox||0;G.surf[BR].push({x0:Math.min(x0,x1)+o,z0:Math.min(z0,z1),x1:Math.max(x0,x1)+o,z1:Math.max(z0,z1),y})}
+function ramp(x0,z0,x1,z1,ya,yb,ax){const o=G.ox||0;G.surf[BR].push({x0:x0+o,z0,x1:x1+o,z1,ya,yb,ax})}
 /* stairs: dir = direction of ascent: 'x+','x-','z+','z-' */
 function stairs(x0,z0,x1,z1,y0,y1,dir,m,o){
  o=o||{};const n=Math.max(2,Math.round((y1-y0)/.19)),dh=(y1-y0)/n;const ax=dir[0],up=dir[1]==='+';
@@ -122,10 +133,13 @@ function stairs(x0,z0,x1,z1,y0,y1,dir,m,o){
   if(ax==='x'){box(x0+a,o.solid===false?top-.12:y0,z0,x0+a+dl,top,z1,m,{col:false,nz0:1,nz1:o.sides?0:1});const ex=up?x0+a:x0+a+dl;box(ex-.025,top-.03,z0,ex+.025,top+.005,z1,nose,{col:false,nz0:1,nz1:1})}
   else{box(x0,o.solid===false?top-.12:y0,z0+a,x1,top,z0+a+dl,m,{col:false,nx0:1,nx1:o.sides?0:1});const ez=up?z0+a:z0+a+dl;box(x0,top-.03,ez-.025,x1,top+.005,ez+.025,nose,{col:false,nx0:1,nx1:1})}}
  ftag(x0,z0,x1,z1,Math.max(y0,y1),m.top||m,1);
- // a solid flight can't be walked into from below or the side: stepped blocks under it, each no higher than the
- // lowest tread above it, so someone climbing never touches them
- if(G.stairCol&&o.solid!==false&&Math.abs(y1-y0)>1.2){const k=8,lo=Math.min(y0,y1);for(let i=0;i<k;i++){const a0=i/k,a1=(i+1)/k;const hA=up?y0+(y1-y0)*a0:y1+(y0-y1)*(1-a1);const hmin=up?hA:y0+(y1-y0)*(1-a1);
-   const h=(up?y0+(y1-y0)*a0:y0+(y1-y0)*(1-a1))-lo;if(h<.6)continue;if(ax==='x')colBox(x0+L*a0,z0,x0+L*a1,z1,lo,lo+h);else colBox(x0,z0+L*a0,x1,z0+L*a1,lo,lo+h)}}
+ // a solid flight can't be walked into from behind or the side: stepped blocks under it, each no higher than the
+ // lowest tread above it, so someone climbing never touches them. A floating flight (open risers) gets a slab of
+ // collision just under its treads instead: you can still walk under it where there's headroom, but not into it
+ if(o.noCol!==true&&Math.abs(y1-y0)>.7){const k=Math.max(4,Math.ceil(L/1.2)),lo=Math.min(y0,y1);for(let i=0;i<k;i++){const a0=i/k,a1=(i+1)/k;
+   // a hand's breadth below the treads, so a long stride up a steep flight never catches the next block
+   const hr=(up?y0+(y1-y0)*a0:y0+(y1-y0)*(1-a1))-lo;if(hr<.6)continue;const h=hr-.1,b0=o.solid===false?Math.max(lo,lo+h-.35):lo;
+   if(ax==='x')colBox(x0+L*a0,z0,x0+L*a1,z1,b0,lo+h);else colBox(x0,z0+L*a0,x1,z0+L*a1,b0,lo+h)}}
  if(ax==='x')ramp(x0,z0,x1,z1,up?y0:y1,up?y1:y0,'x');else ramp(x0,z0,x1,z1,up?y0:y1,up?y1:y0,'z');
 }
 function slab(x0,z0,x1,z1,y,th,m,mu){floorQ(x0,z0,x1,z1,y,m);ceilQ(x0,z0,x1,z1,y-th,mu||m);const e=mu||m;
@@ -156,7 +170,8 @@ function glInit(cv){
  // baked lightmaps are stored as 8-bit RGBM (rgb * a * range): decode where three reads the lightmap
  T.ShaderChunk.lights_fragment_maps=T.ShaderChunk.lights_fragment_maps.replace('vec3 lightMapIrradiance = lightMapTexel.rgb * lightMapIntensity;','vec3 lightMapIrradiance = lightMapTexel.rgb * lightMapTexel.a * '+BAKE.rgbm.toFixed(1)+' * lightMapIntensity;');
  G.scene=new T.Scene();
- G.cam=new T.PerspectiveCamera(70,1,.05,500);G.cam.rotation.order='YXZ';
+ // near plane at 8 cm: depth precision across the plaza matters more than nosing into a wall
+ G.cam=new T.PerspectiveCamera(70,1,.08,500);G.cam.rotation.order='YXZ';
  G.HK=LOOK.hemi;G.hemi=new T.HemisphereLight(0xffffff,0x222222,1);G.scene.add(G.hemi);
  G.fog=new T.Fog(0x000000,10,80);G.scene.fog=G.fog;
  G.aniso=Math.min(8,r.capabilities.getMaxAnisotropy());
@@ -226,7 +241,9 @@ function buildEnv(reg){
  sc.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)o.material.dispose()});
  return G.env[reg]=rt.texture;
 }
-const BUMP={brick:2.2,tile:1.2,tileDark:1.2,concrete:1.4,wood:1,woodDark:1,marble:.5,carpetCon:1.6,carpetHotel:1.6,carpetDark:1.6,carpetGrey:1.6,carpetGallery:1.4,wallHotel:.8,wallCon:.8,panel:1.2,pavers:2,gravel:2.4,grass:1.8,ceil:1,metal:.6,road:1.2,rug:1.4,fabric:1,linen:.6,pegs:1.2};
+/* relief from each texture's own pattern: kept gentle, the colour texture is a rough stand-in for a height map and
+   strong values turn every speck in it into grit */
+const BUMP={brick:1.1,tile:.6,tileDark:.6,concrete:.5,wood:.4,woodDark:.4,marble:.2,carpetCon:.6,carpetHotel:.6,carpetDark:.6,carpetGrey:.6,carpetGallery:.5,wallHotel:.3,wallCon:.3,panel:.5,pavers:1,gravel:1.2,grass:.8,ceil:.4,metal:.3,road:.5,rug:.5,fabric:.4,linen:.3,pegs:.6};
 /* materials are shared between regions and chunks: one per texture/kind/profile */
 function getMat(mk,lmk){
  const key=mk+'|'+(QUALITY[G.q].std?'s':'l')+(lmk?'|'+lmk:'');if(G.mats[key])return G.mats[key];
