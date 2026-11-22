@@ -17,6 +17,14 @@ Source lives in `src/`. To rebuild `index.html` after editing:
     npm i three@0.170.0 esbuild@0.24.0
     npx esbuild tools/three-entry.js --bundle --minify --format=iife --target=es2019 --legal-comments=none --outfile=vendor/three.bundle.js
 
+## Test (under a minute)
+Serve the folder (`python3 -m http.server 8123`), then with Playwright installed:
+
+    node tools/storytest.js 12
+    node tools/storytest.js ends
+
+The first plays twelve whole runs with no 3D (`?test`) and reports endings, how far each route got, texts received, errors and missing scenes. The second plays every ending with every possible partner. In game, F9 or the backtick key opens the debug menu.
+
 ## Source map
 - `01_engine.js`   portraits, VN engine, tutorials
 - `01b_core.js`    the week (days and six parts of each), Skill and Clout ranks, closeness, Exposure and its daily reset and fail, clues, achievements, the story summary, what carries over between runs
@@ -25,8 +33,8 @@ Source lives in `src/`. To rebuild `index.html` after editing:
 - `03_data.js`     clues, the twelve mysteries, leads, items, achievements, endings
 - `03b_flow.js`    story beats, free time, hangouts, leads, the case board, the final act's positions
 - `04_days.js`     the calendar: which part of which day belongs to the story
-- `04a`-`04h`      the prologue and Days 1 to 7; `04i_endings.js` the twenty endings
-- `05_routes.js`   the twenty-one routes' requirements and small talk; `05a`-`05j` their scenes; `05k_leads.js` investigations
+- `04a`-`04h`      the prologue and Days 1 to 7; `04i_endings.js` the twenty endings; `04j` con events; `04k` extra beats; `04l` final nights; `04m`/`04n` ending aftermaths
+- `05_routes.js`   the twenty-one routes' requirements and small talk; `05a`-`05j` and `05l`-`05n` their scenes; `05k_leads.js` investigations; `05o_texts.js` texts that want a reply
 - `06_finale.js`   hub, shop, Room 1337, positions, choosing the ending, title
 - `docs/STORY_BIBLE.md` the cast, the conspiracy, the mysteries, the calendar and the endings (spoilers)
 - `07_gl.js`       three.js renderer: level builder API, chunked geometry, glass, light pool, per-region environment maps, lightmap packing, bump relief, AO, bloom, colour grade, sky. `LOOK` holds every lighting knob in one place
