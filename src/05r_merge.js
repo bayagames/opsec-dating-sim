@@ -59,7 +59,9 @@ function approachMenu(g,go){const T=TASTE[g]||[];S.taste=S.taste||{};
  return[{choice:Object.keys(TONES).map(t=>({t:TONES[t],hint:tasteKnown(g,t)?(S.taste[g][t]>0?'They loved this last time':S.taste[g][t]<0?'They didn\'t enjoy this':'It was fine'):'',then:()=>{const v=tasteOf(g,t);(S.taste[g]=S.taste[g]||{})[t]=v;S.amult=S.amult||{};S.amult[g]=v>0?1.6:v<0?.45:1;
   if(v>0)ach('tastes');const ln=v>0?T[2]:v<0?T[3]:null;return[...(ln?[L(typeof worldLook==='function'?worldLook(g):g,v>0?'h':'d',ln)]:[]),...go(),()=>{if(S.amult)delete S.amult[g];return[]}]}}))}]}
 /* how much a moment can move someone: less the closer you are, and only so much a day */
-function affGain(k,g){if(g<=0)return g;g=g*((S.amult&&S.amult[k])||1)*Math.max(.35,1-S.aff[k]/150);
+function affGain(k,g){if(g<=0)return g;const hang=!!(S.amult&&S.amult[k]!==undefined);g=g*((S.amult&&S.amult[k])||1)*Math.max(.35,1-S.aff[k]/150);
+ // the daily limit is for time you choose to spend together; the story itself is never rationed
+ if(!hang)return Math.max(1,Math.round(g));
  const dk=S.day+':'+k;S.affd=S.affd||{};const room=Math.max(0,AFFCAP-(S.affd[dk]||0));g=Math.min(Math.round(g),room);S.affd[dk]=(S.affd[dk]||0)+g;return g}
 const warmToday=k=>S&&S.affd?S.affd[S.day+':'+k]||0:0;
 function seen(g){if(!S)return;S.seenD=S.seenD||{};S.seenD[g]=S.day}

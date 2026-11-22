@@ -38,7 +38,7 @@ function buildTower(){
  // fire stairs west (up to the public roof)
  mr({x0:212,z0:-8,x1:220,z1:8,h:7.6,nofloor:1,fl:MT.concrete,wa:MT.concrete,n:'Fire stairs',mc:'#4a4a5a'});
  floorQ(212,-8,220,-6,0,MT.concrete);surf(212,-8,220,-6,0);floorQ(216.5,-6,220,4,0,MT.concrete);surf(216.5,-6,220,4,0);
- stairs(212.4,-6,216.5,4,0,TOP,'z+',MT.concrete,{nose:MT.plain('#ffd166')});railing(216.5,-6,216.5,4,0,{y2:TOP,m:MT.plain('#ffd166')});
+ stairs(212.4,-6,216.5,4,0,TOP,'z+',MT.concrete,{nose:MT.plain('#ffd166'),sides:1});railing(216.5,-6,216.5,4,0,{y2:TOP,m:MT.plain('#ffd166')});
  slab(212.2,4,219.8,8,TOP,.3,MT.concrete);floorQ(212.2,4,219.8,7.8,0,MT.concrete);
  panel(219.79,1.2,-2,1.4,.35,'w',sign('ROOF ↑','#ff5d73','#3a3a44',256,64));panel(216,TOP+2.5,7.79,1.6,.4,'n',sign('ROOF TERRACE','#ff5d73','#3a3a44',256,64));
  addLight(216,2.6,-2,[1,.95,.85],8,1);addLight(216,6.4,5,[1,.95,.85],7,1);
@@ -47,7 +47,7 @@ function buildTower(){
  // housekeeping closet: service stairs up to the plant deck (how Mira gets up there)
  const hx0=nb(11);mr({x0:hx0,z0:-22,x1:276,z1:-12,h:7.6,nofloor:1,fl:MT.concrete,wa:MT.wallPale,n:'Housekeeping',mc:'#3a3a44'});
  floorQ(hx0,-22,276,-21,0,MT.concrete);surf(hx0,-22,276,-21,0);floorQ(hx0,-21,272,-12,0,MT.concrete);surf(hx0,-21,272,-12,0);floorQ(272,-15,276,-12,0,MT.concrete);surf(272,-15,276,-12,0);
- stairs(272,-21,275.8,-15,0,TOP,'z+',MT.concrete);slab(hx0+.2,-15,275.8,-12.2,TOP,.3,MT.concrete);railing(272,-21,272,-15,0,{y2:TOP,m:MT.metal});
+ stairs(272,-21,275.8,-15,0,TOP,'z+',MT.concrete,{sides:1});slab(hx0+.2,-15,275.8,-12.2,TOP,.3,MT.concrete);railing(272,-21,272,-15,0,{y2:TOP,m:MT.metal});
  for(let i=0;i<3;i++)box(hx0+.05,0,-20.6+i*1.6,hx0+.4,1.9,-19.3+i*1.6,MT.plain('#e9e3da'));box(274.5,0,-14.2,275.7,1.1,-13,MT.plain('#5a7a9a'));addLight(273,2.6,-17,[1,.95,.9],7,.9);addLight(273,6.4,-13,[1,.95,.9],6,.9);
  // 1336: the party that never stops
  mr({x0:sb(9),z0:12,x1:264,z1:22,h:3,fl:MT.carpetGrey,wa:MT.wallHotel,n:'1336',mc:'#4a1a4a'});

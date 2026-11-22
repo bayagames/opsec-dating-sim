@@ -184,6 +184,8 @@ function buildStation(){
   box(x-.75,1.25,z-.3,x+.75,1.28,z+.3,MT.gloss('#2a2026'),{col:false});kStool(x,z-1.05,.48,MT.gloss('#1a1416'));kSign(x,.95,z-.306,.8,.18,'n','PLAY ME','#ffd166','#1b1026')}
  // pendant lights in the concourse
  for(const x of[712,736,760])for(const z of[27,41])if(!(x===736&&z===27))kPendant(x,CY-.5,z,3.2,.3,'#ffe2b0',10,.45);
+ // the busker's pitch between the planters: a warm pool of light so whoever plays there isn't in the dark
+ kPendant(715.5,CY-.5,34.6,3.2,.3,'#ffd9a8',9,.7);addLight(715.5,2.4,35.6,[1,.86,.66],6,.55);
  vfx('dust',{b0:[702,.4,21],b1:[770,9,47],n:160,size:1.2,col:[1,.92,.8],op:.28,sp:.5});
  vfx('dust',{b0:[702,.4,-60],b1:[770,12,12],n:200,size:1.4,col:[1,.92,.8],op:.26,sp:.4});
  vfx('birds',{b0:[712,14,-50],b1:[760,20,-10],n:7,size:.5,col:[.3,.3,.34],op:.9,sp:.5});

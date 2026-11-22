@@ -63,8 +63,8 @@ const CLUE={
 /* mysteries: answer a (index into opts), and the clues that prove it (any three) */
 const MYST={
  m1:{n:'The Bakery Job',q:'Who stole Proof\'s account?',opts:['A random scammer with a breach list','Lumen Growth Partners: Lumen itself','WHISPER','Someone Ellie knows'],a:1,ev:['recovery','fwdrule','lgpdomain','lgpcall','breakin'],xp:20},
- m2:{n:'WHISPER',q:'Who is WHISPER?',opts:['Nyx','Mira, the silver-haired woman on the roof','Juno','Victor Hale himself'],a:1,ev:['sniffer','cipher','vod','dmtrace','mirasays'],xp:25},
- m3:{n:'The Copycat',q:'Who is WH1SPER?',opts:['WHISPER, getting worse','Lumen: Silas Krall\'s "Trust & Safety" team','Dave, getting revenge','A random troll'],a:1,ev:['daveonly','realaddr','locdata','r1313','burner','tsfolder','framepost','breakin','buriedphone'],xp:30},
+ m2:{n:'WHISPER',q:'Who is the real WHISPER, the hacker who warned you?',opts:['Nyx','Mira, the silver-haired woman on the roof','Juno','Victor Hale himself'],a:1,ev:['sniffer','cipher','vod','dmtrace','mirasays'],xp:25},
+ m3:{n:'The Copycat',q:'The copycat signs as WH1SPER, with a one. Who is really behind it?',opts:['WHISPER, getting worse','Lumen: Silas Krall\'s "Trust & Safety" team','Dave, getting revenge','A random troll'],a:1,ev:['daveonly','realaddr','locdata','r1313','burner','tsfolder','framepost','breakin','buriedphone'],xp:30},
  m4:{n:'Lantern',q:'What is SafeSphere 2 really for?',opts:['Better ads','Fraud detection','A contact graph that finds sources: who talks to journalists, lawyers and regulators','A real privacy upgrade'],a:2,ev:['rinfind','graphcode','salesdeck','runsheet','sources','intern','locker','lifescore','lantern01','locdata'],xp:30},
  m5:{n:'The Badges',q:'Why do the con badges blink?',opts:['A firmware bug','Tilly\'s art project','A Lumen beacon feeding LANTERN who meets whom','WHISPER is tracking people'],a:2,ev:['fwhash','beacons','lantern01','uplink','owensign','framepost'],xp:25},
  m6:{n:'The Mole',q:'Who in Con Ops is feeding Lumen?',opts:['Marge','Owen Pryce','Tilly','Sunny'],a:1,ev:['owensign','owendebt','owen13','leaktest','raid'],xp:30},

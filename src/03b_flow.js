@@ -7,7 +7,7 @@ const sceneReq=g=>{const R=ROUTES[g];return R?R.req[scn(g)]:null};
 function sceneWhy(g){const R=ROUTES[g],i=scn(g);if(!R||i>=R.n)return null;const r=R.req[i];
  if(SC[g+i]===undefined)return'their story moves on in the main plot';
  if(typeof ROUTEBLOCK!=='undefined'&&ROUTEBLOCK[g]){const b=ROUTEBLOCK[g]();if(b)return b}
- {const sa=typeof sceneArea==='function'&&sceneArea(g+i);if(sa&&AREAS[sa]&&typeof areaLock==='function'&&areaLock(sa))return'it happens in the '+AREAS[sa].n+', which isn\'t open yet'}
+ {const sa=typeof sceneArea==='function'&&sceneArea(g+i);if(sa&&AREAS[sa]&&typeof areaLock==='function'&&areaLock(sa))return'not yet'}
  if(day()<r.d&&!(S.restore&&META.routes[g]))return'their story continues on Day '+r.d;
  if(aff(g)<r.a)return'needs ♥ '+r.a+' (you have '+aff(g)+')';
  if(r.sk&&rank('skill')<r.sk)return'needs Skill rank '+r.sk+' ('+RANKS.skill[r.sk]+')';

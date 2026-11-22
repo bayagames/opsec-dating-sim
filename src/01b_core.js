@@ -47,6 +47,7 @@ function fx(e){
    const raw=g;if(typeof affGain==='function')g=affGain(k,g);
    S.aff[k]=clamp(S.aff[k]+g,0,100);
    // words, not numbers: you feel it, you don't count it
+   const capT=!g&&raw>0;if(capT){S.capT=S.capT||{};if(S.capT[S.day+k]){continue}S.capT[S.day+k]=1}
    if(S.unl.aff&&raw){const nm=CH[k].name,t=raw<0?nm+' didn\'t like that':!g?nm+' has had a lot of you today':g>=9?nm+' ♥♥♥ loved that':g>=5?nm+' ♥♥ liked that':nm+' ♥ noticed';toast(t,raw<0?'var(--dim)':CH[k].col);if(typeof sfx==='function')sfx(raw>=0?'heartUp':'heartDown')}
    if(S.aff[k]>=100)ach('maxlove');
   }

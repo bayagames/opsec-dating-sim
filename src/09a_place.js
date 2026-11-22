@@ -108,15 +108,15 @@ opens('walkway ringN hallA',()=>S.day>1||f('d1_badge'),'Badge first. Registratio
 opens('link promenade lobby lifts cafe',()=>S.day>1||f('d1_open'),'The opening ceremony first: Hall A. The hotel will still be there afterwards.');
 opens('corridor room1337 room1336',()=>S.day>1||f('d1_checkin'),'You haven\'t checked in yet. Reception is on the Promenade.');
 opens('bar terrace garden',()=>S.day>1||f('d1_room'),'The bar opens tonight. Drop your bag in your room first.');
-opens('hallC badgelab foyerG',()=>S.day>=2,'Tomorrow. Tonight is for the bar and your bed.');
-opens('villagerow ctf lockpick soc hwv aero carhack soceng ics workshopA workshop ringE ringS gallery courtyard vendor constore demostage seconc',()=>S.day>2||bdone('d2_ctf'),'The villages open after the CTF kick-off in Hall C.');
+opens('hallC badgelab',()=>S.day>=2,'Tomorrow. Tonight is for the bar and your bed.');
+opens('villagerow ctf lockpick soc hwv aero carhack soceng ics workshopA workshop vendor constore demostage',()=>S.day>2||bdone('d2_ctf'),'Still setting up. A volunteer says the villages open later today.');
 opens('lounge naps quiet food fcterrace',()=>S.day>2||bdone('d2_rin'),'Doors open at midday.');
-opens('vrL1 creator arcade tabletop film cosplay seconc1 skygarden ring2 foyerG2 neconc neconc2 speakers hallB hallBback',()=>S.day>2||bdone('d2_badge'),'Not open yet. Check the Calendar on your phone for what\'s on.');
-opens('mezz hotelL1 lumenlounge ballroom meeting stairwell',()=>S.day>2||S.day===2&&S.slot>=3,'The mezzanine opens for the evening reception.');
-opens('library hotelL2 gym pool spa grill boutique press roof plantdeck housekeeping',()=>S.day>=3,'Not today. There\'s plenty to do where you are.');
-opens('noc carpark basement',()=>S.day>4||S.day===4&&S.slot>=1,'Staff and parking only. You\'ve no reason to be down there yet.');
-opens('mdf conops stafffw staffc service security stores kitchenC breakroom dock backstage conroof backstairs luggage',()=>S.day>4||bdone('d4_noc'),'STAFF ONLY. A volunteer with a radio is watching the door.');
-opens('backoffice pdining hkitchen plant tunnel tunnelN',()=>S.day>=5||f('heist_yes')&&S.day===4&&S.slot>=5,'Staff only. Not yet.');
+opens('vrL1 creator arcade tabletop film cosplay skygarden speakers hallB hallBback',()=>S.day>2||bdone('d2_badge'),'Doors closed. A sign says it opens this afternoon.');
+opens('lumenlounge ballroom meeting stairwell',()=>S.day>2||S.day===2&&S.slot>=3,'Private event setup. Closed until this evening.');
+opens('library gym pool spa grill boutique press roof plantdeck housekeeping',()=>S.day>=3,'Closed today.');
+opens('noc carpark basement',()=>S.day>4||S.day===4&&S.slot>=1,'Staff and parking only.');
+opens('mdf conops stafffw staffc service security stores kitchenC breakroom dock backstage conroof backstairs luggage',()=>S.day>4||bdone('d4_noc'),'STAFF ONLY.');
+opens('backoffice pdining hkitchen plant tunnel tunnelN',()=>S.day>=5||f('heist_yes')&&S.day===4&&S.slot>=5,'Staff only.');
 const OPENOF={};
 function areaLock(a){if(!S||window.__allOpen)return null;if(!Object.keys(OPENOF).length)for(const o of OPENS)for(const k of o.areas)OPENOF[k]=o;const o=OPENOF[a];return o&&!o.cond()?o.msg:null}
 /* ---------------- gates: ropes, locked doors and card readers that open with the story ---------------- */
@@ -148,11 +148,11 @@ function placeGates(){
  // luggage room: Nyx can show you how
  gate('con','door',-224,7.2,-224,8.8,0,()=>!!S.f.luggage,()=>null,'Luggage room');
  // staff keycard doors (Nyx's route, chapter 2): every way into the back of house
- const card=()=>!!S.f.keycard,cardMsg=()=>'STAFF ONLY. You tap nothing against the reader, because you have nothing. It blinks red at you, smugly.';
+ const card=()=>!!S.f.keycard,cardMsg=()=>'STAFF ONLY. You have no card to tap. The reader blinks red at you, smugly.';
  gate('con','card',-62.8,-64,-61.2,-64,0,card,cardMsg);gate('con','card',52,-64,54,-64,0,card,cardMsg);gate('con','card',121.2,-64,122.8,-64,0,card,cardMsg,'Kitchen');
  gate('con','card',-6.5,-136,-3.5,-136,1.6,card,cardMsg,'Backstage');gate('con','card',84.5,-111,87.5,-111,.8,card,cardMsg,'Backstage');gate('con','card',-91.5,-54,-88.5,-54,BY,card,cardMsg,'Service tunnel');
  // the Lumen Lounge
- gate('con','door',-137,-24,-135,-24,L1,()=>S.day>2||S.day===2&&S.slot>=3,()=>S.day<2||S.day===2&&S.slot<3?'LUMEN LOUNGE · INVITE ONLY. The door has a card reader and, somehow, an attitude.':'Locked. You\'d need someone with a staff key. Someone like a bartender. Or a former Lumen intern.','Lumen Lounge');
+ gate('con','door',-137,-24,-135,-24,L1,()=>S.day>2||S.day===2&&S.slot>=3,()=>S.day<2||S.day===2&&S.slot<3?'LUMEN LOUNGE · INVITE ONLY. The door has a card reader and, somehow, an attitude.':'Locked. The card reader blinks red.','Lumen Lounge');
  // hotel 13th floor + roof
  gate('home','door',-306,5.6,-306,6.4,7.1,()=>false,()=>'Ellie\'s flat. Locked, obviously. A sticky note on the door: "GONE TO WORK (DOWNSTAIRS) (OBVIOUSLY)".','Flat 2');
  gate('home','door',-306,5.6,-306,6.4,10.3,()=>false,()=>'FLAT 3. Locked. Behind the door, very faintly, a cat is watching you through the letterbox.','Flat 3');

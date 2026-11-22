@@ -17,7 +17,7 @@ const ICON={
  settings:['#d9d4cc','<circle cx="16" cy="16" r="4.5" fill="none" stroke="#1b1026" stroke-width="2.6"/><path d="M16 5v4M16 23v4M5 16h4M23 16h4M8.2 8.2l2.8 2.8M21 21l2.8 2.8M8.2 23.8l2.8-2.8M21 11l2.8-2.8" stroke="#1b1026" stroke-width="2.6" stroke-linecap="round"/>']
 };
 const APPN={messages:'Messages',calendar:'Calendar',map:'Map',hearts:'Hearts',cases:'Case board',stats:'Stats',story:'Story',achieve:'Achievements',bag:'Bag',saves:'Saves',log:'Log',settings:'Settings',quit:'Quit'};
-const APPU={messages:'phone',calendar:'notes',map:'map',hearts:'aff',cases:'clues',stats:'skill',story:'notes',achieve:'notes',bag:'cred'};
+const APPU={messages:'phone',calendar:'phone',map:'map',hearts:'aff',cases:'clues',stats:'skill',story:'phone',achieve:'phone',bag:'phone'};
 /* the phone: a home screen of apps; every app opens full screen. Back (or Esc) goes back to the home screen. */
 let phApp=null,phThread=null,phReg=null;const PH={case:null,pick:[],ans:null,heart:null,day:null,stab:'week',atab:'all',ctab:'board',sday:null};
 function phone(app){

@@ -943,6 +943,7 @@ function fx(e){
    const raw=g;if(typeof affGain==='function')g=affGain(k,g);
    S.aff[k]=clamp(S.aff[k]+g,0,100);
    // words, not numbers: you feel it, you don't count it
+   const capT=!g&&raw>0;if(capT){S.capT=S.capT||{};if(S.capT[S.day+k]){continue}S.capT[S.day+k]=1}
    if(S.unl.aff&&raw){const nm=CH[k].name,t=raw<0?nm+' didn\'t like that':!g?nm+' has had a lot of you today':g>=9?nm+' ♥♥♥ loved that':g>=5?nm+' ♥♥ liked that':nm+' ♥ noticed';toast(t,raw<0?'var(--dim)':CH[k].col);if(typeof sfx==='function')sfx(raw>=0?'heartUp':'heartDown')}
    if(S.aff[k]>=100)ach('maxlove');
   }
@@ -1331,8 +1332,8 @@ const CLUE={
 /* mysteries: answer a (index into opts), and the clues that prove it (any three) */
 const MYST={
  m1:{n:'The Bakery Job',q:'Who stole Proof\'s account?',opts:['A random scammer with a breach list','Lumen Growth Partners: Lumen itself','WHISPER','Someone Ellie knows'],a:1,ev:['recovery','fwdrule','lgpdomain','lgpcall','breakin'],xp:20},
- m2:{n:'WHISPER',q:'Who is WHISPER?',opts:['Nyx','Mira, the silver-haired woman on the roof','Juno','Victor Hale himself'],a:1,ev:['sniffer','cipher','vod','dmtrace','mirasays'],xp:25},
- m3:{n:'The Copycat',q:'Who is WH1SPER?',opts:['WHISPER, getting worse','Lumen: Silas Krall\'s "Trust & Safety" team','Dave, getting revenge','A random troll'],a:1,ev:['daveonly','realaddr','locdata','r1313','burner','tsfolder','framepost','breakin','buriedphone'],xp:30},
+ m2:{n:'WHISPER',q:'Who is the real WHISPER, the hacker who warned you?',opts:['Nyx','Mira, the silver-haired woman on the roof','Juno','Victor Hale himself'],a:1,ev:['sniffer','cipher','vod','dmtrace','mirasays'],xp:25},
+ m3:{n:'The Copycat',q:'The copycat signs as WH1SPER, with a one. Who is really behind it?',opts:['WHISPER, getting worse','Lumen: Silas Krall\'s "Trust & Safety" team','Dave, getting revenge','A random troll'],a:1,ev:['daveonly','realaddr','locdata','r1313','burner','tsfolder','framepost','breakin','buriedphone'],xp:30},
  m4:{n:'Lantern',q:'What is SafeSphere 2 really for?',opts:['Better ads','Fraud detection','A contact graph that finds sources: who talks to journalists, lawyers and regulators','A real privacy upgrade'],a:2,ev:['rinfind','graphcode','salesdeck','runsheet','sources','intern','locker','lifescore','lantern01','locdata'],xp:30},
  m5:{n:'The Badges',q:'Why do the con badges blink?',opts:['A firmware bug','Tilly\'s art project','A Lumen beacon feeding LANTERN who meets whom','WHISPER is tracking people'],a:2,ev:['fwhash','beacons','lantern01','uplink','owensign','framepost'],xp:25},
  m6:{n:'The Mole',q:'Who in Con Ops is feeding Lumen?',opts:['Marge','Owen Pryce','Tilly','Sunny'],a:1,ev:['owensign','owendebt','owen13','leaktest','raid'],xp:30},
@@ -1475,7 +1476,7 @@ const sceneReq=g=>{const R=ROUTES[g];return R?R.req[scn(g)]:null};
 function sceneWhy(g){const R=ROUTES[g],i=scn(g);if(!R||i>=R.n)return null;const r=R.req[i];
  if(SC[g+i]===undefined)return'their story moves on in the main plot';
  if(typeof ROUTEBLOCK!=='undefined'&&ROUTEBLOCK[g]){const b=ROUTEBLOCK[g]();if(b)return b}
- {const sa=typeof sceneArea==='function'&&sceneArea(g+i);if(sa&&AREAS[sa]&&typeof areaLock==='function'&&areaLock(sa))return'it happens in the '+AREAS[sa].n+', which isn\'t open yet'}
+ {const sa=typeof sceneArea==='function'&&sceneArea(g+i);if(sa&&AREAS[sa]&&typeof areaLock==='function'&&areaLock(sa))return'not yet'}
  if(day()<r.d&&!(S.restore&&META.routes[g]))return'their story continues on Day '+r.d;
  if(aff(g)<r.a)return'needs ♥ '+r.a+' (you have '+aff(g)+')';
  if(r.sk&&rank('skill')<r.sk)return'needs Skill rank '+r.sk+' ('+RANKS.skill[r.sk]+')';
@@ -1641,7 +1642,7 @@ beat('d1_station',{adv:1,t:'Central Station',steps:[
  {who:'pia',sc:'d1_pia',t:'Someone is playing the violin on the concourse',lbl:'Listen to the violinist'}]});
 beat('d1_train',{adv:1,t:'The train',steps:[{int:'train',sc:'d1_train',t:'Board the 16:12 at Platform 4'}]});
 beat('d1_arrival',{adv:1,t:'Arrival',steps:[
- {w:'vestibule',ws:['vestibule','foyer'],sc:'d1_doors',t:'Go into the convention centre'},
+ {auto:1,sc:'d1_doors',t:'Into the convention centre'},
  {int:'reg',sc:'d1_badge',t:'Pick up your badge at Registration, on the Foyer\'s west wall'},
  {int:'seat',sc:'d1_ceremony',t:'The opening ceremony: your seat in Hall A is lit up'},
  {int:'reception',sc:'d1_checkin',t:'Check in at the Halcyon: the Link off the Foyer, then the Promenade to reception'},
@@ -10494,7 +10495,9 @@ function approachMenu(g,go){const T=TASTE[g]||[];S.taste=S.taste||{};
  return[{choice:Object.keys(TONES).map(t=>({t:TONES[t],hint:tasteKnown(g,t)?(S.taste[g][t]>0?'They loved this last time':S.taste[g][t]<0?'They didn\'t enjoy this':'It was fine'):'',then:()=>{const v=tasteOf(g,t);(S.taste[g]=S.taste[g]||{})[t]=v;S.amult=S.amult||{};S.amult[g]=v>0?1.6:v<0?.45:1;
   if(v>0)ach('tastes');const ln=v>0?T[2]:v<0?T[3]:null;return[...(ln?[L(typeof worldLook==='function'?worldLook(g):g,v>0?'h':'d',ln)]:[]),...go(),()=>{if(S.amult)delete S.amult[g];return[]}]}}))}]}
 /* how much a moment can move someone: less the closer you are, and only so much a day */
-function affGain(k,g){if(g<=0)return g;g=g*((S.amult&&S.amult[k])||1)*Math.max(.35,1-S.aff[k]/150);
+function affGain(k,g){if(g<=0)return g;const hang=!!(S.amult&&S.amult[k]!==undefined);g=g*((S.amult&&S.amult[k])||1)*Math.max(.35,1-S.aff[k]/150);
+ // the daily limit is for time you choose to spend together; the story itself is never rationed
+ if(!hang)return Math.max(1,Math.round(g));
  const dk=S.day+':'+k;S.affd=S.affd||{};const room=Math.max(0,AFFCAP-(S.affd[dk]||0));g=Math.min(Math.round(g),room);S.affd[dk]=(S.affd[dk]||0)+g;return g}
 const warmToday=k=>S&&S.affd?S.affd[S.day+':'+k]||0:0;
 function seen(g){if(!S)return;S.seenD=S.seenD||{};S.seenD[g]=S.day}
@@ -10586,7 +10589,7 @@ function endingKey(){
  if(!romCount())return ROM.filter(g=>scn(g)>=2).length>=6?'opensource':'notfound';
  return'disclosure'}
 function finishEnding(k){
- S.ending=k;S.inWorld=0;WD.active=false;if(document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}if(typeof updBlur==='function')updBlur();META.ends[k]=1;META.runs=(META.runs||0)+1;saveMeta();ach('end_'+k);if(!S.fails)ach('survivor');if(S.foot<=5)ach('ghostfoot');
+ S.ending=k;S.inWorld=0;WD.active=false;if(typeof vcShow==='function')vcShow(false);if(document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}if(typeof updBlur==='function')updBlur();META.ends[k]=1;META.runs=(META.runs||0)+1;saveMeta();ach('end_'+k);if(!S.fails)ach('survivor');if(S.foot<=5)ach('ghostfoot');
  LS.set('opsec3_save','');
  const E=ENDINFO[k],seen=Object.keys(META.ends).length;
  const who=ROM.filter(loved);const face=k==='harem'?null:(S.partner||who[0]);
@@ -10755,8 +10758,8 @@ function stairs(x0,z0,x1,z1,y0,y1,dir,m,o){
  o=o||{};const n=Math.max(2,Math.round((y1-y0)/.19)),dh=(y1-y0)/n;const ax=dir[0],up=dir[1]==='+';
  const L=ax==='x'?x1-x0:z1-z0,dl=L/n;const nose=o.nose||MT.plain('#2a2230');
  for(let i=0;i<n;i++){const top=y0+(i+1)*dh;const a=up?i*dl:L-(i+1)*dl;
-  if(ax==='x'){box(x0+a,o.solid===false?top-.12:y0,z0,x0+a+dl,top,z1,m,{col:false,nz0:1,nz1:o.sides?0:1});const ex=up?x0+a:x0+a+dl;box(ex-.025,top-.03,z0,ex+.025,top+.005,z1,nose,{col:false,nz0:1,nz1:1})}
-  else{box(x0,o.solid===false?top-.12:y0,z0+a,x1,top,z0+a+dl,m,{col:false,nx0:1,nx1:o.sides?0:1});const ez=up?z0+a:z0+a+dl;box(x0,top-.03,ez-.025,x1,top+.005,ez+.025,nose,{col:false,nx0:1,nx1:1})}}
+  if(ax==='x'){box(x0+a,o.solid===false?top-.12:y0,z0,x0+a+dl,top,z1,m,{col:false,nz0:o.sides?0:1,nz1:o.sides?0:1});const ex=up?x0+a:x0+a+dl;box(ex-.025,top-.03,z0,ex+.025,top+.005,z1,nose,{col:false,nz0:1,nz1:1})}
+  else{box(x0,o.solid===false?top-.12:y0,z0+a,x1,top,z0+a+dl,m,{col:false,nx0:o.sides?0:1,nx1:o.sides?0:1});const ez=up?z0+a:z0+a+dl;box(x0,top-.03,ez-.025,x1,top+.005,ez+.025,nose,{col:false,nx0:1,nx1:1})}}
  ftag(x0,z0,x1,z1,Math.max(y0,y1),m.top||m,1);
  // a solid flight can't be walked into from behind or the side: stepped blocks under it, each no higher than the
  // lowest tread above it, so someone climbing never touches them. A floating flight (open risers) gets a slab of
@@ -11603,7 +11606,7 @@ function buildTower(){
  // fire stairs west (up to the public roof)
  mr({x0:212,z0:-8,x1:220,z1:8,h:7.6,nofloor:1,fl:MT.concrete,wa:MT.concrete,n:'Fire stairs',mc:'#4a4a5a'});
  floorQ(212,-8,220,-6,0,MT.concrete);surf(212,-8,220,-6,0);floorQ(216.5,-6,220,4,0,MT.concrete);surf(216.5,-6,220,4,0);
- stairs(212.4,-6,216.5,4,0,TOP,'z+',MT.concrete,{nose:MT.plain('#ffd166')});railing(216.5,-6,216.5,4,0,{y2:TOP,m:MT.plain('#ffd166')});
+ stairs(212.4,-6,216.5,4,0,TOP,'z+',MT.concrete,{nose:MT.plain('#ffd166'),sides:1});railing(216.5,-6,216.5,4,0,{y2:TOP,m:MT.plain('#ffd166')});
  slab(212.2,4,219.8,8,TOP,.3,MT.concrete);floorQ(212.2,4,219.8,7.8,0,MT.concrete);
  panel(219.79,1.2,-2,1.4,.35,'w',sign('ROOF ↑','#ff5d73','#3a3a44',256,64));panel(216,TOP+2.5,7.79,1.6,.4,'n',sign('ROOF TERRACE','#ff5d73','#3a3a44',256,64));
  addLight(216,2.6,-2,[1,.95,.85],8,1);addLight(216,6.4,5,[1,.95,.85],7,1);
@@ -11612,7 +11615,7 @@ function buildTower(){
  // housekeeping closet: service stairs up to the plant deck (how Mira gets up there)
  const hx0=nb(11);mr({x0:hx0,z0:-22,x1:276,z1:-12,h:7.6,nofloor:1,fl:MT.concrete,wa:MT.wallPale,n:'Housekeeping',mc:'#3a3a44'});
  floorQ(hx0,-22,276,-21,0,MT.concrete);surf(hx0,-22,276,-21,0);floorQ(hx0,-21,272,-12,0,MT.concrete);surf(hx0,-21,272,-12,0);floorQ(272,-15,276,-12,0,MT.concrete);surf(272,-15,276,-12,0);
- stairs(272,-21,275.8,-15,0,TOP,'z+',MT.concrete);slab(hx0+.2,-15,275.8,-12.2,TOP,.3,MT.concrete);railing(272,-21,272,-15,0,{y2:TOP,m:MT.metal});
+ stairs(272,-21,275.8,-15,0,TOP,'z+',MT.concrete,{sides:1});slab(hx0+.2,-15,275.8,-12.2,TOP,.3,MT.concrete);railing(272,-21,272,-15,0,{y2:TOP,m:MT.metal});
  for(let i=0;i<3;i++)box(hx0+.05,0,-20.6+i*1.6,hx0+.4,1.9,-19.3+i*1.6,MT.plain('#e9e3da'));box(274.5,0,-14.2,275.7,1.1,-13,MT.plain('#5a7a9a'));addLight(273,2.6,-17,[1,.95,.9],7,.9);addLight(273,6.4,-13,[1,.95,.9],6,.9);
  // 1336: the party that never stops
  mr({x0:sb(9),z0:12,x1:264,z1:22,h:3,fl:MT.carpetGrey,wa:MT.wallHotel,n:'1336',mc:'#4a1a4a'});
@@ -12543,6 +12546,8 @@ function buildStation(){
   box(x-.75,1.25,z-.3,x+.75,1.28,z+.3,MT.gloss('#2a2026'),{col:false});kStool(x,z-1.05,.48,MT.gloss('#1a1416'));kSign(x,.95,z-.306,.8,.18,'n','PLAY ME','#ffd166','#1b1026')}
  // pendant lights in the concourse
  for(const x of[712,736,760])for(const z of[27,41])if(!(x===736&&z===27))kPendant(x,CY-.5,z,3.2,.3,'#ffe2b0',10,.45);
+ // the busker's pitch between the planters: a warm pool of light so whoever plays there isn't in the dark
+ kPendant(715.5,CY-.5,34.6,3.2,.3,'#ffd9a8',9,.7);addLight(715.5,2.4,35.6,[1,.86,.66],6,.55);
  vfx('dust',{b0:[702,.4,21],b1:[770,9,47],n:160,size:1.2,col:[1,.92,.8],op:.28,sp:.5});
  vfx('dust',{b0:[702,.4,-60],b1:[770,12,12],n:200,size:1.4,col:[1,.92,.8],op:.26,sp:.4});
  vfx('birds',{b0:[712,14,-50],b1:[760,20,-10],n:7,size:.5,col:[.3,.3,.34],op:.9,sp:.5});
@@ -13951,7 +13956,7 @@ const WD={x:0,y:0,z:0,yaw:0,pit:0,vx:0,vz:0,vy:0,eye:1.62,ground:true,reg:'home'
 /* ---------- areas ---------- */
 /* the most specific area wins: 'sub' areas first, then the smallest rectangle (a café inside a lobby, a food court inside the courtyard) */
 function areaAt(reg,x,z,y){let best=null,bs=1e18;for(const k in AREAS){const a=AREAS[k];if(a.reg!==reg)continue;const r=a.r;if(x>=r[0]&&x<=r[2]&&z>=r[1]&&z<=r[3]&&y>=a.y0&&y<=a.y1){const sz=(r[2]-r[0])*(r[3]-r[1])/(a.sub?1e6:1);if(sz<bs){bs=sz;best=k}}}return best}
-function teleport(reg,x,z,yaw,y){G.poolReg=null;G.atmoInit=false;WD.reg=reg;WD.x=x;WD.z=z;WD.yaw=yaw;WD.pit=0;WD.y=y||0;WD.vy=0;WD.vx=WD.vz=0;WD.eye=WD.y+1.62}
+function teleport(reg,x,z,yaw,y){WD.tpAt=performance.now();G.poolReg=null;G.atmoInit=false;WD.reg=reg;WD.x=x;WD.z=z;WD.yaw=yaw;WD.pit=0;WD.y=y||0;WD.vy=0;WD.vx=WD.vz=0;WD.eye=WD.y+1.62}
 function teleportArea(k){const a=AREAS[k];if(!a)return;teleport(a.reg,a.sp[0],a.sp[1],a.sp[2],a.sp[3]||0)}
 const bgArea=k=>BG2AREA[k]||(typeof AREAS!=='undefined'&&AREAS[k]?k:null);
 /* are you in (or right at the edge of) this area? talking over a counter or through a doorway counts */
@@ -14008,7 +14013,8 @@ function setupInput(){
   WD.locked=document.pointerLockElement===lockEl();
   if(WD.locked){WD.everLocked=true;WD.lockFails=0;WD.lockAt=performance.now();return}
   WD.unlockAt=performance.now();
-  const self=WD.selfUnlock;WD.selfUnlock=false;
+  // our own unlocks, loading screens and the moments after a teleport never count as the player asking for the phone
+  const self=WD.selfUnlock||G.baking||G.lmBusy||performance.now()-(WD.tpAt||0)<2500||!S||S.ending||!S.inWorld;WD.selfUnlock=false;
   // a lock that dies within a moment of being granted was the browser finishing an Esc press, not the player asking for the phone
   if(performance.now()-(WD.lockAt||0)<450)return;
   // Esc released the mouse: that's the "open phone" key
@@ -14041,7 +14047,7 @@ function setupInput(){
 /* step back into mouse-look (after the phone closes, a scene ends...). While Esc is held, wait for it to come up:
    locking during an Esc press hands the browser an Esc to cancel the lock with, and the phone pops straight back */
 function relock(){if(WD.touch||WD.noLock||locked())return;if(WD.escDown){WD.lockAfterEsc=true;return}tryLock()}
-function tryLock(){if(WD.touch||WD.noLock)return;const el=lockEl();if(document.pointerLockElement===el)return;try{const p=el.requestPointerLock&&el.requestPointerLock();if(p&&p.catch)p.catch(()=>{})}catch(e){}}
+function tryLock(){if(WD.touch||WD.noLock||!S||!S.inWorld||S.ending||$('title').classList.contains('on'))return;const el=lockEl();if(document.pointerLockElement===el)return;try{const p=el.requestPointerLock&&el.requestPointerLock();if(p&&p.catch)p.catch(()=>{})}catch(e){}}
 function setTouch(on){WD.touch=on;document.body.classList.toggle('touchui',on);document.body.classList.toggle('desk',!on)}
 /* dx>0 (mouse/finger moves right) turns right; dy<0 (moves up) looks up. Never inverted. */
 function look(dx,dy,k){const s=lookSens();WD.yaw-=dx*k*s;WD.pit=clamp(WD.pit-dy*k*s,-1.25,1.25)}
@@ -14101,6 +14107,8 @@ function update(dt){
 const ACTIV={ctf:['Practise a CTF challenge',()=>ctfPractice()],hallB:['Catch a talk in Hall B',()=>attendTalk()],hallC:['Catch a talk in Hall C',()=>attendTalk()],workshopA:['Join the workshop',()=>attendTalk()],workshop:['Join the workshop',()=>attendTalk()],lounge:['Take a breather',()=>restSlot()],naps:['Borrow a nap pod',()=>restSlot()],quiet:['Sit in the quiet for a while',()=>restSlot()]};
 /* stepping into an area that isn't open yet: you stop at its edge and are told why (never trapped: you can always leave) */
 function lockedAt(reg,x,z,y){const a=areaAt(reg,x,z,y);if(!a||a===WD.area)return false;const m=areaLock(a);if(!m)return false;
+ // already somewhere that's closed (a lift, a scene, a gap): every way out is open, so nobody gets stuck
+ if(WD.area&&areaLock(WD.area))return false;
  if(performance.now()-(WD.lockT||0)>2500){WD.lockT=performance.now();toast(m,'var(--coral)')}return true}
 function visibleChars(){return WCH.filter(c=>c.reg===WD.reg&&c.when())}
 function candidates(){
@@ -14354,7 +14362,8 @@ function loop(t){
  const dt=Math.min(.05,(t-(WD.t||t))/1000);WD.t=t;
  // the place you're in needs its lightmaps on the GPU (loaded from cache, or baked on a first visit)
  if(S&&S.inWorld&&G.ok&&G.baked){const R=G.regions[WD.reg];if(R&&!R.lmTex&&!R.lmSkip){if(!G.lmBusy)regionNeed(WD.reg,true);else lmUI(true,G.lmBusy,null,G.bakeP)}}
- if(!S||!S.inWorld||!G.ok||G.baking||$('gl').style.display==='none')return;
+ if(!S||!S.inWorld||S.ending){vcShow(false);if(locked()){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}return}
+ if(!G.ok||G.baking||$('gl').style.display==='none')return;
  const live=worldLive();
  if(live)update(dt);
  // behind a conversation the world is blurred: a few frames a second is plenty
@@ -14499,15 +14508,15 @@ opens('walkway ringN hallA',()=>S.day>1||f('d1_badge'),'Badge first. Registratio
 opens('link promenade lobby lifts cafe',()=>S.day>1||f('d1_open'),'The opening ceremony first: Hall A. The hotel will still be there afterwards.');
 opens('corridor room1337 room1336',()=>S.day>1||f('d1_checkin'),'You haven\'t checked in yet. Reception is on the Promenade.');
 opens('bar terrace garden',()=>S.day>1||f('d1_room'),'The bar opens tonight. Drop your bag in your room first.');
-opens('hallC badgelab foyerG',()=>S.day>=2,'Tomorrow. Tonight is for the bar and your bed.');
-opens('villagerow ctf lockpick soc hwv aero carhack soceng ics workshopA workshop ringE ringS gallery courtyard vendor constore demostage seconc',()=>S.day>2||bdone('d2_ctf'),'The villages open after the CTF kick-off in Hall C.');
+opens('hallC badgelab',()=>S.day>=2,'Tomorrow. Tonight is for the bar and your bed.');
+opens('villagerow ctf lockpick soc hwv aero carhack soceng ics workshopA workshop vendor constore demostage',()=>S.day>2||bdone('d2_ctf'),'Still setting up. A volunteer says the villages open later today.');
 opens('lounge naps quiet food fcterrace',()=>S.day>2||bdone('d2_rin'),'Doors open at midday.');
-opens('vrL1 creator arcade tabletop film cosplay seconc1 skygarden ring2 foyerG2 neconc neconc2 speakers hallB hallBback',()=>S.day>2||bdone('d2_badge'),'Not open yet. Check the Calendar on your phone for what\'s on.');
-opens('mezz hotelL1 lumenlounge ballroom meeting stairwell',()=>S.day>2||S.day===2&&S.slot>=3,'The mezzanine opens for the evening reception.');
-opens('library hotelL2 gym pool spa grill boutique press roof plantdeck housekeeping',()=>S.day>=3,'Not today. There\'s plenty to do where you are.');
-opens('noc carpark basement',()=>S.day>4||S.day===4&&S.slot>=1,'Staff and parking only. You\'ve no reason to be down there yet.');
-opens('mdf conops stafffw staffc service security stores kitchenC breakroom dock backstage conroof backstairs luggage',()=>S.day>4||bdone('d4_noc'),'STAFF ONLY. A volunteer with a radio is watching the door.');
-opens('backoffice pdining hkitchen plant tunnel tunnelN',()=>S.day>=5||f('heist_yes')&&S.day===4&&S.slot>=5,'Staff only. Not yet.');
+opens('vrL1 creator arcade tabletop film cosplay skygarden speakers hallB hallBback',()=>S.day>2||bdone('d2_badge'),'Doors closed. A sign says it opens this afternoon.');
+opens('lumenlounge ballroom meeting stairwell',()=>S.day>2||S.day===2&&S.slot>=3,'Private event setup. Closed until this evening.');
+opens('library gym pool spa grill boutique press roof plantdeck housekeeping',()=>S.day>=3,'Closed today.');
+opens('noc carpark basement',()=>S.day>4||S.day===4&&S.slot>=1,'Staff and parking only.');
+opens('mdf conops stafffw staffc service security stores kitchenC breakroom dock backstage conroof backstairs luggage',()=>S.day>4||bdone('d4_noc'),'STAFF ONLY.');
+opens('backoffice pdining hkitchen plant tunnel tunnelN',()=>S.day>=5||f('heist_yes')&&S.day===4&&S.slot>=5,'Staff only.');
 const OPENOF={};
 function areaLock(a){if(!S||window.__allOpen)return null;if(!Object.keys(OPENOF).length)for(const o of OPENS)for(const k of o.areas)OPENOF[k]=o;const o=OPENOF[a];return o&&!o.cond()?o.msg:null}
 /* ---------------- gates: ropes, locked doors and card readers that open with the story ---------------- */
@@ -14539,11 +14548,11 @@ function placeGates(){
  // luggage room: Nyx can show you how
  gate('con','door',-224,7.2,-224,8.8,0,()=>!!S.f.luggage,()=>null,'Luggage room');
  // staff keycard doors (Nyx's route, chapter 2): every way into the back of house
- const card=()=>!!S.f.keycard,cardMsg=()=>'STAFF ONLY. You tap nothing against the reader, because you have nothing. It blinks red at you, smugly.';
+ const card=()=>!!S.f.keycard,cardMsg=()=>'STAFF ONLY. You have no card to tap. The reader blinks red at you, smugly.';
  gate('con','card',-62.8,-64,-61.2,-64,0,card,cardMsg);gate('con','card',52,-64,54,-64,0,card,cardMsg);gate('con','card',121.2,-64,122.8,-64,0,card,cardMsg,'Kitchen');
  gate('con','card',-6.5,-136,-3.5,-136,1.6,card,cardMsg,'Backstage');gate('con','card',84.5,-111,87.5,-111,.8,card,cardMsg,'Backstage');gate('con','card',-91.5,-54,-88.5,-54,BY,card,cardMsg,'Service tunnel');
  // the Lumen Lounge
- gate('con','door',-137,-24,-135,-24,L1,()=>S.day>2||S.day===2&&S.slot>=3,()=>S.day<2||S.day===2&&S.slot<3?'LUMEN LOUNGE · INVITE ONLY. The door has a card reader and, somehow, an attitude.':'Locked. You\'d need someone with a staff key. Someone like a bartender. Or a former Lumen intern.','Lumen Lounge');
+ gate('con','door',-137,-24,-135,-24,L1,()=>S.day>2||S.day===2&&S.slot>=3,()=>S.day<2||S.day===2&&S.slot<3?'LUMEN LOUNGE · INVITE ONLY. The door has a card reader and, somehow, an attitude.':'Locked. The card reader blinks red.','Lumen Lounge');
  // hotel 13th floor + roof
  gate('home','door',-306,5.6,-306,6.4,7.1,()=>false,()=>'Ellie\'s flat. Locked, obviously. A sticky note on the door: "GONE TO WORK (DOWNSTAIRS) (OBVIOUSLY)".','Flat 2');
  gate('home','door',-306,5.6,-306,6.4,10.3,()=>false,()=>'FLAT 3. Locked. Behind the door, very faintly, a cat is watching you through the letterbox.','Flat 3');
@@ -14939,7 +14948,7 @@ const ICON={
  settings:['#d9d4cc','<circle cx="16" cy="16" r="4.5" fill="none" stroke="#1b1026" stroke-width="2.6"/><path d="M16 5v4M16 23v4M5 16h4M23 16h4M8.2 8.2l2.8 2.8M21 21l2.8 2.8M8.2 23.8l2.8-2.8M21 11l2.8-2.8" stroke="#1b1026" stroke-width="2.6" stroke-linecap="round"/>']
 };
 const APPN={messages:'Messages',calendar:'Calendar',map:'Map',hearts:'Hearts',cases:'Case board',stats:'Stats',story:'Story',achieve:'Achievements',bag:'Bag',saves:'Saves',log:'Log',settings:'Settings',quit:'Quit'};
-const APPU={messages:'phone',calendar:'notes',map:'map',hearts:'aff',cases:'clues',stats:'skill',story:'notes',achieve:'notes',bag:'cred'};
+const APPU={messages:'phone',calendar:'phone',map:'map',hearts:'aff',cases:'clues',stats:'skill',story:'phone',achieve:'phone',bag:'phone'};
 /* the phone: a home screen of apps; every app opens full screen. Back (or Esc) goes back to the home screen. */
 let phApp=null,phThread=null,phReg=null;const PH={case:null,pick:[],ans:null,heart:null,day:null,stab:'week',atab:'all',ctab:'board',sday:null};
 function phone(app){

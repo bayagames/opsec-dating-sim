@@ -83,7 +83,7 @@ function endingKey(){
  if(!romCount())return ROM.filter(g=>scn(g)>=2).length>=6?'opensource':'notfound';
  return'disclosure'}
 function finishEnding(k){
- S.ending=k;S.inWorld=0;WD.active=false;if(document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}if(typeof updBlur==='function')updBlur();META.ends[k]=1;META.runs=(META.runs||0)+1;saveMeta();ach('end_'+k);if(!S.fails)ach('survivor');if(S.foot<=5)ach('ghostfoot');
+ S.ending=k;S.inWorld=0;WD.active=false;if(typeof vcShow==='function')vcShow(false);if(document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}if(typeof updBlur==='function')updBlur();META.ends[k]=1;META.runs=(META.runs||0)+1;saveMeta();ach('end_'+k);if(!S.fails)ach('survivor');if(S.foot<=5)ach('ghostfoot');
  LS.set('opsec3_save','');
  const E=ENDINFO[k],seen=Object.keys(META.ends).length;
  const who=ROM.filter(loved);const face=k==='harem'?null:(S.partner||who[0]);

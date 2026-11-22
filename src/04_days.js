@@ -25,7 +25,7 @@ beat('d1_station',{adv:1,t:'Central Station',steps:[
  {who:'pia',sc:'d1_pia',t:'Someone is playing the violin on the concourse',lbl:'Listen to the violinist'}]});
 beat('d1_train',{adv:1,t:'The train',steps:[{int:'train',sc:'d1_train',t:'Board the 16:12 at Platform 4'}]});
 beat('d1_arrival',{adv:1,t:'Arrival',steps:[
- {w:'vestibule',ws:['vestibule','foyer'],sc:'d1_doors',t:'Go into the convention centre'},
+ {auto:1,sc:'d1_doors',t:'Into the convention centre'},
  {int:'reg',sc:'d1_badge',t:'Pick up your badge at Registration, on the Foyer\'s west wall'},
  {int:'seat',sc:'d1_ceremony',t:'The opening ceremony: your seat in Hall A is lit up'},
  {int:'reception',sc:'d1_checkin',t:'Check in at the Halcyon: the Link off the Foyer, then the Promenade to reception'},
