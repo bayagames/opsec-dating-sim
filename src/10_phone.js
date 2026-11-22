@@ -26,7 +26,7 @@ function phone(app){
  phApp=app||null;phThread=null;phReg=null;drawPhone();
  if(opening){const ph=$('ov').querySelector('.phone');if(ph)ph.classList.add('opening');if(typeof sfx==='function')sfx('phoneOpen')}
 }
-function closePhone(){if($('ov').classList.contains('phoneov')&&typeof sfx==='function')sfx('phoneClose');closeOv();$('ov').classList.remove('phoneov');if(G.ok&&S&&S.inWorld)relock();if($('vn').classList.contains('on'))return;if(G.ok&&S.inWorld)hub();else if($('hub').classList.contains('on'))hub()}
+function closePhone(){if($('ov').classList.contains('phoneov')&&typeof sfx==='function')sfx('phoneClose');closeOv();$('ov').classList.remove('phoneov','mapov');if(G.ok&&S&&S.inWorld)relock();if($('vn').classList.contains('on'))return;if(G.ok&&S.inWorld)hub();else if($('hub').classList.contains('on'))hub()}
 function drawPhone(){
  const apps=Object.keys(APPN).filter(a=>!APPU[a]||S.unl[APPU[a]]);
  const unread=S.msgs.filter(m=>!m.r).length,nn=S.ch>0&&G.ok?newScenes().length:0;
@@ -38,11 +38,11 @@ function drawPhone(){
   body=APPS[phApp]();
  }
  ov(`<div class="phone"><div class="pbar"><span>${S.ch>0?'CTRL+ALT+NET':'HOME-WIFI'}</span><span>${PTIME[S.ch]||''}</span><span class="bat"><b style="width:${Math.max(8,92-S.ch*13)}%"></b></span></div>${phApp?`<div class="ptop"><button class="pback" id="pback" aria-label="Back">‹</button><b>${phThread?esc(CH[phThread]?CH[phThread].name:phThread):title}</b></div>`:''}<div class="pbody">${body}</div><button class="phome" id="phome" aria-label="Close phone"></button></div>`);
- $('ov').classList.add('phoneov');updBlur();
+ $('ov').classList.remove('mapov');$('ov').classList.add('phoneov');updBlur();
  $('ov').onclick=e=>{if(e.target===$('ov'))closePhone()};
  $('phome').onclick=closePhone;
  if($('pback'))$('pback').onclick=()=>{if(phThread){phThread=null}else phApp=null;drawPhone()};
- $('ov').querySelectorAll('.app').forEach(b=>b.onclick=()=>{phApp=b.dataset.a;drawPhone()});
+ $('ov').querySelectorAll('.app').forEach(b=>b.onclick=()=>{if(b.dataset.a==='map'){mapOpen();return}phApp=b.dataset.a;drawPhone()});
  if(APPS_AFTER[phApp])APPS_AFTER[phApp]();
 }
 const bar=(v,c)=>`<div class="bar"><i style="width:${v}%;background:${c}"></i></div>`;

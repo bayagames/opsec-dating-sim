@@ -307,7 +307,7 @@ function placeWorld(){
  int('con',FOODPOS[4].x,FOODPOS[4].z,()=>'Order dumplings',N1('Six dumplings in a paper boat. The chef folds them faster than you can watch. "Mind, they\'re hot," he says, as you burn your mouth.'));
  int('con',FOODPOS[5].x,FOODPOS[5].z,()=>'Get a cold brew',N1('Cold brew in a can with a QR code on it. You don\'t scan it. The barista nods: "Good instinct."'));
  for(const y of[L1,L2])int('con',-212,-27,()=>'Call the lift',()=>liftMenu(),{y});
- int('con',-104,-22.6,()=>'Call the lift',()=>conLift());for(const y of[L1,L2])int('con',-68,-1.2,()=>'Call the lift',()=>conLift(),{y});int('con',-104,-52.4,()=>'Call the lift',()=>conLift(),{y:BY});
+ int('con',-104,-22.6,()=>'Call the lift',()=>conLift());int('con',-104,-22.6,()=>'Call the lift',()=>conLift(),{y:L1});int('con',-104,-52.4,()=>'Call the lift',()=>conLift(),{y:BY});
  int('con',-213.6,49.6,()=>'Play the lobby piano',N1('You play the four notes of the only song you know. The piano, which is a MIDI device, plays the rest of the song for you. Somebody in the lobby claps. You bow, as if you meant it.'));
  int('con',-243,-26.4,()=>'Warm up by the library fire',N1('Leather chairs, shelves to the ceiling, a fire that is definitely gas but commits to the bit. A book on the arm of a chair: "Social Engineering: The Art of Human Hacking". Someone has left a bookmark at chapter one. Ominous.'),{y:L1});
  int('con',-159,-56.6,()=>'Look at the ballroom stage',N1('A banner: "LUMEN PARTNER GALA · TONIGHT". The tables are laid for two hundred. Every place card has a SafeSphere logo and a QR code. You turn one face-down. Then all of them on your table.'),{y:L1});
@@ -360,7 +360,7 @@ function liftMenu(){
 function conLift(){
  const lv=WD.y<-2?'B':WD.y>8?'2':WD.y>3?'1':'G',go=(x,z,yaw,y)=>()=>{fadeTp(()=>teleport('con',x,z,yaw,y));return[]};
  run([{hide:1},N('A glass lift. Someone has stuck a sticker over the "door close" button that says "placebo".'),C(
-  {t:'G · Foyer',if:()=>lv!=='G',then:go(-104,-21.6,Math.PI,0)},{t:'1 · Foyer gallery',if:()=>lv!=='1',then:go(-68,0,Math.PI,L1)},{t:'2 · Level 2',if:()=>lv!=='2',then:go(-68,0,Math.PI,L2)},
+  {t:'G · Foyer',if:()=>lv!=='G',then:go(-104,-21.6,Math.PI,0)},{t:'1 · North gallery (Skybridge)',if:()=>lv!=='1',then:go(-104,-21.6,Math.PI,L1)},
   {t:'B · Car park',if:()=>S.ch>=2&&lv!=='B',then:go(-104,-51,Math.PI,BY)},{t:'Stay here',then:[]})],hub);
 }
 function serviceLift(){

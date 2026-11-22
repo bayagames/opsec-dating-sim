@@ -103,7 +103,7 @@ function buildCore(){
  for(const[x,z]of[[-90,40],[-108,22],[-90,2],[-108,14]]){box(x-.1,0,z-.1,x+.1,6,z+.1,MT.plain('#2a2a34'),{col:false});box(x-.3,6,z-.3,x+.3,6.3,z+.3,MT.glow('#fff0f8',1.6),{col:false,b:1});addLight(x,5.6,z,[1,.94,.98],13,.75)}
  for(const[x,z]of[[-98,-2],[-78,-2],[-98,30],[-78,46],[-96,-18],[-80,-18]])addLight(x,12,z,[.92,.88,1],22,.7);
  // the lifts on the north wall (two cars; they serve G, L1, L2 and the car park)
- for(const x of[-106,-102]){kOnWall('h',-23.8,1,x,1.6,0,2.5,mt('lift',0,1,0,{r:.25,m:.7}));box(x-.9,2.5,-23.8,x+.9,2.62,-23.75,CH,{col:false})}kSign(-104,2.9,-23.78,4,.4,'s','LIFTS · ALL LEVELS · CAR PARK','#8affc1','#1b1026');
+ for(const y of[0,L1])for(const x of[-106,-102]){kOnWall('h',-23.8,1,x,1.6,y,2.5,mt('lift',0,1,0,{r:.25,m:.7}));box(x-.9,y+2.5,-23.8,x+.9,y+2.62,-23.75,CH,{col:false})}kSign(-104,2.9,-23.78,4,.4,'s','LIFTS · LEVEL 1 · CAR PARK','#8affc1','#1b1026');kSign(-104,L1+2.9,-23.78,4,.4,'s','LIFTS · FOYER · CAR PARK','#8affc1','#1b1026');
  for(const[x,z]of[[-100,-9],[-76,-9]])box(x-1.6,0,z-.35,x+1.6,.45,z+.35,{side:MT.clad,top:MT.woodDark});kPlanter(-89.4,-10.4,-86.6,-7.6,.7,0,MT.clad);card(-88,.7,-9,3.6,4.2,.4,MT.leaves);card(-88,.7,-9,3.6,4.2,.4+Math.PI/2,MT.leaves);card(-88,2.8,-9,3,3,1.2,MT.leaves);
  mr(-110,-24,-64,60,0,'Foyer','#4a3a5a');mr(-96,60,-80,68,0,'Entrance','#3a2a4a');mr(-72,-24,-64,60,L1,'','#3a2a4a');mr(-82,22,-72,30,L1,'','#3a2a4a');mr(-110,-24,-72,-14,L1,'','#3a2a4a');mr(-72,-24,-64,60,L2,'','#3a2a4a');mr(-82,4,-72,12,L2,'','#3a2a4a');
  buildHallC();
