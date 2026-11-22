@@ -58,7 +58,7 @@ function kPaper(x,y,z,n){for(let i=0;i<(n||1);i++)box(x-.105+i*.01,y+i*.004,z-.1
 function kPanelLight(x,y,z,w,d,col,rng,int){box(x-w/2,y-.04,z-d/2,x+w/2,y,z+d/2,MT.plain('#d8dce4'),{col:false,nt:1});box(x-w/2+.03,y-.045,z-d/2+.03,x+w/2-.03,y-.04,z+d/2-.03,MT.glow(col||'#f4f6ff',1.2),{col:false,b:1,nt:1});addLight(x,y-.35,z,hx(col||'#f4f6ff'),rng||7,int||.6,1)}
 // a pendant: flex, shade, glowing underside
 function kPendant(x,y,z,len,r,col,rng,int,shade){box(x-.006,y-len,z-.006,x+.006,y,z+.006,MT.plain('#222'),{col:false});box(x-r,y-len-.22,z-r,x+r,y-len,z+r,MT.plain(shade||'#1a1a20'),{col:false,nt:1});
- box(x-r+.02,y-len-.225,z-r+.02,x+r-.02,y-len-.215,z+r-.02,MT.glow(col||'#ffe2b0',1.3),{col:false,b:1,nt:1});addLight(x,y-len-.45,z,hx(col||'#ffe2b0'),rng||6,int||.7)}
+ box(x-r+.02,y-len-.225,z-r+.02,x+r-.02,y-len-.215,z+r-.02,MT.glow(col||'#ffe2b0',1.3),{col:false,b:1,nt:1});addLight(x,y-len-.45,z,hx(col||'#ffe2b0'),rng||6,int||.7,1)}
 // a street lamp (daytime: no light of its own)
 function kStreetLamp(x,z,y){const m=MT.plain('#2a2a30');box(x-.07,y,z-.07,x+.07,y+.5,z+.07,m,{col:false});box(x-.045,y+.5,z-.045,x+.045,y+5.2,z+.045,m,{col:false});box(x-.22,y+5.2,z-.22,x+.22,y+5.5,z+.22,m,{col:false});box(x-.16,y+5.15,z-.16,x+.16,y+5.2,z+.16,MT.plain('#f4efe6'),{col:false})}
 // a stepped pyramid roof (quads can only be parallelograms, so steps stand in for slopes far away)

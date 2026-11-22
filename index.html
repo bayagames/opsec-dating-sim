@@ -3133,7 +3133,7 @@ function kPaper(x,y,z,n){for(let i=0;i<(n||1);i++)box(x-.105+i*.01,y+i*.004,z-.1
 function kPanelLight(x,y,z,w,d,col,rng,int){box(x-w/2,y-.04,z-d/2,x+w/2,y,z+d/2,MT.plain('#d8dce4'),{col:false,nt:1});box(x-w/2+.03,y-.045,z-d/2+.03,x+w/2-.03,y-.04,z+d/2-.03,MT.glow(col||'#f4f6ff',1.2),{col:false,b:1,nt:1});addLight(x,y-.35,z,hx(col||'#f4f6ff'),rng||7,int||.6,1)}
 // a pendant: flex, shade, glowing underside
 function kPendant(x,y,z,len,r,col,rng,int,shade){box(x-.006,y-len,z-.006,x+.006,y,z+.006,MT.plain('#222'),{col:false});box(x-r,y-len-.22,z-r,x+r,y-len,z+r,MT.plain(shade||'#1a1a20'),{col:false,nt:1});
- box(x-r+.02,y-len-.225,z-r+.02,x+r-.02,y-len-.215,z+r-.02,MT.glow(col||'#ffe2b0',1.3),{col:false,b:1,nt:1});addLight(x,y-len-.45,z,hx(col||'#ffe2b0'),rng||6,int||.7)}
+ box(x-r+.02,y-len-.225,z-r+.02,x+r-.02,y-len-.215,z+r-.02,MT.glow(col||'#ffe2b0',1.3),{col:false,b:1,nt:1});addLight(x,y-len-.45,z,hx(col||'#ffe2b0'),rng||6,int||.7,1)}
 // a street lamp (daytime: no light of its own)
 function kStreetLamp(x,z,y){const m=MT.plain('#2a2a30');box(x-.07,y,z-.07,x+.07,y+.5,z+.07,m,{col:false});box(x-.045,y+.5,z-.045,x+.045,y+5.2,z+.045,m,{col:false});box(x-.22,y+5.2,z-.22,x+.22,y+5.5,z+.22,m,{col:false});box(x-.16,y+5.15,z-.16,x+.16,y+5.2,z+.16,MT.plain('#f4efe6'),{col:false})}
 // a stepped pyramid roof (quads can only be parallelograms, so steps stand in for slopes far away)
@@ -5501,12 +5501,12 @@ function buildUnder(){
   for(let i=0;i<7;i++){box(-166,BY,-50+i*3,-163,BY+1.1,-48+i*3,MT.chrome);box(-166.02,BY+.4,-49.4+i*3,-166,BY+.9,-48.6+i*3,MT.glass,{col:false})}
   for(let i=0;i<4;i++){box(-186+i*3,BY,-4,-184+i*3,BY+1,-2.6,MT.plain('#5a7a9a'));box(-186+i*3,BY+1,-4,-184+i*3,BY+1.2,-2.6,MT.linen,{col:false})}
   for(let i=0;i<4;i++)box(-188+i*1.1,CE-1,6+i*1.3,-187.4+i*1.1,CE-.1,6.6+i*1.3,mt('white','#f4f4f8',.5,0,{glass:1}),{col:false});
-  kSign(-180,BY+2.6,-53.78,6,.5,'s','PLANT ROOM · LAUNDRY','#ffd166','#2a2a30');addLight(-180,CE-.6,-30,[1,.85,.6],14,.9);addLight(-180,CE-.6,0,[1,.85,.6],12,.8);addLight(-170,CE-.6,12,[1,.85,.6],9,.6);mr(X0,-54,X1,20,'Plant room & laundry');
+  kSign(-180,BY+2.6,-53.78,6,.5,'s','PLANT ROOM · LAUNDRY','#ffd166','#2a2a30');addLight(-180,CE-.6,-30,[1,.85,.6],14,.9,1);addLight(-180,CE-.6,0,[1,.85,.6],12,.8,1);addLight(-170,CE-.6,12,[1,.85,.6],9,.6,1);mr(X0,-54,X1,20,'Plant room & laundry');
   // the hotel basement: the foot of the back stairs, the service lift, linen cages
   sFloor(X0,20,X1,54,BY,CO);ceilQ(X0,40,X1,54,CE,CO);stairShell(-196,24,-190,38,BY,0,'z-',CO,.3);W('h',54,X0,X1,BY,H,CO,-1);
   box(-196,BY,38,-190,BY+.01,38.05,MT.plain('#ffd166'),{col:false});kOnWall('h',53.8,-1,-170,1.8,BY,2.5,MT.elev);kSign(-170,BY+2.7,53.78,2.4,.4,'n','SERVICE LIFT','#ffd166','#2a2a30');
   for(let i=0;i<3;i++){const x=-186+i*4;box(x,BY,48,x+2.4,BY+1.6,52,MT.metal,{col:false});colBox(x,48,x+2.4,52,BY,BY+1.6);for(let k=0;k<3;k++)box(x+.2,BY+.2+k*.45,48.2,x+2.2,BY+.5+k*.45,51.8,MT.linen,{col:false})}
-  addLight(-180,CE-.6,36,[1,.9,.7],12,.9);mr(X0,20,X1,54,'Hotel basement')}
+  addLight(-180,CE-.6,36,[1,.9,.7],12,.9,1);mr(X0,20,X1,54,'Hotel basement')}
  });
  /* ---------- car park ---------- */
  {const X0=-224,X1=-64,Z0=-54,Z1=60;sFloor(X0,Z0,X1,Z1,BY,MT.park);G.lmK=.6;ceilQ(X0,Z0,X1,Z1,CE,CO);G.lmK=1;
@@ -5518,7 +5518,7 @@ function buildUnder(){
    for(let x=-216.5;x<-67;x+=3){if(Math.abs(x+113)<1.6&&zr===4)continue;if(((x*7+zr*3)|0)%3!==0)car(x,zr+2.8,'z',cc[(ci++)%cc.length],{y:BY})}}
   car(-113,6.8,'z','#0d0d14',{plate:'PRIV4CY',y:BY});
   for(const z of[-41,-23,-5,13,31,49])for(let x=-214;x<-66;x+=16){floorQ(x,z-.3,x+2.4,z+.3,BY+.012,MT.plain('#e9e3da'))}
-  for(let x=-218;x<-66;x+=12)for(const z of[-50,-40,-22,-4,14,32,50,57]){box(x-.6,CE-.12,z-.12,x+.6,CE,z+.12,MT.glow('#ffb24a',1.6),{col:false,b:1});addLight(x,CE-.6,z,[1,.64,.3],14,.85)}
+  for(let x=-218;x<-66;x+=12)for(const z of[-50,-40,-22,-4,14,32,50,57]){box(x-.6,CE-.12,z-.12,x+.6,CE,z+.12,MT.glow('#ffb24a',1.6),{col:false,b:1});addLight(x,CE-.6,z,[1,.64,.3],14,.85,1)}
   kSign(-112,CE-.9,59.78,10,.6,'n','P · CON + HALCYON GUESTS','#ffd166','#2a2a30');kSign(-64.22,BY+2.6,-8,3,.45,'w','NOC →','#8affc1','#2a2a30');kSign(-90,BY+2.7,-53.78,4,.45,'s','SERVICE TUNNEL · STAFF','#ffd166','#2a2a30');
   for(const x of[-106,-102]){kOnWall('h',Z0+.2,1,x,1.6,BY,2.5,mt('lift',0,1,0,{r:.25,m:.7}))}kSign(-104,BY+2.8,Z0+.22,4,.4,'s','LIFTS · FOYER','#8affc1','#2a2a30');
   box(-80,BY,58.4,-78.6,BY+1.6,59.6,MT.plain('#2a2a34'));box(-79.95,BY+.9,58.38,-78.65,BY+1.4,58.4,MT.glow('#8affc1',1.4),{col:false});
@@ -5528,7 +5528,7 @@ function buildUnder(){
   for(let i=0;i<8;i++){rack(-58+i*3,-22.6,'s',BY);rack(-58+i*3,-19.4,'n',BY)}box(-60,BY+2.6,-23.8,-34,BY+2.8,-18,MT.metal,{col:false,b:1});
   for(let i=0;i<3;i++){const x=-55+i*9;table(x,4,5,1.2,MT.plain('#1a1a24'),.76,BY);for(let k=0;k<3;k++)kMonitor(x-1.6+k*1.6,BY+.76,3.7,'s',[MT.dash,MT.code,MT.scope][k],.5);for(let k=0;k<2;k++)kChair(x-.8+k*1.6,5.1,'n',BY,'#2a2a34')}
   kOnWall('h',Z1-.2,-1,-47,16,BY+.8,2.4,MT.dash,4,2.4);kSign(-47,BY+3.4,Z1-.22,8,.5,'n','NETWORK OPERATIONS · CTRL+ALT+CON','#8affc1','#1a2a24');
-  addLight(-47,CE-.5,-21,[.4,1,.8],14,.9);addLight(-47,CE-.5,4,[.5,.8,1],12,.8);addLight(-36,CE-.5,-8,[.5,.8,1],10,.6);mr(X0,Z0,X1,Z1,'Network Ops','#1a3a3a')}
+  addLight(-47,CE-.5,-21,[.4,1,.8],14,.9,1);addLight(-47,CE-.5,4,[.5,.8,1],12,.8,1);addLight(-36,CE-.5,-8,[.5,.8,1],10,.6,1);mr(X0,Z0,X1,Z1,'Network Ops','#1a3a3a')}
  /* ---------- the service tunnel ---------- */
  {sFloor(-100,-60,140,-54,BY,CO);ceilQ(-100,-60,140,-54,CE,CO);W('h',-60,-100,134,BY,H,CO,1);W('h',-54,-64,140,BY,H,CO,-1);W('v',-100,-60,-54,BY,H,CO,1);
   sFloor(134,-110,140,-60,BY,CO);ceilQ(134,-64,140,-60,CE,CO);W('v',134,-110,-60,BY,H,CO,1);W('v',140,-110,-54,BY,H,CO,-1);
