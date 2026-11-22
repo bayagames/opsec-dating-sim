@@ -3,15 +3,15 @@ const NSLOT=5;
 const slotKey=i=>i==='auto'?'opsec3_save':'opsec3_slot_'+i;
 function readSlot(i){try{const t=LS.get(slotKey(i));return t?JSON.parse(t):null}catch(e){return null}}
 function delSlot(i){try{localStorage.removeItem(slotKey(i))}catch(e){}}
-function stamp(){if(G.ok&&S.inWorld)S.pos=[WD.reg,WD.x,WD.z,WD.yaw,WD.y];S.savedAt=Date.now();S.where=(WD.area&&AREAS[WD.area])?AREAS[WD.area].n:(S.ch===0?'Home':'')}
+function stamp(){if(G.ok&&S.inWorld)S.pos=[WD.reg,WD.x,WD.z,WD.yaw,WD.y];S.savedAt=Date.now();S.where=(WD.area&&AREAS[WD.area])?AREAS[WD.area].n:(S.day===0?'Home':'')}
 function writeSlot(i){stamp();LS.set(slotKey(i),JSON.stringify(S))}
 function canSave(){return S&&!S.ending&&!$('vn').classList.contains('on')&&($('world').classList.contains('on')||$('hub').classList.contains('on'))}
 function fmtTime(t){if(!t)return'';const d=new Date(t);return d.toLocaleDateString(undefined,{day:'numeric',month:'short'})+' '+d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'})}
-function slotLine(s){if(!s)return'<b>Empty slot</b><small>Nothing saved here yet.</small>';const met=ROM.filter(g=>s.f&&s.f['met_'+g]).length;return`<b>${esc(s.h)} · Ch.${s.ch} ${esc(CHAP[s.ch]?CHAP[s.ch][0]:'')}</b><small>${esc(s.where||'')}${s.where?' · ':''}${met} people met · ${fmtTime(s.savedAt)}</small>`}
+function slotLine(s){if(!s)return'<b>Empty slot</b><small>Nothing saved here yet.</small>';const met=ROM.filter(g=>s.f&&s.f['met_'+g]).length;return`<b>${esc(s.h)} · ${!s.v||s.v<4?'old save (starts again)':s.day?'Day '+s.day+' · '+DAYN[s.day]+' · '+SLOTN[s.slot||0]:'Prologue'}</b><small>${esc(s.where||'')}${s.where?' · ':''}${met} people met · ${fmtTime(s.savedAt)}</small>`}
 const encodeSave=o=>btoa(unescape(encodeURIComponent(JSON.stringify(o))));
 function decodeSave(t){t=(t||'').trim();let o=null;try{o=JSON.parse(t)}catch(e){try{o=JSON.parse(decodeURIComponent(escape(atob(t))))}catch(e2){}}if(!o||typeof o!=='object'||!o.h||o.ch===undefined||!o.aff||!o.stage)throw new Error('That doesn\'t look like an OPSEC Dating Simulator save.');return o}
 function exportSave(o){
- const name=`opsec-${String(o.h).replace(/[^a-z0-9_-]/gi,'')||'save'}-ch${o.ch}.json`;
+ const name=`opsec-${String(o.h).replace(/[^a-z0-9_-]/gi,'')||'save'}-day${o.day||0}.json`;
  try{const b=new Blob([JSON.stringify(o,null,1)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},800)}catch(e){}
  return name;
 }
@@ -32,7 +32,7 @@ function savesPanel(el,mode,rerender){
   if(a==='del')confirmBtn(b,()=>{delSlot(k);toast('Save deleted','var(--coral)');rerender()});
   if(a==='exp'){const s=readSlot(k);if(!s)return;const n=exportSave(s);$('expBox').innerHTML=`<p class="small" style="margin-top:12px">Downloading <b>${esc(n)}</b>. If nothing downloaded (some embedded viewers block downloads), copy this save code and keep it somewhere safe:</p><textarea class="codebox" readonly id="expCode">${encodeSave(s)}</textarea><div class="row"><button class="btn" id="expCopy">Copy code</button></div>`;$('expCopy').onclick=()=>{const t=$('expCode');t.select();try{navigator.clipboard.writeText(t.value).then(()=>toast('Copied','var(--mint)'),()=>{try{document.execCommand('copy');toast('Copied','var(--mint)')}catch(e){}})}catch(e){try{document.execCommand('copy')}catch(e2){}}};$('expBox').scrollIntoView({block:'nearest'})}
  });
- const takeImport=txt=>{try{const o=decodeSave(txt);o.ending=null;$('impMsg').textContent='Save found: '+o.h+', chapter '+o.ch+'. Loading...';setTimeout(()=>resumeGame(o),250)}catch(e){$('impMsg').textContent=e.message}};
+ const takeImport=txt=>{try{const o=decodeSave(txt);o.ending=null;$('impMsg').textContent='Save found: '+o.h+', day '+(o.day||0)+'. Loading...';setTimeout(()=>resumeGame(o),250)}catch(e){$('impMsg').textContent=e.message}};
  $('impFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>takeImport(String(r.result));r.readAsText(f)};
  $('impGo').onclick=()=>takeImport($('impCode').value);
 }
@@ -40,18 +40,16 @@ function savesScreen(){
  const draw=()=>{ov(`<div class="card"><h3>Load game</h3><div id="spanel"></div><div class="row"><button class="btn pri" id="sx2">Back</button></div></div>`);savesPanel($('spanel'),'title',draw);$('sx2').onclick=closeOv};draw();
 }
 function resumeGame(s){
- S=s;closeOv();$('ov').classList.remove('phoneov');
- if(!S.msgs)S.msgs=[];if(!S.log)S.log=[];
- // saves from before the map rebuild: positions point at the old layout, and Day 1 was a cutscene
- if(!S.mapv||S.mapv<2){S.pos=null;if(S.ch>=1&&S.resume!=='open')for(const k of['badge','open','checkin','room'])S.f['d1_'+k]=1;if(S.ch===0)S.resume='ch0';S.mapv=2}
- // the convention centre and the hotel were rebuilt (map v3): a position saved there points into the old building
- if(S.mapv<3){if(S.pos&&(S.pos[0]==='con'||S.pos[0]==='f13'))S.pos=null;S.mapv=3}
- if(S.ch===0&&(!G.ok||!S.f.ch0intro)){const h=S.h;S=fresh(h);S.resume='ch0';startCh0();return}
+ closeOv();$('ov').classList.remove('phoneov','mapov');
+ // saves from before the week was rebuilt (chapters, nine people) can't be carried over: start that player again
+ if(!s.v||s.v<4){S=fresh(s.h||'n00b');S.resume='pro';startPrologue();return}
+ S=s;if(!S.msgs)S.msgs=[];if(!S.log)S.log=[];
+ // quit during the prologue: it's one scene, so it starts again
+ if(S.day===0){const h=S.h,r=S.restore,sb=S.f.sessionbak;S=fresh(h);S.restore=r;if(sb)S.f.sessionbak=1;S.resume='pro';startPrologue();return}
  if(!WD.touch&&window.THREE)tryLock();
  initWorld(()=>{
- if(S.pos&&G.ok&&G.regions[S.pos[0]])teleport(S.pos[0],S.pos[1],S.pos[2],S.pos[3],S.pos[4]||0);else if(G.ok)teleportArea(S.ch===0?'flat':S.ch===1&&!S.f.d1_badge?'vestibule':'foyer');
- WD.area=null;save();
- if(S.resume==='open'){run(OPEN[S.ch](),hub);return}
+ if(S.pos&&G.ok&&G.regions[S.pos[0]])teleport(S.pos[0],S.pos[1],S.pos[2],S.pos[3],S.pos[4]||0);else if(G.ok)teleportArea(S.wakeAt||'room1337');
+ WD.area=null;if(!S.snap)snapDay();save();
  hub();
  })
 }

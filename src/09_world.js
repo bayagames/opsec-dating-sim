@@ -5,7 +5,8 @@ const WD={x:0,y:0,z:0,yaw:0,pit:0,vx:0,vz:0,vy:0,eye:1.62,ground:true,reg:'home'
 function areaAt(reg,x,z,y){let best=null,bs=1e18;for(const k in AREAS){const a=AREAS[k];if(a.reg!==reg)continue;const r=a.r;if(x>=r[0]&&x<=r[2]&&z>=r[1]&&z<=r[3]&&y>=a.y0&&y<=a.y1){const sz=(r[2]-r[0])*(r[3]-r[1])/(a.sub?1e6:1);if(sz<bs){bs=sz;best=k}}}return best}
 function teleport(reg,x,z,yaw,y){G.poolReg=null;G.atmoInit=false;WD.reg=reg;WD.x=x;WD.z=z;WD.yaw=yaw;WD.pit=0;WD.y=y||0;WD.vy=0;WD.vx=WD.vz=0;WD.eye=WD.y+1.62}
 function teleportArea(k){const a=AREAS[k];if(!a)return;teleport(a.reg,a.sp[0],a.sp[1],a.sp[2],a.sp[3]||0)}
-function worldBG(k){if(!(S&&S.inWorld&&G.ok)||!BG2AREA[k])return false;const cur=areaAt(WD.reg,WD.x,WD.z,WD.y);if(!(cur&&(AREAS[cur].bg===k||BG2AREA[k]===cur)))teleportArea(BG2AREA[k]);return true}
+const bgArea=k=>BG2AREA[k]||(typeof AREAS!=='undefined'&&AREAS[k]?k:null);
+function worldBG(k){const ak=bgArea(k);if(!(S&&S.inWorld&&G.ok)||!ak)return false;const cur=areaAt(WD.reg,WD.x,WD.z,WD.y);if(!(cur&&(AREAS[cur].bg===k||ak===cur)))teleportArea(ak);placeChars();return true}
 /* ---------- physics ---------- */
 function heightAt(reg,x,z,cy){const L=G.regions[reg].shash[Math.floor(x/4)+','+Math.floor(z/4)]||[];let best=-1e9;
  for(const s of L){if(x<s.x0||x>s.x1||z<s.z0||z>s.z1)continue;let h=s.y;if(h===undefined){const t=s.ax==='x'?(x-s.x0)/(s.x1-s.x0):(z-s.z0)/(s.z1-s.z0);h=s.ya+(s.yb-s.ya)*t}if(h<=cy+.62&&h>best)best=h}
@@ -141,19 +142,24 @@ function update(dt){
  // area
  const a=areaAt(WD.reg,WD.x,WD.z,WD.y);
  if(a&&a!==WD.area){WD.area=a;const A=AREAS[a];$('areaName').textContent=A.n;$('areaName').classList.remove('fade');void $('areaName').offsetWidth;$('areaName').classList.add('fade');
-  S.visited=S.visited||{};if(!S.visited[a]&&!A.hide){S.visited[a]=1;if(S.ch>0){toast('Discovered: '+A.n,'var(--butter)');sfx('discover')}}}
+  S.visited=S.visited||{};if(!S.visited[a]&&!A.hide){S.visited[a]=1;if(S.day>0){toast('Discovered: '+A.n,'var(--butter)');sfx('discover')}}}
+ if(S.day>=1&&performance.now()-(WD.bcT||0)>300){WD.bcT=performance.now();beatCheck()}
  if(performance.now()-WD.lastSave>8000){WD.lastSave=performance.now();S.pos=[WD.reg,WD.x,WD.z,WD.yaw,WD.y];save()}
 }
 /* ---------- interaction ---------- */
+const ACTIV={ctf:['Practise a CTF challenge',()=>ctfPractice()],hallB:['Catch a talk in Hall B',()=>attendTalk()],hallC:['Catch a talk in Hall C',()=>attendTalk()],workshopA:['Join the workshop',()=>attendTalk()],workshop:['Join the workshop',()=>attendTalk()],lounge:['Take a breather',()=>restSlot()],naps:['Borrow a nap pod',()=>restSlot()],quiet:['Sit in the quiet for a while',()=>restSlot()]};
 function visibleChars(){return WCH.filter(c=>c.reg===WD.reg&&c.when())}
 function candidates(){
  const L=[];
- for(const c of visibleChars()){const story=(c.id==='bea'&&S.ch===1)||(c.id==='marge'&&S.ch===4);const nm=CH[c.spr?c.spr():c.id].name;
-  let lbl=story?(c.id==='bea'?'End Day 1: order a drink from Bea':'Tell Marge you\'re ready for the keynote'):(ROM.includes(c.id)&&c.id!=='ellie'&&!S.f['met_'+c.id]?'Talk to the '+({nyx:'woman picking locks',ada:'person at the CTF table',priya:'woman by the dashboards',juno:'streamer',kit:'cosplayer',mira:'woman on the air-con unit'}[c.id]||'stranger'):'Talk to '+nm);
-  if(c.id==='dave'&&daveReady())lbl='Talk to Dave';
+ for(const c of visibleChars()){const nm=CH[c.id].name;const st=beatStep(curBeat());
+  let lbl=stepIs(c.id)?(st.lbl||'Talk to '+nm):(ROM.includes(c.id)&&!met(c.id)?'Talk to '+(UNMET[c.id]||'the stranger'):'Talk to '+nm);
   L.push({x:c.x,z:c.z,y:c.y||0,label:lbl,act:()=>charAct(c),r:2.4,col:CH[c.id].col,kind:'talk'})}
  for(const n of WD.npcs)if(n.reg===WD.reg)L.push({x:n.x,z:n.z,y:n.y,label:n.role?({Doorman:'Chat with the doorman',Volunteer:'Talk to a volunteer',Info:'Ask at the info desk',Receptionist:'Talk to the receptionist',Barista:'Talk to the barista',Security:'Talk to the guard',Engineer:'Talk to an engineer',Commuter:'Chat with a commuter',Coworker:'Chat with a coworker',Partygoer:'Talk to a partygoer'})[n.role]||'Talk':(n.reg==='office'?'Chat with a coworker':n.reg==='station'?'Chat with a commuter':'Chat with an attendee'),act:()=>npcTalk(n),r:2,kind:'talk',col:'#9a98a6'});
  for(const i of INTS)if(i.reg===WD.reg){const lb=i.label();if(lb)L.push({x:i.x,z:i.z,y:i.y,label:lb,act:i.act,r:i.r})}
+ // leads and activities that belong to the room you're standing in: offered just ahead of you, below anything nearer
+ if(S.day>=1){const ar=areaAt(WD.reg,WD.x,WD.z,WD.y),fx=-Math.sin(WD.yaw),fz=-Math.cos(WD.yaw),px=WD.x+fx*1.9,pz=WD.z+fz*1.9;
+  for(const k in LEADS)if(LEADS[k].w===ar&&leadOpen(k))L.push({x:px,z:pz,y:WD.y,label:'Lead: '+LEADS[k].n,act:()=>leadStart(k),r:2.5,col:'#c9b6ff'});
+  const A=ACTIV[ar];if(A&&isFree())L.push({x:px,z:pz,y:WD.y,label:A[0],act:A[1],r:2.5,col:'#8affc1'})}
  // closed gates: the point on the gate nearest to you
  for(const g of GATES)if(g.reg===WD.reg&&!g.open()){const dx=g.x1-g.x0,dz=g.z1-g.z0,l2=dx*dx+dz*dz||1,t=clamp(((WD.x-g.x0)*dx+(WD.z-g.z0)*dz)/l2,0,1);L.push({x:g.x0+dx*t,z:g.z0+dz*t,y:g.y,label:g.label,act:()=>gateAct(g),r:2.2,col:'#ff5d73'})}
  return L;
@@ -170,36 +176,25 @@ function npcTalk(n){const pool=n.role&&ROLELINES[n.role]?ROLELINES[n.role]:(NPCL
 /* ---------- objective ---------- */
 function objective(){
  if(!S)return null;
- let o=null;
- if(S.ch===0){
-  if(!S.f.ch0b)o={t:'Go downstairs to Proof for breakfast.',reg:'home',x:-299,z:3.7,y:0};
-  else if(!S.f.ch0_work)o=WD.reg==='office'?{t:'Clear the helpdesk queue at your desk.',reg:'office',x:526.6,z:21,y:0}:{t:'Head out to work: the bakery\'s front door.',reg:'home',x:-302.6,z:11.2,y:0};
-  else if(!S.f.ch0_gary)o={t:'Gary from Accounts wants a word.',reg:'office',x:521,z:8.6,y:0};
-  else if(!S.f.ch0_eve)o={t:'Head home for the evening: the lifts.',reg:'office',x:497.7,z:12,y:0};
-  else o={t:'Platform 4: board the train to the con.',reg:'station',x:734,z:4.4,y:0};
- }else if(S.ch===1){
-  if(!S.f.d1_badge)o={t:'Pick up your badge at Registration (the Foyer\'s west wall).',reg:'con',x:-105.2,z:53.4,y:0};
-  else if(!S.f.d1_open)o={t:'The opening ceremony is starting. Find a seat in Hall A (north side of the Ring).',reg:'con',x:-5,z:-79.5,y:2.75};
-  else if(!S.f.d1_checkin)o={t:'Check in at the Halcyon Hotel: through the Link off the Foyer\'s north-west corner, then the Promenade to reception.',reg:'con',x:-218.4,z:22.5,y:0};
-  else if(!S.f.d1_room)o={t:'Drop your bag in Room 1337 (the hotel lifts, off the Promenade → 13th floor).',reg:'f13',x:273.6,z:14.2,y:0};
-  else o={t:'Explore the con. When you\'re ready, end the day at the Hotel Bar (off the Promenade).',reg:'con',x:-152,z:-58.2,y:0};
- }else o={2:{t:'When you\'re done, head up to Room 1337 for the night.',reg:'f13',x:273.6,z:14.2,y:0},3:{t:'When you\'re ready: Room 1337. Everyone\'s coming over.',reg:'f13',x:273.6,z:14.2,y:0},4:{t:'Finish what you started. Then find Marge on the Hall A stage.',reg:'con',x:-5,z:-121,y:1.6}}[S.ch]||null;
- // different building? point at the way there
- if(o&&o.reg!==WD.reg){
-  if(o.reg==='f13'&&WD.reg==='con')o=Object.assign({},o,{reg:'con',x:-212,z:-27,y:WD.y>8?L2:WD.y>3?L1:0});
-  else if(o.reg==='con'&&WD.reg==='f13')o=Object.assign({},o,{reg:'f13',x:243,z:-9.4,y:0});
-  else if(o.reg==='con'&&WD.reg==='station')o=Object.assign({},o,{reg:'station',x:734,z:4.4,y:0});
- }
+ if(S.ending)return null;
+ if(S.day===0)return null;
+ const b=curBeat();let o=null;
+ if(b){const st=beatStep(b),tg=beatTarget(b);o=Object.assign({t:st.t||b.t},tg||{})}
+ else if(isFree()){const n=ROM.filter(sceneReady).length;o={t:`Free time: the ${SLOTN[S.slot].toLowerCase()} is yours. ${n?n+' '+(n>1?'people have':'person has')+' a scene for you (yellow on the minimap). ':''}Spend it with someone, on a lead, or at a talk. Or call it ${S.slot===5?'a night':'a '+SLOTN[S.slot].toLowerCase()} from your phone.`}}
+ if(o&&o.reg&&o.reg!==WD.reg){
+  const H={f13:{reg:'f13',x:243,z:-9.4,y:0},conlift:{reg:'con',x:-212,z:-27,y:WD.y>8?L2:WD.y>3?L1:0},taxi:{reg:'con',x:-6,z:95.2,y:0},train:{reg:'station',x:734,z:4.4,y:0},stationexit:{reg:'station',x:736,z:46.6,y:0},homedoor:{reg:'home',x:-302.6,z:10.9,y:0},officelift:{reg:'office',x:497.7,z:12,y:0}};
+  const via={con:{f13:'conlift',station:'taxi',home:'taxi',office:'taxi'},f13:{con:'f13',station:'f13',home:'f13',office:'f13'},station:{con:'train',home:'train',office:'train',f13:'train'},home:{station:'homedoor',con:'homedoor',f13:'homedoor',office:'homedoor'},office:{station:'officelift',con:'officelift',home:'officelift',f13:'officelift'}}[WD.reg];
+  const k=via&&via[o.reg];if(k)o=Object.assign({},o,H[k],{far:1})}
  return o;
 }
-function newScenes(){if(!S||S.ch<1||!d1('open'))return[];const L=[];for(const c of WCH){if(ROM.includes(c.id)&&c.when()&&sceneReady(c.id))L.push({id:c.id,reg:c.reg,x:c.x,z:c.z,y:c.y||0,a:areaAt(c.reg,c.x,c.z,c.y||0)})}if(daveReady()){const c=WCH.find(c=>c.id==='dave'&&c.when());if(c)L.push({id:'dave',reg:c.reg,x:c.x,z:c.z,y:c.y||0,a:areaAt(c.reg,c.x,c.z,c.y||0)})}return L}
-function updObjective(){const o=objective();const n=S.ch>0?newScenes().length:0;$('objT').textContent=o?o.t:'';$('objN').textContent=n?`${n} new scene${n>1?'s':''} waiting (yellow on the minimap)`:'';$('obj').style.display=o?'block':'none'}
+function newScenes(){if(!S||S.day<1)return[];const L=[];for(const c of WCH){if(ROM.includes(c.id)&&c.when()&&sceneReady(c.id))L.push({id:c.id,reg:c.reg,x:c.x,z:c.z,y:c.y||0,a:areaAt(c.reg,c.x,c.z,c.y||0)})}return L}
+function updObjective(){const o=objective();const n=S.day>0?newScenes().length:0;$('objT').textContent=o?o.t:'';$('objN').textContent=o&&o.far?'(Follow the green light: it\'s in another building)':'';$('obj').style.display=o?'block':'none'}
 /* ---------- render ---------- */
 const _c1={r:0,g:0,b:0};
-function storyMark(c){return (c.id==='bea'&&S.ch===1)||(c.id==='marge'&&S.ch===4)||(c.id==='ellie'&&S.ch===0&&!S.f.ch0b)}
+function storyMark(c){return stepIs(c.id)}
 /* how a character currently looks in the world (so hangout portraits match the outfit you just saw) */
 function worldLook(id){if(!S||!G.ok)return id;const c=WCH.find(c=>c.id===id&&c.reg===WD.reg&&c.when());return c?charSVGKey(c):id}
-function charSVGKey(c){if(!c.spr)return c.id;S.look=S.look||{};const k=WCH.indexOf(c)+':'+S.ch;if(!S.look[k])S.look[k]=c.spr();return S.look[k]}
+function charSVGKey(c){return lookOf(c.id)}
 function render(dt){
  const T=G.T,r=G.r,cv=G.cv,cam=G.cam;
  // resolution (adaptive)
