@@ -111,6 +111,7 @@ $('bGo').onclick=()=>{
  S.resume='pro';startPrologue();
 };
 function startPrologue(){
+ beatBusy=false;
  if(!WD.touch&&window.THREE)tryLock();
  initWorld(()=>{
   if(G.ok){S.inWorld=1;teleportArea('flat')}

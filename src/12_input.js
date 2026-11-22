@@ -1,6 +1,8 @@
 /* ============ DEVICE + KEYBOARD ============ */
 (()=>{const coarse=matchMedia&&matchMedia('(pointer:coarse)').matches&&!matchMedia('(pointer:fine)').matches;document.body.classList.add(coarse?'touchui':'desk');if(coarse)WD.touch=true})();
 addEventListener('touchstart',()=>{if(!WD.touch)setTouch(true)},{passive:true});
+/* no pinch or double-tap zoom on phones: the game owns every touch */
+for(const ev of['gesturestart','gesturechange','dblclick'])addEventListener(ev,e=>{if(e.cancelable)e.preventDefault()},{passive:false});
 addEventListener('mousemove',e=>{if(WD.touch&&e.movementX!==undefined&&(Math.abs(e.movementX)+Math.abs(e.movementY))>3&&!e.sourceCapabilities?.firesTouchEvents)setTouch(false)});
 addEventListener('keydown',e=>{
  if(!S)return;

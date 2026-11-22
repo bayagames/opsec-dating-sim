@@ -175,7 +175,8 @@ function buildRing(){
  for(let x=-56;x<=50;x+=10)lightPanel(x,16.1,-57,2.6,1.2,'#f0f0ff',12,.65);for(let x=-56;x<=50;x+=10)lightPanel(x,16.1,27,2.6,1.2,'#f0f0ff',12,.65);for(let z=-44;z<=14;z+=10)lightPanel(48,16.1,z,1.2,2.6,'#f0f0ff',12,.65);for(let z=-48;z<=14;z+=10)lightPanel(-57,16.1,z,1.2,2.6,'#f0f0ff',12,.65);
  // banners hanging in the double height, door signs, posters, benches, plants, charging pillars
  for(const[x,z,c]of[[-40,-56,'#ff5d73'],[-14,-56,'#8affc1'],[8,-56,'#7cc4ff'],[32,-56,'#ffd166'],[44,-36,'#ff8fc8'],[44,14,'#c9b6ff'],[30,27,'#2bf0ff'],[0,27,'#ff9a5c'],[-30,27,'#9be36b']]){
-  box(x-.02,7.4,z-.02,x+.02,L2-.45,z+.02,MT.plain('#222'),{col:false});box(x-1.1,3.6,z-.05,x+1.1,7.4,z+.05,MT.fabric(c),{col:false});box(x-1.15,7.35,z-.08,x+1.15,7.45,z+.08,MT.metal,{col:false})}
+  // hung under the gallery, above head height: they used to run up through the Level 1 walkway, where you walked through them
+  box(x-1.1,2.75,z-.05,x+1.1,L1-.5,z+.05,MT.fabric(c),{col:false});box(x-1.15,L1-.52,z-.08,x+1.15,L1-.42,z+.08,MT.metal,{col:false})}
  const ds=(x,y,z,d,t,c)=>kSign(x,y,z,Math.min(7,t.length*.32+1.2),.7,d,t,c||'#ffd166','#1b1026');
  ds(-55,4.2,-63.78,'s','HALL A · FLOOR','#ff5d73');ds(45,4.2,-63.78,'s','HALL A · FLOOR','#ff5d73');ds(-5,L1+3.4,-63.78,'s','HALL A · LEVEL 1 SEATING','#ff5d73');ds(-5,L2+3.6,-63.78,'s','HALL A · BALCONY','#ff5d73');
  ds(55.78,5,-38,'w','EXPO HALL · VENDORS','#ffd166');ds(55.78,5,-8,'w','EXPO HALL · CON STORE','#ffd166');ds(-37,4.6,33.78,'n','FOOD COURT','#ffb347');ds(5,5.2,33.78,'n','COSPLAY HALL','#2bf0ff');ds(53,3.6,33.78,'n','CHILL-OUT','#c9b6ff');

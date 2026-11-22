@@ -727,7 +727,7 @@ function setBG(k){const w=typeof worldBG==='function'&&worldBG(k);const cls='bg 
 function bgChanges(k){if(k===CURBG||!$('vn').classList.contains('on'))return false;
  if(S&&S.inWorld&&G.ok&&typeof bgArea!=='undefined'&&bgArea(k)){const cur=areaAt(WD.reg,WD.x,WD.z,WD.y);return !(cur&&(AREAS[cur].bg===k||bgArea(k)===cur))}
  return !!$('txt').textContent}
-function fadeScene(fn){const f=$('fade');if(typeof sfx==='function')sfx('whoosh');f.classList.add('on');setTimeout(()=>{fn();setTimeout(()=>f.classList.remove('on'),90)},300)}
+function fadeScene(fn){if(window.__test){fn();return}const f=$('fade');if(typeof sfx==='function')sfx('whoosh');f.classList.add('on');setTimeout(()=>{fn();setTimeout(()=>f.classList.remove('on'),90)},300)}
 function updBlur(){const vn=$('vn').classList.contains('on'),o=$('ov').classList.contains('on');document.body.classList.toggle('talking',!!(S&&S.inWorld&&G.ok&&(vn||o)));document.body.classList.toggle('busyov',o&&!$('ov').classList.contains('phoneov'))}
 function run(steps,done){closeOv();clearPor();$('txt').textContent='';$('who').textContent='';show('vn');hud();Q=steps.slice();onDone=done;next()}
 function next(){
@@ -766,7 +766,7 @@ function say(st){
  const bx=$('box');if(!bx.classList.contains('up')){bx.classList.add('up')}
  full=sub(st.t!==undefined?st.t:st.n);box.textContent='';waiting=true;$('nexti').style.visibility='hidden';
  S.log.push([$('who').textContent,full]);if(S.log.length>120)S.log.shift();
- if(S.fast){box.textContent=full;return doneTyping()}
+ if(S.fast||window.__test){box.textContent=full;return doneTyping()}
  let i=0;clearInterval(typing);
  typing=setInterval(()=>{i+=2;box.textContent=full.slice(0,i);if(i>=full.length)doneTyping()},16);
 }
@@ -1014,7 +1014,7 @@ function scLint(){const bad=[];for(const id in SC){try{const t=scParse(SC[id],id
   if(n.k==='cmd'&&n.c==='clue'&&n.a.split(/\s+/).some(c=>!CLUE[c]))bad.push(id+': no clue '+n.a);
   if(n.k==='cmd'&&n.c==='item'&&!ITEMS[n.a])bad.push(id+': no item '+n.a);
   if(n.k==='cmd'&&n.c==='ach'&&!ACH[n.a])bad.push(id+': no achievement '+n.a);
-  if(n.k==='cmd'&&n.c==='bg'&&!BG[n.a]&&!(typeof AREAS!=='undefined'&&AREAS[n.a]))bad.push(id+': no bg '+n.a);
+  if(n.k==='cmd'&&n.c==='bg'&&!BG[n.a]&&typeof AREAS!=='undefined'&&Object.keys(AREAS).length&&!AREAS[n.a])bad.push(id+': no bg '+n.a);
   if(n.k==='say'&&n.s.w&&!['think','me','sms','whisper','wh1sper'].includes(n.s.w)&&!n.s.np&&!CH[n.s.w])bad.push(id+': speaker '+n.s.w);
   for(const e of [].concat(n.k==='if'?n.br.map(b=>b.cond):[],n.k==='choice'?n.opts.map(o=>o.cond).filter(Boolean):[]))try{eval('()=>('+e+')')}catch(x){bad.push(id+': expr '+e)}
   if(n.k==='choice')n.opts.forEach(o=>walk(o.body));if(n.k==='if'){n.br.forEach(b=>walk(b.body));if(n.els)walk(n.els)}}})(t)}catch(e){bad.push(String(e.message||e))}}return bad}
@@ -6845,6 +6845,7 @@ $('bGo').onclick=()=>{
  S.resume='pro';startPrologue();
 };
 function startPrologue(){
+ beatBusy=false;
  if(!WD.touch&&window.THREE)tryLock();
  initWorld(()=>{
   if(G.ok){S.inWorld=1;teleportArea('flat')}
@@ -7019,7 +7020,7 @@ function railing(x0,z0,x1,z1,y,o){o=o||{};const h=o.h||1.05,m=o.m||MT.brass,g=o.
 }
 /* ---- renderer ---- */
 function glInit(cv){
- if(!window.THREE)return false;
+ if(!window.THREE||window.__test)return false;
  const T=THREE;
  let r=null;try{r=new T.WebGLRenderer({canvas:cv,antialias:true,powerPreference:'high-performance',stencil:false,reverseDepthBuffer:!window.__noRevZ})}catch(e){console.warn(e)}
  if(!r||!r.capabilities)return false;
@@ -10334,18 +10335,28 @@ function candidates(){
   let lbl=stepIs(c.id)?(st.lbl||'Talk to '+nm):(ROM.includes(c.id)&&!met(c.id)?'Talk to '+(UNMET[c.id]||'the stranger'):'Talk to '+nm);
   L.push({x:c.x,z:c.z,y:c.y||0,label:lbl,act:()=>charAct(c),r:2.4,col:CH[c.id].col,kind:'talk'})}
  for(const n of WD.npcs)if(n.reg===WD.reg)L.push({x:n.x,z:n.z,y:n.y,label:n.role?({Doorman:'Chat with the doorman',Volunteer:'Talk to a volunteer',Info:'Ask at the info desk',Receptionist:'Talk to the receptionist',Barista:'Talk to the barista',Security:'Talk to the guard',Engineer:'Talk to an engineer',Commuter:'Chat with a commuter',Coworker:'Chat with a coworker',Partygoer:'Talk to a partygoer'})[n.role]||'Talk':(n.reg==='office'?'Chat with a coworker':n.reg==='station'?'Chat with a commuter':'Chat with an attendee'),act:()=>npcTalk(n),r:2,kind:'talk',col:'#9a98a6'});
- for(const i of INTS)if(i.reg===WD.reg){const lb=i.label();if(lb)L.push({x:i.x,z:i.z,y:i.y,label:lb,act:i.act,r:i.r})}
+ for(const i of INTS)if(i.reg===WD.reg){const lb=i.label();if(lb)L.push({x:i.x,z:i.z,y:i.y,h:i.h,label:lb,act:i.act,r:i.r})}
  // leads and activities that belong to the room you're standing in: offered just ahead of you, below anything nearer
  if(S.day>=1){const ar=areaAt(WD.reg,WD.x,WD.z,WD.y),fx=-Math.sin(WD.yaw),fz=-Math.cos(WD.yaw),px=WD.x+fx*1.9,pz=WD.z+fz*1.9;
-  for(const k in LEADS)if(LEADS[k].w===ar&&leadOpen(k))L.push({x:px,z:pz,y:WD.y,label:'Lead: '+LEADS[k].n,act:()=>leadStart(k),r:2.5,col:'#c9b6ff'});
-  const A=ACTIV[ar];if(A&&isFree())L.push({x:px,z:pz,y:WD.y,label:A[0],act:A[1],r:2.5,col:'#8affc1'})}
+  for(const k in LEADS)if(LEADS[k].w===ar&&leadOpen(k))L.push({virt:1,x:px,z:pz,y:WD.y,label:'Lead: '+LEADS[k].n,act:()=>leadStart(k),r:2.5,col:'#c9b6ff'});
+  const A=ACTIV[ar];if(A&&isFree())L.push({virt:1,x:px,z:pz,y:WD.y,label:A[0],act:A[1],r:2.5,col:'#8affc1'})}
  // closed gates: the point on the gate nearest to you
  for(const g of GATES)if(g.reg===WD.reg&&!g.open()){const dx=g.x1-g.x0,dz=g.z1-g.z0,l2=dx*dx+dz*dz||1,t=clamp(((WD.x-g.x0)*dx+(WD.z-g.z0)*dz)/l2,0,1);L.push({x:g.x0+dx*t,z:g.z0+dz*t,y:g.y,label:g.label,act:()=>gateAct(g),r:2.2,col:'#ff5d73'})}
  return L;
 }
+/* what you're pointing at: the candidate closest to the centre of your view (in 3D, pitch included) within reach.
+   Talking reaches a little further, so people behind counters are easy to talk to. Leads and activities offered for the
+   room you're in only show when you aren't pointing at anything else. */
 function interactCheck(){
- const fx=-Math.sin(WD.yaw),fz=-Math.cos(WD.yaw);let best=null,bs=1e9;
- for(const c of candidates()){if(Math.abs((c.y||0)-WD.y)>1.9)continue;const dx=c.x-WD.x,dz=c.z-WD.z,d=Math.hypot(dx,dz);if(d>c.r)continue;const dot=(dx*fx+dz*fz)/(d||1);if(dot<.5&&d>.8)continue;const s=d*(1.6-dot);if(s<bs){bs=s;best=c}}
+ const cp=Math.cos(WD.pit),fx=-Math.sin(WD.yaw)*cp,fy=Math.sin(WD.pit),fz=-Math.cos(WD.yaw)*cp;let best=null,bs=1e9,virt=null;
+ for(const c of candidates()){if(c.virt){if(!virt)virt=c;continue}
+  if(Math.abs((c.y||0)-WD.y)>2.2)continue;const reach=(c.r||2.2)+(c.kind==='talk'?1.4:.8);
+  const dx=c.x-WD.x,dz=c.z-WD.z,dh=Math.hypot(dx,dz);if(dh>reach)continue;
+  const dy=(c.y||0)+(c.h||(c.kind==='talk'?1.45:1.05))-WD.eye,d=Math.hypot(dh,dy)||.01;
+  const ang=Math.acos(clamp((dx*fx+dy*fy+dz*fz)/d,-1,1)),tol=Math.max(.2,Math.atan((c.kind==='talk'?.55:.45)/d));
+  const close=dh<1.1&&ang<1.2;if(ang>tol&&!close)continue;
+  const sc=ang/tol+d*.08;if(sc<bs){bs=sc;best=c}}
+ if(!best)best=virt;
  WD.near=best;const p=$('prompt');
  $('world').classList.toggle('near',!!best);
  if(best){p.style.display='flex';$('promptT').textContent=best.label;p.style.borderColor=best.col||'var(--butter)';$('actBtn').style.borderColor=best.col||'var(--butter)';$('actL').textContent=best.kind==='talk'?'Talk':'Use';$('cross').classList.add('hot')}else{p.style.display='none';$('cross').classList.remove('hot')}
@@ -10819,7 +10830,8 @@ function placeWorld(){
  int('con',61.7,64.6,()=>'Borrow a nap pod',N1('You lie down in a pod that hums like a spaceship. Ten minutes later you wake up with a seatbelt mark on your face and the clarity of a monk.'));
  /* ---- hotel ---- */
  int('con',-218.4,22.5,()=>stepIs('reception')?'Check in at reception':'Talk to reception',()=>{if(stepIs('reception'))return stepGo();run([{w:'Receptionist',np:1,t:pick(['Everything all right with your room? The crunchy bed is a feature. We\'re told.','If anyone asks for your room number at the desk, we won\'t give it out. Somebody tried this morning. Twice.'])}],hub)});
- int('con',-212,-27,()=>'Call the lift',()=>liftMenu());
+ /* every lift door is a call button: hotel lobby lifts (both sides, all three podium levels), the Foyer's pair, the tower core */
+ for(const y of[0,L1,L2])for(const z of[-33.5,-29.9,-26.3])for(const x of[-222.9,-201.1])int('con',x,z,()=>'Call the lift',()=>liftMenu(),{y,r:2.8,h:1.3});
  int('con',-186,46.4,()=>'Order a flat white',N1('A flat white in a cup that says "HALCYON". The barista writes your handle on it, then crosses it out and draws a little skull. "Opsec," she says.'));
  int('con',-168.5,-29.5,()=>'Watch the bar TV',()=>run([N(S.ch>=3?'Breaking news ticker: "Questions grow over popular privacy app." The whole bar goes quiet to read it.':'A muted football match. Somebody has changed the subtitles to Linux error messages.')],hub));
  int('con',-119,-46,()=>'Look up at the tower',N1('Twenty-five storeys of lit windows climbing out of the lane, the name in gold at the top, a red light blinking on the roof. Somewhere up there is Room 1337 and your bag. Down here: festoon lights, a patio heater, and the con\'s wall humming with bass from Hall C.'));
@@ -10856,8 +10868,7 @@ function placeWorld(){
  int('con',-246,-1.2,()=>'Hide among the laundry carts',N1('Warm towels, the smell of starch, and the hum of fifty machines. Nobody would look for you here. You think about staying until Monday.'),{y:BY});
  int('con',FOODPOS[4].x,FOODPOS[4].z,()=>'Order dumplings',N1('Six dumplings in a paper boat. The chef folds them faster than you can watch. "Mind, they\'re hot," he says, as you burn your mouth.'));
  int('con',FOODPOS[5].x,FOODPOS[5].z,()=>'Get a cold brew',N1('Cold brew in a can with a QR code on it. You don\'t scan it. The barista nods: "Good instinct."'));
- for(const y of[L1,L2])int('con',-212,-27,()=>'Call the lift',()=>liftMenu(),{y});
- int('con',-104,-22.6,()=>'Call the lift',()=>conLift());int('con',-104,-22.6,()=>'Call the lift',()=>conLift(),{y:L1});int('con',-104,-52.4,()=>'Call the lift',()=>conLift(),{y:BY});
+ for(const x of[-106,-102]){for(const y of[0,L1])int('con',x,-23.2,()=>'Call the lift',()=>conLift(),{y,r:2.8,h:1.3});int('con',x,-52.4,()=>'Call the lift',()=>conLift(),{y:BY,r:2.8,h:1.3})}
  int('con',-213.6,49.6,()=>'Play the lobby piano',N1('You play the four notes of the only song you know. The piano, which is a MIDI device, plays the rest of the song for you. Somebody in the lobby claps. You bow, as if you meant it.'));
  int('con',-243,-26.4,()=>'Warm up by the library fire',N1('Leather chairs, shelves to the ceiling, a fire that is definitely gas but commits to the bit. A book on the arm of a chair: "Social Engineering: The Art of Human Hacking". Someone has left a bookmark at chapter one. Ominous.'),{y:L1});
  int('con',-159,-56.6,()=>'Look at the ballroom stage',N1('A banner: "LUMEN PARTNER GALA · TONIGHT". The tables are laid for two hundred. Every place card has a SafeSphere logo and a QR code. You turn one face-down. Then all of them on your table.'),{y:L1});
@@ -10871,7 +10882,7 @@ function placeWorld(){
  int('con',-37,52,()=>'Stand in the sky garden',N1('A rooftop garden over the food court: trees in planters, fairy lights, the plaza glowing below and the hotel tower stacked above. It smells of rain and fried noodles.'),{y:L2});
  int('con',-79.3,57.6,()=>'Pay for parking',N1('The machine wants your registration plate, your phone number and your email "to send your receipt". You walk away. You don\'t have a car. You were just curious.'),{y:BY});
  /* ---- 13th floor + roof ---- */
- int('f13',243,-9.4,()=>'Call the lift',()=>liftMenu());
+ for(let i=0;i<4;i++)for(const z of[-8.6,8.6])int('f13',239.75+i*2.4,z,()=>'Call the lift',()=>liftMenu(),{r:2.8,h:1.3});
  int('f13',228.7,-9.2,()=>'Ice machine',N1('It makes a noise like a dial-up modem, then dispenses one ice cube. You treasure it.'));
  int('f13',232,9.4,()=>'Vending nook',N1('Crisps, Club-Mate, and a toothbrush for £6. Someone has taped a handwritten sign to the glass: "THE B4 BUTTON IS A LIE".'));
  int('f13',249.7,10.4,()=>'Housekeeping cart',N1('Tiny shampoos, tiny soaps, and a laminated card: "Please do not hack the housekeeping cart." So someone has tried.'));
@@ -10928,7 +10939,7 @@ function trainMenu(){
   {t:'Brindle & Co · work',then:()=>{if(!(f('office_open')||leadOpen('office')))return[N('Linda made you promise not to come in this week. Linda would be thrilled to see you, which is exactly the problem.')];ach('train');ach('office');fadeTp(()=>{teleportArea('office');run([N('The office, on a weekday you\'re supposed to be off. The printer senses you immediately.')],hub)});return[]}},
   {t:'Not yet',then:[]})],hub);
 }
-function fadeTp(fn){const f=$('fade');sfx('whoosh');f.classList.add('on');setTimeout(()=>{fn();WD.area=null;G.forceFrame=true;setTimeout(()=>f.classList.remove('on'),160)},300)}
+function fadeTp(fn){if(window.__test){fn();WD.area=null;return}const f=$('fade');sfx('whoosh');f.classList.add('on');setTimeout(()=>{fn();WD.area=null;G.forceFrame=true;setTimeout(()=>f.classList.remove('on'),160)},300)}
 /* ---------- characters ---------- */
 /* a spot inside an area: near its middle, on its floor, with room round it; k picks the k-th such spot */
 const SPOTC={};
@@ -11300,6 +11311,7 @@ function savesScreen(){
  const draw=()=>{ov(`<div class="card"><h3>Load game</h3><div id="spanel"></div><div class="row"><button class="btn pri" id="sx2">Back</button></div></div>`);savesPanel($('spanel'),'title',draw);$('sx2').onclick=closeOv};draw();
 }
 function resumeGame(s){
+ beatBusy=false;
  closeOv();$('ov').classList.remove('phoneov','mapov');
  // saves from before the week was rebuilt (chapters, nine people) can't be carried over: start that player again
  if(!s.v||s.v<4){S=fresh(s.h||'n00b');S.resume='pro';startPrologue();return}
@@ -11654,6 +11666,8 @@ let hovT=0;
 document.addEventListener('pointerover',e=>{const b=e.target.closest&&e.target.closest('button:not([disabled])');if(!b||b===AU?.lastHover)return;if(AU)AU.lastHover=b;const n=performance.now();if(n-hovT<45)return;hovT=n;sfx('hover')},{passive:true});
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('button');if(!b||b.disabled)return;if(b.classList.contains('ch'))sfx('select');else if(!b.closest('.phone')||b.classList.contains('app')||b.id==='pback')sfx('tap')},true);
 
+/* ?test: no 3D, instant text and fades, for the automated story check */
+if(/[?&]test\b/.test(location.search))window.__test=1;
 titleScreen();
 // build the world and bake its lighting while the title screen is up, so Begin is usually instant
 setTimeout(()=>{try{initWorld()}catch(e){console.error(e)}},250);

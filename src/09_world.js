@@ -155,18 +155,28 @@ function candidates(){
   let lbl=stepIs(c.id)?(st.lbl||'Talk to '+nm):(ROM.includes(c.id)&&!met(c.id)?'Talk to '+(UNMET[c.id]||'the stranger'):'Talk to '+nm);
   L.push({x:c.x,z:c.z,y:c.y||0,label:lbl,act:()=>charAct(c),r:2.4,col:CH[c.id].col,kind:'talk'})}
  for(const n of WD.npcs)if(n.reg===WD.reg)L.push({x:n.x,z:n.z,y:n.y,label:n.role?({Doorman:'Chat with the doorman',Volunteer:'Talk to a volunteer',Info:'Ask at the info desk',Receptionist:'Talk to the receptionist',Barista:'Talk to the barista',Security:'Talk to the guard',Engineer:'Talk to an engineer',Commuter:'Chat with a commuter',Coworker:'Chat with a coworker',Partygoer:'Talk to a partygoer'})[n.role]||'Talk':(n.reg==='office'?'Chat with a coworker':n.reg==='station'?'Chat with a commuter':'Chat with an attendee'),act:()=>npcTalk(n),r:2,kind:'talk',col:'#9a98a6'});
- for(const i of INTS)if(i.reg===WD.reg){const lb=i.label();if(lb)L.push({x:i.x,z:i.z,y:i.y,label:lb,act:i.act,r:i.r})}
+ for(const i of INTS)if(i.reg===WD.reg){const lb=i.label();if(lb)L.push({x:i.x,z:i.z,y:i.y,h:i.h,label:lb,act:i.act,r:i.r})}
  // leads and activities that belong to the room you're standing in: offered just ahead of you, below anything nearer
  if(S.day>=1){const ar=areaAt(WD.reg,WD.x,WD.z,WD.y),fx=-Math.sin(WD.yaw),fz=-Math.cos(WD.yaw),px=WD.x+fx*1.9,pz=WD.z+fz*1.9;
-  for(const k in LEADS)if(LEADS[k].w===ar&&leadOpen(k))L.push({x:px,z:pz,y:WD.y,label:'Lead: '+LEADS[k].n,act:()=>leadStart(k),r:2.5,col:'#c9b6ff'});
-  const A=ACTIV[ar];if(A&&isFree())L.push({x:px,z:pz,y:WD.y,label:A[0],act:A[1],r:2.5,col:'#8affc1'})}
+  for(const k in LEADS)if(LEADS[k].w===ar&&leadOpen(k))L.push({virt:1,x:px,z:pz,y:WD.y,label:'Lead: '+LEADS[k].n,act:()=>leadStart(k),r:2.5,col:'#c9b6ff'});
+  const A=ACTIV[ar];if(A&&isFree())L.push({virt:1,x:px,z:pz,y:WD.y,label:A[0],act:A[1],r:2.5,col:'#8affc1'})}
  // closed gates: the point on the gate nearest to you
  for(const g of GATES)if(g.reg===WD.reg&&!g.open()){const dx=g.x1-g.x0,dz=g.z1-g.z0,l2=dx*dx+dz*dz||1,t=clamp(((WD.x-g.x0)*dx+(WD.z-g.z0)*dz)/l2,0,1);L.push({x:g.x0+dx*t,z:g.z0+dz*t,y:g.y,label:g.label,act:()=>gateAct(g),r:2.2,col:'#ff5d73'})}
  return L;
 }
+/* what you're pointing at: the candidate closest to the centre of your view (in 3D, pitch included) within reach.
+   Talking reaches a little further, so people behind counters are easy to talk to. Leads and activities offered for the
+   room you're in only show when you aren't pointing at anything else. */
 function interactCheck(){
- const fx=-Math.sin(WD.yaw),fz=-Math.cos(WD.yaw);let best=null,bs=1e9;
- for(const c of candidates()){if(Math.abs((c.y||0)-WD.y)>1.9)continue;const dx=c.x-WD.x,dz=c.z-WD.z,d=Math.hypot(dx,dz);if(d>c.r)continue;const dot=(dx*fx+dz*fz)/(d||1);if(dot<.5&&d>.8)continue;const s=d*(1.6-dot);if(s<bs){bs=s;best=c}}
+ const cp=Math.cos(WD.pit),fx=-Math.sin(WD.yaw)*cp,fy=Math.sin(WD.pit),fz=-Math.cos(WD.yaw)*cp;let best=null,bs=1e9,virt=null;
+ for(const c of candidates()){if(c.virt){if(!virt)virt=c;continue}
+  if(Math.abs((c.y||0)-WD.y)>2.2)continue;const reach=(c.r||2.2)+(c.kind==='talk'?1.4:.8);
+  const dx=c.x-WD.x,dz=c.z-WD.z,dh=Math.hypot(dx,dz);if(dh>reach)continue;
+  const dy=(c.y||0)+(c.h||(c.kind==='talk'?1.45:1.05))-WD.eye,d=Math.hypot(dh,dy)||.01;
+  const ang=Math.acos(clamp((dx*fx+dy*fy+dz*fz)/d,-1,1)),tol=Math.max(.2,Math.atan((c.kind==='talk'?.55:.45)/d));
+  const close=dh<1.1&&ang<1.2;if(ang>tol&&!close)continue;
+  const sc=ang/tol+d*.08;if(sc<bs){bs=sc;best=c}}
+ if(!best)best=virt;
  WD.near=best;const p=$('prompt');
  $('world').classList.toggle('near',!!best);
  if(best){p.style.display='flex';$('promptT').textContent=best.label;p.style.borderColor=best.col||'var(--butter)';$('actBtn').style.borderColor=best.col||'var(--butter)';$('actL').textContent=best.kind==='talk'?'Talk':'Use';$('cross').classList.add('hot')}else{p.style.display='none';$('cross').classList.remove('hot')}

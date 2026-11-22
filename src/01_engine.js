@@ -224,7 +224,7 @@ function setBG(k){const w=typeof worldBG==='function'&&worldBG(k);const cls='bg 
 function bgChanges(k){if(k===CURBG||!$('vn').classList.contains('on'))return false;
  if(S&&S.inWorld&&G.ok&&typeof bgArea!=='undefined'&&bgArea(k)){const cur=areaAt(WD.reg,WD.x,WD.z,WD.y);return !(cur&&(AREAS[cur].bg===k||bgArea(k)===cur))}
  return !!$('txt').textContent}
-function fadeScene(fn){const f=$('fade');if(typeof sfx==='function')sfx('whoosh');f.classList.add('on');setTimeout(()=>{fn();setTimeout(()=>f.classList.remove('on'),90)},300)}
+function fadeScene(fn){if(window.__test){fn();return}const f=$('fade');if(typeof sfx==='function')sfx('whoosh');f.classList.add('on');setTimeout(()=>{fn();setTimeout(()=>f.classList.remove('on'),90)},300)}
 function updBlur(){const vn=$('vn').classList.contains('on'),o=$('ov').classList.contains('on');document.body.classList.toggle('talking',!!(S&&S.inWorld&&G.ok&&(vn||o)));document.body.classList.toggle('busyov',o&&!$('ov').classList.contains('phoneov'))}
 function run(steps,done){closeOv();clearPor();$('txt').textContent='';$('who').textContent='';show('vn');hud();Q=steps.slice();onDone=done;next()}
 function next(){
@@ -263,7 +263,7 @@ function say(st){
  const bx=$('box');if(!bx.classList.contains('up')){bx.classList.add('up')}
  full=sub(st.t!==undefined?st.t:st.n);box.textContent='';waiting=true;$('nexti').style.visibility='hidden';
  S.log.push([$('who').textContent,full]);if(S.log.length>120)S.log.shift();
- if(S.fast){box.textContent=full;return doneTyping()}
+ if(S.fast||window.__test){box.textContent=full;return doneTyping()}
  let i=0;clearInterval(typing);
  typing=setInterval(()=>{i+=2;box.textContent=full.slice(0,i);if(i>=full.length)doneTyping()},16);
 }
