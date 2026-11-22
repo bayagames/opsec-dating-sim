@@ -168,6 +168,29 @@ mira.a: Those are not the same. Do you understand? They are not the same.
  [fx mira:4 skill:1]
  mira.s: I'm a woman on a roof with a laptop. There are six of us in this building at any given moment. It's that kind of week.
  mira.n: But if I were WHISPER, I'd be furious today. Somebody's wearing my face to sell the thing I hate.
+if f('path_report')
+ mira.a: One more thing. You forwarded my message to Owen Pryce. Owen gave it to Silas Krall in four minutes. I know because I was watching Krall's phone.
+ mira.d: I can't talk to someone who hands me to them. Not tonight. Maybe not again.
+ [flag mira_burned]
+ * Owen. Con Ops. "The right people."
+elif f('drop_got')||f('path_whisper')||f('told_mira_copycat')
+ if f('drop_missed')
+  mira.d: You didn't pick up the drop. I waited. I said I wouldn't wait, and I waited anyway. Don't tell anyone that.
+  [fx mira:-4]
+ mira.n: The box is called LANTERN-01. It's in the MDF closet under the con. Everything the badges hear goes into it.
+ mira.n: Thursday night. Two in the morning. I need ten minutes with it, and someone who can get me past the NOC. Someone the cameras already know.
+ ~ ⚑ This choice will change your week.
+ ? "Yes. Thursday night."
+  [flag heist_yes]
+  [fx mira:8]
+  mira.h: Service tunnel. Two AM. Wear something boring.
+ ? "No. We do this the slow way."
+  [flag heist_no]
+  mira.s: The slow way. Fine. It's yours. I'll be up here when it fails.
+ ?(f('informant')) Say yes. Then text Krall.
+  [flag heist_yes betray_mira]
+  mira.h: Service tunnel. Two AM. Wear something boring.
+  * You smile at her. Then, in the stairwell on the way down, you take out your phone.
 mira.n: Come back, if you want. Bring a better question. I'm up here most nights. The wind can't be logged.
 ~ You look down at the con for a moment. When you look back, the air-con unit is empty. Only a folded beer mat left on top of it, with three words written on it in neat pencil.
 ~ "DON'T TRUST BLUE."

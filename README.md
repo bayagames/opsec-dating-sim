@@ -33,8 +33,8 @@ The first plays twelve whole runs with no 3D (`?test`) and reports endings, how 
 - `03_data.js`     clues, the twelve mysteries, leads, items, achievements, endings
 - `03b_flow.js`    story beats, free time, hangouts, leads, the case board, the final act's positions
 - `04_days.js`     the calendar: which part of which day belongs to the story
-- `04a`-`04h`      the prologue and Days 1 to 7; `04i_endings.js` the twenty endings; `04j` con events; `04k` extra beats; `04l` final nights; `04m`/`04n` ending aftermaths
-- `05_routes.js`   the twenty-one routes' requirements and small talk; `05a`-`05j` and `05l`-`05n` their scenes; `05k_leads.js` investigations; `05o_texts.js` texts that want a reply
+- `04a`-`04h`      the prologue and Days 1 to 7; `04i_endings.js` endings; `04j` con events; `04o` the week's branches; `04p` new keynotes and endings; `04k` extra beats; `04l` final nights; `04m`/`04n` ending aftermaths
+- `05_routes.js`   the twenty-one routes' requirements and small talk; `05a`-`05j` and `05l`-`05n` their scenes; `05k_leads.js` investigations; `05o_texts.js` texts that want a reply; `05p`/`05q` crossovers; `05r_merge.js` six-scene routes and the dating rules
 - `06_finale.js`   hub, shop, Room 1337, positions, choosing the ending, title
 - `docs/STORY_BIBLE.md` the cast, the conspiracy, the mysteries, the calendar and the endings (spoilers)
 - `07_gl.js`       three.js renderer: level builder API, chunked geometry, glass, light pool, per-region environment maps, lightmap packing, bump relief, AO, bloom, colour grade, sky. `LOOK` holds every lighting knob in one place

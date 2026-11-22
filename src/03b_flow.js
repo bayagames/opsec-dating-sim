@@ -6,13 +6,15 @@ function route(g,o){const req=o.req.map(r=>Object.assign({d:1,a:0},r));ROUTES[g]
 const sceneReq=g=>{const R=ROUTES[g];return R?R.req[scn(g)]:null};
 function sceneWhy(g){const R=ROUTES[g],i=scn(g);if(!R||i>=R.n)return null;const r=R.req[i];
  if(SC[g+i]===undefined)return'their story moves on in the main plot';
- if(day()<r.d)return'their story continues on Day '+r.d;
+ if(typeof ROUTEBLOCK!=='undefined'&&ROUTEBLOCK[g]){const b=ROUTEBLOCK[g]();if(b)return b}
+ {const sa=typeof sceneArea==='function'&&sceneArea(g+i);if(sa&&AREAS[sa]&&typeof areaLock==='function'&&areaLock(sa))return'it happens in the '+AREAS[sa].n+', which isn\'t open yet'}
+ if(day()<r.d&&!(S.restore&&META.routes[g]))return'their story continues on Day '+r.d;
  if(aff(g)<r.a)return'needs ♥ '+r.a+' (you have '+aff(g)+')';
  if(r.sk&&rank('skill')<r.sk)return'needs Skill rank '+r.sk+' ('+RANKS.skill[r.sk]+')';
  if(r.cl&&rank('clout')<r.cl)return'needs Clout rank '+r.cl+' ('+RANKS.clout[r.cl]+')';
  if(r.c&&!r.c())return r.y||'not yet';
  return null}
-const sceneReady=g=>met(g)&&ROUTES[g]&&scn(g)<ROUTES[g].n&&scn(g)>0&&!sceneWhy(g);
+const sceneReady=g=>met(g)&&ROUTES[g]&&scn(g)<ROUTES[g].n&&scn(g)>=1&&!sceneWhy(g);
 function adv(g,i){if(!S)return;if((S.sc[g]||0)<=i&&typeof tqQueue==='function')tqQueue(g,i);S.sc[g]=Math.max(S.sc[g]||0,i+1);if(ROUTES[g]&&S.sc[g]>=ROUTES[g].n)loveDone(g)}
 function loveDone(g){META.routes[g]=1;saveMeta();ach('love_'+g);const n=romCount();if(n>=2)ach('love2');if(n>=3)ach('love3')}
 /* ---- the calendar ---- */
@@ -37,15 +39,16 @@ function addSlotLog(t){if(!S||!t)return;S.slog=S.slog||{};const k=S.day+':'+S.sl
 function spend(kind,what){S.acts=(S.acts||0)+1;addSlotLog(what||({hang:'Time with someone',lead:'Worked a lead',talk:'A talk',ctf:'CTF practice',bounty:'Bug bounty',rest:'Rested',wait:'Let it go by'}[kind]||kind));
  if(S.restore&&!S.oc&&S.day>=1){S.oc=1;toast('Overclocked: one more thing this '+SLOTN[S.slot].toLowerCase(),'var(--mint)');save();hub();return}
  nextSlot()}
-function nextSlot(){S.oc=0;S.slot++;if(S.slot>5){endDay();return}tqFlush();save();toast(SLOTN[S.slot],'var(--dim)');if(typeof sfx==='function')sfx('advance');hub()}
+function nextSlot(){S.oc=0;S.slot++;if(S.slot>5){endDay();return}evMissCheck();tqFlush();save();setTimeout(evSoonToast,600);toast(SLOTN[S.slot],'var(--dim)');if(typeof sfx==='function')sfx('advance');hub()}
 function endDay(){
  const d=S.day;S.slot=5;
  const sleep=SC['sleep'+d]!==undefined?scr('sleep'+d):scr('sleep');
  run(sleep,()=>{newDay(d+1)})}
 function newDay(d){
  if(S.day>=1&&S.exp<=10)ach('lowkey');
+ neglectCheck(d);
  S.day=d;S.ch=Math.min(d,4);S.slot=0;S.oc=0;S.exp=S.foot;S.hang={};delete S.failing;
- const wake=S.wakeAt||'room1337';tqFlush();snapDay();save();
+ evMissCheck();const wake=S.wakeAt||'room1337';tqFlush();snapDay();save();setTimeout(evSoonToast,1800);
  const go=()=>{run([{chapter:d},{hide:1}],hub)};
  if(G.ok&&S.inWorld)fadeTp(()=>{teleportArea(wake);S.pos=null;go()});else go();
 }
@@ -60,19 +63,27 @@ const stepGo=()=>startBeat(curBeat());
 function beatTarget(b0){const b=beatStep(b0);if(b.manual)return b.tg||null;if(b.int&&INTPOS[b.int]){const p=INTPOS[b.int];return{reg:p[0],x:p[1],z:p[2],y:p[3]}}if(b.who){const c=WCH.find(c=>c.id===b.who&&c.on);return c?{reg:c.reg,x:c.x,z:c.z,y:c.y||0}:null}if(b.auto)return null;if(b.pos)return{reg:b.pos[0],x:b.pos[1],z:b.pos[2],y:b.pos[3]||0};const A=AREAS[b.w];if(!A)return null;return{reg:A.reg,x:A.sp[0],z:A.sp[1],y:A.sp[3]||0}}
 /* ---- free time: what you can do with a part of the day ---- */
 function freeCheck(what){if(!S||S.day<1)return false;if(curBeat()){run([N(blockedMsg()+'. It\'s waiting where the green light is.')],hub);return false}if(!isFree()){run([N('Not right now.')],hub);return false}return true}
+/* a scene that belongs somewhere else: they ask to meet you there instead of whisking you off */
+function elsewhere(g,id){if(!(S&&S.inWorld&&typeof G!=='undefined'&&G.ok))return false;const sa=typeof sceneArea==='function'&&sceneArea(id);if(!sa||!AREAS[sa]||nearArea(sa,6))return false;
+ const A=AREAS[sa];S.wp={reg:A.reg,x:A.sp[0],z:A.sp[1],y:A.sp[3]||0,t:CH[g].name+': '+A.n};
+ run([L(typeof worldLook==='function'?worldLook(g):g,'n',pick(['Not here. Meet me at the '+A.n+'?','Can we do this somewhere else? The '+A.n+'. I\'ll see you there.','Too many people. '+A.n+', in a bit?'])),N('Pinned on your map: '+A.n+'.')],hub);return true}
 function hangMenu(g,bgk){
  const R=ROUTES[g],pg=typeof worldLook==='function'?worldLook(g):g;
- if(!met(g)){meet(g);adv(g,0);return run([{bg:bgk},...scr(g+'0')],hub)}
+ // the menu itself happens right where you're standing
+ if(typeof areaAt==='function'&&S.inWorld&&typeof G!=='undefined'&&G.ok){const here=areaAt(WD.reg,WD.x,WD.z,WD.y);if(here)bgk=here}
+ if(!met(g)){if(elsewhere(g,g+'0'))return;meet(g);adv(g,0);return run([{bg:bgk},...scr(g+'0')],hub)}
  const opts=[],why=sceneWhy(g),i=scn(g),free=isFree();
  if(i<R.n)opts.push({t:i===R.n-1?'Spend time together: the last one':'Spend time together',hint:why?('Locked: '+why):curBeat()?blockedMsg():!free?'Not now':'Uses the '+SLOTN[S.slot].toLowerCase()+(i===R.n-1?' · this is the end of their story':''),if:()=>true,then:()=>{
    if(why)return[N(CH[g].name+'\'s story '+(why.startsWith('their')?'continues later: ':'needs more: ')+why+'.')];
    if(!freeCheck())return[];
-   return[...scr(g+i),()=>{adv(g,i);addSum(R.sum?R.sum[i]||'':'');if(S.slot===5)ach('night_owl');ach('first_hang');spend('hang');return[]}]}});
+   if(elsewhere(g,g+i))return[];
+   seen(g);
+   return[N('How do you want to spend it?'),...approachMenu(g,()=>[...scr(g+i),()=>{fx({[g]:8});adv(g,i);seen(g);addSum(R.sum?R.sum[i]||'':'');if(S.slot===5)ach('night_owl');ach('first_hang');spend('hang');return[]}])]}});
  const tk=g+':'+S.day;
- opts.push({t:'Talk shop',hint:S.hang[tk]?'Already did that today':'Free · once a day',if:()=>!S.hang[tk],then:()=>{S.hang[tk]=1;return[{unlock:'hang'},{game:'quiz',who:g,n:3}]}});
+ opts.push({t:'Talk shop',hint:S.hang[tk]?'Already did that today':'Free · once a day',if:()=>!S.hang[tk],then:()=>{S.hang[tk]=1;seen(g);S.thint=S.thint||{};const first=!S.thint[g];S.thint[g]=1;return[{unlock:'hang'},{game:'quiz',who:g,n:3},...(first&&TASTE[g]?[T('think',TASTE[g][4])]:[])]}});
  const gi=Object.keys(ITEMS).find(k=>ITEMS[k].g===g);
- if(gi&&S.inv[gi]&&!S.gifted[g])opts.push({t:'Give the '+ITEMS[gi].n.toLowerCase(),then:()=>{S.inv[gi]--;if(!S.inv[gi])delete S.inv[gi];S.gifted[g]=1;if(Object.keys(S.gifted).length>=5)ach('gifts5');return[FX({[g]:12}),L(pg,'b',R.gift)]}});
- opts.push({t:'Just chat',then:()=>[L(pg,'h',pick(R.idle))]});
+ if(gi&&S.inv[gi]&&!S.gifted[g])opts.push({t:'Give the '+ITEMS[gi].n.toLowerCase(),then:()=>{S.inv[gi]--;if(!S.inv[gi])delete S.inv[gi];S.gifted[g]=1;seen(g);if(Object.keys(S.gifted).length>=5)ach('gifts5');return[FX({[g]:12}),L(pg,'b',R.gift)]}});
+ opts.push({t:'Just chat',then:()=>{seen(g);const ck=g+':c:'+S.day,first=!S.hang[ck];S.hang[ck]=1;return[L(pg,'h',pick(R.idle)),...(first?[FX({[g]:2})]:[])]}});
  opts.push({t:'Leave',then:[]});
  const st=stageOf(g);
  run([{bg:bgk},L(pg,'n',pick(R.hello||R.idle)),N(`${CH[g].name} · ${loved(g)?'In love':st} · ♥ ${aff(g)}${why&&i<R.n?' · next: '+why:''}`),C(...opts)],hub);
@@ -125,7 +136,7 @@ const TASKS=[
  {k:'buyer',n:'Find the buyer',d:'Halberd\'s man is somewhere in the building.',best:'vesper',good:['fern','wren','astrid']},
  {k:'story',n:'The human story',d:'Make three thousand people feel why it matters.',best:'ellie',good:['pia','delphine','dave']}
 ];
-const allyReady=g=>g==='dave'?!!S.f.dave_helped:(met(g)&&scn(g)>=3);
+const allyReady=g=>g==='dave'?!!S.f.dave_helped:(met(g)&&scn(g)>=2);
 /* the right person, someone you love, someone who's ready (their sixth scene), each holds a little harder */
 const taskScore=(t,a)=>{let s=!a?(rank('skill')>=3?1:0):a===t.best?3:t.good.includes(a)?2:1;if(a&&a!=='dave'&&loved(a))s++;if(a&&S.f[a+'_ready'])s++;return Math.min(3,s)};
 /* ---- the con programme: optional events at a time and place. Joining one takes that part of the day. ---- */

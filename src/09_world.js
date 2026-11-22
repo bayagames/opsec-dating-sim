@@ -6,7 +6,9 @@ function areaAt(reg,x,z,y){let best=null,bs=1e18;for(const k in AREAS){const a=A
 function teleport(reg,x,z,yaw,y){G.poolReg=null;G.atmoInit=false;WD.reg=reg;WD.x=x;WD.z=z;WD.yaw=yaw;WD.pit=0;WD.y=y||0;WD.vy=0;WD.vx=WD.vz=0;WD.eye=WD.y+1.62}
 function teleportArea(k){const a=AREAS[k];if(!a)return;teleport(a.reg,a.sp[0],a.sp[1],a.sp[2],a.sp[3]||0)}
 const bgArea=k=>BG2AREA[k]||(typeof AREAS!=='undefined'&&AREAS[k]?k:null);
-function worldBG(k){const ak=bgArea(k);if(!(S&&S.inWorld&&G.ok)||!ak)return false;const cur=areaAt(WD.reg,WD.x,WD.z,WD.y);if(!(cur&&(AREAS[cur].bg===k||ak===cur)))teleportArea(ak);placeChars();return true}
+/* are you in (or right at the edge of) this area? talking over a counter or through a doorway counts */
+function nearArea(k,m){const a=AREAS[k];if(!a||!S||a.reg!==WD.reg)return false;m=m===undefined?3:m;const r=a.r;return WD.x>=r[0]-m&&WD.x<=r[2]+m&&WD.z>=r[1]-m&&WD.z<=r[3]+m&&WD.y>=a.y0-1.5&&WD.y<=a.y1+1.5}
+function worldBG(k){const ak=bgArea(k);if(!(S&&S.inWorld&&G.ok)||!ak)return false;const cur=areaAt(WD.reg,WD.x,WD.z,WD.y);if(!(cur&&(AREAS[cur].bg===k||ak===cur))&&!nearArea(ak))teleportArea(ak);placeChars();return true}
 /* ---------- physics ---------- */
 function heightAt(reg,x,z,cy){const L=G.regions[reg].shash[Math.floor(x/4)+','+Math.floor(z/4)]||[];let best=-1e9;
  for(const s of L){if(x<s.x0||x>s.x1||z<s.z0||z>s.z1)continue;let h=s.y;if(h===undefined){const t=s.ax==='x'?(x-s.x0)/(s.x1-s.x0):(z-s.z0)/(s.z1-s.z0);h=s.ya+(s.yb-s.ya)*t}if(h<=cy+.62&&h>best)best=h}
@@ -52,7 +54,7 @@ function setupInput(){
   if(k==='m'&&S.unl.map){e.preventDefault();mapOpen(false)}});
  addEventListener('keyup',e=>{WD.keys[e.key.toLowerCase()]=false;if(e.key==='Escape'){WD.escDown=false;if(WD.lockAfterEsc){WD.lockAfterEsc=false;setTimeout(tryLock,30)}}});
  addEventListener('keydown',e=>{if(e.key==='Escape')WD.escDown=true},true);
- addEventListener('blur',()=>{WD.keys={}});
+ addEventListener('blur',()=>{WD.keys={};WD.blurAt=performance.now()});
  document.addEventListener('pointerlockerror',()=>{if(!WD.clickLock)return;WD.clickLock=false;WD.lockFails=(WD.lockFails||0)+1;if(WD.lockFails>=3&&!WD.everLocked){WD.noLock=true;$('lockHint').innerHTML='<b>Drag</b> to look around'}});
  document.addEventListener('pointerlockchange',()=>{
   WD.locked=document.pointerLockElement===lockEl();
@@ -62,7 +64,8 @@ function setupInput(){
   // a lock that dies within a moment of being granted was the browser finishing an Esc press, not the player asking for the phone
   if(performance.now()-(WD.lockAt||0)<450)return;
   // Esc released the mouse: that's the "open phone" key
-  if(!self&&S&&S.inWorld&&(worldLive()||$('vn').classList.contains('on')))phone();
+  // tabbing out also drops the lock: only treat it as Esc if the window still has focus a moment later
+  if(!self&&S&&S.inWorld&&(worldLive()||$('vn').classList.contains('on')))setTimeout(()=>{if(document.hidden||!document.hasFocus()||WD.blurAt&&performance.now()-WD.blurAt<600)return;if(S&&S.inWorld&&!$('ov').classList.contains('on')&&(worldLive()||$('vn').classList.contains('on')))phone()},120);
  });
  // only explicit clicks count towards the 'pointer lock is impossible here' fallback (e.g. a sandboxed iframe)
  tz.addEventListener('click',()=>{if(WD.touch||!worldLive())return;WD.clickLock=true;tryLock()});
@@ -143,7 +146,7 @@ function update(dt){
  const a=areaAt(WD.reg,WD.x,WD.z,WD.y);
  if(a&&a!==WD.area){WD.area=a;const A=AREAS[a];$('areaName').textContent=A.n;$('areaName').classList.remove('fade');void $('areaName').offsetWidth;$('areaName').classList.add('fade');
   S.visited=S.visited||{};if(!S.visited[a]&&!A.hide){S.visited[a]=1;if(S.day>0){toast('Discovered: '+A.n,'var(--butter)');sfx('discover')}}}
- if(S.day>=1&&performance.now()-(WD.bcT||0)>300){WD.bcT=performance.now();beatCheck()}
+ if(S&&!S.ending&&performance.now()-(WD.bcT||0)>300){WD.bcT=performance.now();beatCheck()}
  if(performance.now()-WD.lastSave>8000){WD.lastSave=performance.now();S.pos=[WD.reg,WD.x,WD.z,WD.yaw,WD.y];save()}
 }
 /* ---------- interaction ---------- */
@@ -390,8 +393,8 @@ function drawMapCanvas(c,reg,o){
  for(const c of visibleChars()){if(c.reg!==reg||!onLv(c.y))continue;const nw=news.some(n=>n.id===c.id);x.fillStyle=nw?'#ffd166':(CH[c.id].col||'#fff');x.beginPath();x.arc(X(c.x),Z(c.z),(nw?(o.mini?4:5):(o.mini?2.6:3.5))*u,0,7);x.fill();if(nw){x.strokeStyle='#1b1026';x.lineWidth=1.5*u;x.stroke()}}
  if(o.mini)for(const n of WD.npcs)if(n.reg===reg&&onLv(n.y)){x.fillStyle='#bba8cf88';x.fillRect(X(n.x)-u,Z(n.z)-u,2*u,2*u)}
  const ob=objective();
- if(ob&&ob.reg===reg){let px=X(ob.x),pz=Z(ob.z);if(o.mini){const cx=Wd/2,cz=Hd/2,dx=px-cx,dz=pz-cz,m=Math.max(Math.abs(dx),Math.abs(dz)),lim=Wd/2-8*u;if(m>lim){px=cx+dx/m*lim;pz=cz+dz/m*lim}}star(x,px,pz,(o.mini?6:8)*u);if(!onLv(ob.y)){x.fillStyle='#8affc1';x.font=`bold ${11*u}px sans-serif`;x.textAlign='center';x.fillText(ob.y>lv?'▲':'▼',px,pz-9*u)}}
- if(S.wp&&S.wp.reg===reg){let px=X(S.wp.x),pz=Z(S.wp.z);if(o.mini){const cx=Wd/2,cz=Hd/2,dx=px-cx,dz=pz-cz,m=Math.max(Math.abs(dx),Math.abs(dz)),lim=Wd/2-8*u;if(m>lim){px=cx+dx/m*lim;pz=cz+dz/m*lim}}const r=(o.mini?5:8)*u;x.fillStyle='#ffd166';x.beginPath();x.arc(px,pz-r,r*.75,Math.PI,0);x.lineTo(px,pz+r*.4);x.closePath();x.fill();x.strokeStyle='#1b1026';x.lineWidth=1.2*u;x.stroke();if(levelOf(reg,S.wp.y||0)!==lv){x.fillStyle='#ffd166';x.font=`bold ${10*u}px sans-serif`;x.textAlign='center';x.fillText((S.wp.y||0)>lv?'▲':'▼',px,pz-r*2)}}
+ if(ob&&ob.reg===reg){let px=X(ob.x),pz=Z(ob.z);if(o.mini){const cx=Wd/2,cz=Hd/2,dx=px-cx,dz=pz-cz,m=Math.hypot(dx,dz),lim=Wd/2-11*u;if(m>lim){px=cx+dx/m*lim;pz=cz+dz/m*lim}}star(x,px,pz,(o.mini?6:8)*u);if(!onLv(ob.y)){x.fillStyle='#8affc1';x.font=`bold ${11*u}px sans-serif`;x.textAlign='center';x.fillText(ob.y>lv?'▲':'▼',px,pz-9*u)}}
+ if(S.wp&&S.wp.reg===reg){let px=X(S.wp.x),pz=Z(S.wp.z);if(o.mini){const cx=Wd/2,cz=Hd/2,dx=px-cx,dz=pz-cz,m=Math.hypot(dx,dz),lim=Wd/2-11*u;if(m>lim){px=cx+dx/m*lim;pz=cz+dz/m*lim}}const r=(o.mini?5:8)*u;x.fillStyle='#ffd166';x.beginPath();x.arc(px,pz-r,r*.75,Math.PI,0);x.lineTo(px,pz+r*.4);x.closePath();x.fill();x.strokeStyle='#1b1026';x.lineWidth=1.2*u;x.stroke();if(levelOf(reg,S.wp.y||0)!==lv){x.fillStyle='#ffd166';x.font=`bold ${10*u}px sans-serif`;x.textAlign='center';x.fillText((S.wp.y||0)>lv?'▲':'▼',px,pz-r*2)}}
  if(reg===WD.reg&&levelOf(reg,WD.y)===lv){const px=X(WD.x),pz=Z(WD.z);x.save();x.translate(px,pz);x.scale(u,u);x.rotate(-WD.yaw);x.fillStyle='#ff5d73';x.beginPath();x.moveTo(0,-8);x.lineTo(5.5,6);x.lineTo(0,3);x.lineTo(-5.5,6);x.closePath();x.fill();x.strokeStyle='#fff';x.lineWidth=1.2;x.stroke();x.restore()}
  if(o.mini){x.fillStyle='#f6eefc';x.font=`bold ${10*u}px sans-serif`;x.textAlign='center';x.fillText('N',Wd/2,11*u)}else if(o.view){x.fillStyle='#f6eefc';x.font='bold 18px sans-serif';x.textAlign='center';x.fillText('N ↑',30,26)}
 }

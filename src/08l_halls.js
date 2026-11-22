@@ -153,7 +153,9 @@ function buildHalls(){
  /* ---- the loading dock (with the stair down to the service tunnel and the fire stairs to the roof) ---- */
  {const X0=134,X1=176,Z0=-150,Z1=-64,H=10;sFloor(X0,Z0,X1,Z1,0,MT.concrete,[[134,-122,140,-110]],.4,MT.concrete);G.lmK=.6;ceilQ(X0,Z0,X1,Z1,H,MT.deck);G.lmK=1;
   W('h',Z1,X0,X1,0,H,MT.concrete,-1);W('h',Z0,X0,X1,0,H,MT.concrete,1);W('v',X0,Z0+.2,Z1-.2,0,H,MT.concrete,1);W('v',X1,Z0+.2,Z1-.2,0,H,MT.concrete,-1);
-  stairs(134,-122,140,-110,BY,0,'z-',MT.concrete,{nose:MT.plain('#ffd166'),solid:false});stairShell(134,-122,140,-110,BY,0,'z-',MT.concrete,.3);railing(140,-122,140,-110,0,{y2:BY,m:MT.plain('#ffd166'),under:5.3});railing(140,-110,140,-122,0,{m:MT.plain('#ffd166')});railing(134,-110,140,-110,0,{m:MT.plain('#ffd166')});
+  stairs(134,-122,140,-110,BY,0,'z-',MT.concrete,{nose:MT.plain('#ffd166'),solid:false});stairShell(134,-122,140,-110,BY,0,'z-',MT.concrete,.3);
+  // the shaft the flight drops through: closed on both sides and at the top end, down to the tunnel
+  box(133.8,BY,-122.2,134,0,-109.8,MT.concrete,{col:false});box(140,BY,-122.2,140.2,0,-109.8,MT.concrete,{col:false});box(133.8,BY,-122.2,140.2,-.4,-122,MT.concrete,{col:false});railing(140,-122,140,-110,0,{y2:BY,m:MT.plain('#ffd166'),under:5.3});railing(140,-110,140,-122,0,{m:MT.plain('#ffd166')});railing(134,-110,140,-110,0,{m:MT.plain('#ffd166')});
   for(let i=0;i<4;i++){const z=-140+i*18;kOnWall('v',X1-.2,-1,z,7,0,6,MT.plain('#8a8a94'));for(let k=0;k<12;k++)box(X1-.35,.4+k*.48,z-3.4,X1-.2,.44+k*.48,z+3.4,MT.plain('#5a5a64'),{col:false});box(X1-6,0,z-3.4,X1-.2,.12,z+3.4,MT.hazard,{col:false})}
   box(150,0,-120,166,3.8,-114,MT.plain('#e9e3da'));box(166,0,-120,170,2.8,-114,MT.plain('#2a4a8a'));kSign(158,1.2,-113.99,12,1.4,'s','HALCYON FRESH · DELIVERIES','#2a4a8a','#e9e3da');
   for(const[x,z]of[[142,-146],[146,-146],[142,-96],[150,-80],[160,-90]]){box(x,0,z,x+1.2,.15,z+1.2,MT.wood);box(x+.1,.15,z+.1,x+1.1,1+((x+z)%3)*.2,z+1.1,MT.plain('#c9a46a'))}

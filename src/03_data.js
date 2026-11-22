@@ -154,12 +154,19 @@ const ENDINFO={
  larp:['Larp Exposed','You went on stage with a bluff. The internet keeps receipts.','bad'],
  opensource:['Open Source','No one person. Everyone, together.','good'],
  notfound:['404: Partner Not Found','You did the right thing. You did it alone.','mixed'],
- lasttrain:['Last Train','You left before the keynote. The train was nearly empty.','bad']
+ lasttrain:['Last Train','You left before the keynote. The train was nearly empty.','bad'],
+ dump:['Data Dump','Everything LANTERN ever heard, in public, at once.','mixed'],
+ trojan:['Trojan Horse','The demo was you. You said something else.','good'],
+ rollback:['Rollback','Four thousand badges turn rainbow in the middle of the demo.','good'],
+ doublecross:['Double-Cross','Victor introduced you himself.','good'],
+ informant:['Informant','You were on the right list. Everyone else was on the other one.','bad'],
+ lastlogin:['Last Login','Krall doesn\'t keep sources. He spends them.','bad']
 };
 const ENDORDER=Object.keys(ENDINFO);
 /* achievements: [name, description, hidden until earned] */
 const ACH={
  first_hang:['Quality Time','Spend part of a day with someone.'],
+ tastes:['Read the Room','Pick exactly the right way to spend time with someone.'],
  first_event:['On the Programme','Go to a con event.'],events6:['Con Veteran','Go to six con events in one run.'],
  first_lead:['Following Up','Work a lead.'],
  first_solve:['Case Closed','Solve a mystery on the case board.'],

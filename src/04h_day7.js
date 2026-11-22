@@ -4,6 +4,10 @@ SC.d7_positions=`
 [hide]
 if S.plan==='walk'
  [scene end_lasttrain]
+elif S.plan==='informant'
+ [bg hotel]
+ ~ Sunday. Your phone buzzes all morning with messages from people getting into position. You read every one. You forward every one.
+ * Eight in the morning, and you've already done the worst thing you'll ever do. The rest of the day is just waiting to find out what it costs.
 elif S.plan==='soldout'
  [bg lumenlounge]
  ~ Sunday. The Lumen green room, which this morning is the Lumen Lounge with the curtains drawn. Make-up. Coffee. A man with a clipboard who calls you "talent".
@@ -99,6 +103,8 @@ if S.plan==='soldout'
  [scene key_sold]
 elif S.plan==='kill'
  [scene key_kill]
+elif ['dump','trojan','rollback','doublecross','informant'].includes(S.plan)
+ [call scr('key_'+S.plan)]
 else
  [scene key_main]
 `;
@@ -108,11 +114,17 @@ if S.plan==='front'
  ~ The Ledger. Front page, live. "LUMEN'S LANTERN: THE APP THAT MAPS WHO TALKS TO JOURNALISTS, SOLD TO A SPY FIRM FOR £400M". By Saoirse Quinn.
  ~ Victor keeps talking. Nobody's listening. They're reading. He can see them reading.
  [flag paper_out]
+if f('press_court')&&(S.plan==='front'||S.plan==='inj')&&met('noor')&&met('saoirse')
+ ~ And because Noor and Saoirse finally stopped arguing on Thursday night, both happen at once: the story goes live as the order is served.
+ [flag paper_out injunction_served]
 if S.plan==='inj'
  ~ 3:59 PM. Noor comes through the stage door at a run, a folder over her head, her hijab coming loose, the pen in her hand still uncapped.
  noor.h: Granted. Interim injunction. No launch, no transfer, no "demonstration" of the data. Signed eleven minutes ago by a very grumpy judge.
  ~ She serves it on Lumen's head of legal in the wings. He reads it twice. His face does a very slow thing.
  [flag injunction_served]
+if f('decoy_plan')&&!f('mira_taken')
+ ~ Somewhere on the fourth floor, two of Krall's men are following your badge down a corridor. Mira has it in her pocket, and is walking it very slowly towards the car park.
+ [flag rin_safe]
 ~ 4:00. The lights go down. Victor Hale walks out into a single spotlight to a wall of noise.
 victor.h: Good afternoon, CTRL+ALT+CON. This week, you've been connected. Today, I'm going to show you just how connected.
 ~ The screen behind him blooms into a galaxy: four thousand dots, every badge in the building, and lines between them, thick where people stood together for hours, thin where they passed.
@@ -125,10 +137,13 @@ if !solved('m6')&&!f('mole_fed')
  [flag mole_struck]
  if taskOK('screens')
   ~ {=KTX('screens',a=>CH[a].name+' is already in the AV booth. "Nope," you hear over the comms. Three switches, a cable you didn\\'t know existed, and the faders come back up. Owen stares at the desk like it bit him.',a=>CH[a].name+' scrambles at the desk and gets one microphone back. One is enough.','')}
- elif met('astrid')&&scn('astrid')>=4
+ elif f('van_ready')
+  ~ Your phone buzzes. Petra: "Car park roof. Dish is up. Astrid says you're live to half of Europe. Keep talking." The car on the roof, the one they drove up the ramp on its rims, is broadcasting you to the sky.
+  [flag signal]
+ elif met('astrid')&&scn('astrid')>=3
   ~ Your phone buzzes. Astrid. "They cut the room. They can't cut the sky. Going out by satellite. Keep talking."
   [flag signal]
- elif met('sunny')&&scn('sunny')>=4&&taskOf('uplink')==='sunny'
+ elif met('sunny')&&scn('sunny')>=3&&taskOf('uplink')==='sunny'
   ~ Your earpiece crackles. Sunny. "They've got the room. Fine. Then nobody gets anything." And the whole building goes dark.
   [flag blackout]
  else
@@ -157,14 +172,25 @@ else
  if taskOK('uplink')
   ~ {=KTX('uplink',a=>'In the basement, '+CH[a].name+' pulls three cables in the right order. LANTERN-01\\'s uplink dies mid-sentence. On screen, the galaxy stops turning. Every line goes grey.',a=>CH[a].name+' gets to LANTERN-01 a minute late, and pulls everything. The galaxy stutters, and stops.','')}
   [flag uplink_cut]
+ elif f('redblue')
+  ~ In the basement, Nyx opens the MDF door in nine seconds while Priya reads the cable labels off her phone. Red team in, blue team knows which cable. The galaxy on the screen stops turning.
+  [flag uplink_cut]
  else
   ~ The galaxy keeps turning behind you. LANTERN's still live, still collecting. Every second, more lines.
  if taskOK('screens')
   ~ And then every screen in Hall A changes at once: {=KTX('screens',a=>'frame-perfect, on the beat, the way only '+CH[a].name+' could time it.',a=>CH[a].name+' gets the feed across with a stutter, but it\\'s there.','')} Rin's findings, the size of a house.
  else
   ~ You get the evidence onto one side screen, small, half the room squinting at it.
+ if f('kit_cam')
+  ~ Then a clip nobody expected: Lumen's own booth, filmed from inside a cosplay helmet. Krall's team, on Tuesday, laughing about "the WHISPER posts" before there were any WHISPER posts. Kit's visor saw everything.
+  [flag paper_out]
+ if f('juno_audience')&&met('juno')
+  ~ Juno's stream is carrying all of it. Twelve thousand people. Then a hundred thousand. Then Juno says "Chat, this isn't content, this is real," and they believe her more than they'd ever believe a newspaper.
  if f('rin_safe')
   ~ Rin walks on. Lilac hoodie. Pleated skirt. A gummy worm in one fist like a stress ball. He takes SafeSphere apart, line by line, in front of two thousand people, and his voice doesn't shake once.
+  if f('mira_source')&&met('mira')&&!f('mira_taken')
+   rin.n: Three years ago someone sent me the documents that started all of this. She's here. She doesn't have to stand up.
+   ~ At the back of the hall, a woman with silver hair stands up anyway.
  else
   ~ Rin isn't here. Rin's in a police station across the city. You explain his work for him, as best you can, and it's not as good as him, and it has to be enough.
  if taskOK('verify')
@@ -185,15 +211,21 @@ else
    ~ Dave takes the mic. "I was MegaHax. I made the TikTok. Ten million downloads. I didn't know. Now I do. Delete it." It's the most honest thing anyone in a Lumen T-shirt has ever said.
   else
    ~ {=CH[taskOf('story')].name} tells the human part. It lands.
- if scn('delphine')>=5&&!f('delphine_stage')
+ if (scn('delphine')>=3||f('delphine_on_record')&&scn('delphine')>=2)&&!f('delphine_stage')
   ~ And then Delphine Vos walks out of the wings, in her navy suit, with her hair down. Victor's face does something you'll remember for the rest of your life.
   delphine.n: I'm Lumen's VP of Communications. I wrote every word Victor has said this week. I also found WH1SPER's posts in our own Trust and Safety folder, written days before they went up. I'd like to read you some.
   [flag delphine_stage]
- if solved('m9')&&scn('pia')>=4
+ if solved('m9')&&scn('pia')>=3||f('jonah_met')
   ~ And from the back of the hall, a thin man with a beard and a hoodie walks all the way down the centre aisle. Nobody knows who he is. Then Saoirse, in the front row, stands up.
   saoirse.d: That's Jonah Reyes.
   ~ He climbs onto the stage beside you. He has LANTERN's first design documents in a carrier bag, with Victor's signature on every page.
   [flag jonah_stage]
+  if clue('jonahcode')
+   jonah.n: My name's Jonah Reyes. Three years ago I wrote the core of what you're looking at. I thought it was for catching fraud. I'm here to tell you exactly how to break it.
+   ~ The hall goes so quiet you can hear the projector fans.
+ if (f('vesper_forgiven')||f('vesper_delphine'))&&met('vesper')&&!taskOK('buyer')
+  ~ At the back of the hall, a silver-haired man in a very good suit is quietly leaving. Vesper Lane is in the doorway, no earpiece, singing the first line of his favourite song. "Mr Ashgrove. I'm afraid I've resigned."
+  [flag buyer_named]
  if taskOK('buyer')
   ~ {=KTX('buyer',a=>'At the back of the hall, a silver-haired man in a very good suit is quietly leaving. '+CH[a].name+' is standing in the doorway, smiling. "Mr Ashgrove. Leaving before the end? You\\'ll miss your signing."',a=>CH[a].name+' spots Halberd\\'s man leaving and follows him all the way to the lifts.','')}
   [flag buyer_named]
@@ -212,7 +244,7 @@ mira.d: And nobody asked them. That's the part I can't get past. I'm doing to te
  ~ She presses enter.
  ~ Far below, through the con's glass roof, two thousand phones in Hall A buzz at once. Then the whole city's do.
  ~ "SafeSphere has been updated by its original author. Data collection: off. Thank you for trusting us. You shouldn't have."
-?(scn('mira')>=5) "Come with me instead. After. Leave all of this."
+?(scn('mira')>=3) "Come with me instead. After. Leave all of this."
  [flag kill_go ghost]
  ~ She looks at you for a long time. Then she presses enter, closes the laptop, and holds out her hand.
  mira.b: ...Yes. After. Somewhere with no Wi-Fi at all.
@@ -235,6 +267,12 @@ SC.key_sold=`
 SC.d7_roof=`
 [bg corridor]
 [hide]
+if S.plan==='informant'||f('betray_mira')&&!f('lantern_dead')&&!['trojan','doublecross','rollback'].includes(S.plan)
+ [scene roof_loose]
+else
+ [scene roof_main]
+`;
+SC.roof_main=`
 ~ Evening. The 13th floor. The door at the end of the refurbishment wing, the one that's always shut, is open. Suite 1313. Light, voices, and the smell of very expensive coffee.
 if f('kill_go')||f('injunction_served')||f('blackout')||f('signal')||f('uplink_cut')&&(f('paper_out')||f('buyer_named')||f('delphine_stage')||f('jonah_stage'))
  [call S.f.lantern_dead=1]
@@ -250,7 +288,7 @@ if f('lantern_dead')
   "Police officer": Silas Krall? We'd like to talk to you about a series of posts made under the name WH1SPER.
   ~ Krall turns from the window. For the first time all week, he looks surprised.
   [flag krall_arrested]
- if scn('vesper')>=5&&clue('vconfess')
+ if scn('vesper')>=3&&clue('vconfess')
   ~ Vesper is in the corridor behind you. You didn't hear her arrive. No earpiece.
   vesper.n: Halberd will want someone inside who understands what happened here today. Someone who knows Lumen's mistakes, and LANTERN's code, and the people in it.
   vesper.s: Come with me, darling. Inside. We could take them apart from the middle, slowly, beautifully, for years.
@@ -287,8 +325,7 @@ else
  [scene end_main]
 `;
 /* who you find at the afterparty, if more than one person's story ended with you */
-function choosePartner(){const L=ROM.filter(loved);if(L.length<=1){S.partner=L[0]||null;return}
- return[N('You look around the ballroom. There\'s someone you want to find first.'),{choice:L.map(g=>({t:CH[g].name,then:()=>{S.partner=g;return[]}}))}]}
+function choosePartner(){const L=ROM.filter(loved).sort((a,b)=>aff(b)-aff(a));S.partner=L[0]||null}
 SC.end_main=`
 [call scr('end_'+S.endK)]
 `;

@@ -10,7 +10,7 @@ Working reference for the expanded game. Spoilers throughout.
 - **Free slots** take one activity: a hangout scene, an investigation lead, a talk or workshop, CTF practice, a bug bounty, streaming with Juno, or resting. Meeting someone, talking shop (once per person per day), gifts, the shop and the phone are free.
 - **Exposure** resets each morning to your Footprint (permanent leaks). At 100 you're doxxed and the day restarts from its morning snapshot. Risky leads can spike it.
 - **Skill** and **Clout** are XP with ranks (0-5). Skill: Script Kiddie, Novice, Practitioner, Specialist, Expert, Elite. Clout: Nobody, Lurker, Known Face, Notable, Con Famous, Legend. Thresholds 0/30/80/150/250/380.
-- **Closeness** per character: affection 0-100 plus scenes seen (0-8). Stages: Met, Acquaintance, Friend, Close, Dating, In Love. Scene 0 (meeting) is free; story beats don't use up their slot, so there are about 26 free actions in a run.
+- **Closeness** per character: affection 0-100 plus scenes seen (0-6). Stages: Met, Acquaintance, Friend, Close, Dating, In Love (one per scene). Scene 0 (meeting) is free; story beats don't use up their slot, so there are about 26 free actions in a run.
 - About 26 free actions per run: enough for two full routes plus Ellie, or one route and most of the leads. From Day 5 the story nudges you to spend time on people you're dating.
 
 ## Cast (datable: 21)
@@ -94,38 +94,76 @@ Solving: pick the answer and the three clues that prove it. A wrong deduction co
 - D6 Sat: Morning F · Midday S CTF Finals (Ada; Mira's challenge names Halberd) · Afternoon F · Evening S The Raid (Room 1337 searched) · Night S War Council (choose the plan) · Late F (the night before)
 - D7 Sun: Morning S Positions · Midday S Krall's Move · Afternoon S The Keynote (tasks) · Evening S The Thirteenth Floor (roof, 1313, Mira, Krall, Ashgrove) · Night S 0xFF (afterparty, epilogue)
 
-## Final act
-Plan options (each needs its own conditions): Disclosure (Marge's slot), Front Page (Saoirse), Injunction (Noor and
-Delphine), Kill Switch (Mira), Sell Out (Victor's offer), Walk Away (last train). Then the keynote tasks: stop the
-uplink, protect Rin and the evidence, get the evidence on screen, verify it live, find the buyer, handle the mole.
-Allies are assigned; fit and closeness decide each task. Then the roof.
+## The branches
+Five big decisions (marked ⚑ in the game) change which beats you get:
+- **A. Day 2, late: WHISPER's message.** Answer it (`path_whisper`: a dead drop on Day 3 afternoon, only then), forward
+  it to Con Ops (`path_report`: Owen hands it to Krall in four minutes; Day 3 evening becomes Krall's interview and
+  Mira won't trust you), or tell nobody (`path_alone`).
+- **Krall's offer (path_report only).** Become his "community liaison" for real (`informant_real`), fake it
+  (`informant`), or refuse (`krall_enemy`, more exposure).
+- **B. Day 3, the roof.** Mira asks you to get her into LANTERN-01 on Thursday night. Yes (`heist_yes`: Day 4 late
+  becomes the heist), no, or, if you're Krall's informant, yes and then tell Krall (`betray_mira`: Mira is taken).
+  On the heist you copy LANTERN-01 (`lantern_dump`) and learn the twist: the first badge it ever tracked was yours,
+  because WHISPER used you as a decoy. Sunny catches you unless her route or the flood trace covers you.
+- **C. Who leaked Room 1337 (Day 6 raid).** You (if you reported or informed), Vesper (if you never won her over), or
+  Owen. If it was Vesper she waits at the piano on Saturday night, once: forgive her or send her away.
+- **D. Day 5, Victor's offer.** Refuse; fake it (`fake_accept`: Saturday afternoon inside Suite 1313, LANTERN-02, the
+  term sheet, and the two men planning to sell each other); or take it (`took_offer`: Saturday on the Lumen booth,
+  where whoever you're closest to comes to find you, once: turn back (`turncoat`) or don't).
+- **E. Day 6, the plan.** Disclosure, Front Page, Injunction, Kill Switch, Walk Away, and the ones your week opened:
+  the Dump (`lantern_dump`), the Trojan Horse (`inside_1313`), the Rollback (Sunny and Tilly's crossover), the
+  Double-Cross (`turncoat`), and Krall's way (informant).
 
-## Endings (20)
+Twists along the way: Mira was Rin's anonymous source three years ago (Rin's crossover); WHISPER used you as a decoy;
+Jonah Reyes built LANTERN's core before he ran (the early Thursday at the station); Krall spends his informants;
+Victor and Krall each have a folder on the other.
+
+Time-limited events (⏳ in the calendar, gone if you miss the slot): WHISPER's dead drop (D3 afternoon), Mira's last
+chance (D4 evening, if you burned her), Vesper at the piano (D6 late, if she leaked), Jonah at the station (D5 night,
+if you're close to Pia).
+
+People you can lose: Mira (taken, or gone if you never make amends), Vesper (sent away, or gone), Sunny's route (if
+you lie to her). They disappear from the world or their route locks.
+
+## Final act
+After the plan, the keynote tasks: stop the uplink, protect Rin and the evidence, get the evidence on screen, verify it
+live, find the buyer, handle the mole. Allies are assigned; fit and closeness decide each task. Crossovers add their
+own help: Petra and Astrid's van broadcasts if the mics are cut, Nyx and Priya cut the uplink if nobody else can,
+Kit's helmet footage, Juno's audience, Rin's source standing up, Vesper naming the buyer, the decoy pulling Krall's
+men away, Noor and Saoirse's story and court order together. Then the roof: Suite 1313, or, for an informant, Krall
+on the plant deck, where you die unless someone who loves you comes up the stairs.
+
+## Endings (26)
 1 Everything Connected (true harem) · 2 Responsible Disclosure · 3 Half Measures · 4 Front Page · 5 Injunction ·
 6 Kill Switch · 7 Ghost Protocol (leave with Mira) · 8 Double Agent (with Vesper) · 9 Whistleblower (Delphine) ·
-10 Found (Jonah testifies) · 11 Signal (Astrid's broadcast) · 12 Blackout (Sunny cuts everything) · 13 The Graph
+10 Found (Jonah testifies) · 11 Signal (the broadcast) · 12 Blackout (Sunny cuts everything) · 13 The Graph
 (Lumen wins) · 14 Scapegoat (framed) · 15 Sold Out · 16 Proof (go home with Ellie, Day 5) · 17 Larp Exposed ·
-18 Open Source (friends) · 19 404: Partner Not Found · 20 Last Train.
-Every ending runs in three parts: the outcome (`SC.end_<k>`), the final night with whoever's route you finished
-(`SC.epi_<g>`, 04l, pick one if several) and a playable aftermath that jumps forward in time (`SC.after_<k>`, 04m/04n,
-hooked in just before the ending card): a select committee, a contempt hearing, the full injunction hearing, Mira's
-choice to run or stand trial, a cottage up north, a year inside Halberd, Victor's call on bail, Jonah's first
-Thursday, the radio regulator, the basement retrieval of LANTERN-01's logs, teaching a source to stay off the graph,
-an interview under caution, a year on Lumen's 31st floor, Rin at Proof, the beginners' bracket, next year's planning
-meeting, packet_pam on the 09:12, buying a ticket a year later, and the twenty-first con.
+18 Open Source (friends) · 19 404: Partner Not Found · 20 Last Train · 21 Data Dump · 22 Trojan Horse ·
+23 Rollback · 24 Double-Cross · 25 Informant · 26 Last Login (you don't survive).
+Every ending runs in four parts: the outcome (`SC.end_<k>`); the final night with everyone whose route you finished
+(`SC.epi_<g>`, 04l, all of them, with `epi_many` if they find out about each other); a playable aftermath that jumps
+forward in time (`SC.after_<k>`, 04m/04n/04p); and a line for each person you love, still with you (`ROMAFTER`).
 
 ## The hidden way to everyone
 Persistent meta records every route finished and every mystery solved across runs. Once every route and every
 mystery has been done at least once, a new run's prologue flat has `session.bak` on your laptop. Restoring it:
-people whose route you've finished before start at Dating once met, mysteries you've solved before keep their clues
-in your notebook, and you get "overclocked" days (two activities per free slot). With all 21 final scenes, max love
-and all 12 mysteries solved in that run, Day 7 becomes Everything Connected.
+people whose route you've finished before jump to their last scene as soon as you meet them (and it isn't held to
+its usual day), mysteries you've solved before keep their clues, and you get "overclocked" days (two activities per
+free slot). Finish all 21 last scenes and solve all 12 mysteries in that run, and Day 7 becomes Everything Connected.
+The ending cards carry hex fragments that spell `session.bak`.
 
 ## Routes
-Eight scenes each (0-7). Scene 0 is meeting them; 1-6 are hangouts that each take part of a slot; 7 is the final love
-scene. Scene 6 usually sets `<g>_ready`, which makes them better at their keynote task. A stage with no scene text
-(Ellie's 0-2) is advanced by the main story and never offered by talking. After scenes 1, 3/4 and 5 most people send
-a text that wants a reply (`05o_texts.js`, answered in Messages); it arrives at the start of the next slot.
+Six scenes each (0-5): meeting, four hangouts and the last scene. They were written as eight shorter scenes plus a
+crossover; `05r_merge.js` joins them in order, so nothing is lost. Scene 4 is always the crossover, with someone else
+from the cast (a different version if you haven't met them), and several crossovers open plot options. Ellie's 0-2
+come from the main story.
+
+## Dating
+Before every hangout you choose how to spend it: somewhere quiet, something fun, something reckless, or working the
+case. Everyone loves one and dislikes one (`TASTE`); you find out by trying, or talking shop drops a hint, and the
+Hearts file remembers. Closeness comes slower the closer you are, and only so much a day (`AFFCAP`), so a route takes
+most of the week. People you're dating notice if you go a whole day without seeing them. Feedback is in words.
+Thresholds: scene 1 at 5, 2 at 15, 3 at 26, 4 at 38, the last at 50 (Day 5 or later).
 
 ## Testing
 `python3 build.py`, serve the folder (`python3 -m http.server 8123`), then:
@@ -146,6 +184,6 @@ Scenes are plain text in template literals, parsed at runtime:
 ## Files
 - `01b_core.js` calendar constants, ranks, closeness, effects, exposure fail, meta; `01c_script.js` the script parser
 - `03_data.js` clues, mysteries, leads, items, achievements, endings; `03b_flow.js` beats, free time, hangouts, leads, case board, positions
-- `04_days.js` the calendar; `04a`-`04h` the prologue and Days 1-7; `04i_endings.js` the twenty endings; `04j_events.js` con events; `04k_beats2.js` extra beats; `04l_epilogues.js` final nights; `04m`/`04n` aftermaths
-- `05_routes.js` route requirements and small talk; `05a`-`05j` the routes; `05k_leads.js` leads, Dave, solved-case beats; `05l`-`05n` route scenes 5 and 6; `05o_texts.js` texts that want a reply
+- `04_days.js` the calendar; `04a`-`04h` the prologue and Days 1-7; `04i_endings.js` the first twenty endings; `04o_branches.js` the week's branches; `04p_finale2.js` the new keynotes, the roof and six more endings; `04j_events.js` con events; `04k_beats2.js` extra beats; `04l_epilogues.js` final nights; `04m`/`04n` aftermaths
+- `05_routes.js` route requirements and small talk; `05a`-`05j` the routes; `05k_leads.js` leads, Dave, solved-case beats; `05l`-`05n` route scenes 5 and 6; `05o_texts.js` texts that want a reply; `05p`/`05q` crossovers; `05r_merge.js` six-scene routes and dating
 - `06_finale.js` hub, shop, Room 1337, positions game, ending choice, title

@@ -57,7 +57,7 @@ beat('d6_finals',{t:'The CTF finals: Hall A',w:'hallA',sc:'d6_finals'});
 beat('d6_raid',{t:'Back to Room 1337',w:'room1337',sc:'d6_raid'});
 beat('d6_council',{adv:1,t:'The war council: the hotel library, after hours',w:'library',sc:'d6_council'});
 /* Day 7: Sunday */
-beat('d7_positions',{adv:1,t:'Positions',auto:1,sc:'d7_positions'});
+beat('d7_positions',{t:'Positions',auto:1,sc:'d7_positions'});
 beat('d7_krall',{adv:1,t:'Something is wrong in the Foyer',w:'foyer',ws:['foyer','foyerG','link','hallC'],sc:'d7_krall'});
 beat('d7_keynote',{adv:1,t:'The closing keynote: Hall A, 4 PM',w:'hallA',ws:['hallA','backstage'],sc:'d7_keynote'});
 beat('d7_roof',{adv:1,t:'The thirteenth floor',w:'corridor',ws:['corridor','roof','plantdeck','stairwell'],sc:'d7_roof'});
