@@ -23,7 +23,7 @@ function bakeMats(){
    float r=soft*(.5+d*.08)/max(d,.3),bias=.035+d*.012+(1.-clamp(ndl,0.,1.))*(.03+d*.025),s=0.;for(int i=0;i<12;i++){vec2 o=PD[i]*r;vec2 c=textureCube(cube,dir+t1*o.x+t2*o.y).rg*far;s+=c.x>d-bias?(c.y>d-bias?1.:.6):0.;}return s/12.;}
   void main(){vec3 n=normalize(wn);vec3 L=lp-wp;float d=length(L);if(d>lr)discard;vec3 l=L/d;float x=clamp(1.-d/lr,0.,1.),fall=x*x,ndl=dot(n,l);if(length(wn)>1.5&&ndl<0.){n=-n;ndl=-ndl;}
    // ceiling fittings (downlights, panels) shine down: what's level with or above them only gets a little spill
-   if(dn>.5)fall*=mix(.12,1.,smoothstep(-.05,.55,l.y));
+   if(dn>.5)fall*=mix(.05,1.,smoothstep(.05,.55,l.y));
    vec3 p=wp+n*(.03+d*.006);float sh=vis(p,length(p-lp),ndl);
    gl_FragColor=vec4(lc*(max(ndl,0.)+fillk*(ndl*.5+.5))*fall*sh,0.);}`,
   side:T.DoubleSide,depthTest:false,depthWrite:false,blending:T.CustomBlending,blendEquation:T.AddEquation,blendSrc:T.OneFactor,blendDst:T.OneFactor,blendSrcAlpha:T.ZeroFactor,blendDstAlpha:T.OneFactor});
@@ -183,6 +183,6 @@ function bakeSync(){const T=G.T,r=G.r;if(!G.bkSyncRT){G.bkSyncRT=new T.WebGLRend
 /* light at a point, for things that move (characters, crowds, doors): every nearby source, no shadows */
 function probeAt(reg,x,y,z,out){
  const L=G.lights[reg]||[];let r=0,g=0,b=0;
- for(const l of L){const dx=l[0]-x,dy=l[1]-y,dz=l[2]-z,d=Math.hypot(dx,dy,dz),R=l[6]*LOOK.reach;if(d>=R)continue;let f=(1-d/R)*(1-d/R)*l[7]*G.LK*.55;if(l[8])f*=.12+.88*Math.min(1,Math.max(0,(dy/(d||1)+.05)/.6));r+=lin(l[3])*f;g+=lin(l[4])*f;b+=lin(l[5])*f}
+ for(const l of L){const dx=l[0]-x,dy=l[1]-y,dz=l[2]-z,d=Math.hypot(dx,dy,dz),R=l[6]*LOOK.reach;if(d>=R)continue;let f=(1-d/R)*(1-d/R)*l[7]*G.LK*.55;if(l[8])f*=.05+.95*Math.min(1,Math.max(0,(dy/(d||1)-.05)/.5));r+=lin(l[3])*f;g+=lin(l[4])*f;b+=lin(l[5])*f}
  out.r=r;out.g=g;out.b=b;return out;
 }

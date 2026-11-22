@@ -3,7 +3,9 @@
 const hx=h=>{if(h.length===4)h='#'+h[1]+h[1]+h[2]+h[2]+h[3]+h[3];return[parseInt(h.slice(1,3),16)/255,parseInt(h.slice(3,5),16)/255,parseInt(h.slice(5,7),16)/255]};
 const rnd=(()=>{let s=1337;return()=>(s=(s*16807)%2147483647)/2147483647})();
 function noise(c,w,h,n,col,a){c.globalAlpha=a;c.fillStyle=col;for(let i=0;i<n;i++)c.fillRect(rnd()*w,rnd()*h,1+rnd()*2,1+rnd()*2);c.globalAlpha=1}
-function blotch(c,w,h,n,col,a,r0,r1){c.fillStyle=col;for(let i=0;i<n;i++){c.globalAlpha=a*rnd();const x=rnd()*w,y=rnd()*h,r=r0+rnd()*(r1-r0);const g=c.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,col);g.addColorStop(1,'transparent');c.fillStyle=g;c.fillRect(x-r,y-r,r*2,r*2);
+/* soft blobs of colour; the gradient fades to the same colour at zero alpha (fading to 'transparent', which is
+   transparent black, draws a dark ring round every blob) */
+function blotch(c,w,h,n,col,a,r0,r1){c.fillStyle=col;for(let i=0;i<n;i++){c.globalAlpha=a*rnd();const x=rnd()*w,y=rnd()*h,r=r0+rnd()*(r1-r0);const g=c.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,col);g.addColorStop(1,col.length===7?col+'00':'transparent');c.fillStyle=g;c.fillRect(x-r,y-r,r*2,r*2);
  // wrap so the tile repeats without seams
  for(const[ox,oy]of[[w,0],[-w,0],[0,h],[0,-h]]){if(x+ox-r<w&&x+ox+r>0&&y+oy-r<h&&y+oy+r>0){c.save();c.translate(ox,oy);c.fillRect(x-r,y-r,r*2,r*2);c.restore()}}}c.globalAlpha=1}
 function grain(c,w,h,a){const d=c.getImageData(0,0,w,h),p=d.data;for(let i=0;i<p.length;i+=4){const n=(rnd()-.5)*a;p[i]+=n;p[i+1]+=n;p[i+2]+=n}c.putImageData(d,0,0)}
