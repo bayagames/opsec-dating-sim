@@ -3726,7 +3726,7 @@ const ROMEPI={
 };
 function epilogueCast(good){const r=[];const ppl=ROM.filter(g=>met(g)&&scn(g)>=3&&g!==S.partner);for(const g of ppl)r.push(N(FATE[g][good?0:1]));if(f('dave_helped'))r.push(N(good?'Dave deletes the SafeSphere TikTok account live on stream. Two million people watch. His mum calls him "David" again, but nicely.':'Dave quits Lumen on Monday. He doesn\'t post about it. That\'s how you know he means it.'));return r}
 function romanceEpi(){if(!S.partner)return[N(pick(['You don\'t end up with anyone tonight. That\'s all right. You did something that mattered with people who mattered.','At two in the morning you\'re on the hotel steps on your own, with a cold cinnamon knot and a strange, quiet feeling that might be pride.']))];
- return[N(ROMEPI[S.partner])]}
+ return SC['epi_'+S.partner]!==undefined?scr('epi_'+S.partner):[N(ROMEPI[S.partner])]}
 SC.end_disclosure=`
 [hide]
 ~ It's on every front page by midnight. Not as WHISPER's stunt, or as a rumour, or as a leak. As a disclosure: careful, dated, verified, handed to the regulator a day before anyone said a word in public.
@@ -4394,6 +4394,826 @@ else
   [flag told_owen_time]
  [sum Owen Pryce asked you for the timing of whatever was happening in Victor's slot.]
 `;
+
+/* ============ ROMANCE EPILOGUES: the last night, with the person you found first ============
+   Played inside the ending, after the main outcome. Every one is its own short scene with a choice.
+   endBad() lets a scene notice when the week went wrong. */
+const endBad=()=>!!(S.endK&&ENDINFO[S.endK]&&ENDINFO[S.endK][2]==='bad');
+SC.epi_ellie=`
+[bg terrace]
+~ Much later, Ellie finds you on the hotel terrace with a paper bag. Two cinnamon knots. A tiny croissant drawn on the side in biro, like every bag she's ever handed you.
+ellie.b: I worked it out. Why I kept drawing them. It was so you'd keep the bags.
+? "I kept every one."
+ ellie.h: I know. They're in the drawer by your sink. All forty-one. I counted. I'm not ashamed.
+? "I thought you just liked croissants."
+ ellie.s: I do like croissants. I like you more. That's the most romantic thing I've ever said, and I said it about a pastry.
+if endBad()
+ ellie.d: It didn't go how we wanted. I know. But Proof opens at six on Tuesday, and the oven doesn't care who won. Come and fold dough with me. That's a thing we can do right.
+else
+ ellie.n: Mrs Okafor's going to ask. On Tuesday. "Did you meet anyone at your computer thing?" And I'm going to say, "I went with someone." And she's going to make a noise.
+~ She leans on your shoulder. The city's still awake below you. Somewhere in it, a bakery with a new lock, a new password, and a sign in the window that's going back up on Tuesday: WE DO THINGS PROPERLY HERE.
+? Take her hand
+ ellie.b: ...Properly. Like that.
+? Steal a bite of her cinnamon knot
+ ellie.h: THIEF. Hacker. I knew it. I'm calling the police. The police is me. You're under arrest. For life.
+`;
+SC.epi_nyx=`
+[bg stairwell]
+~ Nyx is where she always is: the fire exit, the stairwell, the place with two ways out. Tonight she's sitting on the step with her picks rolled up beside her, not using them.
+nyx.n: I don't do this.
+> I know.
+nyx.d: No. You don't. I don't stay in places. I get in, I write the report, I leave by the door nobody's watching. Twelve years.
+nyx.n: I signed the Lumen contract under a name that isn't mine. I've been in this building six days and I know every door, and the only one I keep walking back to is yours.
+? "Then stay a bit."
+ nyx.s: A bit. I can do a bit. A bit's a good amount. Nobody gets hurt in a bit.
+? "Teach me something. Your last lock of the week."
+ ~ She hands you the picks and a little brass padlock. Talks you through it with her hand over yours. It opens. She doesn't take her hand back.
+nyx.b: Here's the real secret. The whole job. You don't pick locks. You pick people who trust you enough to stand still while you do it.
+~ She takes your hand like picking a lock she already knows the combination to.
+`;
+SC.epi_ada=`
+[bg ctf]
+~ The CTF room, empty, scoreboard frozen on the final standings. Ada's on the floor between two desks, a whiteboard marker in her hand, and the whole of the whiteboard is covered in a single, enormous equation.
+ada.n: Don't look at it! Okay, look at it. I've been trying to calculate something since Wednesday.
+? "What's the answer?"
+ ada.b: That's the thing. I kept getting it wrong. I had too many variables. "Is this a distraction." "Am I being weird." "Will I mess it up like I mess up everything that isn't a flag."
+ ada.h: Then I took out all the variables that didn't matter, and there was only one left. You. And it's one.
+? Pick up a marker and write underneath it
+ ~ Under her equation you write "= 1". She stares at it.
+ ada.b: That's... that's not even the right notation. That's so wrong. I love it.
+ada.n: The probability I'm in love with you is one. Which is a weird number for a probability. It means certain. I've never been certain of anything I couldn't submit.
+~ She has to sit down, even though she's already sitting down, which she does by lying down on the carpet. You lie down beside her. The scoreboard glows over you both.
+ada.h: Next year we enter as a team. Two people. We'll lose. We'll lose so badly.
+`;
+SC.epi_priya=`
+[bg soc]
+~ Priya finds you in the Blue Team Village, the screens all dark, the coffee machine finally switched off.
+priya.n: Here. Hold this.
+~ She hands you her phone. It's off. Actually, completely off. You didn't know it could be.
+priya.d: That's for you. An hour. I'm going to be unreachable for an hour. Nobody on earth can find me. Do you know what that means for a person like me?
+? "It means you trust me."
+ priya.b: It means I trust you. With my threat model. Which is the most intimate thing I own.
+? "Want me to put it in a Faraday bag?"
+ priya.h: You'd do that? You carry one? Oh no. Oh no, I'm in so much trouble.
+~ For an hour you sit in the dark with her and she tells you things that she's never written down anywhere. Her first job. Her mother's recipes. The time she cried in a server room because the backups had worked.
+priya.s: Most people's idea of a date is "share your location with me". You're the first person who's ever made me want to switch it all off.
+~ At midnight the phone is still off. At one, it's still off. You stop checking. So does she.
+`;
+SC.epi_juno=`
+[bg creator]
+~ Creator Corner, after hours. Juno's ring light is off. The camera's lens cap is on, and there's a sticky note on it that says "NOT TONIGHT".
+juno.n: First time in four years I've been somewhere with no cameras. I checked. Twice. I checked the smoke alarm. Don't laugh.
+juno.d: Juno's not my name. You know that.
+> Do you want me to say it?
+juno.o: ...Yes. Say the real one.
+~ You do. She closes her eyes like she's hearing a song.
+? "It suits you better."
+ juno.b: It's a boring name. It's my nan's. It's the only thing I own that nobody else has ever seen.
+? "I'll keep it safe."
+ juno.h: I know you will. That's why I told you. You're the only person I know who'd never put it in a title.
+~ Her phone buzzes forty times. Chat wants to know where she is. She looks at it, then puts it face down, then puts a cushion over it.
+juno.s: Let them wonder. Let them make theories. I'm off stream. I'm a person. With a person.
+`;
+SC.epi_kit=`
+[bg ballroom]
+~ Kit arrives at the afterparty in full armour, which is a lot of armour, and walks straight to the middle of the dance floor.
+~ Then she takes the helmet off. In front of everyone. Four hundred people. For Kit, that's louder than shouting.
+kit.b: Hi. It's me. Just me.
+? "Hi, just you."
+ kit.h: That's my favourite thing anyone's ever called me.
+? Take her gauntlet off for her, one finger at a time
+ kit.o: You're... oh. You're very good at that. That's a lot of tiny buckles. Most people don't have the patience.
+~ Under the armour she's in a black T-shirt with paint on it, her hair stuck down, glitter on her neck from the photo booth.
+kit.n: I made that suit to be somebody else. All week I've been building the next one in my head. It doesn't have a helmet. It's just a jacket. With one pocket. Where you can put your hand.
+? Put your hand in the imaginary pocket
+ kit.h: ...Yep. That's where it goes. I'm going to sew it there. Exactly there.
+? "Make one for me too."
+ kit.b: Matching? Matching. Oh, I'm going to make us so embarrassing.
+`;
+SC.epi_rin=`
+[bg chill]
+~ The chill-out zone, two beanbags, one bag of gummy worms. Rin's in his oversized hoodie with the sleeves over his hands and his feet tucked under him.
+rin.n: Last one. I saved it. All week.
+~ He offers you the last gummy worm. Then he takes it back, bites it in half, and gives you half.
+rin.h: That's how you know it's serious. I don't share worms.
+if endBad()
+ rin.d: They're going to say we lost. I've had a year of people saying that. It's fine. The report still exists. The truth doesn't expire.
+else
+ rin.s: Three years. I wrote that report three years ago and nobody believed it. Tonight four thousand people read it. And the one I wanted to read it first was you.
+? "You did that. You stood up."
+ rin.b: I was shaking the whole time. You saw. My voice went up like eight keys.
+ > You sounded brave.
+ rin.o: ...Say it again. No. Don't. I'll cry on my hoodie.
+? "Your nails are still chipped from the stage."
+ rin.h: I was picking at them! It's a nervous thing! You're not supposed to notice that.
+ > I notice everything about you.
+ rin.b: That's opsec talk. That's terrifying. Keep doing it.
+~ He leans on you. The beanbag makes a terrible noise. Neither of you moves.
+`;
+SC.epi_bea=`
+[bg bar]
+~ Bea's off shift. She's never off shift. She's sitting at the end of the bar, on the wrong side of it, a sketchbook in her lap, and she's been drawing you since you walked in.
+bea.s: Hold still. You're ruining it.
+? Hold very still
+ ~ You hold still. She draws. You've never been looked at like this, carefully, for a long time, like you're worth getting right.
+? Steal a look at the sketchbook
+ bea.h: Oi! That's a work in progress! Like you.
+~ The page: you, at the bar, on Monday night, the first time. You, on the roof, with a notebook. You, asleep on a bench in the lobby on Thursday, mouth open. Twenty little drawings.
+bea.n: Six years behind this bar. I've drawn everyone who ever sat on that stool. Nobody ever came back for the drawing.
+bea.b: I applied for the art course. In Glasgow. The one I said I'd never do. I sent it at four this afternoon, when everything was happening, because I thought, if today's the day everything changes...
+? "You're going to get in."
+ bea.s: You don't know that.
+ > I know you.
+? "Glasgow's not far. Trains exist."
+ bea.h: Trains. Yeah. You'd come? To see me be a student? With paint on me?
+ > I'd come for the paint.
+~ She tears the drawing out, the one from Monday, and hands it to you. On the back, in pencil: "come back for this".
+`;
+SC.epi_mira=`
+[bg roof]
+~ Mira doesn't come to the party. You knew she wouldn't.
+~ When you go up to the roof at one in the morning, she's there, at the edge by the rig, the antenna dismantled and packed in a bag at her feet. For once there's no laptop at all.
+mira.n: WHISPER's gone. I deleted everything. Every account, every key but one. Three years of my life in one keystroke.
+mira.d: I thought I'd feel free. I mostly feel like I've forgotten how to have hands.
+? Hold out yours
+ mira.o: ...That's very obvious. That's the most obvious thing anyone's ever done to me. Okay.
+ ~ She takes it. Her fingers are cold and her grip is much stronger than you expected.
+? "What's the key you didn't delete?"
+ mira.s: The one that opens my old flat. A real one. Brass. I'm going to go back there. I'm going to buy a plant. I'm going to forget my passwords.
+mira.n: You were the only one who never asked me who I was. You just asked what I wanted.
+? "What do you want?"
+ mira.b: Sleep. Toast. A name that's just mine. And this. Whatever this is. With no plan behind it.
+? Say nothing. Stay.
+ ~ You stay. The city doesn't know you're there. For the first time in three years, nothing on earth is watching her.
+`;
+SC.epi_saoirse=`
+[bg press]
+~ The press room, 11:58 PM. Saoirse files her last story of the week, presses send, and closes the laptop. She looks at it for a while, as if it might reopen itself.
+saoirse.n: Done. Six years of chasing Lumen. Four thousand words. Three lawyers. One source who'll never be named.
+saoirse.s: Off the record?
+? "Off the record."
+ ~ She kisses you. It's very quick and very sure.
+ saoirse.h: Don't print that.
+? "On the record. I want it in writing."
+ saoirse.b: You cheeky... Fine. "Source confirms." There. That's the most I've ever written about myself.
+ ~ She kisses you anyway.
+saoirse.n: I've spent my whole career learning not to need anybody. People are sources, or they're subjects, or they're liabilities. You were all three. And I still couldn't stay away.
+? "What happens to us after?"
+ saoirse.d: I'll be in court for a year. Lumen will sue everyone. I'll get no sleep. I'll be a nightmare.
+ > I've met you. I know.
+ saoirse.h: Good. Then you can't say I didn't warn you.
+? "Let's get chips."
+ saoirse.h: At midnight? On a Sunday? With a story out? ...Yes. God, yes. The ones with the curry sauce.
+`;
+SC.epi_sunny=`
+[bg noc]
+~ The NOC, after midnight. One screen still on: the con's network map, every switch green. Sunny reaches over and turns her radio off. Actually off. The light goes dark.
+sunny.n: The network can manage for one hour. I built it so it could. I've never once let it.
+? "What do you do with an hour?"
+ sunny.h: I genuinely don't know. Normal people... watch things? Eat things? I've forgotten. Tell me what normal people do.
+ > They sit with someone they like.
+ sunny.b: Oh. That's it? That's easy. I can do that.
+? "I'll watch the map. You rest."
+ sunny.o: Nobody's ever offered to watch the map. Nobody ever even sees the map.
+~ She sits next to you on the floor under the desk, where the fans are warm, and she's asleep in about four minutes, on your shoulder.
+~ At 1:17 a switch on Level 2 goes amber. You look at it. You look at her. The switch goes green again on its own, because she built it to.
+* She'll never know. You'll never tell her. That's the job.
+`;
+SC.epi_tilly=`
+[bg badgelab]
+~ The Badge Lab, quiet, the reflow oven cooling. Tilly's at her bench with a magnifier and one last badge, tiny tweezers, the tip of her tongue showing.
+tilly.n: Don't look yet. Two more joints. One more. There.
+~ She presses it into your hand. Not blue. A tiny rainbow running round its edge, the LEDs taking turns, softly.
+tilly.b: Turn it over.
+~ On the back, in her tiny writing, scratched into the solder mask: "for {h}, who read the back".
+? "You made this tonight?"
+ tilly.h: I made it on Thursday. After you read the back of my real one. Nobody reads the back. I've been hiding notes on the backs of badges for nine years.
+? Put it on
+ tilly.o: You're... wearing it. Like, now. In public. Okay. That's. Okay.
+tilly.n: Next year I'm designing the badge again. My firmware. My art. No sponsor. And there's going to be a hidden mode, and you only unlock it if you're standing next to the one badge that's paired with yours.
+? "Whose badge is it paired with?"
+ tilly.b: ...Mine. Obviously. Don't make me say it with my mouth. I said it with solder.
+`;
+SC.epi_petra=`
+[bg carpark]
+~ Petra drives you to the top of the car park in a car held together with love and cable ties. Engine off. Handbrake on, with a noise. City lights all the way to the sea.
+petra.n: I practised this. Out loud. To the car. She was very supportive.
+? "Go on, then."
+ petra.b: Okay. Right. Okay. The thing is. I fix things. That's what I'm for. I find the broken part and I swap it.
+ petra.n: And all week I kept waiting for you to be a broken part. Something I'd need to fix to make it work. And you just... weren't. You were the bit that already worked.
+? "Was that the speech?"
+ petra.h: That was the speech! I had a better version! The car liked the other version!
+~ The car radio comes on by itself. She bought it as scrap. It only gets one station, which only plays songs from before you were born.
+petra.s: It does that. It's got a short somewhere. I've never fixed it. I like it.
+? "Don't ever fix it."
+ petra.b: Never. Same as you.
+? Turn it up
+ ~ You turn it up. She sings along, badly, every word, with her feet on the dashboard.
+`;
+SC.epi_astrid=`
+[bg conroof]
+~ Astrid takes you up to the con roof. The dish is still there, aimed at nothing now, the cables coiled neatly. She's brought a flask and two folding chairs.
+astrid.n: There's a satellite going over at 23:51. I've asked it to take our picture.
+? "Can it do that?"
+ astrid.h: No. It's a weather satellite. It takes pictures of clouds. But we'll be in it. Too small to see. Two pixels. Maybe a quarter of a pixel.
+? "Will it say yes?"
+ astrid.s: Satellites don't say anything. You just have to trust they're there.
+~ At 23:51 a very faint light crosses the sky, from west to east, slow and steady. She points. You both wave at it like idiots.
+astrid.b: When I was nine, I used to lie in the garden and wave at the space station. My dad said nobody up there could see me. I kept doing it.
+astrid.n: All week I've been talking to the sky. You're the first thing that ever answered.
+? Take her cold hand in yours
+ astrid.o: You're warm. Radio people are always cold. We stand on roofs.
+? "Same time tomorrow?"
+ astrid.h: It goes over again at 00:33 on Monday. I've already worked it out. I worked it out on Wednesday.
+`;
+SC.epi_yuki=`
+[bg arcade]
+~ The Retro Arcade, the main lights off, the cabinets glowing. Yuki's at the two-player fighting game in the corner, holding out player two's controller.
+yuki.h: First to three. Loser buys breakfast. Winner also buys breakfast because I don't actually have any money.
+? Play properly
+ ~ You lose the first two in about nine seconds each. The third, she does something with her thumb you can't see, and her character walks into yours and falls over.
+ yuki.s: Oh no. A glitch. A terrible, terrible glitch. You win, I guess.
+? Mash buttons
+ ~ You mash. It works horribly well. You win a round. She is outraged.
+ yuki.h: That's not a strategy! That's a weather event!
+~ She lets you win the last one. She will deny this forever.
+yuki.n: I used to think the best thing in the world was a route nobody else could find. A perfect line. No mistakes.
+yuki.b: Then I did my run with you watching and I made two mistakes, and it was the best run of my life. I don't think the route was the point.
+? "What's the point?"
+ yuki.h: Who's on the other controller.
+? "Rematch?"
+ yuki.s: Every day. Forever. I'm keeping score.
+`;
+SC.epi_vesper=`
+[bg lumenlounge]
+~ After the party, the Lumen Lounge is empty. Vesper sits at the piano and sings one more song, very quietly, to the room.
+~ There's no earpiece. You check. She sees you check, and she smiles, and takes her hair down so you can see her ears.
+vesper.s: Nobody's listening, darling. Only you. I've never sung to only one person in my life.
+? "What will you tell Halberd?"
+ vesper.n: That their asset went quiet. They lose people all the time. They'll write me off by Friday. It's the kindest thing they'll ever do.
+? "Sing it again."
+ vesper.b: Greedy. ...Yes. All right.
+ ~ She sings it again. It's not a song you know. She's making it up as she goes, and halfway through you realise it's about you.
+vesper.n: I came here to find WHISPER through you. I wrote it in a report. "Target is credulous." And then I sat in this room and watched you protect every single person you met, and none of them had any idea.
+vesper.d: I'm out of practice at being nobody. Will you help me?
+? "We'll start with breakfast. Under your real name."
+ vesper.o: My real name. It's dreadful. You'll laugh.
+ > Try me.
+ ~ She whispers it. You don't laugh. She sings the next verse with it in.
+? "You were never nobody."
+ vesper.b: ...There. That's the line I'd have written. Damn you.
+`;
+SC.epi_delphine=`
+[bg grill]
+~ The Grill, after midnight. Delphine takes her hair down and leaves the Lumen lanyard on the bar, next to an untouched glass of wine.
+delphine.n: I've been to four hundred of these. I've never once said anything I meant at one.
+? "Say something now."
+ delphine.d: Something I mean. Okay. I'm terrified. I don't have a job. I don't know who I am without a brief. My mother will ask what happened, and I'll have to tell her I set my career on fire in front of two thousand people.
+ delphine.h: And I've never felt this well in my life. All at the same time.
+? "Shall I write you a speech?"
+ delphine.h: Oh, would you? Something with a pause in it. I love a pause.
+ > No. Say it yourself.
+ delphine.s: ...Cruel. Correct. Fine.
+delphine.n: You're the first person all week who didn't want something from me. Everyone wanted the press release. You wanted me to stop writing them.
+? "What will you do now?"
+ delphine.b: Noor says the charity needs a communications person. Pays nothing. All true. Imagine. Writing only true things. I might be terrible at it.
+? Take her hand across the bar
+ delphine.o: That's not on brand.
+ > Good.
+~ She says something she means. It's three words long, and nobody's ever going to see a draft of it.
+`;
+SC.epi_noor=`
+[bg library]
+~ The hotel library. Noor caps her fountain pen and puts it in its case and closes the case, very deliberately, like a judge putting away a gavel.
+noor.n: No more paperwork tonight. Just this.
+~ She means you.
+? "What's this?"
+ noor.s: I don't have a word for it. I have words for everything. Tort, injunction, estoppel. Nothing for you. It's very irritating.
+? Sit with her by the window
+ ~ The window that she posted letters from. The red post box below, with the street light on it.
+noor.d: I've written to Jonah every month for a year and every letter came back. I thought I'd become the sort of person who writes to people who never answer.
+if f('noor_letter')
+ noor.h: He wrote back. This afternoon. Pia gave me the envelope. One line. "Thank you for never stopping." I've read it eleven times.
+else
+ noor.n: Maybe one day one will stay gone. Maybe that's what tonight is.
+noor.n: You answered. Every time. Every stupid question at two in the morning about precedent. You never once made me feel like too much.
+? "You're exactly enough."
+ noor.b: That's not a legal standard. That's... I'm going to have that engraved on something.
+? "Write me a letter."
+ noor.o: To you? You're right here.
+ > I'll answer it anyway.
+`;
+SC.epi_fern=`
+[bg garden]
+~ Fern takes you out into the Halcyon garden among the little lights strung through the olive tree, and shows you where the purple beans are going to go next spring.
+fern.n: Here. And the squash there, so it can climb. And the bees will come over the wall from the roof at about ten every morning, if it's warm.
+~ Then she stops showing you things and just stands there with you, dirt on her knees, a single bee asleep on her sleeve.
+? "Is it okay that it's on you?"
+ fern.h: She's tired. Big day. She's allowed. So am I.
+? Brush a leaf out of her hair
+ fern.o: Oh. You found my leaf. I keep one there, in case. No I don't. I didn't know it was there.
+fern.n: Nobody sees the gardener. That's the job. You fix the soil and you go home and nobody ever says "the soil's lovely today".
+fern.b: You saw me. On Monday. You said "the bamboo's in the wrong place". It was in the wrong place! I'd been saying it for two years!
+? "Stay out here a while?"
+ fern.s: Until the sprinklers. They come on at two. I'll give you a two-minute warning. One-minute warning. No warning. That's what you get.
+? "Can I help you plant the beans?"
+ fern.h: In March. Gloves on. You'll be terrible at it. You'll be my favourite.
+`;
+SC.epi_wren=`
+[bg pool]
+~ The pool, after midnight, the underwater lights still on. Wren's sitting at the edge with her feet in the water, her phone in a plastic bag, the podcast mic packed away.
+~ Then, without warning, she drops in fully clothed. She comes up laughing and looks up at you from the water.
+wren.h: Lifeguard's off duty. You're on your own.
+? Jump in
+ ~ You jump in. It's colder than it looks. She cheers like you've won a medal.
+? Sit on the edge and put your feet in
+ wren.s: Coward. Sensible. Both. I like both.
+wren.n: Episode one hundred goes out on Monday. "The Thirteenth Floor". Forty-four listeners. One guest. "The Consultant". My sister says it's my best one.
+wren.b: The secret is, every true-crime podcast is about a mystery. Mine was always "why can't I stop watching other people's lives". And this week I worked it out. I was waiting for one of them to be mine.
+? "This one's yours."
+ wren.h: Don't! I'll put it in the outro! I'll put it in the outro and you'll hear it and you'll die!
+? Float on your back next to her
+ ~ You both float, looking up at the glass roof and the dark sky behind it. Neither of you says anything for a long time. It's the best episode of all.
+`;
+SC.epi_pia=`
+[bg station]
+~ Central Station, nearly empty, after midnight. Pia's piano, the public one in the middle of the concourse, under the departures board.
+~ She plays you "that one". The song she never plays for money. It's short, and a bit sad, and on the last note the board above you clicks over to the morning trains.
+pia.n: That's the song our mum used to sing in the car. Jonah's song. For a year, it meant "I'm still here". Every Thursday.
+if f('jonah_video')||S.endK==='found'
+ pia.b: He's sleeping at mine tonight. On the sofa. He snores. I forgot he snores. I'm so happy I could scream.
+else
+ pia.d: He's still out there. But he knows I'm here. And now someone else does too.
+? "Play it again?"
+ pia.s: No. I've played it enough. I want to play something new. Something that means "and then something good happened".
+ ~ She plays something new. You've never heard it, because she's writing it right now, looking at you.
+? Sit on the bench next to her
+ ~ You sit next to her. She shows you where to put your hands, which keys. You play the bottom two notes over and over while she plays everything else, and it sounds wonderful, and it's mostly her.
+pia.h: Next Thursday you have to come and turn pages. That's the deal. That's the price of the song.
+`;
+
+/* ============ AFTERMATHS (1/2): what happens next, played, for each ending ============
+   Each SC.after_<ending> runs at the end of SC.end_<ending>, just before the ending card (hooked in 04n). */
+SC.after_disclosure=`
+[bg office]
+~ THREE WEEKS LATER.
+~ A committee room in Westminster, wood panels, green leather, a glass of water nobody trusts. The Digital Affairs Select Committee wants to hear from "a member of the public with relevant experience". You.
+"Committee chair": Thank you for coming. We understand you were present for the events at CTRL+ALT+CON. In your own words: how did an app with ten million users get away with this for three years?
+? "Because nobody reads the permissions."
+ [flag aft_a]
+ "Committee chair": That's rather blaming the public, isn't it?
+ > No. It's blaming whoever wrote them to be unreadable.
+ ~ A murmur. Someone in the press seats writes that down.
+? "Because the people who checked it were paid by the people who made it."
+ [flag aft_b]
+ ~ You name Bastion. You name the audits. You name Graham Pike, who is, at this exact moment, sitting in the second row.
+ "Committee chair": Mr Pike, we'll be inviting you to give evidence next week.
+? "Because the only people who found out were treated like criminals."
+ [flag aft_c]
+ ~ You talk about Jonah Reyes. About Rin. About a forum post three years old that only got one reply: "source?"
+"MP": And what would you have us do?
+? "Make the audits independent."
+ ~ It ends up in the committee's report, page eleven, recommendation four, in almost your exact words.
+? "Protect the people who report it."
+ ~ It ends up in the report too. Recommendation one. Saoirse texts you a photo of the page with a lot of exclamation marks.
+~ Outside, on the steps, Marge is waiting in a coat with a hundred badge ribbons pinned to the lapel.
+marge.h: You're on the crew. I said. Planning meeting's on Thursday. We're doing a privacy village. You're running it. Don't argue.
+? "I'm not qualified."
+ marge.s: Nobody's qualified. That's what a village is. Thursday. Bring biscuits. Ellie's, not shop.
+? "Only if it's called the Proof Village."
+ marge.h: ...Fine. FINE. But you're making the sign.
+[sum Aftermath: you gave evidence to a select committee. Next year you're running a village at the con.]
+`;
+SC.after_half=`
+[bg hotel]
+~ MONDAY. ROOM 1337.
+~ The room's booked for another night. Everyone who's still in the city is crammed in: on the beds, on the floor, on the windowsill. Rin's laptop is open on the desk with a single slide on it: "PAUSED IS NOT CANCELLED".
+rin.n: They're waiting for us to get bored. Three months, a rebrand, "SafeSphere Family", and we're back here. So we don't get bored. We pick one crack and we keep hitting it.
+~ Three cracks on the whiteboard.
+? Hit the auditors: get Bastion's other audits reviewed
+ [flag aft_audit]
+ ~ For six weeks, the room takes apart every report Graham Pike ever signed. Eleven apps. Nine are fine. Two aren't. One of the two is SafeSphere.
+ ~ In February, Bastion's accreditation is suspended "pending review". Without a clean audit, the app stores pull SafeSphere 2's listing.
+? Hit the customers: show the insurers what they bought
+ [flag aft_ins]
+ ~ Priya writes a twelve-page letter to every insurer that ever bought LifeScore data, explaining exactly what they bought and exactly which law it breaks.
+ ~ Brindle & Co cancels its contract with Lumen by Christmas. Two more follow. Without the buyers, the data's worth nothing.
+? Hit the money: follow Corvid Holdings
+ [flag aft_money]
+ ~ Saoirse and Noor spend the winter following the money through four countries and a company registered to a post office box in a petrol station.
+ ~ The story runs in March. Halberd's board fires the man who signed the term sheet.
+~ It's not a front page. It's a long, boring, grinding winter. Nobody makes a film about it.
+~ In April, SafeSphere 2 is quietly cancelled.
+~ In May, Lumen announces SafeSphere Kids.
+rin.d: ...Of course they do.
+? "Same time next year?"
+ rin.h: Same time next year. We'll bring more.
+? "Then we start again tomorrow."
+ rin.s: Tomorrow. Room 1337. I'll bring the worms.
+[sum Aftermath: a long, grinding winter with Room 1337. SafeSphere 2 was cancelled in April. Then came SafeSphere Kids.]
+`;
+SC.after_frontpage=`
+[bg office]
+~ TWO MONTHS LATER. THE HIGH COURT.
+~ Lumen sues The Ledger for £40 million. The judge orders Saoirse to name her source. She says no. Then she's asked again, under oath, in front of a full public gallery. You're in the third row.
+"Barrister": Ms Quinn, it would be very simple. A name. Was your source an attendee of CTRL+ALT+CON?
+saoirse.n: I'm not going to answer that.
+"Judge": Ms Quinn, you understand that refusing puts you in contempt of this court.
+saoirse.n: I understand, my lady.
+~ She looks up at the gallery for exactly half a second. Not at you. Over your head. A professional.
+? Stand up. Name yourself.
+ [flag aft_named]
+ ~ You stand up. The gallery turns. You say your name, and "I was the source", and the barrister drops his pen.
+ ~ It's a very bad idea. It's also the end of the case: a source who comes forward voluntarily, with documents, makes a defamation claim collapse.
+ ~ Outside, Saoirse grabs you by the coat and shouts at you for ten minutes and then cries into your scarf.
+ saoirse.d: I would have gone to prison for you. You IDIOT. You absolute... Thank you.
+? Stay seated. Trust her.
+ [flag aft_trust]
+ ~ You stay seated. It's the hardest thing you've done all year.
+ ~ The judge fines her. She doesn't pay. She spends nine days in Bronzefield and writes about it. The piece wins an award she doesn't go to.
+ ~ On the tenth day you're outside the gate at seven in the morning with a coffee and a pastry from Proof. She walks out squinting at the light.
+ saoirse.h: Source still protected. Notebook still in my sock. Is that a cinnamon knot?
+~ In June, Lumen drops the case. In July, Lumen Analytics goes into administration.
+[sum Aftermath: Lumen sued The Ledger and the judge ordered Saoirse to name her source. Lumen dropped the case and went under.]
+`;
+SC.after_injunction=`
+[bg office]
+~ THREE MONTHS LATER. THE FULL HEARING.
+~ Court 14. Noor in her wig, which she claims to hate and has clearly ironed. You're beside her as her "assistant", which means you carry the folders.
+~ Delphine is in the witness box for the sixth hour. Lumen's barrister, a silver-haired man who charges by the syllable, smiles at her.
+"Barrister": Ms Vos, you were Lumen's head of communications for six years. You've written hundreds of statements that weren't true. Why should this court believe this one is?
+~ Delphine falters. Noor's hand goes to her folder, then stops. She can't speak while he's questioning. But you can pass her a note.
+? Pass "The apology: drafted Tuesday, posted Sunday. Ask for the metadata."
+ [flag aft_note]
+ ~ Noor reads it, stands, and asks the court to admit the document metadata. The apology for WH1SPER's "attacks", saved on Lumen's own server on Tuesday at 10:14, five days before there was anything to apologise for.
+ "Judge": ...Mr Frobisher. Do you have an explanation for this timestamp?
+ "Barrister": I... would need to take instructions, my lady.
+ ~ Delphine sits up straighter. She doesn't need to be believed now. The server believes her.
+? Pass "She's telling the truth. Let her say why."
+ ~ Noor lets it play out. Delphine takes a breath, then looks straight at the barrister.
+ delphine.n: Because the others were written for Victor. This one I wrote for me. You can tell the difference. Everyone in this room can tell the difference.
+ ~ It's not evidence. It's better than evidence. The judge stops writing and just looks at her.
+~ The judgment comes a month later. Forty pages, grumpy, perfect. A permanent injunction. LANTERN is to be destroyed under the supervision of an independent expert, who turns out to be Rin.
+~ Noor reads the last page on the steps outside, out loud, to a pigeon.
+noor.h: "The court has no hesitation." No hesitation! Do you know how rarely a judge has no hesitation? I'm going to frame it. I'm going to frame the pigeon.
+[sum Aftermath: at the full hearing Delphine gave evidence for six hours. A permanent injunction followed, and Rin supervised LANTERN's destruction.]
+`;
+SC.after_killswitch=`
+[bg bakery]
+~ ONE WEEK LATER.
+~ The news has stopped calling it heroism. A hospital trust says a ward's staff rota app had a SafeSphere library inside it, and went dark for six hours on Sunday night. Nobody was hurt. Everyone keeps saying "but they could have been".
+~ You're in Proof at six in the morning when Mira walks in. She's never been inside a shop with you before. She looks terrible.
+mira.n: They know it was me. Not publicly. Not yet. A detective called my mother.
+mira.d: I can disappear. I've got the money. I've got a passport that isn't mine. Or I can walk into a police station and say "it was me, and here's why", and spend two years explaining a signing key to twelve people who don't own a computer.
+ellie.n: ...Do you want a coffee? You look like you need a coffee. Sit. Both of you. Sit.
+? "Disappear. You've earned it."
+ [flag aft_run]
+ mira.o: ...Yes. Maybe. Earned. That's a strange word for it.
+ ~ She drinks the coffee. She leaves a folded beer mat under the cup. On it, an address in a country you've never been to, and "in a year, if you still want to know".
+? "Hand yourself in. Make them listen."
+ [flag aft_trial]
+ mira.n: You think they'll listen?
+ > I think Noor will make them.
+ ~ She hands herself in on Wednesday. At the trial eight months later, Noor defends her. The jury is out for nine hours.
+ ~ Guilty, on one count: unauthorised modification of computer material. A suspended sentence. The judge says, "the court notes the defendant's motives, and the absence of any lasting harm." Mira laughs in the dock, once, very loudly.
+? "I can't decide this for you."
+ mira.s: No. You can't. That's why I came here. You're the only one who wouldn't.
+ ~ She drinks the coffee and leaves without saying which. A week later you get a postcard with no stamp and no words, only a drawing of a small key.
+[sum Aftermath: the news turned on the kill switch, and Mira had to decide whether to run or face a trial.]
+`;
+SC.after_ghost=`
+[bg garden]
+~ FOUR MONTHS LATER. SOMEWHERE NORTH.
+~ The cottage has a kettle older than both of you and a garden Mira has failed to grow anything in except one very determined potato.
+~ It's raining. Someone knocks at the door. Nobody has ever knocked at the door.
+mira.d: Don't move. Back window. The bag's under the sink. Go.
+? Go to the back window
+ ~ You go. Through the glass, a woman in a cagoule with a walking stick and a soggy map, peering at the house name.
+ "Hiker": Hello? Sorry! Is this the way to the falls? I think I've gone wrong!
+ ~ Mira opens the door four inches and gives her perfect directions in an accent you've never heard her use. The hiker thanks her and squelches away.
+ mira.n: ...I've been waiting for that knock for four months. It was a hiker. I'm going to go and lie on the floor.
+? Open the door yourself
+ ~ You open it. A woman in a cagoule, lost, looking for the falls. You give her bad directions. Mira gives her good ones, from behind you, then shuts the door and lies on the floor.
+~ That night there's a letter in the box at the end of the lane. It's been through three people and a charity shop. Ellie's handwriting, and a croissant drawn in the corner.
+~ "I don't know where you are. I'm not asking. Proof has a new oven. It's called {h}. It's temperamental and brilliant. Come home whenever. Love, E."
+? Write back, the same way, through three people
+ [flag aft_letter]
+ mira.s: One letter. Through three people. Paper. No names. ...Yes. Do it. Tell her the potato's name is Victor.
+? Keep it. Don't write back.
+ mira.d: You can, you know. I wouldn't mind.
+ > I know. Not yet.
+~ The news found out who sent the update, eventually. It never found out where you went.
+[sum Aftermath: four months in a cottage with Mira and a lost hiker at the door. Ellie's letter found you anyway.]
+`;
+SC.after_double=`
+[bg office]
+~ ONE YEAR LATER. HALBERD'S LONDON OFFICE.
+~ No name on the door. Glass walls that go frosted at the touch of a button. You've been here a year. You've learned to smile at everyone. You've learned which lift has the camera that doesn't work.
+~ Vesper drops a file on your desk, smiling, the way she smiles at everyone.
+vesper.n: Project LARK. Our client wants to find out who's talking to a journalist at The Ledger. They've asked us to use "pattern of life analysis". It's LANTERN, darling. They've rebuilt it from the bits.
+~ The journalist's name is on the first page. Saoirse Quinn.
+? Copy the file and get it to Saoirse
+ [flag aft_lark]
+ vesper.s: Not the copier. The copier counts pages. Photograph it with the old phone, in the stairwell, where the camera doesn't work. One page a day. Eleven days.
+ ~ Eleven days. One page a day. In the stairwell. On day nine, the head of security holds the stairwell door open for you and says "after you". Your heart stops. He's just being polite.
+ ~ The story runs a month later. "HALBERD SPIED ON JOURNALISTS". Your name isn't in it. Neither is hers.
+? Sabotage it from inside
+ [flag aft_sabo]
+ ~ You're on the analysis team. You make sure the analysis is wrong. Every week for six weeks, the graph says Saoirse's source is a man in Dundee who doesn't exist.
+ vesper.h: You're a natural. A dreadful, wonderful liar. I've corrupted you completely.
+~ That night, in a bar where nobody knows either of you, Vesper sings, very quietly, to an empty room.
+vesper.b: Slowly, darling. Beautifully. For years. ...Or until we're caught. Whichever's first.
+? "We won't get caught."
+ vesper.s: Everyone gets caught. The trick is to be someone they're glad they caught.
+? "Then let's make it beautiful."
+ vesper.h: Oh, it will be.
+[sum Aftermath: a year inside Halberd. They rebuilt LANTERN as Project LARK and pointed it at Saoirse. You and Vesper broke it from inside.]
+`;
+SC.after_whistle=`
+[bg flat]
+~ TUESDAY NIGHT.
+~ Victor Hale was arrested this morning. Released on bail this afternoon. At 11 PM your phone rings. Withheld number. You know who it is before you answer.
+? Answer it, and record
+ [flag aft_rec]
+ victor.n: {h}. I'm not going to waste your time. Neither of us has much of it. Everything that happened this week was a misunderstanding I'd like to correct.
+ victor.n: Delphine is a troubled woman. You could help her. Say she was confused. Say you saw her with Mira. I could make sure the people who need to forget you, forget you.
+ > You're asking me to lie for you. On a recorded line.
+ ~ A long silence. Then he hangs up.
+ ~ The recording is played at his trial, fourteen months later. The jury hears him say "the people who need to forget you". He's convicted on four counts.
+? Don't answer
+ ~ It rings out. It rings again. Then a text: "Disappointing." Then nothing.
+ * You'll never know what he wanted. You don't need to.
+~ Wednesday morning, Delphine's on breakfast television. They've given her six minutes and a sofa, and she gets through all of it without saying "we" once.
+~ After, she texts you a photo of the green room: a bowl of fruit and a fridge full of water and, on the wall, a poster for SafeSphere that somebody's crossed out in biro.
+delphine.n: I'm writing a book. Noor says I mustn't. My agent says I must. It's called "Approved Messaging". Is that a terrible title?
+? "It's perfect."
+ delphine.h: It's awful. It's a joke nobody will get. I'm keeping it.
+? "Call it 'My Own Words'."
+ delphine.o: ...Oh. Oh, that's better. That's much better. I hate you.
+[sum Aftermath: Victor rang you on bail and asked you to lie. Delphine went on breakfast TV, then started writing a book.]
+`;
+SC.after_found=`
+[bg station]
+~ THE NEXT THURSDAY. CENTRAL STATION.
+~ Pia's at the piano. Jonah's standing next to her with his hood down for the first time in a year, holding two coffees and blinking at the departures board like he's never seen one.
+jonah.n: It's very loud. I'd forgotten loud. I lived in a storeroom behind a laundrette. Loud was the spin cycle.
+~ Commuters walk past. A few stop. One woman stops and stares at Jonah for a long time, then walks up and shakes his hand without saying anything, and leaves.
+jonah.d: That keeps happening. I don't know what to do with my face.
+~ Jonah pulls an envelope out of his coat. A letterhead you don't recognise: "Lamplight. Independent app auditing. Funded by nobody."
+jonah.n: Rin and I are starting something. Audits that nobody can buy. Every report public. We need someone who reads the permissions, and does the opsec, and doesn't get scared on stage.
+jonah.s: The pay is terrible. The office is Pia's spare room.
+? "I'm in."
+ [flag aft_lamp]
+ jonah.h: Really? You'll quit Brindle? Your boss Linda?
+ > Linda will throw me a party.
+ ~ Linda does, in fact, throw you a party. Gary cries. Brindle's "LifeScore" pilot was quietly scrapped in September.
+? "Let me think about it."
+ jonah.n: Of course. Think properly. It took me a year to think about anything.
+ ~ You think about it all the way home. You say yes on Saturday.
+ [flag aft_lamp]
+~ Pia plays the song she never plays for money. Then she plays it again, faster, as a joke, and Jonah laughs so suddenly he spills the coffee on both of you.
+pia.h: Thursday. Every Thursday. That's not a code anymore. That's just the day we have coffee.
+[sum Aftermath: Jonah's first Thursday back. He and Rin started Lamplight, an audit shop nobody can buy, and asked you to join.]
+`;
+SC.after_signal=`
+[bg office]
+~ SIX WEEKS LATER. THE REGULATOR.
+~ Unlicensed broadcasting on amateur bands, interference with a satellite downlink, transmission of "non-amateur content". Astrid has a hearing at the communications regulator, a room with grey carpet and one very bored official.
+"Official": Ms Lund, you used an amateur licence to transmit a news broadcast. That's a clear breach. Do you have anything to say?
+astrid.n: Yes. I'd like to say it wasn't only me.
+~ She hands over a list. Four hundred and twelve call signs. Every amateur radio operator in Europe who heard the broadcast on Sunday and rebroadcast it, on their own licences, at their own risk, before anyone could stop it.
+"Official": ...Are you asking us to prosecute four hundred and twelve people?
+astrid.s: I'm asking you to decide whether you want to.
+? Speak up: "It was a public-interest emergency."
+ [flag aft_pi]
+ ~ You explain, in plain language, what LANTERN was, and why the microphones were cut. The official stops being bored about halfway through.
+? Stay quiet and let the list speak
+ ~ The official reads the list, slowly, for a long time. Then she turns over the last page and finds, written in pencil, "and one more: mine". It's her own call sign.
+ "Official": ...I was on my allotment shed on Sunday. With the handheld. I heard it.
+~ Astrid gets a formal warning and a letter that says, between the lines, "please don't do this again, and also, well done".
+~ That night, on the con roof, she gets a QSL card in the post: a postcard from an operator in Finland who heard the broadcast. "Received. 59. Thank you." Then another, from Portugal. Then forty more.
+astrid.h: People send these when they hear you. Proof of contact. I've been sending them since I was nine. I've never got this many back.
+[sum Aftermath: Astrid faced the regulator with the call signs of 412 radio operators who rebroadcast the evidence. She got off with a warning and a pile of postcards.]
+`;
+
+/* ============ AFTERMATHS (2/2) ============ */
+SC.after_blackout=`
+[bg basement]
+~ EIGHT DAYS LATER. THE CON CENTRE BASEMENT.
+~ Lumen is calling the blackout "sabotage by extremists". The venue has suspended Sunny "pending investigation". And on Thursday the venue will hand the MDF's contents back to "their rightful owner", meaning LANTERN-01, meaning Lumen. Unless somebody gets the logs off it first.
+sunny.n: I still have a badge. Technically. They forgot to cancel it. They forgot because I built the system that cancels badges.
+~ The plant room door. A new padlock on it, cheap and shiny.
+if met('nyx')
+ nyx.s: Oh, that's insulting. Hold my torch.
+ ~ Nyx has it open in eleven seconds. She looks almost disappointed.
+else
+ [game timing kind=pins n=3 mult=0 title="A cheap new padlock"]
+ ~ It's cheap. You have it open in a minute. Sunny watches with her arms folded and the look of someone deciding whether to be impressed.
+~ LANTERN-01 hums in the rack, still running on battery backup. Sunny plugs in a laptop.
+sunny.n: The logs are encrypted. The key's on the box. If we pull the power, the key's gone. If we copy it live, the box sends an alert to Krall's phone. We've got four minutes after it alerts.
+? Copy it live. Four minutes is enough.
+ [game pipe n=1 only=7 title="Pull the logs before the alert lands"]
+ ~ Three minutes forty. You're out of the plant room door and up the service stairs as two men in Lumen fleeces come down the main ones.
+ [flag aft_logs]
+? Photograph the screen instead: the routing table only
+ ~ Less. Much less. Just enough to prove where the data went: one IP address, in a Halberd data centre in Frankfurt.
+ [flag aft_logs]
+~ Saoirse runs it on Monday: "LANTERN'S LOST LOGS". Every badge, every meeting, every minute, mapped by a box that Lumen swore did not exist.
+~ Lumen withdraws the "extremists" statement. The venue reinstates Sunny with an apology and a pay rise she uses to buy a nap pod for the NOC.
+sunny.h: It stopped the sale. Now it's stopped the lie. That's both. I'd like my nap now.
+[sum Aftermath: you went back into the basement with Sunny and pulled LANTERN-01's logs before Lumen got the box back. That ended the lie as well as the sale.]
+`;
+SC.after_graph=`
+[bg cafe]
+~ SIX MONTHS LATER.
+~ A café across the city. A table at the back. A woman you've never met sits down opposite you with her coat still on. She's a civil servant. She found something in her department's contracts she wasn't supposed to find.
+"Source": They said you'd know what to do. A friend of a friend. They said you were at the con. They said you were "the one who knows about the graph".
+* LANTERN is running. You know it's running. Every meeting she's had this month is already a line on somebody's map. Including, probably, this one.
+? "Turn your phone off. No, properly. Give it to me."
+ [flag aft_teach]
+ ~ You put it in a crisp packet. Then you put the crisp packet in the café's freezer, with the owner's blessing, because the owner is Ellie's cousin.
+ "Source": Is that... does that work?
+ > Well enough. For now.
+? "We should leave. Separately. Different directions."
+ ~ You leave first, through the kitchen. She leaves ten minutes later, by the front. You meet again a week later in the reading room of a library with no Wi-Fi.
+~ For an hour you teach her the things nobody taught you until it was nearly too late: how to meet, how to talk, what not to carry, who not to tell. She writes nothing down. Good.
+"Source": Does this ever get easier?
+? "No. But you get better at it."
+? "Yes. When there are enough of us."
+~ That night you post on the old forum, the one from when you were fourteen. A long post. Practical. Boring. Correct. "How to meet someone when everyone's watching."
+~ The next morning it has four hundred replies. The first one is from packet_pam.
+pam.n: "source: me, and everyone else here. keep going."
+* You tried. That has to count for something. It's starting to feel like it does.
+[sum Aftermath: LANTERN shipped. Six months later you were teaching a stranger in a café how to stay off the graph.]
+`;
+SC.after_scapegoat=`
+[bg office]
+~ THREE WEEKS LATER. AN INTERVIEW ROOM.
+~ Interview under caution. Two detectives, a tape recorder that's actually a laptop, and a folder with your face on the front, printed off WH1SPER's post.
+"Detective": You see the problem. Every place WHISPER posted from, you were there. Every time. Your badge says so.
+if met('noor')
+ noor.n: My client's badge says so because the badge was built by the people who wrote the posts. Next question, please.
+ ~ Noor, beside you, with her fountain pen and her dreadful calm. She came on the first day. She's not charging you.
+else
+ "Duty solicitor": You don't have to answer that.
+? "Ask Lumen's Trust and Safety team who logged in to the WH1SPER account."
+ [flag aft_ask]
+ "Detective": We have asked. They've declined to provide access.
+ > Then ask a judge to make them.
+ ~ The detective writes something down. For the first time, she looks like she might be on a different side.
+? "No comment."
+ ~ "No comment." Twenty-two times. It's the most boring three hours of your life. It's also correct.
+~ That evening, Ellie's waiting outside the station in her apron with a box of pastries for the custody sergeant, because she's Ellie.
+ellie.n: I told them you were in my bakehouse at four on Thursday morning folding dough. They asked if I had proof. I said, "I'm literally called Proof."
+~ The charges are dropped in March. Krall's team is charged in May. The internet doesn't notice. Your name still comes up first when you search for "WHISPER".
+? Write your own account, and post it
+ [flag aft_post]
+ ~ Ten thousand words. Dates. Evidence. "I am not WHISPER, and this is how they made you think I was." It gets fewer clicks than the lie. It gets read by everyone who matters.
+? Let it go
+ * You change your name on everything. You keep the old one for Ellie.
+[sum Aftermath: interviewed under caution, with Ellie as your alibi. The charges were dropped in March and Krall's team were charged in May.]
+`;
+SC.after_soldout=`
+[bg office]
+~ ONE YEAR LATER. LUMEN TOWER, FLOOR 31.
+~ "Head of Community". Glass desk. A view of the river you never look at. Your shield-shaped business cards are on their third reprint.
+~ An email arrives at 11:48 PM to your personal address. Not your Lumen one. Nobody at Lumen knows your personal address.
+~ "You don't know me. I work in data. They're using LANTERN to find the people who talk to unions. I'm scared. Somebody said you used to be one of the good ones. —D"
+? Reply. Help them.
+ [flag aft_help]
+ ~ You reply from a library computer. You meet in a park. You give them a USB stick with everything you've seen in a year on the 31st floor, which turns out to be a great deal.
+ ~ Saoirse's byline. "INSIDE LUMEN: THE HEAD OF COMMUNITY SPEAKS". Your name is in it, because you asked for it to be.
+ ~ Lumen fires you by courier. Ellie puts the sign back in the window: WE DO THINGS PROPERLY HERE.
+ * It's not a lot of money. You keep saying that too. It feels better.
+? Delete it.
+ ~ You delete it. Then you empty the bin. Then you sit there for an hour in the dark, on the 31st floor, with the river you never look at.
+ ~ In the morning, the data team has one fewer member. Nobody tells you why. You don't ask.
+ * It's a lot of money. You say it to yourself in the lift. You've stopped believing it.
+? Forward it to Krall.
+ [flag aft_krall]
+ ~ Krall replies with a thumbs-up emoji. Nothing else. Three weeks later you get a bonus.
+ * You don't sleep for a while after that. Then you do, which is worse.
+[sum Aftermath: a year as Lumen's Head of Community, then an email from someone who said you used to be one of the good ones.]
+`;
+SC.after_proof=`
+[bg bakery]
+~ THREE MONTHS LATER. PROOF.
+~ The news ran its course. LANTERN shipped, or didn't, depending on which week you asked. You stopped checking. The bakery opened at six every day, and you were there for every one of them.
+~ You can do a proper fold now. You can do a laminated dough. You can tell when sourdough's ready by the smell.
+~ On a Tuesday morning the bell goes, and it's someone in an oversized hoodie with the sleeves pulled over his hands. Rin.
+rin.n: Hi. Sorry. I didn't call. I don't call people. Can I have a... whatever that is? The one with the twist.
+ellie.h: Cinnamon knot! It's the best one. On the house. You're the one from the photos!
+rin.d: We're starting again. A few of us. It got worse after the con. We could use someone who reads the permissions.
+? "I'm a baker now."
+ rin.s: I can see that. You've got flour on your eyebrow. It suits you.
+ rin.n: Bakers can read permissions too. One evening a week. In the back room. You don't even have to leave.
+? "Tell me everything."
+ [flag aft_back]
+ rin.h: I was hoping you'd say that. I brought slides.
+ ~ He did. He brought slides. On a laptop he sets up on the flour bin.
+ellie.n: The back room's free on Thursdays. I'll make tea. I'm putting a sign up. "Proof Security Club". I'll draw a croissant on it.
+* You went home. The fight went on without you. Now it's coming in the front door asking for a cinnamon knot.
+[sum Aftermath: months of folding dough at Proof, until Rin came in for a cinnamon knot and asked you back. Thursdays, in the back room.]
+`;
+SC.after_larp=`
+[bg flat]
+~ FOUR MONTHS LATER.
+~ The clip has eleven million views. Someone made a remix. Someone made a remix of the remix. "Quantum-encrypted blockchain telemetry" is on a T-shirt you saw in a shop window in town.
+~ You haven't posted since. You haven't been back to the forum. You've been doing something else: starting again. Properly.
+~ A small, quiet CTF, online. Beginners' bracket. You enter under a new handle.
+[game pipe n=2 only=12,4 title="Beginners' bracket"]
+~ You come eighth out of forty. You write up every challenge, carefully, honestly, with every mistake you made left in. You post it.
+~ A reply arrives within the hour. packet_pam.
+pam.n: "this is good. you got #3 wrong, here's why. but this is good. source: me."
+? Thank her and ask for help with #3
+ [flag aft_learn]
+ pam.s: "now you're getting it. 'I don't know' is the most powerful thing a hacker can say."
+? Tell her who you are
+ pam.h: "i know who you are. i've always known. the bluff was bad. this is much better."
+~ Next year, at CTRL+ALT+CON, you sit in the audience for the beginners' track, with a notebook, at the back. Nobody recognises you. Then someone does: Rin, two rows in front. He turns round and holds up a little handwritten sign. "PROUD OF YOU."
+* You should have handed over the microphone. Next time you will.
+[sum Aftermath: after the bluff went viral you started again, properly, in a beginners' CTF. packet_pam replied to your write-up.]
+`;
+SC.after_opensource=`
+[bg hotel]
+~ SIX MONTHS LATER. ROOM 1337, BOOKED UNDER EVERYONE'S NAME.
+~ The planning meeting for next year's con. Marge says it's a "small informal meeting". There are twenty-three people in a hotel room built for two.
+marge.n: No headline sponsor. Four thousand people paying their own way. A programme run by the people who were in this room. I need a theme. You lot pick it.
+~ Everyone looks at you. You didn't fall in love this week. You did something else: you became the person everyone looks at when a decision has to be made.
+? "Trust nobody."
+ rin.h: Classic. It'll look great on a lanyard.
+ [flag aft_theme1]
+? "Read the back."
+ ~ Tilly makes a sound like a kettle and has to sit on the bed.
+ [flag aft_theme2]
+? "Source: everyone."
+ ~ Across the room, packet_pam, who came in late and is sitting on the radiator, raises her mug and doesn't say anything at all.
+ [flag aft_theme3]
+marge.h: Done. Decided. Nobody argue. Next item: who's running the village nobody wants to run?
+~ Twenty-two hands point at you.
+? Accept, with dignity
+ ~ You accept, with dignity. Everyone cheers, without any.
+? Point at Rin
+ rin.d: Absolutely not. I'll help. I'll bring the worms. I'll make a slide. One slide.
+~ They're the people you'd call at three in the morning. They're the people who'd pick up. That turned out to be the whole point.
+[sum Aftermath: you helped plan next year's con, with no sponsor, in a hotel room with twenty-three people in it.]
+`;
+SC.after_notfound=`
+[bg train]
+~ MONDAY. THE 09:12.
+~ A bag of stickers for Ellie on your lap. The carriage is half empty. Your phone's off. The city slides away behind you.
+~ At the next stop, a woman gets on with a cardigan, a canvas bag of books, and a laptop covered in stickers from privacy projects you've heard of. She sits opposite you. You know who she is before she says anything.
+pam.n: You were going to go home without saying goodbye.
+> I didn't know you were on this train.
+pam.s: I wasn't. I got on it because you were. That's a joke. I'm going to my daughter's. Same line.
+~ For two hours, she talks to you about the things that don't make the news. Small projects. Libraries that need someone to set up the Wi-Fi properly. Women's refuges that need someone who knows what stalkerware is. Schools whose names shouldn't be on four thousand phones.
+pam.n: The con's once a year. The work is every Tuesday. Nobody gets on stage for it. Nobody falls in love at it. It's mostly checking someone's router.
+? "Can I help?"
+ [flag aft_pam]
+ pam.h: I was hoping you'd ask. There's a refuge near you. Thursday evenings. Bring a screwdriver.
+? "That sounds lonely."
+ pam.d: It isn't. That's the secret. You do it alone, and it turns out everyone else is doing it alone, at the same time, and that's not alone at all.
+~ She gets off two stops early. On the platform she raises one hand, not waving, just there.
+* You did the right thing. You did most of it alone. Now it turns out you didn't have to.
+[sum Aftermath: packet_pam sat opposite you on the 09:12 and offered you Thursday evenings at a refuge near home.]
+`;
+SC.after_lasttrain=`
+[bg flat]
+~ ONE YEAR LATER.
+~ Flat 1A. A wet Tuesday. Proof's ovens humming downstairs. You're eating toast standing up when the news alert comes in, and this time you don't swipe it away.
+~ "LANTERN: HOW A PRIVACY APP MAPPED A NATION". A year of fallout in one headline. Arrests in three countries. A whistleblower's photo. A list of names of people who were "identified through routine analysis".
+~ One of the names you recognise. Somebody from the con. Somebody you could have met.
+~ The website for CTRL+ALT+CON is still in your bookmarks. Twenty-first year. Tickets on sale. A line at the bottom of the homepage that wasn't there last year: "In memory of the ones who were mapped."
+? Buy a ticket
+ [flag aft_ticket]
+ ~ It costs more than you'd like. You buy it anyway. The confirmation email has a small line at the bottom: "Welcome back."
+ ~ Downstairs, Ellie sees the email on your phone over your shoulder and says nothing at all. She just hands you a cinnamon knot, with a tiny croissant drawn on the bag.
+? Close the laptop
+ ~ You close the laptop. You finish your toast. You do the washing up.
+ ~ Later that night, you open it again. You buy the ticket at 2 AM, when nobody's watching, which is the only way you know how to do brave things.
+ [flag aft_ticket]
+* It wasn't your fight. It is now.
+[sum Aftermath: a year later, a headline about LANTERN. You bought a ticket to next year's con.]
+`;
+SC.after_harem=`
+[bg ballroom]
+~ ONE YEAR LATER. CTRL+ALT+CON, TWENTY-FIRST YEAR.
+~ The Grand Ballroom again. Purple chandeliers. Tilly's new badges on four thousand lanyards, rainbow round the edges, firmware open source, a hidden mode nobody's found yet.
+~ They're all here again. Some of them came a long way.
+~ Ellie's opened a second Proof by the station. Pia plays outside it on Thursdays, and Jonah sells coffee next to her and talks to everyone.
+~ Nyx quit red-teaming and teaches locksport at a school for girls. Ada won the international CTF. Priya switched her phone on, once, in March, for a wedding. Juno has a cooking show under her real name. Kit's new suit has no helmet.
+~ Rin runs Lamplight. Bea's in second year at art school, and her degree show is all drawings of the same hotel bar. Mira grew a second potato. Saoirse's book is out. Sunny took a holiday and has not stopped talking about it.
+~ Petra's car finally died, and she gave it a funeral. Astrid's CubeSat launched in April. Yuki holds the world record, by two frames. Vesper sings under her own name. Delphine's book is called "My Own Words". Noor is a judge's favourite barrister. Fern's bees won a ribbon. Wren hit episode one hundred and fifty. Tilly's badge is in a museum.
+~ And they've all turned round, all at once, because you just walked in.
+? Wave
+ ~ Twenty-one people wave back. Somebody's crying. It's Ellie. It's also Rin. It's also, very discreetly, Mira.
+? Say "same time next year?"
+ ~ Twenty-one people, at once: "SAME TIME NEXT YEAR."
+* Every thread. Every person. You, somehow, in the middle of it, still.
+[sum Aftermath: a year later, at the twenty-first con, they all turned round at once when you walked in.]
+`;
+/* hook: every ending plays its aftermath just before the ending card */
+for(const k of Object.keys(ENDINFO)){const e='end_'+k,a='after_'+k;if(SC[e]!==undefined&&SC[a]!==undefined&&!SC[e].includes('[scene '+a+']'))SC[e]=SC[e].replace('[end '+k+']','[scene '+a+']\n[end '+k+']')}
 
 const rsum=(g,i,t)=>{ROUTES[g].sum[i]=t};
 /* ============ THE TWENTY-ONE: who they are, when their scenes open, what they say in passing ============
