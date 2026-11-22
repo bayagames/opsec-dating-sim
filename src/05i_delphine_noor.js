@@ -86,7 +86,7 @@ delphine.d: I'll lose my job before I've finished the first paragraph. Lumen wil
 delphine.n: My mother would have liked you. She liked people who said things plainly. She said I spoke like a contract.
 delphine.b: I'm trying to speak like a person. Bear with me. I'm out of practice.
 `;
-SC.delphine5=`
+SC.delphine7=`
 [bg pdining]
 ~ The private dining room, the night before. Candles. Delphine's dismissed the waiter, locked the door, and taken off her Lumen lanyard and laid it on the table like a dead thing.
 delphine.n: My last night as Lumen's Head of Communications. I thought I'd spend it with the only person this week I didn't have to manage.
@@ -202,7 +202,7 @@ else
 [flag inj_ready]
 noor.n: You realise what you're doing? You're making the slow way fast. That's the hardest thing in law.
 `;
-SC.noor5=`
+SC.noor7=`
 [bg library]
 ~ The library at midnight, the night before. Every case file closed and stacked. The fountain pen, capped, laid across the top. Noor's sitting in the window seat with her shoes off and her knees up, looking at the garden lights.
 noor.n: I always close every file the night before something big. Then I sit here and don't open them again. It's a superstition. My father did it before exams.

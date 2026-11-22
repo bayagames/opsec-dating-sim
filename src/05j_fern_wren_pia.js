@@ -88,7 +88,7 @@ fern.n: The manager said "Mr Ashgrove". And "fourteen". As in 1314, I think. Nex
  [fx fern:8]
  fern.s: Nobody sees the gardener. That's the whole point of the hat.
 `;
-SC.fern5=`
+SC.fern7=`
 [bg garden]
 ~ The garden at night, the night before. Every little light in the trees is on. Fern's sitting on the bench by the olive tree, no hat, her hair loose, with two mugs of tea and a jar of honey with a spoon in it.
 fern.n: Sit. Lavender tea. From the bed by the door. And the honey. Nobody else gets the honey.
@@ -197,7 +197,7 @@ wren.a: What does a con organiser do in a closed suite at 2 AM with a man who ne
  wren.h: Already done. Timestamps, durations, which key card. My sister says evidence without timestamps is just gossip.
 wren.n: I'm scared, a bit. I don't usually get scared. Usually the mysteries are about missing towels.
 `;
-SC.wren5=`
+SC.wren7=`
 [bg pool]
 ~ The pool, midnight, the night before. Every light's off except the ones underwater, so the whole room is blue and moving. Wren's standing at the edge in her red hoodie with her hands in the pocket.
 wren.n: Lifeguard's off duty. For the first time all week. Nobody's watching the pool. Which means, technically, you're on your own.
@@ -310,7 +310,7 @@ jonah.n: If it goes public on Sunday, properly, with proof, I'll come in. I'll s
  [flag jonah_ready]
 pia.b: I'm going to play every day now. Not just Thursdays. Every day.
 `;
-SC.pia5=`
+SC.pia7=`
 [bg platform]
 ~ Platform 4, after the last train. The station's lights are on their night setting. Pia's sitting on a bench with her violin case open beside her and the strings, new ones, if you gave her them, catching the light.
 pia.n: The guard knows me. He lets me stay till he locks up. He likes Bach.

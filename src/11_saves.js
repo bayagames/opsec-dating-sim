@@ -40,6 +40,7 @@ function savesScreen(){
  const draw=()=>{ov(`<div class="card"><h3>Load game</h3><div id="spanel"></div><div class="row"><button class="btn pri" id="sx2">Back</button></div></div>`);savesPanel($('spanel'),'title',draw);$('sx2').onclick=closeOv};draw();
 }
 function resumeGame(s){
+ beatBusy=false;
  closeOv();$('ov').classList.remove('phoneov','mapov');
  // saves from before the week was rebuilt (chapters, nine people) can't be carried over: start that player again
  if(!s.v||s.v<4){S=fresh(s.h||'n00b');S.resume='pro';startPrologue();return}

@@ -130,6 +130,8 @@ const ITEMS={
  novel:{n:'Battered detective novel',d:'For someone who\'s read every one of these except this one.',p:15,g:'wren'},
  strings:{n:'Set of violin strings',d:'For someone who plays at Central Station in the cold.',p:20,g:'pia'}
 };
+/* texts that want an answer (Messages): filled in by the story */
+const TEXTQ={};
 const DAYCARD={0:['PROLOGUE','Hello, World','Two weeks before the con'],1:['DAY 1 · MONDAY','Badge In','CTRL+ALT+CON opens tonight'],2:['DAY 2 · TUESDAY','Capture the Flag','Six days to the closing keynote'],3:['DAY 3 · WEDNESDAY','Exposure','Five days to the closing keynote'],4:['DAY 4 · THURSDAY','Packet Loss','Four days to the closing keynote'],5:['DAY 5 · FRIDAY','Home','Three days to the closing keynote'],6:['DAY 6 · SATURDAY','Finals','The night before'],7:['DAY 7 · SUNDAY','Closing Keynote','Today']};
 /* endings: title, one line, and how it reads on the card */
 const ENDINFO={
@@ -158,6 +160,7 @@ const ENDORDER=Object.keys(ENDINFO);
 /* achievements: [name, description, hidden until earned] */
 const ACH={
  first_hang:['Quality Time','Spend part of a day with someone.'],
+ first_event:['On the Programme','Go to a con event.'],events6:['Con Veteran','Go to six con events in one run.'],
  first_lead:['Following Up','Work a lead.'],
  first_solve:['Case Closed','Solve a mystery on the case board.'],
  all_solved:['The Whole Board','Solve all twelve mysteries in one run.'],

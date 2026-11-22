@@ -1,34 +1,161 @@
-/* ============ PROLOGUE: two weeks before the con ============ */
-SC.prologue=`
+/* ============ PROLOGUE: a Friday, two weeks before the con ============
+   Morning in the flat, breakfast at Proof, a day at Brindle & Co, Underwriting's big telly, and then, that evening,
+   Ellie at your door. It runs on the same calendar as the con (DAYS[0]). */
+SC.p_wake=`
 [chapter 0]
 [bg flat]
 [hide]
-~ Friday. 9:47 PM. Flat 1A, above Proof bakery, Linden Street.
-~ Three monitors glow in the dark like an aquarium nobody feeds. On the left one, a forum thread you started at three in the morning, a week ago.
+[wake flat]
+~ Friday. 7:12 AM. Flat 1A, above Proof bakery, Linden Street.
+~ Your alarm goes off for the third time. You've snoozed it twice. The third time it plays a sound you chose specifically because it's unbearable: a dial-up modem connecting.
+* Two weeks. Two weeks today, and you'll be on a train to CTRL+ALT+CON.
+~ Three monitors on your desk, glowing in the half-dark like an aquarium nobody feeds. On the left one, a forum thread you started at three in the morning, a week ago.
 ~ "honestly most firewalls are a joke if you know what you're doing"
 ~ Fourteen upvotes. One reply, from a user called packet_pam: "source?"
-* You never answered packet_pam. You check every day to see if anyone else has.
+* You never answered packet_pam. You check every morning to see if anyone else has.
 * Online, you're {h}. You've had the handle since you were fourteen. It's on four forums, two Discords and a Git account with one repository in it, which is a list of other people's repositories.
 * Offline, you work the IT helpdesk at Brindle & Co Insurance. You reset passwords. You explain, gently, that the printer is not haunted. You own one houseplant, and it's plastic.
-~ On the middle monitor: a video, paused at 4:12. HACKING IN 10 MINUTES (REAL) (NOT CLICKBAIT). The man in it is wearing sunglasses indoors.
-~ On the right monitor, an email you've read eleven times.
+~ On the middle monitor, an email you've read eleven times.
 ~ "CTRL+ALT+CON 20 · Your ticket is confirmed. Hack Week: seven days of talks, villages, workshops and the world's longest-running Capture the Flag. Badge pickup opens Monday the 14th, 6 PM, at the Halcyon Convention Centre. Be excellent to each other."
 * CTRL+ALT+CON. The biggest hacker convention in the country. Four thousand people who actually know what they're doing, in one building, for a week.
 * You bought the ticket at 3 AM too. It seemed like a very good idea at 3 AM. It cost the same as two months of your gas bill.
-? Re-read the ticket email. Twelfth time's the charm.
- ~ "Be excellent to each other." It says it at the bottom, like a sign-off, like a dare.
- * You will be excellent. You'll be so excellent. You'll walk in, someone will say "is that {h}?", and you'll say "maybe".
- * Nobody is going to say "is that {h}?"
 ? Post about it on the forum.
  ~ You type: "see you all at CTRL+ALT+CON 😎 room's booked at the Halcyon". You add a photo of the ticket. You hit post before you can think about it.
  [fx clout:3 foot:3]
  [flag posted_ticket]
  ~ Within a minute: "see u there king". You feel like a king.
  * A king whose travel dates, hotel and badge number are now public. But a king.
-? Close the laptop. You should eat something that isn't from a box.
+? Close the laptop. It's a work day.
  [fx skill:2]
- ~ You open the fridge. Oat milk, hot sauce, half a lemon of unknown age. On the door, a takeaway menu someone has annotated in red pen: "NO. Cook something. —E"
- * You close the fridge. You'll cook something tomorrow. You've been cooking something tomorrow for three years.
+ ~ The forum can wait. It has waited three years for you to say something true. It can wait a bit longer.
+[unlock move]
+~ Downstairs, through the floor, you can smell cinnamon. It's been coming up through the boards since four.
+[sum A Friday, two weeks before the con. Your ticket confirmed. Fourteen upvotes, and packet_pam's "source?".]
+`;
+SC.p_bakery=`
+[bg bakery]
+~ Directly beneath your flat is Proof, a bakery so small that three customers count as a queue. The bell over the door. The radio on low. A coffee machine that hisses like a cat with opinions.
+ellie.h: Morning, computer guy! The usual?
+[meet ellie]
+~ Ellie Park. Owner, head baker, only baker. There is flour on her cheek every single day, as if it's part of the uniform.
+[unlock aff]
+ellie.s: One cinnamon knot and a coffee strong enough to debug with. Did I say that right? I'm learning your language.
+? "You said it perfectly."
+ [fx ellie:5]
+ ellie.h: I've been practising. I also know "have you tried turning it off and on again".
+? "Technically you debug with a debugger, not coffee."
+ [fx ellie:2]
+ ellie.s: Wow. Okay. Your coffee is now decaf.
+ ellie.h: Kidding. Mostly.
+? "I don't need coffee. I run on pure code."
+ [fx ellie:3]
+ ellie.b: You run on cinnamon knots. I have the receipts. Literally. I print them.
+ellie.n: Quick question while you're here. My card reader keeps saying "update required". Is it going to explode?
+? "It's fine. Update it through the official app, not a link someone sends you."
+ [fx ellie:6 skill:2]
+ ellie.o: Oh! That's actually useful. You're actually useful.
+ * You feel, for about four seconds, like someone who knows things.
+? "Could be hackers. I'll take a look later. I'm kind of a big deal online."
+ [fx ellie:1 clout:2]
+ ellie.s: A big deal. Online. Mm-hm.
+? "Turn it off and on again."
+ [fx ellie:4]
+ ~ She does. It updates. She stares at you like you just raised the dead.
+ ellie.h: You're a wizard.
+ellie.n: Also. My bank's started asking me to install this. Some shield thing. They say it keeps you safe.
+~ She holds up her phone: a banner ad inside her banking app. A blue shield. "SafeSphere: your free privacy shield. Recommended by your bank."
+? "Don't install it till I've had a look."
+ [fx ellie:3 skill:1]
+ [flag ellie_no_ss]
+ ellie.n: Okay. I trust you more than a banner.
+? "Everyone's using it. It's probably fine."
+ [fx clout:1]
+ ellie.h: Shield on everything! Like a knight!
+ * You'll remember you said that.
+~ She hands you the knot in a paper bag with a tiny croissant drawn on it in biro. She draws one on every bag.
+* You've kept all of them. You will never tell anyone this.
+[sum Breakfast at Proof. Ellie's bank had started recommending something called SafeSphere.]
+`;
+SC.p_door=`
+[hide]
+~ Linden Street at half seven: the barber unrolling his shutter, a van unloading flour, a pigeon eating a croissant flake with real violence.
+[bg office]
+~ Forty minutes later, the lift doors open on the third floor of the Brindle & Co tower.
+`;
+SC.p_office=`
+[hide]
+~ Brindle & Co Insurance. Third floor. Grey carpet, grey desks, a motivational poster of a rowing team that says TEAMWORK and has been there since before anyone can remember.
+~ The IT helpdesk is you, a stapler and the Accounts printer, which hates you personally.
+linda.n: {h}! Good, you're in. Half of Claims got weird emails this morning. Before anyone clicks anything, can you go through the queue?
+~ Linda Ashworth, Head of Operations. She manages forty people, a budget, and a three-page document called "Things {h} Has Fixed That Were Not Broken".
+linda.a: And then come and see me. Underwriting have got a new toy and I don't understand it, and when I don't understand something it's usually because someone doesn't want me to.
+* Finally. A chance to be the hacker you say you are.
+[sum A day at Brindle & Co. Linda wanted you to look at Underwriting's new toy.]
+`;
+SC.p_queue=`
+[hide]
+~ You sit down at the helpdesk. Forty-seven tickets. A suspicious number of them have the subject line "URGENT!!!" and were sent in the same minute.
+* Same minute, same subject. That's not forty-seven people with problems. That's one person with forty-seven targets.
+[unlock skill]
+[game phish pool=3,10,4,8,11 title="Helpdesk queue" noexp=1 res=d1QueueRes]
+if f('office_good')
+ linda.h: Brilliant. That's every single one. Honestly, you're wasted on us.
+ * For one second, you are a legend offline too.
+ [fx skill:4]
+else
+ linda.a: Hm. Gary has already clicked the gift-card one. Gary has bought eleven gift cards. Gary does not know who for.
+~ Across the office, Gary from Accounts is waving at you. Hard. With both arms.
+`;
+SC.p_gary=`
+[hide]
+gary.h: Mate. MATE. Are you, like, a hacker? A real one? Linda says you're going to a hacker thing.
+~ Gary Pugh, Accounts. Thirty-four. He owns a jet ski and a T-shirt that says "I PAUSED MY GAME TO BE HERE".
+[unlock clout]
+? "Yeah. I could take this building's network down from my phone."
+ [fx clout:6]
+ gary.o: No way. Sick. Don't, though. My fantasy football's on it.
+? "I'm learning. I read a lot."
+ [fx skill:2]
+ gary.h: Respect. Can you un-buy eleven gift cards?
+? "It's a convention. It's mostly talks."
+ [fx skill:1]
+ gary.s: Talks. Right. "Talks". Wink.
+gary.n: Anyway, listen. I've ordered that shield app for everyone's work phones. SafeSphere. The Lumen bloke said it'd stop exactly this kind of thing. The gift card thing. Rolls out in two weeks.
+gary.n: And it's free, and it gives us "insights". Underwriting are already using the data side. Come and look at their telly. It's got a little map.
+[clue gary_mdm]
+`;
+SC.p_underwriting=`
+[bg office]
+[hide]
+~ Underwriting is the corner of the floor with the good chairs. On the wall, a new TV, sixty inches, showing a dashboard with a cheerful blue logo: LIFESCORE · powered by Lumen.
+~ A map of the city, covered in little dots. Each dot has a colour: green, amber, red. Linda's standing in front of it with her arms folded.
+linda.n: This. They put it up on Monday. Underwriting say it "scores" people for their premiums. I asked what the score is made of, and they said "insights". I asked what an insight is, and they said "data, but nicer".
+~ You lean in. Hover over a red dot. A pop-up: "Policyholder 44817 · Risk: elevated · Frequent late-night travel · Visits: licensed premises (6/month) · Social graph: 2 contacts flagged."
+* Late-night travel. Licensed premises. Six a month. That's someone's Friday at the pub, on a map, in an insurance office.
+? "Where does this come from? Who's collecting this?"
+ [fx skill:3]
+ linda.a: That's my question. The contract's with Lumen. "Mobility and relationship insights from opted-in users". I didn't opt in to anything. Did you?
+ [flag heard_lifescore]
+? "Linda, this is people's location. Every night."
+ [fx skill:2]
+ linda.d: I know. I know what it looks like. I'm asking you because you'll say it out loud.
+ [flag heard_lifescore]
+linda.n: I'm not going to do anything yet. I'm going to watch it. And when you're back from your con, you're going to help me understand it, and then I'm going to have a very polite meeting with someone who'll regret it.
+* Lumen. The shield on Ellie's bank. The app on Brindle's phones. The dots on Underwriting's map. It's the same blue everywhere.
+~ The clock says five. The lift says "going down".
+[sum Underwriting's new dashboard, LifeScore, "powered by Lumen", scores policyholders from where their phones go at night.]
+`;
+SC.p_lift=`
+[hide]
+linda.n: Go home, {h}. Two weeks and you're free. Don't hack anything I'd have to explain to legal.
+~ The lift says "going down". So does the sun.
+[bg flat]
+`;
+SC.p_home=`
+[bg flat]
+[hide]
+~ Evening. Your flat. You eat something that isn't from a box, then you eat something that is.
+~ You're halfway through a video called "HACKING IN 10 MINUTES (REAL) (NOT CLICKBAIT)" when it happens.
 ~ Then someone hammers on your door. Not a knock. A hammering. The kind of knock that has been running up the stairs.
 [sum Two weeks before CTRL+ALT+CON, Ellie hammered on your door: someone had stolen her bakery's account.]
 [meet ellie]
@@ -205,5 +332,24 @@ ellie.b: Thank you, {h}. Really. You were... you were real tonight. Not the foru
 * You close the video. You don't need HACKING IN 10 MINUTES. You just did two hours of the boring kind, and it worked.
 * On the forum, packet_pam's reply is still sitting there. "source?"
 * You don't answer it. For the first time, you think you might know what the honest answer is.
+`;
+SC.p_night=`
+[bg flat]
+[hide]
+~ Nearly one in the morning. Your flat is very quiet after Ellie's gone.
+* Lumen. The shield on her bank app. The shield on Brindle's phones. The dots on the LifeScore map. The "recovery" eleven minutes after the yacht. The sponsor of the con you've been looking forward to for a year.
+? Look up Lumen properly. Tonight.
+ [fx skill:3]
+ ~ Lumen Analytics. Founded nine years ago. CEO: Victor Hale. Flagship: SafeSphere. Ten million downloads. Headline sponsor of CTRL+ALT+CON 20, "proudly protecting attendees".
+ ~ A news story from last year: a researcher called Jonah Reyes accused Lumen of something, was accused of stealing code, and retracted. The story's two paragraphs long. The retraction is longer.
+ [flag saw_jonah_news]
+? Go to bed. It's one in the morning.
+ ~ You go to bed. You don't sleep for a long time.
 ~ Two weeks.
+`;
+SC.sleep0=`
+[bg flat]
+[hide]
+~ The fortnight goes the way fortnights do. You pack in your head forty times. Ellie's account stays hers. BREAD SHIELD asks her for a code every morning, and she gives it, every morning.
+~ And then it's Monday.
 `;

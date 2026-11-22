@@ -10,8 +10,8 @@ Working reference for the expanded game. Spoilers throughout.
 - **Free slots** take one activity: a hangout scene, an investigation lead, a talk or workshop, CTF practice, a bug bounty, streaming with Juno, or resting. Meeting someone, talking shop (once per person per day), gifts, the shop and the phone are free.
 - **Exposure** resets each morning to your Footprint (permanent leaks). At 100 you're doxxed and the day restarts from its morning snapshot. Risky leads can spike it.
 - **Skill** and **Clout** are XP with ranks (0-5). Skill: Script Kiddie, Novice, Practitioner, Specialist, Expert, Elite. Clout: Nobody, Lurker, Known Face, Notable, Con Famous, Legend. Thresholds 0/30/80/150/250/380.
-- **Closeness** per character: affection 0-100 plus scenes seen (0-6). Stages: Met, Acquaintance, Friend, Close, Dating, In Love. Scene 0 (meeting) is free; scenes 1-5 cost a slot each; scene 5 is the final love scene.
-- 14 free slots per run, so two full routes plus Ellie (whose scenes are mostly story beats) plus a few leads. From Day 5 the story nudges you to spend time on people you're dating.
+- **Closeness** per character: affection 0-100 plus scenes seen (0-8). Stages: Met, Acquaintance, Friend, Close, Dating, In Love. Scene 0 (meeting) is free; story beats don't use up their slot, so there are about 26 free actions in a run.
+- About 26 free actions per run: enough for two full routes plus Ellie, or one route and most of the leads. From Day 5 the story nudges you to spend time on people you're dating.
 
 ## Cast (datable: 21)
 | id | name | who | where | met |
@@ -106,7 +106,13 @@ Allies are assigned; fit and closeness decide each task. Then the roof.
 10 Found (Jonah testifies) · 11 Signal (Astrid's broadcast) · 12 Blackout (Sunny cuts everything) · 13 The Graph
 (Lumen wins) · 14 Scapegoat (framed) · 15 Sold Out · 16 Proof (go home with Ellie, Day 5) · 17 Larp Exposed ·
 18 Open Source (friends) · 19 404: Partner Not Found · 20 Last Train.
-Romance epilogues layer on top: whoever's final scene you reached (pick one if several).
+Every ending runs in three parts: the outcome (`SC.end_<k>`), the final night with whoever's route you finished
+(`SC.epi_<g>`, 04l, pick one if several) and a playable aftermath that jumps forward in time (`SC.after_<k>`, 04m/04n,
+hooked in just before the ending card): a select committee, a contempt hearing, the full injunction hearing, Mira's
+choice to run or stand trial, a cottage up north, a year inside Halberd, Victor's call on bail, Jonah's first
+Thursday, the radio regulator, the basement retrieval of LANTERN-01's logs, teaching a source to stay off the graph,
+an interview under caution, a year on Lumen's 31st floor, Rin at Proof, the beginners' bracket, next year's planning
+meeting, packet_pam on the 09:12, buying a ticket a year later, and the twenty-first con.
 
 ## The hidden way to everyone
 Persistent meta records every route finished and every mystery solved across runs. Once every route and every
@@ -114,6 +120,18 @@ mystery has been done at least once, a new run's prologue flat has `session.bak`
 people whose route you've finished before start at Dating once met, mysteries you've solved before keep their clues
 in your notebook, and you get "overclocked" days (two activities per free slot). With all 21 final scenes, max love
 and all 12 mysteries solved in that run, Day 7 becomes Everything Connected.
+
+## Routes
+Eight scenes each (0-7). Scene 0 is meeting them; 1-6 are hangouts that each take part of a slot; 7 is the final love
+scene. Scene 6 usually sets `<g>_ready`, which makes them better at their keynote task. A stage with no scene text
+(Ellie's 0-2) is advanced by the main story and never offered by talking. After scenes 1, 3/4 and 5 most people send
+a text that wants a reply (`05o_texts.js`, answered in Messages); it arrives at the start of the next slot.
+
+## Testing
+`python3 build.py`, serve the folder (`python3 -m http.server 8123`), then:
+- `node tools/storytest.js 12` plays twelve full runs with four strategies in a few seconds (endings, route depth, texts, errors, missing scenes)
+- `node tools/storytest.js ends` plays every ending with every possible partner to its ending card
+- in game, F9 or the backtick key opens the debug menu (jump to any beat, any ending, set stats)
 
 ## Script format (src/03a_script.js)
 Scenes are plain text in template literals, parsed at runtime:
@@ -128,6 +146,6 @@ Scenes are plain text in template literals, parsed at runtime:
 ## Files
 - `01b_core.js` calendar constants, ranks, closeness, effects, exposure fail, meta; `01c_script.js` the script parser
 - `03_data.js` clues, mysteries, leads, items, achievements, endings; `03b_flow.js` beats, free time, hangouts, leads, case board, positions
-- `04_days.js` the calendar; `04a`-`04h` the prologue and Days 1-7; `04i_endings.js` the twenty endings and epilogues
-- `05_routes.js` route requirements and small talk; `05a`-`05j` the routes; `05k_leads.js` leads, Dave, solved-case beats
+- `04_days.js` the calendar; `04a`-`04h` the prologue and Days 1-7; `04i_endings.js` the twenty endings; `04j_events.js` con events; `04k_beats2.js` extra beats; `04l_epilogues.js` final nights; `04m`/`04n` aftermaths
+- `05_routes.js` route requirements and small talk; `05a`-`05j` the routes; `05k_leads.js` leads, Dave, solved-case beats; `05l`-`05n` route scenes 5 and 6; `05o_texts.js` texts that want a reply
 - `06_finale.js` hub, shop, Room 1337, positions game, ending choice, title

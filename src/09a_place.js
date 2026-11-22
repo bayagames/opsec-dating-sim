@@ -99,6 +99,26 @@ function genCrowd(){
  for(const[x,z]of[[260,17],[262.6,17.4],[260.2,17.2],[263,14.6]])R('Partygoer','f13',x,z,0,'room1336',(x*7|0)%7);
  R('Commuter','station',727,9,0,'platform',2);R('Commuter','station',744,13,0,'platform',5);R('Coworker','office',502.6,1.7,0,'office',4);
 }
+/* ---------------- what's open: the con and the hotel open up as the story needs them, so the first days stay small ----------------
+   Each entry: areas, when they open, what you're told if you try earlier. Areas not listed are always open. */
+const OPENS=[];
+const opens=(areas,cond,msg)=>OPENS.push({areas:areas.split(' '),cond,msg});
+const bdone=b=>!!(S&&(S.done[b]||S.day>+b[1]));
+opens('walkway ringN hallA',()=>S.day>1||f('d1_badge'),'Badge first. Registration is on the Foyer\'s west wall.');
+opens('link promenade lobby lifts cafe',()=>S.day>1||f('d1_open'),'The opening ceremony first: Hall A. The hotel will still be there afterwards.');
+opens('corridor room1337 room1336',()=>S.day>1||f('d1_checkin'),'You haven\'t checked in yet. Reception is on the Promenade.');
+opens('bar terrace garden',()=>S.day>1||f('d1_room'),'The bar opens tonight. Drop your bag in your room first.');
+opens('hallC badgelab foyerG',()=>S.day>=2,'Tomorrow. Tonight is for the bar and your bed.');
+opens('villagerow ctf lockpick soc hwv aero carhack soceng ics workshopA workshop ringE ringS gallery courtyard vendor constore demostage seconc',()=>S.day>2||bdone('d2_ctf'),'The villages open after the CTF kick-off in Hall C.');
+opens('lounge naps quiet food fcterrace',()=>S.day>2||bdone('d2_rin'),'Doors open at midday.');
+opens('vrL1 creator arcade tabletop film cosplay seconc1 skygarden ring2 foyerG2 neconc neconc2 speakers hallB hallBback',()=>S.day>2||bdone('d2_badge'),'Not open yet. Check the Calendar on your phone for what\'s on.');
+opens('mezz hotelL1 lumenlounge ballroom meeting stairwell',()=>S.day>2||S.day===2&&S.slot>=3,'The mezzanine opens for the evening reception.');
+opens('library hotelL2 gym pool spa grill boutique press roof plantdeck housekeeping',()=>S.day>=3,'Not today. There\'s plenty to do where you are.');
+opens('noc carpark basement',()=>S.day>4||S.day===4&&S.slot>=1,'Staff and parking only. You\'ve no reason to be down there yet.');
+opens('mdf conops stafffw staffc service security stores kitchenC breakroom dock backstage conroof backstairs luggage',()=>S.day>4||bdone('d4_noc'),'STAFF ONLY. A volunteer with a radio is watching the door.');
+opens('backoffice pdining hkitchen plant tunnel tunnelN',()=>S.day>=5,'Staff only. Not yet.');
+const OPENOF={};
+function areaLock(a){if(!S||window.__allOpen)return null;if(!Object.keys(OPENOF).length)for(const o of OPENS)for(const k of o.areas)OPENOF[k]=o;const o=OPENOF[a];return o&&!o.cond()?o.msg:null}
 /* ---------------- gates: ropes, locked doors and card readers that open with the story ---------------- */
 const GATES=[];
 function gate(reg,kind,x0,z0,x1,z1,y,open,msg,label){GATES.push({reg,kind,x0,z0,x1,z1,y:y||0,open,msg,label:label||(kind==='rope'?'Roped off':kind==='card'?'Staff door':'Locked door')})}
@@ -250,7 +270,8 @@ function placeWorld(){
  int('con',61.7,64.6,()=>'Borrow a nap pod',N1('You lie down in a pod that hums like a spaceship. Ten minutes later you wake up with a seatbelt mark on your face and the clarity of a monk.'));
  /* ---- hotel ---- */
  int('con',-218.4,22.5,()=>stepIs('reception')?'Check in at reception':'Talk to reception',()=>{if(stepIs('reception'))return stepGo();run([{w:'Receptionist',np:1,t:pick(['Everything all right with your room? The crunchy bed is a feature. We\'re told.','If anyone asks for your room number at the desk, we won\'t give it out. Somebody tried this morning. Twice.'])}],hub)});
- int('con',-212,-27,()=>'Call the lift',()=>liftMenu());
+ /* every lift door is a call button: hotel lobby lifts (both sides, all three podium levels), the Foyer's pair, the tower core */
+ for(const y of[0,L1,L2])for(const z of[-33.5,-29.9,-26.3])for(const x of[-222.9,-201.1])int('con',x,z,()=>'Call the lift',()=>liftMenu(),{y,r:2.8,h:1.3});
  int('con',-186,46.4,()=>'Order a flat white',N1('A flat white in a cup that says "HALCYON". The barista writes your handle on it, then crosses it out and draws a little skull. "Opsec," she says.'));
  int('con',-168.5,-29.5,()=>'Watch the bar TV',()=>run([N(S.ch>=3?'Breaking news ticker: "Questions grow over popular privacy app." The whole bar goes quiet to read it.':'A muted football match. Somebody has changed the subtitles to Linux error messages.')],hub));
  int('con',-119,-46,()=>'Look up at the tower',N1('Twenty-five storeys of lit windows climbing out of the lane, the name in gold at the top, a red light blinking on the roof. Somewhere up there is Room 1337 and your bag. Down here: festoon lights, a patio heater, and the con\'s wall humming with bass from Hall C.'));
@@ -287,8 +308,7 @@ function placeWorld(){
  int('con',-246,-1.2,()=>'Hide among the laundry carts',N1('Warm towels, the smell of starch, and the hum of fifty machines. Nobody would look for you here. You think about staying until Monday.'),{y:BY});
  int('con',FOODPOS[4].x,FOODPOS[4].z,()=>'Order dumplings',N1('Six dumplings in a paper boat. The chef folds them faster than you can watch. "Mind, they\'re hot," he says, as you burn your mouth.'));
  int('con',FOODPOS[5].x,FOODPOS[5].z,()=>'Get a cold brew',N1('Cold brew in a can with a QR code on it. You don\'t scan it. The barista nods: "Good instinct."'));
- for(const y of[L1,L2])int('con',-212,-27,()=>'Call the lift',()=>liftMenu(),{y});
- int('con',-104,-22.6,()=>'Call the lift',()=>conLift());int('con',-104,-22.6,()=>'Call the lift',()=>conLift(),{y:L1});int('con',-104,-52.4,()=>'Call the lift',()=>conLift(),{y:BY});
+ for(const x of[-106,-102]){for(const y of[0,L1])int('con',x,-23.2,()=>'Call the lift',()=>conLift(),{y,r:2.8,h:1.3});int('con',x,-52.4,()=>'Call the lift',()=>conLift(),{y:BY,r:2.8,h:1.3})}
  int('con',-213.6,49.6,()=>'Play the lobby piano',N1('You play the four notes of the only song you know. The piano, which is a MIDI device, plays the rest of the song for you. Somebody in the lobby claps. You bow, as if you meant it.'));
  int('con',-243,-26.4,()=>'Warm up by the library fire',N1('Leather chairs, shelves to the ceiling, a fire that is definitely gas but commits to the bit. A book on the arm of a chair: "Social Engineering: The Art of Human Hacking". Someone has left a bookmark at chapter one. Ominous.'),{y:L1});
  int('con',-159,-56.6,()=>'Look at the ballroom stage',N1('A banner: "LUMEN PARTNER GALA · TONIGHT". The tables are laid for two hundred. Every place card has a SafeSphere logo and a QR code. You turn one face-down. Then all of them on your table.'),{y:L1});
@@ -302,7 +322,7 @@ function placeWorld(){
  int('con',-37,52,()=>'Stand in the sky garden',N1('A rooftop garden over the food court: trees in planters, fairy lights, the plaza glowing below and the hotel tower stacked above. It smells of rain and fried noodles.'),{y:L2});
  int('con',-79.3,57.6,()=>'Pay for parking',N1('The machine wants your registration plate, your phone number and your email "to send your receipt". You walk away. You don\'t have a car. You were just curious.'),{y:BY});
  /* ---- 13th floor + roof ---- */
- int('f13',243,-9.4,()=>'Call the lift',()=>liftMenu());
+ for(let i=0;i<4;i++)for(const z of[-8.6,8.6])int('f13',239.75+i*2.4,z,()=>'Call the lift',()=>liftMenu(),{r:2.8,h:1.3});
  int('f13',228.7,-9.2,()=>'Ice machine',N1('It makes a noise like a dial-up modem, then dispenses one ice cube. You treasure it.'));
  int('f13',232,9.4,()=>'Vending nook',N1('Crisps, Club-Mate, and a toothbrush for £6. Someone has taped a handwritten sign to the glass: "THE B4 BUTTON IS A LIE".'));
  int('f13',249.7,10.4,()=>'Housekeeping cart',N1('Tiny shampoos, tiny soaps, and a laminated card: "Please do not hack the housekeeping cart." So someone has tried.'));
@@ -359,7 +379,7 @@ function trainMenu(){
   {t:'Brindle & Co · work',then:()=>{if(!(f('office_open')||leadOpen('office')))return[N('Linda made you promise not to come in this week. Linda would be thrilled to see you, which is exactly the problem.')];ach('train');ach('office');fadeTp(()=>{teleportArea('office');run([N('The office, on a weekday you\'re supposed to be off. The printer senses you immediately.')],hub)});return[]}},
   {t:'Not yet',then:[]})],hub);
 }
-function fadeTp(fn){const f=$('fade');sfx('whoosh');f.classList.add('on');setTimeout(()=>{fn();WD.area=null;G.forceFrame=true;setTimeout(()=>f.classList.remove('on'),160)},300)}
+function fadeTp(fn){if(window.__test){fn();WD.area=null;return}const f=$('fade');sfx('whoosh');f.classList.add('on');setTimeout(()=>{fn();WD.area=null;G.forceFrame=true;setTimeout(()=>f.classList.remove('on'),160)},300)}
 /* ---------- characters ---------- */
 /* a spot inside an area: near its middle, on its floor, with room round it; k picks the k-th such spot */
 const SPOTC={};
@@ -373,7 +393,7 @@ function spotIn(key,k){k=k||0;const ck=key+':'+k;if(SPOTC[ck])return SPOTC[ck];c
 /* where everyone is: a function of day d and part of the day s. A fixed spot [reg,x,z,y], an area (optionally with which spot), or null */
 const at=(reg,x,z,y)=>({reg,x,z,y:y||0});
 const WHERE={
- ellie:(d,s)=>d===1&&s===0?at('home',-299,3.7):d===5&&s>=1&&s<=2?at('home',-299,3.7):(d===3||d===4||d>=6)&&s<=3?at('con',-183.6,56.8):(d>=3&&d!==5||d===5&&s>=3)&&s===4?['garden',1]:null,
+ ellie:(d,s)=>d<=1&&s===0?at('home',-299,3.7):d===5&&s>=1&&s<=2?at('home',-299,3.7):(d===3||d===4||d>=6)&&s<=3?at('con',-183.6,56.8):(d>=3&&d!==5||d===5&&s>=3)&&s===4?['garden',1]:null,
  nyx:(d,s)=>d>=2&&s<=3?at('con',145,-44.5):d>=2&&s===4?['bar',2]:null,
  ada:(d,s)=>d>=2&&s!==3?at('con',146,-6.8):d>=2?['food',0]:null,
  priya:(d,s)=>d>=2&&s<=3?at('con',146,13):d>=2&&s===4?['quiet',0]:null,
@@ -399,15 +419,19 @@ const WHERE={
  victor:(d,s)=>d<=2&&d>=1&&s<=3?at('con',-100,30.4):d===5&&s>=3?['grill',1]:d>=3&&s===4?['lumenlounge',2]:null,
  owen:(d,s)=>d>=2&&s<=3?['conops',0]:null,
  krall:(d,s)=>d>=3&&s>=3?['corridor',0]:null,
- linda:(d,s)=>d<=1&&s<=1?at('office',537.4,2.4):null,
- gary:(d,s)=>d<=1&&s<=1?at('office',521,8.6):null
+ linda:(d,s)=>d===0&&s<=2?at('office',537.4,2.4):null,
+ gary:(d,s)=>d===0&&s===1?at('office',521,8.6):null
 };
 /* a story beat can hold someone in place, or hide them (S.hold = {id:[reg,x,z,y]|0}) */
-function placeChars(){if(!S)return;const d=S.day,sl=S.day===0?3:S.slot;
+function placeChars(){if(!S)return;const d=S.day,sl=S.slot;
  for(const c of WCH){let p=S.hold&&S.hold[c.id]!==undefined?S.hold[c.id]:WHERE[c.id](d,sl);
+  // someone with a scene ready waits where that scene starts, so talking to them never whisks you somewhere else
+  if(p&&ROM.includes(c.id)&&S.day>=1&&sceneReady(c.id)){const sa=sceneArea(c.id+scn(c.id));if(sa&&AREAS[sa]&&!areaLock(sa))p=[sa,ROM.indexOf(c.id)%3]}
   if(Array.isArray(p)&&typeof p[0]==='string'&&!AREAS[p[0]]&&p.length>=3)p={reg:p[0],x:p[1],z:p[2],y:p[3]||0};
   else if(Array.isArray(p))p=spotIn(p[0],p[1]);
   if(!p){c.on=false;continue}c.on=true;c.reg=p.reg;c.x=p.x;c.z=p.z;c.y=p.y||0}}
+/* the area a scene opens in: its first [bg ...] */
+const SCAREA={};function sceneArea(id){if(SCAREA[id]!==undefined)return SCAREA[id];const m=SC[id]&&SC[id].match(/^\s*\[bg ([a-z0-9]+)\]/m);return SCAREA[id]=m?bgArea(m[1]):null}
 const UNMET={nyx:'the woman picking locks',ada:'the person at the CTF table',priya:'the woman by the dashboards',juno:'the streamer',kit:'the cosplayer',rin:'the person behind the bean bag',bea:'the bartender',mira:'the woman on the air-con unit',saoirse:'the woman with the notebook',sunny:'the woman in hi-vis',tilly:'the woman with the soldering iron',petra:'the mechanic',astrid:'the woman with the antenna',yuki:'the girl at the arcade cabinet',vesper:'the singer',delphine:'the woman in the navy suit',noor:'the woman with the case files',fern:'the gardener',wren:'the lifeguard',pia:'the violinist'};
 const ROLEIDLE={
  marge:['Be excellent to each other. And hydrate.','If you see Lumen people in the ceiling, tell me. I\'m only half joking.','Twenty years of this con. Every year I swear it\'s the last.'],

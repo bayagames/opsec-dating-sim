@@ -98,7 +98,7 @@ petra.n: And look. It's a new one. Telematics. It's snitching right now, to its 
  [flag heard_corvid]
 petra.n: Corvid Holdings. Write that down. Somebody you know will know what it means.
 `;
-SC.petra5=`
+SC.petra7=`
 [bg carpark]
 ~ The top deck of the car park, open to the sky. The Škoda's parked facing the city, engine off, all four windows down. Petra's sitting on the bonnet.
 petra.n: Come up. Bonnet's warm. Best seat in the Conference Quarter.
@@ -200,7 +200,7 @@ astrid.n: That's Halberd's building. Everyone in my old job knew it. The private
 [flag heard_corvid]
 astrid.d: They're here. The people I wouldn't sell pictures to. They're here, at a hacker con, for something.
 `;
-SC.astrid5=`
+SC.astrid7=`
 [bg conroof]
 ~ The con roof, the night before. Astrid's checked a forecast. It's the peak of a meteor shower, and the sky's clear, and she's laid out two camping mats and one very large blanket.
 astrid.n: The Perseids. Well, not the Perseids, it's the wrong month. These are much smaller. But they're here. Lie down. Look north-east.

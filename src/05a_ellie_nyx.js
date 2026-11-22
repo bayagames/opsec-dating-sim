@@ -89,7 +89,7 @@ ellie.b: I wanted you to have something to look at that wasn't a screen.
  ~ And then she kisses you, very quickly, as if she's checking whether something's proved.
 ellie.n: Go back to your con. Win. Come home. That's the order.
 `;
-SC.ellie5=`
+SC.ellie7=`
 [bg roof]
 ~ The Halcyon's roof terrace, after dark. The pool's lit from underneath, the loungers are stacked, and the city's spread out on every side like someone spilled a jewellery box.
 ~ Ellie's sitting on the edge of the pool with her boots off and her feet in the water. Next to her: two cinnamon knots in a paper bag, with a tiny croissant drawn on it.
@@ -128,7 +128,7 @@ ellie.b: I love you. I think I've loved you since the oven timer. Don't laugh. I
  ellie.b: ...Properly. Yes. Properly.
 ~ You stay until the cinnamon knots are gone and the water's gone cold and the lifeguard who didn't see anything comes back and pointedly turns off the pool lights.
 ellie.h: Tomorrow. Win. Then home. That's the order.
-[adv ellie 5]
+[adv ellie 7]
 `;
 SC.nyx0=`
 [bg lockpick]
@@ -269,7 +269,7 @@ nyx.n: ...Cover. It was cover.
 > Sure.
 nyx.b: Shut up. Ice machine's on twelve.
 `;
-SC.nyx5=`
+SC.nyx7=`
 [bg conroof]
 ~ The convention centre's roof. A flat expanse of gravel and skylights and humming plant, the Lumen logo turning slowly on its frame thirty metres away. Nyx got you up here through a hatch she says "was basically open", which it was not.
 ~ She's sitting on the edge of a skylight with her knees up, looking down through the glass at the Foyer, four storeys below: tiny people, tiny badges, all blue.

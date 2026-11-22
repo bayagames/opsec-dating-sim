@@ -59,6 +59,7 @@ function scCmd(n,ctx){const a=n.a;
   case'unflag':return[()=>{a.split(/\s+/).forEach(f=>delete S.f[f])}];
   case'clue':return[()=>{a.split(/\s+/).forEach(c=>addClue(c))}];
   case'item':return[{fx:{item:a}}];
+  case'text':{const sp=a.indexOf(' ');return[()=>{textQ(a.slice(0,sp),a.slice(sp+1))}]}
   case'msg':{const sp=a.indexOf(' ');return[{msg:[a.slice(0,sp),a.slice(sp+1)]}]}
   case'game':{const sp=a.indexOf(' ');const o=scArgs(sp<0?'':a.slice(sp+1));const g=Object.assign({game:sp<0?a:a.slice(0,sp)},o);if(typeof o.res==='string'){const fn=o.res;g.res=(...r)=>ev(fn)(...r)}return[g]}
   case'sum':return[()=>{addSum(sub(a))}];
@@ -93,7 +94,7 @@ function scLint(){const bad=[];for(const id in SC){try{const t=scParse(SC[id],id
   if(n.k==='cmd'&&n.c==='clue'&&n.a.split(/\s+/).some(c=>!CLUE[c]))bad.push(id+': no clue '+n.a);
   if(n.k==='cmd'&&n.c==='item'&&!ITEMS[n.a])bad.push(id+': no item '+n.a);
   if(n.k==='cmd'&&n.c==='ach'&&!ACH[n.a])bad.push(id+': no achievement '+n.a);
-  if(n.k==='cmd'&&n.c==='bg'&&!BG[n.a]&&!(typeof AREAS!=='undefined'&&AREAS[n.a]))bad.push(id+': no bg '+n.a);
+  if(n.k==='cmd'&&n.c==='bg'&&!BG[n.a]&&typeof AREAS!=='undefined'&&Object.keys(AREAS).length&&!AREAS[n.a])bad.push(id+': no bg '+n.a);
   if(n.k==='say'&&n.s.w&&!['think','me','sms','whisper','wh1sper'].includes(n.s.w)&&!n.s.np&&!CH[n.s.w])bad.push(id+': speaker '+n.s.w);
   for(const e of [].concat(n.k==='if'?n.br.map(b=>b.cond):[],n.k==='choice'?n.opts.map(o=>o.cond).filter(Boolean):[]))try{eval('()=>('+e+')')}catch(x){bad.push(id+': expr '+e)}
   if(n.k==='choice')n.opts.forEach(o=>walk(o.body));if(n.k==='if'){n.br.forEach(b=>walk(b.body));if(n.els)walk(n.els)}}})(t)}catch(e){bad.push(String(e.message||e))}}return bad}

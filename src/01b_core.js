@@ -18,8 +18,10 @@ const solved=m=>!!(S&&S.solved[m]);
 const day=()=>S?S.day:0;
 const slot=()=>S?S.slot:0;
 const done=b=>!!(S&&S.done[b]);
-const dating=g=>scn(g)>=4;
-const loved=g=>scn(g)>=6;
+/* how close you are: scenes seen after meeting (routes have eight scenes: meeting, six, and the last one) */
+const stageOf=g=>{const i=scn(g)-1,n=ROUTES[g]?ROUTES[g].n:8;return i>=n-1?STAGEN[5]:i<=0?STAGEN[0]:i<=2?STAGEN[1]:i<=3?STAGEN[2]:i<=5?STAGEN[3]:STAGEN[4]};
+const dating=g=>scn(g)>=7;
+const loved=g=>!!ROUTES[g]&&scn(g)>=ROUTES[g].n;
 /* who someone looks like right now (Ellie changes out of her apron for the con, Kit wears her armour some days) */
 const lookOf=g=>{if(!S)return g;if(g==='ellie')return S.day>=3&&!S.f.ellie_apron?'ellie2':'ellie';if(g==='kit')return S.f.kit_armour?'kitc':'kit';if(g==='dave')return S.day>=2?'davex':'dave';return g};
 const romCount=()=>ROM.filter(loved).length;
@@ -51,8 +53,9 @@ function fx(e){
    if(g>0&&S.inv.faraday)g=Math.ceil(g*.6);
    if(g>0&&e.phish&&S.inv.yubi){S.inv.yubi--;if(!S.inv.yubi)delete S.inv.yubi;toast('Security key blocked it','var(--mint)');continue}
    S.exp=clamp(S.exp+g,0,100);if(S.unl.exp&&g)toast(`Exposure ${g>=0?'+':''}${g}`,'var(--coral)');
+   S.expPeak=S.expPeak||{};S.expPeak[S.day]=Math.max(S.expPeak[S.day]||0,S.exp);
   }
-  else if(k==='foot'){S.foot=clamp(S.foot+v,0,60);S.exp=clamp(S.exp+v,0,100);if(S.unl.exp&&v)toast(`Footprint ${v>=0?'+':''}${v} (permanent)`,'var(--coral)')}
+  else if(k==='foot'){(S.footLog=S.footLog||[]).push({d:S.day,s:S.slot,v,w:S.inBeat?(BEATS[S.inBeat]||{}).t||S.inBeat:((S.log[S.log.length-1]||[])[1]||'').slice(0,90)});S.foot=clamp(S.foot+v,0,60);S.exp=clamp(S.exp+v,0,100);if(S.unl.exp&&v)toast(`Footprint ${v>=0?'+':''}${v} (permanent)`,'var(--coral)')}
   else if(k==='skill'||k==='clout'){
    const r0=rankOf(S[k]);S[k]=Math.max(0,S[k]+v);const r1=rankOf(S[k]);
    if(S.unl[k]&&v)toast(`${k==='skill'?'Skill':'Clout'} ${v>=0?'+':''}${v}`,k==='skill'?'var(--mint)':'var(--butter)');

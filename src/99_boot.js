@@ -1,3 +1,5 @@
+/* ?test: no 3D, instant text and fades, for the automated story check */
+if(/[?&]test\b/.test(location.search))window.__test=1;
 titleScreen();
 // build the world and bake its lighting while the title screen is up, so Begin is usually instant
 setTimeout(()=>{try{initWorld()}catch(e){console.error(e)}},250);

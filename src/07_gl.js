@@ -158,7 +158,7 @@ function railing(x0,z0,x1,z1,y,o){o=o||{};const h=o.h||1.05,m=o.m||MT.brass,g=o.
 }
 /* ---- renderer ---- */
 function glInit(cv){
- if(!window.THREE)return false;
+ if(!window.THREE||window.__test)return false;
  const T=THREE;
  let r=null;try{r=new T.WebGLRenderer({canvas:cv,antialias:true,powerPreference:'high-performance',stencil:false,reverseDepthBuffer:!window.__noRevZ})}catch(e){console.warn(e)}
  if(!r||!r.capabilities)return false;

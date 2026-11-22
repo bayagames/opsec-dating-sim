@@ -134,7 +134,7 @@ function buildEast(){
  // Creator Corner: a streaming stage with a ring light and a desk, three studio pods
  vroom(168,-64,196,-40,L1,L2-.45-L1,MT.carpetDark,MT.panel,MT.ceilDark,'Creator Corner','#4a1a4a',-50,'e','CREATOR CORNER','#ff8fc8');
  {const y=L1;box(184,y,-62,194,y+.25,-52,MT.plain('#3a1a40'),{walk:1,col:false});kOnWall('v',195.8,-1,-57,9,y+.3,3,MT.stream);box(187.4,y+.25,-58,188,y+.85,-56,MT.plain('#ffffff'));
-  for(const z of[-61.2,-52.8]){box(186.9,y+.25,z-.05,187,y+1.8,z+.05,MT.plain('#222'),{col:false});box(186.9,y+1.8,z-.4,186.98,y+2.6,z+.4,MT.glow('#fff6fb'),{col:false});addLight(186.4,y+2.2,z,[1,.7,.9],6,1)}
+  for(const z of[-61.2,-52.8]){box(186.9,y+.25,z-.05,187,y+1.8,z+.05,MT.plain('#222'));box(186.9,y+1.8,z-.4,186.98,y+2.6,z+.4,MT.glow('#fff6fb'),{col:false});addLight(186.4,y+2.2,z,[1,.7,.9],6,1)}
   for(let i=0;i<5;i++)box(193.3,y+.25,-61+i*1.4,193.8,y+.85,-60.4+i*1.4,MT.plain(['#ff8fc8','#c9b6ff','#ffd166','#8affc1','#ff5d73'][i]),{col:false});
   for(let i=0;i<3;i++){const x=171+i*5;box(x,y,-49.8,x+.1,y+2.4,-44,MT.panel);table(x+2.4,-47,2,1,MT.plain('#2a2a34'),.76,y);box(x+.6,y+1.6,-47.3,x+.66,y+2.4,-46.7,MT.glow('#fff6fb',1.8),{col:false});addLight(x+2,y+2.4,-47,[1,.75,.9],4,.6)}
   box(186,y,-49.8,186.1,y+2.4,-44,MT.panel);lightPanel(176,L2-.45,-58,3,1,'#fff0fa',12,.8);lightPanel(189,L2-.45,-57,3,2,'#fff0fa',12,.9);lightPanel(178,L2-.45,-46,4,1,'#fff0fa',10,.7)}

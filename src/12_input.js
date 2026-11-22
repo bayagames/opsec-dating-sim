@@ -1,6 +1,8 @@
 /* ============ DEVICE + KEYBOARD ============ */
 (()=>{const coarse=matchMedia&&matchMedia('(pointer:coarse)').matches&&!matchMedia('(pointer:fine)').matches;document.body.classList.add(coarse?'touchui':'desk');if(coarse)WD.touch=true})();
 addEventListener('touchstart',()=>{if(!WD.touch)setTouch(true)},{passive:true});
+/* no pinch or double-tap zoom on phones: the game owns every touch */
+for(const ev of['gesturestart','gesturechange','dblclick'])addEventListener(ev,e=>{if(e.cancelable)e.preventDefault()},{passive:false});
 addEventListener('mousemove',e=>{if(WD.touch&&e.movementX!==undefined&&(Math.abs(e.movementX)+Math.abs(e.movementY))>3&&!e.sourceCapabilities?.firesTouchEvents)setTouch(false)});
 addEventListener('keydown',e=>{
  if(!S)return;
@@ -11,7 +13,7 @@ addEventListener('keydown',e=>{
   if(isPhone){e.preventDefault();closePhone();return}
   if(!ovOn){e.preventDefault();phone();return}
  }
- if(k==='Escape'&&isPhone){e.preventDefault();if(phApp){if(phThread)phThread=null;else phApp=null;drawPhone()}else closePhone();return}
+ if(k==='Escape'&&isPhone){e.preventDefault();if($('ov').dataset.app)phoneBack();else closePhone();return}
  // Esc opens the phone (in the world the browser also uses Esc to release the mouse, which opens it too)
  if(k==='Escape'&&!ovOn&&!$('title').classList.contains('on')&&!$('card').classList.contains('on')){e.preventDefault();phone();return}
  if($('card').classList.contains('on')&&(k===' '||k==='Enter')){e.preventDefault();$('card').click();return}

@@ -23,6 +23,7 @@ const CH={
  fern:{name:'Fern',col:'#8ac86a',skin:'#efcfb4',hair:'#6a4a2a',style:'loose',eye:'#5a7a3a',outfit:'garden',oc:'#e9e0c8',acc:['sunhat','dirt'],lower:{t:'pants',c:'#6a7a4a',s:'#4a3a2a',boot:1}},
  wren:{name:'Wren',col:'#ff6a5a',skin:'#e8bf9a',hair:'#d8b878',brow:'#9a7a4a',style:'wavyshort',eye:'#3a6a8a',outfit:'hoodie',oc:'#d0302a',acc:['whistle','freckles'],lower:{t:'shorts',c:'#1a2a4a',s:'#f4f4f4'}},
  pia:{name:'Pia',col:'#c89ae8',skin:'#d9a888',hair:'#2a1a14',style:'curly',eye:'#5a3a24',outfit:'coat',oc:'#4a5a4a',acc:['beanie','scarf'],lower:{t:'pants',c:'#2a2a34',s:'#3a2a1a',boot:1}},
+ pam:{name:'Pam',col:'#b8d8a8',skin:'#e9c3a6',hair:'#5a5a5a',brow:'#3a3a3a',style:'bob',streak:'#5a5a5a',eye:'#4a5a3a',outfit:'cardigan',oc:'#5a6a4a',inn:'#e9e3da',acc:['glasses','earring'],lower:{t:'pants',c:'#2a2a34',s:'#2a1a10'}},
  krall:{name:'Silas Krall',col:'#8a8f9a',skin:'#e6c4a8',hair:'#6a6a70',style:'buzz',eye:'#5a6a7a',outfit:'suit',oc:'#1a1c22',acc:['scar','stubble'],lower:{t:'pants',c:'#1a1c22',s:'#0d0d10'}},
  pike:{name:'Graham Pike',col:'#b8a88a',skin:'#efc8a8',hair:'#8a8070',style:'slick',eye:'#4a5a4a',outfit:'suit',oc:'#4a4a3a',acc:['glasses','tie'],lower:{t:'pants',c:'#4a4a3a',s:'#2a1a10'}},
  owen:{name:'Owen Pryce',col:'#c8b08a',skin:'#efcfb4',hair:'#7a5a3a',style:'short',eye:'#4a5a3a',outfit:'cardigan',oc:'#6a5a4a',inn:'#e9e3da',acc:['beard','glasses'],lower:{t:'pants',c:'#3a3a44',s:'#2a1a10'}},
@@ -224,7 +225,7 @@ function setBG(k){const w=typeof worldBG==='function'&&worldBG(k);const cls='bg 
 function bgChanges(k){if(k===CURBG||!$('vn').classList.contains('on'))return false;
  if(S&&S.inWorld&&G.ok&&typeof bgArea!=='undefined'&&bgArea(k)){const cur=areaAt(WD.reg,WD.x,WD.z,WD.y);return !(cur&&(AREAS[cur].bg===k||bgArea(k)===cur))}
  return !!$('txt').textContent}
-function fadeScene(fn){const f=$('fade');if(typeof sfx==='function')sfx('whoosh');f.classList.add('on');setTimeout(()=>{fn();setTimeout(()=>f.classList.remove('on'),90)},300)}
+function fadeScene(fn){if(window.__test){fn();return}const f=$('fade');if(typeof sfx==='function')sfx('whoosh');f.classList.add('on');setTimeout(()=>{fn();setTimeout(()=>f.classList.remove('on'),90)},300)}
 function updBlur(){const vn=$('vn').classList.contains('on'),o=$('ov').classList.contains('on');document.body.classList.toggle('talking',!!(S&&S.inWorld&&G.ok&&(vn||o)));document.body.classList.toggle('busyov',o&&!$('ov').classList.contains('phoneov'))}
 function run(steps,done){closeOv();clearPor();$('txt').textContent='';$('who').textContent='';show('vn');hud();Q=steps.slice();onDone=done;next()}
 function next(){
@@ -263,7 +264,7 @@ function say(st){
  const bx=$('box');if(!bx.classList.contains('up')){bx.classList.add('up')}
  full=sub(st.t!==undefined?st.t:st.n);box.textContent='';waiting=true;$('nexti').style.visibility='hidden';
  S.log.push([$('who').textContent,full]);if(S.log.length>120)S.log.shift();
- if(S.fast){box.textContent=full;return doneTyping()}
+ if(S.fast||window.__test){box.textContent=full;return doneTyping()}
  let i=0;clearInterval(typing);
  typing=setInterval(()=>{i+=2;box.textContent=full.slice(0,i);if(i>=full.length)doneTyping()},16);
 }
@@ -332,4 +333,6 @@ function chapterCard(n,cb){
   if(typeof G!=='undefined'&&G.ok)G.forceFrame=true;
   requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(()=>{f.style.transition='';f.classList.remove('on')},60)))};
 }
+/* a text that wants an answer: TEXTQ[key] = {t, replies:[{t, fx, a (their reply)}]}. Answer it in Messages. */
+function textQ(from,key){const q=TEXTQ[key];if(!q||S.f['tq_'+key])return;S.f['tq_'+key]=1;S.msgs.push({f:from,t:sub(q.t),c:S.day,s:S.slot,r:0,q:key});if(S.unl.phone){toast('New message · '+(CH[from]?CH[from].name:from)+' (wants a reply)','var(--mint)');if(typeof sfx==='function')sfx('notify')}hud()}
 function addMsg(from,t){S.msgs.push({f:from,t:sub(t),c:S.day,s:S.slot,r:0});if(S.unl.phone){toast('New message · '+(CH[from]?CH[from].name:from),'var(--mint)');if(typeof sfx==='function')sfx('notify')}hud()}

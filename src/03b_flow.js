@@ -2,9 +2,10 @@
 /* ---- routes: six scenes each. Scene 0 is meeting them (free); 1-5 take part of a day; 5 is the last, just the two of you.
    req[i] = {d: earliest day, a: affection, sk/cl: skill/clout rank, c: extra condition, y: why it's locked} ---- */
 const ROUTES={};
-function route(g,o){const req=o.req.map(r=>Object.assign({d:1,a:0},r));ROUTES[g]=Object.assign({n:6,aff:req.map(r=>r.a)},o,{req})}
+function route(g,o){const req=o.req.map(r=>Object.assign({d:1,a:0},r));ROUTES[g]=Object.assign({n:8,aff:req.map(r=>r.a)},o,{req})}
 const sceneReq=g=>{const R=ROUTES[g];return R?R.req[scn(g)]:null};
 function sceneWhy(g){const R=ROUTES[g],i=scn(g);if(!R||i>=R.n)return null;const r=R.req[i];
+ if(SC[g+i]===undefined)return'their story moves on in the main plot';
  if(day()<r.d)return'their story continues on Day '+r.d;
  if(aff(g)<r.a)return'needs ♥ '+r.a+' (you have '+aff(g)+')';
  if(r.sk&&rank('skill')<r.sk)return'needs Skill rank '+r.sk+' ('+RANKS.skill[r.sk]+')';
@@ -12,7 +13,7 @@ function sceneWhy(g){const R=ROUTES[g],i=scn(g);if(!R||i>=R.n)return null;const 
  if(r.c&&!r.c())return r.y||'not yet';
  return null}
 const sceneReady=g=>met(g)&&ROUTES[g]&&scn(g)<ROUTES[g].n&&scn(g)>0&&!sceneWhy(g);
-function adv(g,i){if(!S)return;S.sc[g]=Math.max(S.sc[g]||0,i+1);if(ROUTES[g]&&S.sc[g]>=ROUTES[g].n)loveDone(g)}
+function adv(g,i){if(!S)return;if((S.sc[g]||0)<=i&&typeof tqQueue==='function')tqQueue(g,i);S.sc[g]=Math.max(S.sc[g]||0,i+1);if(ROUTES[g]&&S.sc[g]>=ROUTES[g].n)loveDone(g)}
 function loveDone(g){META.routes[g]=1;saveMeta();ach('love_'+g);const n=romCount();if(n>=2)ach('love2');if(n>=3)ach('love3')}
 /* ---- the calendar ---- */
 const BEATS={};
@@ -28,12 +29,15 @@ const beatStep=b=>b&&b.steps?Object.assign({},b,b.steps[(S.bstep&&S.bstep[b.id])
 function startBeat(b0){if(beatBusy)return;beatBusy=true;const b=beatStep(b0);S.inBeat=b0.id;
  run(scr(b.sc),()=>{beatBusy=false;S.inBeat=null;if(S.failing)return;
   if(b0.steps){S.bstep=S.bstep||{};const k=(S.bstep[b0.id]||0)+1;if(k<b0.steps.length){S.bstep[b0.id]=k;save();hub();return}}
-  S.done[b0.id]=1;if(b0.after)b0.after();if(S.ending)return;if(S.noAdvance){delete S.noAdvance;save();hub();return}nextSlot()})}
+  S.done[b0.id]=1;addSlotLog(b0.t);if(b0.after)b0.after();if(S.ending)return;
+  // most story beats happen at the start of their part of the day and leave the rest of it free; travel and the big ones use it up
+  if(S.noAdvance||!b0.adv){delete S.noAdvance;save();hub();return}if(b0.adv==='day'){endDay();return}nextSlot()})}
+function addSlotLog(t){if(!S||!t)return;S.slog=S.slog||{};const k=S.day+':'+S.slot;(S.slog[k]=S.slog[k]||[]).push(t)}
 /* time moves only here */
-function spend(kind){S.acts=(S.acts||0)+1;
+function spend(kind,what){S.acts=(S.acts||0)+1;addSlotLog(what||({hang:'Time with someone',lead:'Worked a lead',talk:'A talk',ctf:'CTF practice',bounty:'Bug bounty',rest:'Rested',wait:'Let it go by'}[kind]||kind));
  if(S.restore&&!S.oc&&S.day>=1){S.oc=1;toast('Overclocked: one more thing this '+SLOTN[S.slot].toLowerCase(),'var(--mint)');save();hub();return}
  nextSlot()}
-function nextSlot(){S.oc=0;S.slot++;if(S.slot>5){endDay();return}save();toast(SLOTN[S.slot],'var(--dim)');if(typeof sfx==='function')sfx('advance');hub()}
+function nextSlot(){S.oc=0;S.slot++;if(S.slot>5){endDay();return}tqFlush();save();toast(SLOTN[S.slot],'var(--dim)');if(typeof sfx==='function')sfx('advance');hub()}
 function endDay(){
  const d=S.day;S.slot=5;
  const sleep=SC['sleep'+d]!==undefined?scr('sleep'+d):scr('sleep');
@@ -41,7 +45,7 @@ function endDay(){
 function newDay(d){
  if(S.day>=1&&S.exp<=10)ach('lowkey');
  S.day=d;S.ch=Math.min(d,4);S.slot=0;S.oc=0;S.exp=S.foot;S.hang={};delete S.failing;
- const wake=S.wakeAt||'room1337';snapDay();save();
+ const wake=S.wakeAt||'room1337';tqFlush();snapDay();save();
  const go=()=>{run([{chapter:d},{hide:1}],hub)};
  if(G.ok&&S.inWorld)fadeTp(()=>{teleportArea(wake);S.pos=null;go()});else go();
 }
@@ -70,7 +74,7 @@ function hangMenu(g,bgk){
  if(gi&&S.inv[gi]&&!S.gifted[g])opts.push({t:'Give the '+ITEMS[gi].n.toLowerCase(),then:()=>{S.inv[gi]--;if(!S.inv[gi])delete S.inv[gi];S.gifted[g]=1;if(Object.keys(S.gifted).length>=5)ach('gifts5');return[FX({[g]:12}),L(pg,'b',R.gift)]}});
  opts.push({t:'Just chat',then:()=>[L(pg,'h',pick(R.idle))]});
  opts.push({t:'Leave',then:[]});
- const st=STAGEN[Math.min(5,i>=R.n?5:Math.max(0,i-1))];
+ const st=stageOf(g);
  run([{bg:bgk},L(pg,'n',pick(R.hello||R.idle)),N(`${CH[g].name} · ${loved(g)?'In love':st} · ♥ ${aff(g)}${why&&i<R.n?' · next: '+why:''}`),C(...opts)],hub);
 }
 /* talks, workshops and practice: Skill (and a little Clout) for a part of the day */
@@ -122,4 +126,11 @@ const TASKS=[
  {k:'story',n:'The human story',d:'Make three thousand people feel why it matters.',best:'ellie',good:['pia','delphine','dave']}
 ];
 const allyReady=g=>g==='dave'?!!S.f.dave_helped:(met(g)&&scn(g)>=3);
-const taskScore=(t,a)=>{let s=!a?(rank('skill')>=3?1:0):a===t.best?3:t.good.includes(a)?2:1;if(a&&a!=='dave'&&loved(a))s++;return Math.min(3,s)};
+/* the right person, someone you love, someone who's ready (their sixth scene), each holds a little harder */
+const taskScore=(t,a)=>{let s=!a?(rank('skill')>=3?1:0):a===t.best?3:t.good.includes(a)?2:1;if(a&&a!=='dave'&&loved(a))s++;if(a&&S.f[a+'_ready'])s++;return Math.min(3,s)};
+/* ---- the con programme: optional events at a time and place. Joining one takes that part of the day. ---- */
+const EVENTS={};
+function event(id,o){EVENTS[id]=Object.assign({id,sc:'ev_'+id},o)}
+const eventsNow=()=>Object.values(EVENTS).filter(e=>e.d===S.day&&e.s===S.slot&&!(S.evs&&S.evs[e.id])&&(!e.when||e.when()));
+function joinEvent(id){const e=EVENTS[id];if(!freeCheck())return;S.evs=S.evs||{};S.evs[id]=1;
+ run([...scr(e.sc),()=>{ach('first_event');if(Object.keys(S.evs).length>=6)ach('events6');spend('event',e.n);return[]}],hub)}

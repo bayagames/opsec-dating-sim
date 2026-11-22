@@ -94,7 +94,7 @@ rin.n: But if I don't, SafeSphere 2 ships on Monday, and everyone who's ever met
 rin.n: Will you help me practise? I've written it out. It's twenty minutes long. Marge says I've got four.
 ~ You practise until the lava lamps turn off. By the end, it's four minutes long, and his voice only shakes on the first sentence.
 `;
-SC.rin5=`
+SC.rin7=`
 [bg naps]
 ~ The nap pods. A row of white capsules with sliding doors, humming softly, glowing faint blue inside. Rin's lying in one with the door open, a metre-long gummy worm draped across his chest like a sash.
 rin.h: Hi. Get in. There's room. There's not really room. Get in anyway.
@@ -212,7 +212,7 @@ bea.n: 4:10. That's when he shows them the graph. If anyone was going to interru
  bea.n: I've got savings. I've got a sketchbook. I've got a man who keeps saying "you could still go back".
  bea.d: Maybe I'll listen to him. Don't tell him.
 `;
-SC.bea5=`
+SC.bea7=`
 [bg bar]
 ~ The bar, after midnight. Bea's suspension hasn't stopped her having a key. The chairs are up, the lights are down to one green lamp, and there's an easel set up where the jukebox should be.
 bea.n: Sit there. On the stool. No, the other stool. The light's better. Don't smile. Don't not smile. Just be.

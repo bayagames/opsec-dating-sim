@@ -49,7 +49,7 @@ const ROMEPI={
 };
 function epilogueCast(good){const r=[];const ppl=ROM.filter(g=>met(g)&&scn(g)>=3&&g!==S.partner);for(const g of ppl)r.push(N(FATE[g][good?0:1]));if(f('dave_helped'))r.push(N(good?'Dave deletes the SafeSphere TikTok account live on stream. Two million people watch. His mum calls him "David" again, but nicely.':'Dave quits Lumen on Monday. He doesn\'t post about it. That\'s how you know he means it.'));return r}
 function romanceEpi(){if(!S.partner)return[N(pick(['You don\'t end up with anyone tonight. That\'s all right. You did something that mattered with people who mattered.','At two in the morning you\'re on the hotel steps on your own, with a cold cinnamon knot and a strange, quiet feeling that might be pride.']))];
- return[N(ROMEPI[S.partner])]}
+ return SC['epi_'+S.partner]!==undefined?scr('epi_'+S.partner):[N(ROMEPI[S.partner])]}
 SC.end_disclosure=`
 [hide]
 ~ It's on every front page by midnight. Not as WHISPER's stunt, or as a rumour, or as a leak. As a disclosure: careful, dated, verified, handed to the regulator a day before anyone said a word in public.
