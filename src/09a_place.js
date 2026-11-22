@@ -132,14 +132,14 @@ function placeGates(){
  gate('con','card',-62.8,-64,-61.2,-64,0,card,cardMsg);gate('con','card',52,-64,54,-64,0,card,cardMsg);gate('con','card',121.2,-64,122.8,-64,0,card,cardMsg,'Kitchen');
  gate('con','card',-6.5,-136,-3.5,-136,1.6,card,cardMsg,'Backstage');gate('con','card',84.5,-111,87.5,-111,.8,card,cardMsg,'Backstage');gate('con','card',-91.5,-54,-88.5,-54,BY,card,cardMsg,'Service tunnel');
  // the Lumen Lounge
- gate('con','door',-137,-24,-135,-24,L1,()=>S.ch>=4&&(S.f.met_bea||S.f.dave_helped),()=>S.ch<4?'LUMEN LOUNGE · INVITE ONLY. The door has a card reader and, somehow, an attitude.':'Locked. You\'d need someone with a staff key. Someone like a bartender. Or a former Lumen intern.','Lumen Lounge');
+ gate('con','door',-137,-24,-135,-24,L1,()=>S.day>2||S.day===2&&S.slot>=3,()=>S.day<2||S.day===2&&S.slot<3?'LUMEN LOUNGE · INVITE ONLY. The door has a card reader and, somehow, an attitude.':'Locked. You\'d need someone with a staff key. Someone like a bartender. Or a former Lumen intern.','Lumen Lounge');
  // hotel 13th floor + roof
  gate('home','door',-306,5.6,-306,6.4,7.1,()=>false,()=>'Ellie\'s flat. Locked, obviously. A sticky note on the door: "GONE TO WORK (DOWNSTAIRS) (OBVIOUSLY)".','Flat 2');
  gate('home','door',-306,5.6,-306,6.4,10.3,()=>false,()=>'FLAT 3. Locked. Behind the door, very faintly, a cat is watching you through the letterbox.','Flat 3');
  gate('home','door',-293,-12,-292,-12,0,()=>false,()=>'The back door to the yard. Bins, Ellie\'s bike and a seagull with a criminal record. Nothing you need.','Back door');
- gate('f13','door',272.7,-12,273.9,-12,0,()=>!!S.f.roof_open,()=>'HOUSEKEEPING. Locked. Through the gap under the door you can hear a stairwell breathing.','Housekeeping');
+ gate('f13','door',272.7,-12,273.9,-12,0,()=>S.day>=2,()=>'HOUSEKEEPING. Locked. Through the gap under the door you can hear a stairwell breathing.','Housekeeping');
  gate('f13','door',268,-.7,268,.7,0,()=>false,()=>'ALARMED · EMERGENCY ONLY. You are not having an emergency. Yet.','Fire exit');
- gate('f13','door',248,-1,248,1,TOP,()=>!!S.f.roof_open,()=>'MAINTENANCE · STAFF ONLY. The fence rattles in the wind. On the other side: air-con units, a water tank and, maybe, a footprint.','Maintenance door');
+ gate('f13','door',248,-1,248,1,TOP,()=>S.day>=2,()=>'MAINTENANCE · STAFF ONLY. The fence rattles in the wind. On the other side: air-con units, a water tank and, maybe, a footprint.','Maintenance door');
 }
 /* a door that only keeps you in (g.out: the direction of outside) opens once you've stood just outside it, and stays
    open until you're clear of it on the way in: arrive by taxi or fast travel and you can always get back indoors,
@@ -274,7 +274,6 @@ function placeWorld(){
  int('con',-50.8,-30,()=>'Look out over the courtyard',N1('From up here the courtyard is a green square in a glass box. The big tree, the amphitheatre, the fountain, and two people in cloaks having what looks like a very serious duel with foam swords.'),{y:L2});
  int('con',-175.2,-44,()=>'Look through the glass at the pool',N1('The hotel pool, glowing blue. One person is swimming slow lengths in a CTRL+ALT+CON hoodie. You have so many questions.'),{y:L2});
  int('con',-187,-61.4,()=>'Read the meeting room slides',N1('"LUMEN PARTNER BREAKFAST · SafeSphere 2 roadmap". Somebody forgot to close the projector. The next slide is titled "Monetising the Social Graph".'),{y:L1});
- int('con',-140,-59.8,()=>S.ch>=4?'Look at the papers on the bar':null,()=>run([N('A glossy folder on the Lumen Lounge bar. "KEYNOTE RUN-SHEET · CONFIDENTIAL".'),...(S.clues.includes('runsheet')?[N('The same run-sheet Dave showed you. Same plan. Same Monday launch.')]:[N('"SafeSphere 2: contact graph. Launch all regions Monday." You photograph it. Your hands are steady. Mostly.'),{unlock:'clues'},FX({clue:'runsheet'})])],hub),{y:L1});
  /* ---- back of house ---- */
  int('con',-90,-97.4,()=>'Watch the CCTV wall',()=>run([N(S.ch>=2?'Fifteen screens. One is paused on the bar from last night: you can see Victor leaning over the counter towards Bea. A sticky note under the screen: "LUMEN ASKED FOR THIS FOOTAGE AGAIN. NO WARRANT. NO."':'Fifteen screens. The Foyer, the Ring, the bar, the car park. On one of them, a man is trying to pick up a free tote bag with his feet. Security is watching him very closely.')],hub));
  int('con',59,-97.6,()=>'Look at the box on the core switch',()=>run([N('Between the racks, plugged straight into the con\'s core switch: a small white box with a Lumen asset sticker and a hand-written label: "temp · do not unplug · V.H."'),...(S.clues.includes('evil_twin')?[N('The other end of the fake Wi-Fi. Nyx and Priya will want a photo.')]:[N('Lumen hardware, inside the con\'s own network. That\'s not sponsorship. That\'s a wiretap with a logo.'),{unlock:'clues'},FX({clue:'evil_twin'})])],hub));
@@ -425,6 +424,6 @@ function charAct(c){
  if(stepIs(id))return stepGo();
  if(id==='dave'&&SC['dave'+(S.daveS||0)]!==undefined&&DAVEOK[S.daveS||0]&&DAVEOK[S.daveS||0]())return run([...scr('dave'+(S.daveS||0)),()=>{S.daveS=(S.daveS||0)+1;return[]}],hub);
  if(!ROM.includes(id)){const k=id==='dave'&&S.day>=2?'davex':id;return run([L(lookOf(id),'n',pick(ROLEIDLE[k]||['...']))],hub)}
- if(S.day===1&&!met(id)&&id!=='bea'&&id!=='pia'&&id!=='fern')return run([L(lookOf(id),'n','Hey. Not now, sorry. Come and find me tomorrow?')],hub);
+ if(!met(id)&&SC[id+'0']===undefined)return run([L(lookOf(id),'n',pick(['Hey. Sorry, can\'t stop, I\'m in the middle of something. Later?','Oh! Hi. Not right now, sorry. Come back in a bit?','Busy, busy. Catch me later.']))],hub);
  const a=areaAt(c.reg,c.x,c.z,c.y);return hangMenu(id,a||ROUTES[id].loc);
 }

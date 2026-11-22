@@ -255,7 +255,7 @@ function say(st){
  else if(who==='wh1sper'){clearPor();$('who').textContent='WH1SPER';$('who').style.background='#c0102a';box.className='whisper wh1'}
  else if(who==='think'){$('who').textContent='';box.className='think'}
  else if(who==='me'){$('who').textContent=S.h;$('who').style.background='var(--butter)'}
- else if(who==='sms'){$('who').textContent=st.from;$('who').style.background='var(--mint)';box.className='sms'}
+ else if(who==='sms'){$('who').textContent=sub(st.from);$('who').style.background='var(--mint)';box.className='sms'}
  else if(who){if(st.np)clearPor();$('who').textContent=who;$('who').style.background='var(--dim)'}
  else{$('who').textContent='';box.className='narr'}
  $('por').classList.toggle('dim',!(who&&CH[who])&&who!=='think'&&who!=='me');

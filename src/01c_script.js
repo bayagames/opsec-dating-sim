@@ -66,7 +66,7 @@ function scCmd(n,ctx){const a=n.a;
   case'unlock':return[{unlock:a}];
   case'tp':return[{tp:a}];
   case'end':return[{end:a}];
-  case'call':return[()=>{const r=ev(a.includes('(')?a:a+'()');return Array.isArray(r)?r:undefined}];
+  case'call':return[()=>{const r=ev(/[(=]/.test(a)?a:a+'()');return Array.isArray(r)?r:undefined}];
   case'scene':return[()=>scr(a)];
   case'goto':return[()=>{const k=ctx.labels[a];if(k===undefined){console.error('no label',a);return}const at=Q.indexOf(ctx.mark);if(at>0)Q.splice(0,at);return scCompile(ctx.top.slice(k+1),ctx)}];
   case'wait':return[];

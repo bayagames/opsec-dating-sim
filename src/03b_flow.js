@@ -97,7 +97,7 @@ function leadStart(k){const L=LEADS[k];if(!freeCheck())return;if(L.need&&!L.need
  S.leads[k]=1;run([...scr('lead_'+k),()=>{ach('first_lead');spend('lead');return[]}],hub)}
 /* a risky moment: the roll is shown, so it's fair. Risk 1-3; the hoodie and a high Skill help; a coffee skips it */
 function riskRoll(r,caught){
- return()=>{let p=[0,.2,.38,.55][r]||0;if(S.inv.hoodie)p-=.12;p-=rank('skill')*.04;p=clamp(p,.04,.9);
+ {let p=[0,.2,.38,.55][r]||0;if(S.inv.hoodie)p-=.12;p-=rank('skill')*.04;p=clamp(p,.04,.9);
   if(S.inv.coffee){S.inv.coffee--;if(!S.inv.coffee)delete S.inv.coffee;return[N('The triple espresso kicks in. You\'re in and out before anyone has blinked.')]}
   const bad=Math.random()<p;if(!bad)return[N('Nobody sees you. '+pick(['Your heart is going like a drum, but nobody sees you.','A door closes somewhere else. You breathe out.','You\'re just another lanyard in a corridor.']))];
   return scr(caught||'caught').concat([FX({exp:20+r*12})])}}

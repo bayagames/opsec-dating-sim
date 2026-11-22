@@ -82,6 +82,7 @@ ellie.b: And be careful. If the people who did that to me are paying for your pa
 ellie.h: If they're paying for your convention. Be careful anyway.
 * You walk out with a cinnamon knot, a bag of baking heavy enough to stun a man, and a feeling that you don't have a word for yet.
 [fx ellie:5]
+[adv ellie 1]
 [sum Ellie gave you a bag of baking for the con, and told you a man from Lumen Growth Partners had come into Proof selling "account protection".]
 `;
 SC.d1_leave=`

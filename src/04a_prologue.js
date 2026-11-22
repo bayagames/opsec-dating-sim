@@ -31,6 +31,7 @@ SC.prologue=`
  * You close the fridge. You'll cook something tomorrow. You've been cooking something tomorrow for three years.
 ~ Then someone hammers on your door. Not a knock. A hammering. The kind of knock that has been running up the stairs.
 [sum Two weeks before CTRL+ALT+CON, Ellie hammered on your door: someone had stolen her bakery's account.]
+[meet ellie]
 ellie.d: {h}! Sorry. Sorry, sorry. Are you busy? You're not busy. You're never busy, you're always just... doing that.
 ~ Ellie Park. She owns Proof, the bakery downstairs. She bakes every loaf in it herself, starting at four every morning, and there's flour on her cheek every single day, as if it's part of the uniform.
 ~ It's nearly ten at night. There's still flour on her cheek. She's holding her phone in both hands like it's bleeding.

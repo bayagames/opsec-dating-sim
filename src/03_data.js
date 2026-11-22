@@ -16,6 +16,7 @@ const CLUE={
  locdata:{s:'Location trail',t:'The WH1SPER dox included a minute-by-minute location trail. Only SafeSphere collects that.',m:['m3','m4']},
  r1313:{s:'Suite 1313',t:'WH1SPER\'s uploads go out through the access point outside Suite 1313, on the 13th floor.',m:['m3']},
  burner:{s:'Six burners',t:'A man matching Silas Krall bought six prepaid phones at the station kiosk on Monday, paying cash.',m:['m3']},
+ buriedphone:{s:'The buried phone',t:'Fern dug a prepaid phone out of a planter in the hotel garden. Its only content: drafts of WH1SPER posts.',m:['m3']},
  tsfolder:{s:'The drafts',t:'Delphine found WH1SPER\'s posts as drafts in a Lumen Trust & Safety shared folder, written days before they went up.',m:['m3']},
  framepost:{s:'The frame',t:'The post naming you as WHISPER placed you with a timeline only the badge data could give.',m:['m3','m5']},
  rinfind:{s:'What it sends',t:'SafeSphere uploads your whole address book, your location every 60 seconds and every site you visit.',m:['m4']},
@@ -63,7 +64,7 @@ const CLUE={
 const MYST={
  m1:{n:'The Bakery Job',q:'Who stole Proof\'s account?',opts:['A random scammer with a breach list','Lumen Growth Partners: Lumen itself','WHISPER','Someone Ellie knows'],a:1,ev:['recovery','fwdrule','lgpdomain','lgpcall','breakin'],xp:20},
  m2:{n:'WHISPER',q:'Who is WHISPER?',opts:['Nyx','Mira, the silver-haired woman on the roof','Juno','Victor Hale himself'],a:1,ev:['sniffer','cipher','vod','dmtrace','mirasays'],xp:25},
- m3:{n:'The Copycat',q:'Who is WH1SPER?',opts:['WHISPER, getting worse','Lumen: Silas Krall\'s "Trust & Safety" team','Dave, getting revenge','A random troll'],a:1,ev:['daveonly','realaddr','locdata','r1313','burner','tsfolder','framepost','breakin'],xp:30},
+ m3:{n:'The Copycat',q:'Who is WH1SPER?',opts:['WHISPER, getting worse','Lumen: Silas Krall\'s "Trust & Safety" team','Dave, getting revenge','A random troll'],a:1,ev:['daveonly','realaddr','locdata','r1313','burner','tsfolder','framepost','breakin','buriedphone'],xp:30},
  m4:{n:'Lantern',q:'What is SafeSphere 2 really for?',opts:['Better ads','Fraud detection','A contact graph that finds sources: who talks to journalists, lawyers and regulators','A real privacy upgrade'],a:2,ev:['rinfind','graphcode','salesdeck','runsheet','sources','intern','locker','lifescore','lantern01','locdata'],xp:30},
  m5:{n:'The Badges',q:'Why do the con badges blink?',opts:['A firmware bug','Tilly\'s art project','A Lumen beacon feeding LANTERN who meets whom','WHISPER is tracking people'],a:2,ev:['fwhash','beacons','lantern01','uplink','owensign','framepost'],xp:25},
  m6:{n:'The Mole',q:'Who in Con Ops is feeding Lumen?',opts:['Marge','Owen Pryce','Tilly','Sunny'],a:1,ev:['owensign','owendebt','owen13','leaktest','raid'],xp:30},

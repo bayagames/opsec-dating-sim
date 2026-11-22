@@ -4,14 +4,14 @@ Working reference for the expanded game. Spoilers throughout.
 
 ## Shape of a run
 - **Prologue (Two weeks earlier).** Linear. Proof, Flat 1A, Brindle & Co, Ellie's stolen account, WHISPER's first DM, Lumen.
-- **Day 1 (Sunday).** Linear morning to afternoon: packing, saying goodbye at Proof, a last half-day at the office (Linda, Gary, SafeSphere rolled out to work phones), Central Station (Pia busking), the train (Astrid). From the Evening slot the calendar runs.
+- **Day 1 (Monday).** Linear morning to afternoon: packing, saying goodbye at Proof, a last half-day at the office (Linda, Gary, SafeSphere rolled out to work phones), Central Station (Pia busking), the train (Astrid). From the Evening slot the calendar runs.
 - **Days 1 to 7** of CTRL+ALT+CON's 20th anniversary "Hack Week". Six slots a day: Morning, Midday, Afternoon, Evening, Night, Late night. Day 1 starts at Evening. Time never moves on its own: only story beats and slot activities move it.
 - **Story slots** hold a beat that happens at a place (the goal beacon points there). Other activities wait until it's done.
 - **Free slots** take one activity: a hangout scene, an investigation lead, a talk or workshop, CTF practice, a bug bounty, streaming with Juno, or resting. Meeting someone, talking shop (once per person per day), gifts, the shop and the phone are free.
 - **Exposure** resets each morning to your Footprint (permanent leaks). At 100 you're doxxed and the day restarts from its morning snapshot. Risky leads can spike it.
 - **Skill** and **Clout** are XP with ranks (0-5). Skill: Script Kiddie, Novice, Practitioner, Specialist, Expert, Elite. Clout: Nobody, Lurker, Known Face, Notable, Con Famous, Legend. Thresholds 0/30/80/150/250/380.
 - **Closeness** per character: affection 0-100 plus scenes seen (0-6). Stages: Met, Acquaintance, Friend, Close, Dating, In Love. Scene 0 (meeting) is free; scenes 1-5 cost a slot each; scene 5 is the final love scene.
-- 15 free slots per run, so two full routes plus Ellie (whose scenes are mostly story beats) plus a few leads. From Day 5 the story nudges you to spend time on people you're dating.
+- 14 free slots per run, so two full routes plus Ellie (whose scenes are mostly story beats) plus a few leads. From Day 5 the story nudges you to spend time on people you're dating.
 
 ## Cast (datable: 21)
 | id | name | who | where | met |
@@ -86,13 +86,13 @@ Solving: pick the answer and the three clues that prove it. A wrong deduction co
 12. **Mira's Switch**: what is Mira planning? The signing key and a kill update.
 
 ## Calendar (S = story beat, F = free)
-- D1 Sun: Evening S Arrival (badge, Dave, ceremony, check-in, room) · Night S The Bar (Bea, Victor, Delphine, WHISPER doxes Dave) · Late F
-- D2 Mon: Morning S CTF 101 (Ada; CTF explained) · Midday F · Afternoon S The Badge (Tilly, Priya; the badges beacon) · Evening S Reception (Lumen Lounge: Vesper sings, Delphine, Krall) · Night F · Late S Room 1337 (WHISPER's DM, Ellie's text, Rin in the lift, then the Chill-out)
-- D3 Tue: Morning S Ellie arrives · Midday S Two Whispers (Victor exposed; then WH1SPER posts a real address; Saoirse) · Afternoon F · Evening F · Night S The Roof (Mira) · Late F
-- D4 Wed: Morning F · Midday S The NOC (Sunny; LANTERN-01; Owen) · Afternoon F · Evening S The Gathering (Rin's findings; Marge's deal) · Night S Proof is burgled · Late F
-- D5 Thu: Morning S Home (train with Ellie; Proof ransacked; Pia) · Midday F (home side: leads at Proof, the office, the station) · Afternoon S Framed (WH1SPER names {h}; Ellie chooses; leave-with-Ellie ending) · Evening S The Offer (Victor at the Grill) · Night F · Late F
-- D6 Fri: Morning F · Midday S CTF Finals (Ada; Mira's challenge names Halberd) · Afternoon F · Evening S The Raid (Room 1337 searched) · Night S War Council (choose the plan) · Late F (the night before)
-- D7 Sat: Morning S Positions · Midday S Krall's Move · Afternoon S The Keynote (tasks) · Evening S The Thirteenth Floor (roof, 1313, Mira, Krall, Ashgrove) · Night S 0xFF (afterparty, epilogue)
+- D1 Mon: Morning S Home (pack, Ellie, the door) · Midday S Brindle & Co (queue, Gary, LifeScore) · Afternoon S Central Station (Pia, the train, Astrid) · Evening S Arrival (badge, Dave, ceremony, check-in, room) · Night S The Bar (Bea, Victor, Delphine, WHISPER doxes Dave) · Late F
+- D2 Tue: Morning S CTF 101 (Ada; CTF explained) · Midday S Rin in the Chill-out · Afternoon S The Badge (Tilly, Priya; the badges beacon) · Evening S Reception (Lumen Lounge: Vesper sings, Delphine, Krall, LANTERN teased) · Night F · Late S Room 1337 (WHISPER's DM, Ellie's text)
+- D3 Wed: Morning S Ellie arrives · Midday S Two Whispers (Victor exposed; then WH1SPER posts a real address; Saoirse) · Afternoon F · Evening F · Night S The Roof (Mira) · Late F
+- D4 Thu: Morning F · Midday S The NOC (Sunny; LANTERN-01; Owen) · Afternoon F · Evening S The Gathering (Rin's findings; Marge's deal) · Night S Proof is burgled · Late F
+- D5 Fri: Morning S Home (train with Ellie; Proof ransacked; Pia) · Midday F (home side: leads at Proof, the office, the station) · Afternoon S Framed (WH1SPER names {h}; Ellie chooses; leave-with-Ellie ending) · Evening S The Offer (Victor at the Grill) · Night F · Late F
+- D6 Sat: Morning F · Midday S CTF Finals (Ada; Mira's challenge names Halberd) · Afternoon F · Evening S The Raid (Room 1337 searched) · Night S War Council (choose the plan) · Late F (the night before)
+- D7 Sun: Morning S Positions · Midday S Krall's Move · Afternoon S The Keynote (tasks) · Evening S The Thirteenth Floor (roof, 1313, Mira, Krall, Ashgrove) · Night S 0xFF (afterparty, epilogue)
 
 ## Final act
 Plan options (each needs its own conditions): Disclosure (Marge's slot), Front Page (Saoirse), Injunction (Noor and
@@ -124,3 +124,10 @@ Scenes are plain text in template literals, parsed at runtime:
 - `? choice text || hint` with an indented block below; `?(expr) text` only if expr is true
 - `if expr` / `elif expr` / `else` with indented blocks; `# label`
 - `{h}` is your handle; `{=expr}` evaluates.
+
+## Files
+- `01b_core.js` calendar constants, ranks, closeness, effects, exposure fail, meta; `01c_script.js` the script parser
+- `03_data.js` clues, mysteries, leads, items, achievements, endings; `03b_flow.js` beats, free time, hangouts, leads, case board, positions
+- `04_days.js` the calendar; `04a`-`04h` the prologue and Days 1-7; `04i_endings.js` the twenty endings and epilogues
+- `05_routes.js` route requirements and small talk; `05a`-`05j` the routes; `05k_leads.js` leads, Dave, solved-case beats
+- `06_finale.js` hub, shop, Room 1337, positions game, ending choice, title
