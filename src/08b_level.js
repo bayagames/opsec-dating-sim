@@ -1,6 +1,6 @@
 /* ============ LEVEL HELPERS ============ */
 const DOORS={},MAPR={},AREAS={},INTS=[],WCH=[],DYN=[];
-const LEVELS={home:[[0,'Bakery'],[3.9,'Flat 1A'],[7.1,'Second floor'],[10.3,'Third floor'],[13.5,'Roof']],office:[[0,'3rd floor']],station:[[0,'Concourse']],con:[[-4.5,'Basement'],[0,'Ground floor'],[5.5,'Level 1'],[12,'Con roof']],f13:[[0,'13th floor'],[3.6,'Hotel roof']]};
+const LEVELS={home:[[0,'Bakery'],[3.9,'Flat 1A'],[7.1,'Second floor'],[10.3,'Third floor'],[13.5,'Roof']],office:[[0,'3rd floor']],station:[[0,'Concourse']],con:[[-5,'Basement'],[0,'Ground floor'],[5.5,'Level 1'],[11,'Level 2'],[16.5,'Con roof']],f13:[[0,'13th floor'],[3.6,'Hotel roof']]};
 function door(o,at,c,w,h,y,nf){(DOORS[BR]=DOORS[BR]||[]).push({o,at,c,w,h:h||2.7,y:y||0,nf})}
 /* a wide opening between two spaces: a door with no frame */
 const gap=(o,at,c,w,h,y)=>door(o,at,c,w,h,y,1);
@@ -16,7 +16,7 @@ function wallLine(o,fixed,a0,a1,Y,H,m,inward,frame){
  G.ao=Y;
  for(const s of P){if(s[1]-s[0]<.01||s[3]-s[2]<.01)continue;
   if(m.glass){glassSeg(o,fixed,s[0],s[1],s[2],s[3],t0,t1,s[2]>Y+.05);G.walls[BR].push(o==='h'?[s[0],fixed,s[1],fixed,s[2],s[3]]:[fixed,s[0],fixed,s[1],s[2],s[3]]);continue}
-  if(o==='h')box(s[0],s[2],t0,s[1],s[3],t1,m);else box(t0,s[2],s[0],t1,s[3],s[1],m);
+  const nt=G.wallNT&&H>=3&&Math.abs(s[3]-(Y+H))<.01?1:0;if(o==='h')box(s[0],s[2],t0,s[1],s[3],t1,m,{nt});else box(t0,s[2],s[0],t1,s[3],s[1],m,{nt});
   if(s[3]-s[2]>1)G.walls[BR].push(o==='h'?[s[0],fixed,s[1],fixed,s[2],s[3]]:[fixed,s[0],fixed,s[1],s[2],s[3]]);
   if(Math.abs(s[2]-Y)<.01&&!m.e){const sk=MT.skirt,f=face+inward*.012;
    if(o==='h'){if(inward>0)quad([s[0],Y,f],[s[1],Y,f],[s[1],Y+.13,f],[s[0],Y+.13,f],sk,1,1);else quad([s[1],Y,f],[s[0],Y,f],[s[0],Y+.13,f],[s[1],Y+.13,f],sk,1,1)}
@@ -35,11 +35,11 @@ function room(o){
  if(o.n)(MAPR[BR]=MAPR[BR]||[]).push({x0,z0,x1,z1,y,n:o.n,c:o.mc||'#3a2a4a'});
 }
 /* glass curtain wall: transparent pane, chrome mullions every ~2.4 m, solid to walk into */
-function glassSeg(o,fixed,a,b,y0,y1,t0,t1,lintel){const g=MT.glass,c=MT.chrome,tm=(t0+t1)/2;
- if(o==='h'){box(a,y0,tm-.02,b,y1,tm+.02,g,{col:false});colBox(a,t0,b,t1,y0,y1)}else{box(tm-.02,y0,a,tm+.02,y1,b,g,{col:false});colBox(t0,a,t1,b,y0,y1)}
+function glassSeg(o,fixed,a,b,y0,y1,t0,t1,lintel){const g=MT.glass,c=MT.chrome,tm=(t0+t1)/2,yt=y1-.006;
+ if(o==='h'){box(a,y0,tm-.02,b,yt,tm+.02,g,{col:false});colBox(a,t0,b,t1,y0,y1)}else{box(tm-.02,y0,a,tm+.02,yt,b,g,{col:false});colBox(t0,a,t1,b,y0,y1)}
  const n=Math.max(1,Math.round((b-a)/2.4));
- for(let i=0;i<=n;i++){if(lintel&&(i===0||i===n))continue;const p=a+(b-a)*i/n;if(o==='h')box(p-.04,y0,tm-.06,p+.04,y1,tm+.06,c,{col:false});else box(tm-.06,y0,p-.04,tm+.06,y1,p+.04,c,{col:false})}
- for(const yy of[y0,Math.min(y1,y0+3.2),y1-.08])if(yy<y1){if(o==='h')box(a,yy,tm-.05,b,yy+.08,tm+.05,c,{col:false});else box(tm-.05,yy,a,tm+.05,yy+.08,b,c,{col:false})}}
+ for(let i=0;i<=n;i++){if(lintel&&(i===0||i===n))continue;const p=a+(b-a)*i/n;if(o==='h')box(p-.04,y0,tm-.06,p+.04,yt,tm+.06,c,{col:false});else box(tm-.06,y0,p-.04,tm+.06,yt,p+.04,c,{col:false})}
+ for(const yy of[y0,Math.min(y1,y0+3.2),y1-.092])if(yy<y1-.05){if(o==='h')box(a,yy,tm-.05,b,yy+.08,tm+.05,c,{col:false});else box(tm-.05,yy,a,tm+.05,yy+.08,b,c,{col:false})}}
 /* top surface only, for roofs you can see but not walk on */
 function roofTop(x0,z0,x1,z1,y,m){floorQ(x0,z0,x1,z1,y,m||MT.gravel)}
 /* a run of theatre seats as one long seat + back (much cheaper than single chairs) */

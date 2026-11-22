@@ -25,11 +25,17 @@ Source lives in `src/`. To rebuild `index.html` after editing:
 - `05_routes_b.js` Kit, Rin, Bea, Ellie, Mira routes + Dave
 - `06_hub_finale.js` hangouts, shop, keynote, endings, title
 - `07_gl.js`       three.js renderer: level builder API, chunked geometry, glass, light pool, per-region environment maps, lightmap packing, bump relief, AO, bloom, colour grade, sky. `LOOK` holds every lighting knob in one place
-- `07c_bake.js`    baked lighting: on load every level light renders a cube shadow map and is accumulated into per-region lightmaps (soft shadows, falloff, fill), stored as RGBM. Moving things are lit by `probeAt`
+- `07c_bake.js`    baked lighting, one place at a time: the first visit to a place renders a cube shadow map per light and accumulates them into its lightmaps (soft shadows, falloff, fill, RGBM), caches them in IndexedDB, and frees the previous place's GPU memory. Moving things are lit by `probeAt`
 - `07b_chars.js`   full-body character and crowd art
 - `08_level.js`    textures and materials
 - `08b_level.js`   level helpers + home (flat and bakery)
-- `08c_site.js`    the Halcyon Hotel + Convention Centre: Foyer, Ring, courtyard, halls, Village Row, back of house, Level 1, basement, con roof
+- `08i_site.js`    the site: textures, builder helpers (floors with holes, stair shells, escalators, booths, chandeliers) and the visibility zones (which part of the building can see which)
+- `08j_hotel.js`   the Halcyon Hotel: atrium lobby, promenade, bar and terrace, grill, kitchen, back rooms; mezzanine, ballroom, Lumen Lounge, meeting rooms, library; pool, gym, spa; tower and facades
+- `08k_core.js`    the convention core: the Foyer atrium with registration, the Lumen booth, escalators and skybridge; the three-level Ring; the courtyard and bar terrace
+- `08l_halls.js`   Hall A (the arena), Hall B, backstage, staff corridors, security, stores, MDF, service corridor, Con Ops/press/speakers, kitchen, break room, loading dock
+- `08m_east.js`    the Expo Hall, the south-east concourse, Village Row (two storeys of villages and workshops)
+- `08n_south.js`   food court and Sky Garden, cosplay hall, chill-out, nap pods, quiet room, the plaza and the outside of the buildings
+- `08o_under.js`   car park, NOC, plant room and laundry, hotel basement, service tunnel, the con roof, and the named areas
 - `08d_tower.js`   hotel 13th floor + hotel roof
 - `08a_kit.js`     shared props (desks, chairs, monitors, plants, lamps, beams) sized in metres
 - `08g_office.js`  Brindle & Co: the third floor of an office tower, with the street below

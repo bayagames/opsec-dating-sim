@@ -178,15 +178,15 @@ function objective(){
   else if(!S.f.ch0_eve)o={t:'Head home for the evening: the lifts.',reg:'office',x:497.7,z:12,y:0};
   else o={t:'Platform 4: board the train to the con.',reg:'station',x:734,z:4.4,y:0};
  }else if(S.ch===1){
-  if(!S.f.d1_badge)o={t:'Pick up your badge at Registration.',reg:'con',x:-38.6,z:31,y:0};
-  else if(!S.f.d1_open)o={t:'The opening ceremony is starting. Find a seat in Hall A (north side of the Ring).',reg:'con',x:-5,z:-49.5,y:2.75};
-  else if(!S.f.d1_checkin)o={t:'Check in at the Halcyon Hotel: reception, through the big gap in the Foyer.',reg:'con',x:-80.4,z:7,y:0};
-  else if(!S.f.d1_room)o={t:'Drop your bag in Room 1337 (lifts → 13th floor).',reg:'f13',x:273.6,z:14.2,y:0};
-  else o={t:'Explore the con. When you\'re ready, end the day at the Hotel Bar.',reg:'con',x:-65,z:-35.6,y:0};
- }else o={2:{t:'When you\'re done, head up to Room 1337 for the night.',reg:'f13',x:273.6,z:14.2,y:0},3:{t:'When you\'re ready: Room 1337. Everyone\'s coming over.',reg:'f13',x:273.6,z:14.2,y:0},4:{t:'Finish what you started. Then find Marge on the Hall A stage.',reg:'con',x:-5,z:-76,y:1.3}}[S.ch]||null;
+  if(!S.f.d1_badge)o={t:'Pick up your badge at Registration (the Foyer\'s west wall).',reg:'con',x:-105.2,z:53.4,y:0};
+  else if(!S.f.d1_open)o={t:'The opening ceremony is starting. Find a seat in Hall A (north side of the Ring).',reg:'con',x:-5,z:-79.5,y:2.75};
+  else if(!S.f.d1_checkin)o={t:'Check in at the Halcyon Hotel: reception, through the big gap on the Foyer\'s west side.',reg:'con',x:-154.4,z:22.5,y:0};
+  else if(!S.f.d1_room)o={t:'Drop your bag in Room 1337 (the hotel lifts, off the Promenade → 13th floor).',reg:'f13',x:273.6,z:14.2,y:0};
+  else o={t:'Explore the con. When you\'re ready, end the day at the Hotel Bar (off the Promenade).',reg:'con',x:-88,z:-58.2,y:0};
+ }else o={2:{t:'When you\'re done, head up to Room 1337 for the night.',reg:'f13',x:273.6,z:14.2,y:0},3:{t:'When you\'re ready: Room 1337. Everyone\'s coming over.',reg:'f13',x:273.6,z:14.2,y:0},4:{t:'Finish what you started. Then find Marge on the Hall A stage.',reg:'con',x:-5,z:-121,y:1.6}}[S.ch]||null;
  // different building? point at the way there
  if(o&&o.reg!==WD.reg){
-  if(o.reg==='f13'&&WD.reg==='con')o=Object.assign({},o,{reg:'con',x:-78,z:27.6,y:0});
+  if(o.reg==='f13'&&WD.reg==='con')o=Object.assign({},o,{reg:'con',x:-148,z:-27,y:WD.y>8?L2:WD.y>3?L1:0});
   else if(o.reg==='con'&&WD.reg==='f13')o=Object.assign({},o,{reg:'f13',x:243,z:-9.4,y:0});
   else if(o.reg==='con'&&WD.reg==='station')o=Object.assign({},o,{reg:'station',x:734,z:4.4,y:0});
  }
@@ -227,7 +227,7 @@ function render(dt){
  const sp=Math.hypot(WD.vx,WD.vz),bamp=(WD.bobAmp||0)*(sp>6.5?.024:.016)*(SETTINGS.bob===false?0:1),bob=-bamp*(1-Math.cos(WD.bob*2))*.5-(WD.land||0);
  const asp=w/h,vf=clamp(2*Math.atan(Math.tan(.75+WD.fovk*.045)/asp),1.05,1.8);
  cam.fov=vf*180/Math.PI;cam.far=(FAR[WD.reg]||180)+40;cam.updateProjectionMatrix();
- cam.position.set(WD.x,WD.eye+bob,WD.z);cam.rotation.set(WD.pit,WD.yaw,0);
+ cam.position.set(WD.x,WD.eye+bob,WD.z);cam.rotation.set(WD.pit,WD.yaw,0);zoneCull(WD.reg,WD.x,WD.eye,WD.z);
  G.sky.position.copy(cam.position);const su=G.sky.material.uniforms;su.hz.value.copy(G.fog.color);su.t.value=performance.now()/1000;if(R.day){su.zn.value.setRGB(.12,.3,.75);su.st.value=0}else{su.zn.value.setRGB(.012,.012,.05);su.st.value=1}
  updLights(dt);
  updSprites(dt);vfxTick();
@@ -326,6 +326,8 @@ let mmT=0,icT=0,perfAcc=0,perfN=0,perfT=0;
 function loop(t){
  requestAnimationFrame(loop);
  const dt=Math.min(.05,(t-(WD.t||t))/1000);WD.t=t;
+ // the place you're in needs its lightmaps on the GPU (loaded from cache, or baked on a first visit)
+ if(S&&S.inWorld&&G.ok&&G.baked){const R=G.regions[WD.reg];if(R&&!R.lmTex&&!R.lmSkip){if(!G.lmBusy)regionNeed(WD.reg,true);else lmUI(true,G.lmBusy,null,G.bakeP)}}
  if(!S||!S.inWorld||!G.ok||G.baking||$('gl').style.display==='none')return;
  const live=worldLive();
  if(live)update(dt);
@@ -351,9 +353,10 @@ function initWorld(cb){
   paintTextures();buildLevels();placeWorld();finishRegions();vfxBuild();
   setupInput();requestAnimationFrame(loop);
  }catch(e){console.error(e);G.ok=false;finishInit();return false}
- // bake every light in the level into lightmaps (a few seconds, once per load)
- G.baking=true;if(cb)loadUI(true);
- bakeAll(f=>{G.bakeP=f;const b=$('loadBar');if(b)b.style.width=(f*100|0)+'%';const t=$('loadPct');if(t)t.textContent=(f*100|0)+'%'},ok=>{G.baking=false;G.baked=!!ok;if(ok)setQuality(G.q);finishInit()});
+ // lighting is baked per place, the first time you go there (and cached after): warm up the place the latest save is in
+ G.baked=bakeOK();setQuality(G.q);finishInit();
+ let pre='home';try{const a=readSlot('auto');if(a&&a.pos&&G.regions[a.pos[0]]&&(a.mapv||0)>=3)pre=a.pos[0];else if(a&&a.ch>=1)pre='con'}catch(e){}
+ setTimeout(()=>{if(!G.lmBusy&&!(S&&S.inWorld))regionNeed(pre,false)},50);
  return G.ok;
 }
 function finishInit(){G.ready=true;loadUI(false);const w=G.waiters||[];G.waiters=[];for(const f of w)f()}
