@@ -260,17 +260,4 @@ mira.s: You've done this before, haven't you. I can tell. People who've been her
 [ach harem]
 [end harem]
 `;
-SC.restore=`
-[bg hotel]
-[hide]
-~ A file on your laptop that you don't remember putting there. session.bak. Last modified: a date that hasn't happened yet.
-~ Inside, in plain text: every name. Every scene. Every clue, every lead, every answer. In your own words, as if you wrote it after a week you haven't had.
-* It should feel impossible. Instead it feels like remembering.
-? Restore it
- [call S.restore=true]
- [ach restore]
- ~ The screen flickers. You feel faster. Your days feel longer, as if each part of them has room for twice as much. The people in this file feel like people you already know.
- * Whatever this is, you're not going to waste it.
-? Close the laptop
- ~ You close it. Some things you should earn the slow way.
-`;
+

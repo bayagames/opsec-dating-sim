@@ -66,6 +66,7 @@ function scCmd(n,ctx){const a=n.a;
   case'ach':return[()=>{ach(a)}];
   case'unlock':return[{unlock:a}];
   case'tp':return[{tp:a}];
+  case'cut':return[{cut:a}];
   case'end':return[{end:a}];
   case'call':return[()=>{const r=ev(/[(=]/.test(a)?a:a+'()');return Array.isArray(r)?r:undefined}];
   case'scene':return[()=>scr(a)];
@@ -83,7 +84,7 @@ function scCompile(nodes,ctx){const out=[];
  }
  return out}
 /* a scene's steps, fresh each time (choices and conditions are evaluated as they're reached) */
-function scr(id){
+function scr(id){if(S&&!S.replay&&typeof META!=='undefined'&&/^([a-z]+\d|[a-z]+_x|epi_[a-z]+)$/.test(id)){META.seenSc=META.seenSc||{};if(!META.seenSc[id]){META.seenSc[id]=1;saveMeta()}}
  if(!SCAST[id]){if(SC[id]===undefined){console.error('no scene',id);return[N('['+id+']')]}SCAST[id]=scParse(SC[id],id)}
  const top=SCAST[id],labels={};top.forEach((n,k)=>{if(n.k==='label')labels[n.n]=k});
  const ctx={top,labels,mark:()=>{}};return scCompile(top,ctx).concat([ctx.mark]);

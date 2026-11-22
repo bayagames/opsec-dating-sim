@@ -362,6 +362,14 @@ body.desk .kn{display:inline-block}
 /* ---- motion + polish ---- */
 #gl{transition:filter .5s ease,transform .6s cubic-bezier(.2,.8,.2,1)}
 body.talking #gl{filter:blur(7px) brightness(.5) saturate(.85);transform:scale(1.045)}
+body.cutscene #gl{filter:none!important;transform:none!important}
+body.cutscene .bg-dim{background:linear-gradient(#0a061000 55%,#0a061088)!important}
+body.cutscene #por,body.cutscene #sign{display:none!important}
+body.cutscene #vn::before,body.cutscene #vn::after{content:'';position:absolute;left:0;right:0;height:7vh;background:#000;z-index:4;pointer-events:none;animation:cutbar .6s ease both}
+body.cutscene #vn::before{top:0}body.cutscene #vn::after{bottom:0}
+@keyframes cutbar{from{height:0}to{height:7vh}}
+body.cutscene #box{left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:min(820px,calc(100% - 24px))!important;background:linear-gradient(#1e1229d8,#140c1ce8)}
+body.cutscene #chs{left:50%!important;right:auto!important;transform:translateX(-50%)!important}
 #world::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 58%,#05020a99 100%)}
 #vn.on #box{animation:boxIn .42s cubic-bezier(.2,.8,.2,1)}
 @keyframes boxIn{from{opacity:0;translate:0 26px}}
@@ -488,6 +496,28 @@ img,svg,canvas{-webkit-user-drag:none;user-drag:none}
 .loc.vhover,.chat.vhover,.seg button.vhover,.pback.vhover,.tok.vhover,.chip.vhover,.code button.vhover{border-color:var(--butter);filter:brightness(1.15)}
 #box.vhover{border-color:#6d4d8a}
 #vcur.hot{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22'%3E%3Cpath d='M2 2 L2 18 L6.5 13.8 L9.6 20.4 L12.6 19 L9.6 12.6 L15.6 12.6Z' fill='%23ffd166' stroke='%231b1026' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E")}
+
+#tprof.tbtns{width:min(860px,calc(100vw - 32px));align-items:center}
+.pfiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;width:100%}
+.pfile{background:linear-gradient(#2a1a3af2,#1e1229f7);border:2px solid var(--line);border-radius:14px;padding:14px;text-align:left;cursor:pointer;color:var(--ink);font:inherit;display:flex;flex-direction:column;gap:6px;min-height:150px}
+.pfile:hover,.pfile.vhover{border-color:var(--butter)}
+.pfile h4{margin:0;font:22px VT323,monospace;color:var(--butter)}
+.pfile .pct{font:34px VT323,monospace;color:var(--mint);line-height:1}
+.pfile .del{align-self:flex-start;margin-top:auto;font-size:12px;opacity:.7}
+.pfile.empty{opacity:.75;border-style:dashed}
+@media(max-width:640px){.pfiles{grid-template-columns:1fr}.pfile{min-height:0}}
+
+.pgcard{width:min(980px,calc(100vw - 24px));max-height:calc(100vh - 40px);display:flex;flex-direction:column}
+.pgbody{overflow:auto;flex:1;min-height:0;padding-right:4px}
+.ttree .tnode{margin:4px 0 4px 0}.ttree .tkids{margin-left:18px;border-left:2px solid var(--line);padding-left:12px}
+.ttree .tl{font-size:15px;color:var(--dim)}.ttree .tnode.seen>.tl{color:var(--ink)}.ttree .ok{color:var(--mint)}
+.tends,.egrid{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.echip{font:inherit;font-size:13px;padding:4px 9px;border-radius:999px;border:1.5px dashed var(--line);background:#0003;color:var(--dim);cursor:pointer}
+.echip.on{border-style:solid;color:var(--ink);background:#ffffff12}.echip.on.good{border-color:var(--mint)}.echip.on.mixed{border-color:var(--butter)}.echip.on.bad{border-color:var(--coral)}.echip.on.true,.echip.on.secret{border-color:#c9b6ff;color:#c9b6ff}
+.edetail{margin-top:12px;padding:12px;border:2px solid var(--line);border-radius:12px;background:#0002}.evar{font-size:13px;padding:8px 0;border-top:1px solid var(--line)}
+.hint{padding:8px 12px;margin:6px 0;border-left:3px solid var(--mint);background:#0002;border-radius:6px}.hint.riddle{border-color:#c9b6ff;font-style:italic}
+.ehints{text-align:left;margin:10px 0;padding:10px;border-radius:10px;background:#0003}
+.rrow{display:flex;gap:10px;align-items:center;margin:8px 0}.rhd{width:44px;height:50px;flex:none}.rbtns{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}.rbtns .btn{font-size:12px;padding:4px 8px}
 </style>
 </head>
 <body>
@@ -502,11 +532,14 @@ img,svg,canvas{-webkit-user-drag:none;user-drag:none}
         <p>A visual novel about love, lies and leaving your Bluetooth on.</p>
       </div>
       <div class="heads" id="heads"></div>
-      <div class="tbtns" id="tmain">
+      <div class="tbtns" id="tprof"></div>
+      <div class="tbtns" id="tmain" style="display:none">
+        <p class="small" id="tfile"></p>
         <button class="btn pri" id="bNew">New game</button>
-        <button class="btn" id="bCont">Continue</button>
         <button class="btn" id="bLoad">Load game</button>
-        <button class="btn" id="bEnds">Endings</button>
+        <button class="btn" id="bPost">Postgame</button>
+        <button class="btn" id="bAch">Achievements</button>
+        <button class="btn" id="bFiles">Change file</button>
       </div>
       <div class="tbtns" id="tname" style="display:none">
         <label for="hIn" class="small">What's your hacker handle? (Not your real name. Trust me on this.)</label>
@@ -514,7 +547,7 @@ img,svg,canvas{-webkit-user-drag:none;user-drag:none}
         <button class="btn pri" id="bGo">Begin</button>
         <button class="btn" id="bBack">Back</button>
       </div>
-      <p class="small" style="margin-top:22px">An original parody. Every character is a fictional adult. Saves stay in this browser.</p>
+      <p class="small" style="margin-top:22px">An original parody. Every character is a fictional adult. Saves stay in this browser, in three files.</p>
     </div>
   </section>
 

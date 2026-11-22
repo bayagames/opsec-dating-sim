@@ -194,7 +194,7 @@ const saveSettings=()=>{try{localStorage.setItem('opsec_settings',JSON.stringify
 let CURBG=null;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const LS={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
-const save=()=>LS.set('opsec3_save',JSON.stringify(S));
+const save=()=>{if(PROF)LS.set(slotKey('auto'),JSON.stringify(S))};
 const endsSeen=()=>{try{return JSON.parse(LS.get('opsec2_endings')||'[]')}catch(e){return[]}};
 const $=id=>document.getElementById(id);
 const sub=t=>String(t).replace(/\{=([^}]*)\}/g,(m,e)=>{const r=ev(e);return r===undefined||r===false?'':r}).replace(/\{h\}/g,S?S.h:'you').replace(/\{H\}/g,S?S.h.toUpperCase():'YOU');
@@ -211,7 +211,7 @@ function hud(){
  if(S.unl.skill){const[r,p]=rk('skill');ms.push(['SKL '+r,p,'var(--mint)',RANKS.skill[r]])}
  if(S.unl.clout){const[r,p]=rk('clout');ms.push(['CLT '+r,p,'var(--butter)',RANKS.clout[r]])}
  if(S.unl.exp)ms.push(['EXP '+S.exp,S.exp,'var(--coral)','Exposure '+S.exp+'/100 · resets to '+S.foot+' each morning']);
- $('meters').innerHTML=ms.map(m=>`<div class="m" title="${m[3]}">${m[0]}<b><i style="width:${m[1]}%;background:${m[2]}"></i></b></div>`).join('')+(S.unl.cred?`<div class="m" style="width:auto;color:var(--butter)">CR<br>${S.cred}</div>`:'');
+ $('meters').innerHTML=ms.map(m=>`<div class="m" title="${m[3]}">${m[0]}<b><i style="width:${m[1]}%;background:${m[2]}"></i></b></div>`).join('')+(S.unl.money||S.unl.cred?`<div class="m" style="width:auto;color:var(--butter)">£<br>${S.money||0}</div>`:'');
  $('phoneBtn').style.display='block';
  $('phoneBtn').innerHTML='Phone<span class="kn" style="margin:0 0 0 6px">P</span>'+(S.msgs.some(m=>!m.r)?'<span class="dot"></span>':'');
 }
@@ -220,7 +220,7 @@ function show(id){document.body.classList.toggle('inworld',id==='world');if(id==
 /* ============ VN ENGINE ============ */
 let Q=[],onDone=null,typing=null,full='',waiting=false;
 const BG={con:'CTRL+ALT+CON',lock:'LOCKPICK VILLAGE',ctf:'CTF ROOM · SCOREBOARD LIVE',soc:'BLUE TEAM VILLAGE',stream:'● LIVE · CYBERJUNO',hotel:'ROOM 1337',roof:'ROOFTOP',dawn:'ROOFTOP · 5:52 AM',stage:'MAIN STAGE',keynote:'CLOSING KEYNOTE',vendor:'VENDOR HALL',party:'0xFF AFTERPARTY',void:'█████',flat:'YOUR FLAT',bakery:'PROOF · BAKERY',office:'BRINDLE & CO · IT HELPDESK',train:'TRAIN · PLATFORM 4',cos:'COSPLAY HALL',chill:'CHILL-OUT LOUNGE',bar:'THE HOTEL BAR',lobby:'HOTEL LOBBY'};
-function setBG(k){const w=typeof worldBG==='function'&&worldBG(k);const cls='bg '+(w?'bg-dim':'bg-'+(BG[k]?k:'con'));if($('bg').className!==cls){$('bg').className=cls;$('bg').classList.add('bgin')}CURBG=k;const sg=BG[k]||(typeof AREAS!=='undefined'&&AREAS[k]?AREAS[k].n.toUpperCase():'');$('sign').textContent=sg;$('sign').style.display=sg?'block':'none';if(w&&G.ok)G.forceFrame=true}
+function setBG(k){const w=typeof worldBG==='function'&&worldBG(k);const cls='bg '+(w?'bg-dim':'bg-'+(BG[k]?k:'con'));if($('bg').className!==cls){$('bg').className=cls;$('bg').classList.add('bgin')}CURBG=k;if(typeof cutClass==='function')cutClass();const sg=BG[k]||(typeof AREAS!=='undefined'&&AREAS[k]?AREAS[k].n.toUpperCase():'');$('sign').textContent=sg;$('sign').style.display=sg?'block':'none';if(w&&G.ok)G.forceFrame=true}
 /* does switching to this background move us somewhere else? (then fade through black) */
 function bgChanges(k){if(k===CURBG||!$('vn').classList.contains('on'))return false;
  if(S&&S.inWorld&&G.ok&&typeof bgArea!=='undefined'&&bgArea(k)){const cur=areaAt(WD.reg,WD.x,WD.z,WD.y);return !(cur&&(AREAS[cur].bg===k||bgArea(k)===cur))}
@@ -231,7 +231,7 @@ function run(steps,done){closeOv();clearPor();$('txt').textContent='';$('who').t
 function next(){
  $('chs').innerHTML='';
  if(S.exp>=100&&!S.ending&&!S.failing&&S.day>0){S.failing=1;Q=[];onDone=null;clearPor();failDay();return}
- if(!Q.length){const d=onDone;onDone=null;if(d)d();return}
+ if(!Q.length){if(typeof cutSet==='function'&&WD.cut)cutSet(null);const d=onDone;onDone=null;if(d)d();return}
  const st=Q.shift();
  if(typeof st==='function'){const r=st();if(Array.isArray(r))Q.unshift(...r);return next()}
  if(st.bg&&!st._f&&bgChanges(st.bg)){const s2=Object.assign({},st,{_f:1});fadeScene(()=>{Q.unshift(s2);next()});return}
@@ -240,10 +240,11 @@ function next(){
  if(st.hide){clearPor();return next()}
  if(st.msg){addMsg(st.msg[0],st.msg[1]);return next()}
  if(st.tp){if(G.ok&&S.inWorld)teleportArea(st.tp);return next()}
+ if(st.cut!==undefined){if(typeof cutSet==='function')cutSet(st.cut);return next()}
  if(st.unlock)return unlock(st.unlock,next);
  if(st.chapter!==undefined)return chapterCard(st.chapter,next);
  if(st.choice)return choose(st.choice);
- if(st.game)return GAMES[st.game](st,()=>next());
+ if(st.game){if(S.replay)return next();return GAMES[st.game](st,()=>next())}
  if(st.end)return finishEnding(st.end);
  say(st);
 }
@@ -251,7 +252,7 @@ function say(st){
  const who=st.w,box=$('txt');
  box.className='';
  const pw=$('who').textContent;
- if(who&&CH[who]){if(!st.keep)setPor(lookOf(who),st.x);$('who').textContent=st.as||CH[who].name;$('who').style.background=CH[who].col}
+ if(who&&CH[who]){if(!st.keep&&!(typeof cutOn==='function'&&cutOn()))setPor(lookOf(who),st.x);$('who').textContent=st.as||CH[who].name;$('who').style.background=CH[who].col}
  else if(who==='whisper'){clearPor();$('who').textContent='WHISPER';$('who').style.background='var(--coral)';box.className='whisper'}
  else if(who==='wh1sper'){clearPor();$('who').textContent='WH1SPER';$('who').style.background='#c0102a';box.className='whisper wh1'}
  else if(who==='think'){$('who').textContent='';box.className='think'}
@@ -314,8 +315,9 @@ const TUT={
  map:['The map','Press M for the map. Drag to look around, scroll or pinch to zoom, tap a room you\'ve visited to fast travel. A green light in the world, and a green star on the map, mark where the story wants you.'],
  time:['Time','Each day has six parts: Morning, Midday, Afternoon, Evening, Night and Late night. Time only moves when you do something that takes it. Some parts of the day belong to the story: the green light shows where. The rest are yours: spend each one with someone, on a lead, at a talk, or however you like. Walking, talking, shopping and your phone are free. You can\'t do everything. Choose.'],
  hang:['Spending time','Walk up to someone and choose Spend time to use the current part of the day with them. Their next scene needs them to like you enough, and sometimes it needs the right day, or enough Skill or Clout. Talking shop is free, once a day each.'],
- cred:['Credits','You earn credits from minigames, bug bounties and the CTF. Spend them at the Con Store in the Vendor Hall, on gear and gifts. Each person has a gift they\'ll love.'],
- room:['Room 1337','Your hotel room. The laptop runs bug bounties for credits, and the bed ends the day. Your phone can call it a night from anywhere.'],
+ money:['Money','Brindle pays a per diem every morning. You can earn more from bug bounties on your laptop, minigames, the CTF, and shifts (the info desk, the hotel bar, Proof). Shops are spread around: the Con Store, the Byte Café, the hotel boutique, the bar, the station kiosk. Gifts are ordinary things, and everyone feels differently about each one. You find out by giving, by getting closer, or by asking the wrong people.'],
+ echo:['Echo','You remember. Your phone has a new app, Echo: it lists everyone and everything left, and lets you rewind the day to this morning. Each part of the day now holds six things instead of one, people can take three times as much of you, and nobody\'s story waits as long for its day.'],
+ room:['Room 1337','Your hotel room. The laptop runs bug bounties for money, and the bed ends the day. Your phone can call it a night from anywhere.'],
  clues:['The case board','Someone at this con is watching everyone, and there\'s more going on than that. Clues go onto the case board in your phone. Leads there cost time, and some are risky. When you have the evidence, pick the answer and the three clues that prove it. Get it wrong and people notice you asking.']
 };
 function unlock(k,cb){

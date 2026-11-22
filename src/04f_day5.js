@@ -93,10 +93,12 @@ ellie.b: You don't owe anyone this. You're not a superhero. You're a man who fix
 ellie.n: Did I do that right? Foil?
 > You did that exactly right.
 [bg plaza]
+[call inject('d5_framed')]
 [sum Afternoon: WH1SPER named you as WHISPER, with a minute-by-minute map of your week that only the badges could have made. Lumen reposted it in four minutes. Ellie offered you a way out. You went back to the con together.]
 `;
 SC.end_proof=`
 [hide]
+[flag stayed_home]
 ~ You stay.
 ~ That evening you board up the back door with Mr Demir. You fix the till's broken drawer. You turn your phone off, all the way off, and put it in the bread bin, which Ellie insists is "basically a Faraday cage, it's metal".
 ~ The next morning, at four, you're in the bakehouse with her, folding dough you don't understand into shapes she does.

@@ -130,8 +130,8 @@ function stairs(x0,z0,x1,z1,y0,y1,dir,m,o){
  o=o||{};const n=Math.max(2,Math.round((y1-y0)/.19)),dh=(y1-y0)/n;const ax=dir[0],up=dir[1]==='+';
  const L=ax==='x'?x1-x0:z1-z0,dl=L/n;const nose=o.nose||MT.plain('#2a2230');
  for(let i=0;i<n;i++){const top=y0+(i+1)*dh;const a=up?i*dl:L-(i+1)*dl;
-  if(ax==='x'){box(x0+a,o.solid===false?top-.12:y0,z0,x0+a+dl,top,z1,m,{col:false,nz0:1,nz1:o.sides?0:1});const ex=up?x0+a:x0+a+dl;box(ex-.025,top-.03,z0,ex+.025,top+.005,z1,nose,{col:false,nz0:1,nz1:1})}
-  else{box(x0,o.solid===false?top-.12:y0,z0+a,x1,top,z0+a+dl,m,{col:false,nx0:1,nx1:o.sides?0:1});const ez=up?z0+a:z0+a+dl;box(x0,top-.03,ez-.025,x1,top+.005,ez+.025,nose,{col:false,nx0:1,nx1:1})}}
+  if(ax==='x'){box(x0+a,o.solid===false?top-.12:y0,z0,x0+a+dl,top,z1,m,{col:false,nz0:o.sides?0:1,nz1:o.sides?0:1});const ex=up?x0+a:x0+a+dl;box(ex-.025,top-.03,z0,ex+.025,top+.005,z1,nose,{col:false,nz0:1,nz1:1})}
+  else{box(x0,o.solid===false?top-.12:y0,z0+a,x1,top,z0+a+dl,m,{col:false,nx0:o.sides?0:1,nx1:o.sides?0:1});const ez=up?z0+a:z0+a+dl;box(x0,top-.03,ez-.025,x1,top+.005,ez+.025,nose,{col:false,nx0:1,nx1:1})}}
  ftag(x0,z0,x1,z1,Math.max(y0,y1),m.top||m,1);
  // a solid flight can't be walked into from behind or the side: stepped blocks under it, each no higher than the
  // lowest tread above it, so someone climbing never touches them. A floating flight (open risers) gets a slab of

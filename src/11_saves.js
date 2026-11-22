@@ -1,6 +1,6 @@
 /* ============ SAVE SLOTS ============ */
 const NSLOT=5;
-const slotKey=i=>i==='auto'?'opsec3_save':'opsec3_slot_'+i;
+const slotKey=i=>'opsec5_p'+PROF+'_'+(i==='auto'?'auto':'slot_'+i);
 function readSlot(i){try{const t=LS.get(slotKey(i));return t?JSON.parse(t):null}catch(e){return null}}
 function delSlot(i){try{localStorage.removeItem(slotKey(i))}catch(e){}}
 function stamp(){if(G.ok&&S.inWorld)S.pos=[WD.reg,WD.x,WD.z,WD.yaw,WD.y];S.savedAt=Date.now();S.where=(WD.area&&AREAS[WD.area])?AREAS[WD.area].n:(S.day===0?'Home':'')}
@@ -45,8 +45,10 @@ function resumeGame(s){
  // saves from before the week was rebuilt (chapters, nine people) can't be carried over: start that player again
  if(!s.v||s.v<4){S=fresh(s.h||'n00b');S.resume='pro';startPrologue();return}
  S=s;if(!S.msgs)S.msgs=[];if(!S.log)S.log=[];
+ // credits became money; gifts became ordinary things
+ if(S.money===undefined){S.money=(S.cred||0)+20;delete S.cred;if(S.unl.cred)S.unl.money=1}for(const k in S.inv)if(!ITEMS[k])delete S.inv[k];for(const g in S.gifted)if(S.gifted[g]===true)S.gifted[g]=1;
  // quit during the prologue: it's one scene, so it starts again
- if(S.day===0){const h=S.h,r=S.restore,sb=S.f.sessionbak;S=fresh(h);S.restore=r;if(sb)S.f.sessionbak=1;S.resume='pro';startPrologue();return}
+ if(S.day===0){const h=S.h,r=S.f.canrewind;S=fresh(h);if(r)S.f.canrewind=1;S.resume='pro';startPrologue();return}
  if(!WD.touch&&window.THREE)tryLock();
  initWorld(()=>{
  if(S.pos&&G.ok&&G.regions[S.pos[0]])teleport(S.pos[0],S.pos[1],S.pos[2],S.pos[3],S.pos[4]||0);else if(G.ok)teleportArea(S.wakeAt||'room1337');

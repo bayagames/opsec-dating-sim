@@ -52,6 +52,7 @@ ellie.h: I'm going to sell pastries to scared hackers. You go and do... whatever
 SC.d3_whispers=`
 [bg hallA]
 [hide]
+[cut hallA_stage]
 ~ Midday. Hall A is packed for the day's big talk: "The State of Privacy", given by a professor with an enormous beard and a nervous laugh. Two thousand people. Ten minutes in, he's explaining cookies.
 ~ Then every screen in the hall goes black. The house lights dip. A hush, the way a room goes quiet before a storm.
 [bg void]
@@ -60,13 +61,16 @@ whisper: HOME ADDRESS: [REDACTED. I'M NOT AN ANIMAL.]
 whisper: INSTEAD, HERE IS WHAT HIS APP SENDS HOME. YOUR CONTACTS. YOUR LOCATION, EVERY SIXTY SECONDS. EVERY WEBSITE YOU VISIT, THROUGH ITS "PRIVACY VPN".
 whisper: TEN MILLION PEOPLE. ASK HIM. I'LL WAIT.
 [bg hallA]
+[cut hallA_front victor delphine]
 ~ A spotlight swings. Victor Hale is in the front row, in a reserved seat. Two thousand faces turn to him.
 ~ He stands. He buttons his jacket. He smiles. Delphine, two seats along, has gone very still.
 victor.a: Fabricated. Defamatory. SafeSphere is independently audited by Bastion Security. Lumen's lawyers will be in touch with this... WHISPER.
+[cut hallA_stage marge]
 ~ From the side of the stage, Marge, who wasn't on the programme, takes the professor's microphone.
 marge.n: Victor. Is any of it true?
 victor.s: Marge. Please. Would a privacy company lie about privacy?
 ~ A ripple through the hall: half laughter, half something nastier. The professor is holding his beard.
+[cut off]
 ~ In the crowd you spot a lilac hoodie. Rin has gone completely white.
 * Every sixty seconds. Astrid said that number on the train. Everyone who looks knows.
 ~ The screens come back. The professor tries to restart. Nobody's listening.
@@ -115,6 +119,7 @@ saoirse.d: I learned that the hard way. Once.
 ~ Her phone rings. She looks at it like it owes her money.
 saoirse.n: Editor. Four minutes. Told you. Think, {h}. Keep thinking.
 * She knew your handle. She never looked at your badge after the first glance. She'd read it in one.
+[call inject('d3_copycat')]
 [sum In the chaos, Saoirse Quinn, an investigative journalist from The Ledger, found you. Two different people wrote those posts, she said: one is a lesson, the other is a sales pitch with a body count.]
 `;
 SC.d3_roof=`

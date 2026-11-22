@@ -157,6 +157,16 @@ astrid.n: Sorry. Am I being loud? It hisses. The radio. Some people find it upse
   ~ She nods at the window, where the SafeSphere billboard is sliding away.
   astrid.n: That one says it's a shield. Shields don't need to know where you are every sixty seconds.
   * Every sixty seconds. You've read that number before. You didn't know it was common knowledge.
+ ? "Is anything else up there? Anything strange?"
+  [flag heard_echo]
+  [fx astrid:5]
+  ~ She goes quiet. Then she turns the dial, very slowly, past the satellite, into hiss.
+  astrid.n: There's one. I've never told anyone because it sounds mad. Every seven days, on a frequency nothing is licensed to use, something sends a burst. Ninety seconds. Compressed. Like a whole week squeezed into one breath.
+  astrid.s: It started three weeks ago. It always comes from the direction of the Conference Quarter. And the last one ended with a word I could actually decode.
+  > What word?
+  astrid.d: "{h}." She says it carefully, like a word in a language she's learning. Is that... you?
+  * You haven't said your handle out loud today. You check. You haven't.
+  [clue echo_sky]
  astrid.s: If you come to the Aerospace Village, I'll show you how to listen. It takes a radio that costs less than a pizza.
 ? Smile, nod, and look out of the window.
  ~ She smiles back and puts the headphones on again. For the rest of the journey she listens to the sky and you watch the backs of houses go by.
@@ -236,6 +246,7 @@ SC.d1_ceremony=`
 ~ A bowl of two thousand seats rising into the dark on three sides, a stage the width of a street, and over it a screen the size of a house. The seats are filling with hoodies. Somewhere a DJ is playing something that sounds like a modem falling in love.
 ~ Block C, Row 4, Seat 12. You find it. You sit. The person on your left is eating noodles. The person on your right is asleep.
 * Two thousand people. Some of them wrote the tools you've only read about. Some of them broke things you thought couldn't be broken. And you're in Row 4, with a bag of sausage rolls.
+[cut hallA_stage marge]
 ~ The lights go down. One spotlight. A woman in her sixties with silver hair cropped short and reading glasses on a chain walks to the podium like she owns the building, which, for this week, she basically does.
 marge.h: Welcome to CTRL+ALT+CON number twenty! I'm Marge, your con chair. I've been doing this since it was thirty people in a pub basement and a router we weren't supposed to have.
 ~ A roar from the seats. Marge waits for it with the patience of someone who's waited for it nineteen times before.
@@ -245,18 +256,23 @@ marge.s: And a fourth rule, new this year, because some of you are animals. No p
 * No photos of badges. You think about the forum post, the ticket photo, the hotel name. You quietly decide it's fine. It's probably fine.
 marge.n: This year's a big one. Seven days. A hundred and forty talks. Twenty-two villages. The world's longest-running Capture the Flag, final on Saturday. And a closing keynote on Sunday that I've been told, repeatedly, by its speaker, will "change everything".
 marge.s: Speaking of whom. A word from our headline sponsor. He insisted. Twice.
+[cut hallA_stage victor marge]
 ~ A man walks on to applause he seems to have expected. Fifties, silver hair swept back, a suit that costs more than your rent, a smile with a lot of practice in it.
 victor.h: Thank you, Marge. Thank you, everyone. Victor Hale, CEO of Lumen Analytics. When I was your age, I was in a pub basement too.
 * Somewhere behind you someone mutters "no you weren't".
 victor.n: At Lumen, we believe privacy is a human right. Which is why SafeSphere is, and always will be, free.
+[cut hallA_podium victor marge delphine]
 ~ Behind him, to the side of the stage, a woman in a sharp navy suit with a sleek blond chignon watches the audience, not the speaker. She mouths the next line half a second before he says it.
 victor.s: This week, we're proud to give every attendee something special: your badge is "SafeSphere-enabled". It keeps you connected, and it keeps you safe.
 * Keeps you connected. To what?
 victor.h: Join me on Sunday at the closing keynote. We'll be announcing something that changes how people connect, forever.
 ~ Applause, mostly. Somebody boos. Somebody claps the boo. Most people are looking at their phones.
+[cut hallA_wing marge victor owen]
 ~ As Victor walks off, a bearded man in a brown cardigan and glasses shakes his hand at the edge of the stage, a little too long, a little too gratefully. His lanyard says OWEN PRYCE · DEPUTY CHAIR.
+[cut hallA_stage marge]
 marge.n: Right. Go. Be excellent. Badge Lab's in Hall C if your badge is broken, the CTF kicks off tomorrow morning, and the hotel bar is open from seven. Hydrate.
 [flag d1_open]
+[cut off]
 ~ The lights come up. Your phone buzzes twice.
 sms Ellie: did you get there ok?? is it all hoodies? send a pic of the hoodies (not of you, I know, opsec, I'm learning)
 ~ And from the con app: "Halcyon Hotel: check-in for CTRL+ALT+CON guests is now open. Through the Link off the Foyer's north-west corner, then the Promenade to reception."

@@ -63,8 +63,8 @@ const CLUE={
 /* mysteries: answer a (index into opts), and the clues that prove it (any three) */
 const MYST={
  m1:{n:'The Bakery Job',q:'Who stole Proof\'s account?',opts:['A random scammer with a breach list','Lumen Growth Partners: Lumen itself','WHISPER','Someone Ellie knows'],a:1,ev:['recovery','fwdrule','lgpdomain','lgpcall','breakin'],xp:20},
- m2:{n:'WHISPER',q:'Who is WHISPER?',opts:['Nyx','Mira, the silver-haired woman on the roof','Juno','Victor Hale himself'],a:1,ev:['sniffer','cipher','vod','dmtrace','mirasays'],xp:25},
- m3:{n:'The Copycat',q:'Who is WH1SPER?',opts:['WHISPER, getting worse','Lumen: Silas Krall\'s "Trust & Safety" team','Dave, getting revenge','A random troll'],a:1,ev:['daveonly','realaddr','locdata','r1313','burner','tsfolder','framepost','breakin','buriedphone'],xp:30},
+ m2:{n:'WHISPER',q:'Who is the real WHISPER, the hacker who warned you?',opts:['Nyx','Mira, the silver-haired woman on the roof','Juno','Victor Hale himself'],a:1,ev:['sniffer','cipher','vod','dmtrace','mirasays'],xp:25},
+ m3:{n:'The Copycat',q:'The copycat signs as WH1SPER, with a one. Who is really behind it?',opts:['WHISPER, getting worse','Lumen: Silas Krall\'s "Trust & Safety" team','Dave, getting revenge','A random troll'],a:1,ev:['daveonly','realaddr','locdata','r1313','burner','tsfolder','framepost','breakin','buriedphone'],xp:30},
  m4:{n:'Lantern',q:'What is SafeSphere 2 really for?',opts:['Better ads','Fraud detection','A contact graph that finds sources: who talks to journalists, lawyers and regulators','A real privacy upgrade'],a:2,ev:['rinfind','graphcode','salesdeck','runsheet','sources','intern','locker','lifescore','lantern01','locdata'],xp:30},
  m5:{n:'The Badges',q:'Why do the con badges blink?',opts:['A firmware bug','Tilly\'s art project','A Lumen beacon feeding LANTERN who meets whom','WHISPER is tracking people'],a:2,ev:['fwhash','beacons','lantern01','uplink','owensign','framepost'],xp:25},
  m6:{n:'The Mole',q:'Who in Con Ops is feeding Lumen?',opts:['Marge','Owen Pryce','Tilly','Sunny'],a:1,ev:['owensign','owendebt','owen13','leaktest','raid'],xp:30},
@@ -135,7 +135,9 @@ const TEXTQ={};
 const DAYCARD={0:['PROLOGUE','Hello, World','Two weeks before the con'],1:['DAY 1 · MONDAY','Badge In','CTRL+ALT+CON opens tonight'],2:['DAY 2 · TUESDAY','Capture the Flag','Six days to the closing keynote'],3:['DAY 3 · WEDNESDAY','Exposure','Five days to the closing keynote'],4:['DAY 4 · THURSDAY','Packet Loss','Four days to the closing keynote'],5:['DAY 5 · FRIDAY','Home','Three days to the closing keynote'],6:['DAY 6 · SATURDAY','Finals','The night before'],7:['DAY 7 · SUNDAY','Closing Keynote','Today']};
 /* endings: title, one line, and how it reads on the card */
 const ENDINFO={
- harem:['Everything Connected','Every thread, every person, every secret. All of it, together.','true'],
+ harem:['Everything Connected','The week closes. Every person, every mystery, every story ends, and it\'s finally Monday.','true'],
+ zeroday:['Zero Day','The lights go out. Not everyone comes down from the roof. And a message arrives from someone who\'s already been here.','secret'],
+ bigscore:['The Big Score','Five people, one laundry trolley, and a spy firm\'s crystal ball in the back of a van.','good'],
  disclosure:['Responsible Disclosure','The slow way, done right. LANTERN dies in daylight.','good'],
  half:['Half Measures','SafeSphere 2 is paused. Lumen is wounded. Not finished.','mixed'],
  frontpage:['Front Page','Saoirse\'s story runs at 4:01 PM. The world reads it at 4:02.','good'],
@@ -180,9 +182,12 @@ const ACH={
  doxxed:['Doxxed','Hit 100 Exposure.'],doxxed3:['Glutton for Punishment','Get doxxed three times in one run.'],
  lowkey:['Low Profile','End a day of the con with Exposure at 10 or less.'],
  ghostfoot:['Ghost','Reach the keynote without adding to your Footprint once.'],
- rich:['Bug Bounty Hunter','Hold 300 credits at once.'],
- shopper:['Retail Therapy','Buy something at the Con Store.'],
- gifts5:['Thoughtful','Give five people the gift they love.'],
+ rich:['Bug Bounty Hunter','Hold £200 at once.'],
+ perfect_gift:['Paying Attention','Give someone a gift they love.'],
+ worked:['Gig Economy','Work a shift for money.'],
+ broker:['Data Broker','Buy someone\'s secrets from PEOPLEFINDR. You know what you did.'],
+ shopper:['Retail Therapy','Buy something in a shop.'],
+ gifts5:['Thoughtful','Give gifts to five different people.'],
  ctf_win:['Capture the Flag','Win the CTF finals with Ada.'],
  dave:['Redemption Arc','Help Dave lock down his life.'],
  train:['Commuter','Take the train during the con.'],
@@ -190,8 +195,19 @@ const ACH={
  talks5:['Front Row','Go to five talks or workshops.'],
  night_owl:['Night Owl','Spend a Late night slot with someone.'],
  survivor:['Clean Week','Finish the con without being doxxed once.'],
- restore:['session.bak','Restore a session.',1],
  harem:['Everything Connected','See the true ending.',1],
+ secret:['Zero Day','Find the secret ending.',1],
+ badge0:['Badge 0000','Find something in the pool that shouldn\'t exist.',1],
+ awake:['rewind','Type the word at the very beginning.',1],
+ loopclosed:['Monday','Close the loop.',1],
+ rewind_day:['Again, But Better','Rewind a day.',1],
+ bigscore_heist:['Eight Frames','Steal LANTERN-02 with the crew.',1],
+ injected:['Friends in Need','Have someone you know step into the story for you.'],
+ hints5:['Riddler','Learn five hints.'],hints_all:['Nothing Left to Learn','Learn every hint.'],
+ replay:['Rerun','Replay a scene from the postgame.'],
+ tree10:['Cartographer','Find ten different endings.'],
+ epilogue:['The Week After','Walk around after everything.',1],
+ money500:['Comfortable','Earn £500 across all your runs.'],
  newgame:['Again','Start a second run.']
 };
 for(const k of ENDORDER)ACH['end_'+k]=['Ending: '+ENDINFO[k][0],ENDINFO[k][1],1];

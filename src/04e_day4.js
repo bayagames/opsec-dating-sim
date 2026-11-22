@@ -185,5 +185,6 @@ ellie.b: Will you come? You don't have to. You've got your con. You've got your 
 > I'll come. Of course I'll come.
 ellie.b: ...Thank you. First train. I'll meet you in the lobby. Bring a coat. Linden Street's cold at eight.
 [flag ellie_home_ask]
+[call inject('d4_burglary')]
 [sum Proof was broken into. Nothing was taken but Ellie's old laptop, the one with the forwarding rule on it. She has to go home in the morning, and asked you to come.]
 `;

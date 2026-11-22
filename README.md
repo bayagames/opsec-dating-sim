@@ -22,11 +22,16 @@ Serve the folder (`python3 -m http.server 8123`), then with Playwright installed
 
     node tools/storytest.js 12
     node tools/storytest.js ends
+    node tools/storytest.js routes
 
-The first plays twelve whole runs with no 3D (`?test`) and reports endings, how far each route got, texts received, errors and missing scenes. The second plays every ending with every possible partner. In game, F9 or the backtick key opens the debug menu.
+The first plays twelve whole runs with no 3D (`?test`) and reports endings, how far each route got, texts received, errors and missing scenes. The second plays every ending with every possible partner. The third plays the secret route, the crew's heist and the loop to the true ending. In game, F9 or the backtick key opens the debug menu.
 
 ## Source map
 - `01_engine.js`   portraits, VN engine, tutorials
+- `03c_economy.js` money, shops, gifts and what everyone thinks of them, shifts, PEOPLEFINDR
+- `04q_loop.js`   the Big Score, Zero Day (secret), the loop (true route), people stepping into the story
+- `06c_postgame.js` the postgame: the week as a tree, endings and versions, hints, replay, the week after
+- `09c_cut.js`    cutscenes: camera shots with the cast on their marks
 - `01b_core.js`    the week (days and six parts of each), Skill and Clout ranks, closeness, Exposure and its daily reset and fail, clues, achievements, the story summary, what carries over between runs
 - `01c_script.js`  the scene language: scenes are written as plain text (`~` narration, `*` thoughts, `name.x:` lines, `?` choices, `if`, `[commands]`) and parsed on first use
 - `02_games.js`    minigames (quiz, phishing, terminal, timing, code review)

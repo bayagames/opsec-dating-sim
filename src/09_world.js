@@ -3,7 +3,7 @@ const WD={x:0,y:0,z:0,yaw:0,pit:0,vx:0,vz:0,vy:0,eye:1.62,ground:true,reg:'home'
 /* ---------- areas ---------- */
 /* the most specific area wins: 'sub' areas first, then the smallest rectangle (a café inside a lobby, a food court inside the courtyard) */
 function areaAt(reg,x,z,y){let best=null,bs=1e18;for(const k in AREAS){const a=AREAS[k];if(a.reg!==reg)continue;const r=a.r;if(x>=r[0]&&x<=r[2]&&z>=r[1]&&z<=r[3]&&y>=a.y0&&y<=a.y1){const sz=(r[2]-r[0])*(r[3]-r[1])/(a.sub?1e6:1);if(sz<bs){bs=sz;best=k}}}return best}
-function teleport(reg,x,z,yaw,y){G.poolReg=null;G.atmoInit=false;WD.reg=reg;WD.x=x;WD.z=z;WD.yaw=yaw;WD.pit=0;WD.y=y||0;WD.vy=0;WD.vx=WD.vz=0;WD.eye=WD.y+1.62}
+function teleport(reg,x,z,yaw,y){WD.tpAt=performance.now();G.poolReg=null;G.atmoInit=false;WD.reg=reg;WD.x=x;WD.z=z;WD.yaw=yaw;WD.pit=0;WD.y=y||0;WD.vy=0;WD.vx=WD.vz=0;WD.eye=WD.y+1.62}
 function teleportArea(k){const a=AREAS[k];if(!a)return;teleport(a.reg,a.sp[0],a.sp[1],a.sp[2],a.sp[3]||0)}
 const bgArea=k=>BG2AREA[k]||(typeof AREAS!=='undefined'&&AREAS[k]?k:null);
 /* are you in (or right at the edge of) this area? talking over a counter or through a doorway counts */
@@ -60,7 +60,8 @@ function setupInput(){
   WD.locked=document.pointerLockElement===lockEl();
   if(WD.locked){WD.everLocked=true;WD.lockFails=0;WD.lockAt=performance.now();return}
   WD.unlockAt=performance.now();
-  const self=WD.selfUnlock;WD.selfUnlock=false;
+  // our own unlocks, loading screens and the moments after a teleport never count as the player asking for the phone
+  const self=WD.selfUnlock||G.baking||G.lmBusy||performance.now()-(WD.tpAt||0)<2500||!S||S.ending||!S.inWorld;WD.selfUnlock=false;
   // a lock that dies within a moment of being granted was the browser finishing an Esc press, not the player asking for the phone
   if(performance.now()-(WD.lockAt||0)<450)return;
   // Esc released the mouse: that's the "open phone" key
@@ -93,7 +94,7 @@ function setupInput(){
 /* step back into mouse-look (after the phone closes, a scene ends...). While Esc is held, wait for it to come up:
    locking during an Esc press hands the browser an Esc to cancel the lock with, and the phone pops straight back */
 function relock(){if(WD.touch||WD.noLock||locked())return;if(WD.escDown){WD.lockAfterEsc=true;return}tryLock()}
-function tryLock(){if(WD.touch||WD.noLock)return;const el=lockEl();if(document.pointerLockElement===el)return;try{const p=el.requestPointerLock&&el.requestPointerLock();if(p&&p.catch)p.catch(()=>{})}catch(e){}}
+function tryLock(){if(WD.touch||WD.noLock||!S||!S.inWorld||S.ending||$('title').classList.contains('on'))return;const el=lockEl();if(document.pointerLockElement===el)return;try{const p=el.requestPointerLock&&el.requestPointerLock();if(p&&p.catch)p.catch(()=>{})}catch(e){}}
 function setTouch(on){WD.touch=on;document.body.classList.toggle('touchui',on);document.body.classList.toggle('desk',!on)}
 /* dx>0 (mouse/finger moves right) turns right; dy<0 (moves up) looks up. Never inverted. */
 function look(dx,dy,k){const s=lookSens();WD.yaw-=dx*k*s;WD.pit=clamp(WD.pit-dy*k*s,-1.25,1.25)}
@@ -153,6 +154,8 @@ function update(dt){
 const ACTIV={ctf:['Practise a CTF challenge',()=>ctfPractice()],hallB:['Catch a talk in Hall B',()=>attendTalk()],hallC:['Catch a talk in Hall C',()=>attendTalk()],workshopA:['Join the workshop',()=>attendTalk()],workshop:['Join the workshop',()=>attendTalk()],lounge:['Take a breather',()=>restSlot()],naps:['Borrow a nap pod',()=>restSlot()],quiet:['Sit in the quiet for a while',()=>restSlot()]};
 /* stepping into an area that isn't open yet: you stop at its edge and are told why (never trapped: you can always leave) */
 function lockedAt(reg,x,z,y){const a=areaAt(reg,x,z,y);if(!a||a===WD.area)return false;const m=areaLock(a);if(!m)return false;
+ // already somewhere that's closed (a lift, a scene, a gap): every way out is open, so nobody gets stuck
+ if(WD.area&&areaLock(WD.area))return false;
  if(performance.now()-(WD.lockT||0)>2500){WD.lockT=performance.now();toast(m,'var(--coral)')}return true}
 function visibleChars(){return WCH.filter(c=>c.reg===WD.reg&&c.when())}
 function candidates(){
@@ -248,7 +251,8 @@ function render(dt){
  const sp=Math.hypot(WD.vx,WD.vz),bamp=(WD.bobAmp||0)*(sp>6.5?.024:.016)*(SETTINGS.bob===false?0:1),bob=-bamp*(1-Math.cos(WD.bob*2))*.5-(WD.land||0);
  const asp=w/h,vf=clamp(2*Math.atan(Math.tan(.75+WD.fovk*.045)/asp),1.05,1.8);
  cam.fov=vf*180/Math.PI;cam.far=(FAR[WD.reg]||180)+40;cam.updateProjectionMatrix();
- cam.position.set(WD.x,WD.eye+bob,WD.z);cam.rotation.set(WD.pit,WD.yaw,0);zoneCull(WD.reg,WD.x,WD.eye,WD.z);
+ if(WD.cut&&cutOn()){const p=cutCam(cam);zoneCull(WD.reg,p[0],p[1],p[2])}
+ else{cam.position.set(WD.x,WD.eye+bob,WD.z);cam.rotation.set(WD.pit,WD.yaw,0);zoneCull(WD.reg,WD.x,WD.eye,WD.z)}
  G.sky.position.copy(cam.position);const su=G.sky.material.uniforms;su.t.value=performance.now()/1000;
  const tod=todNow();if(tod){su.hz.value.setRGB(...tod.hz);su.zn.value.setRGB(...tod.zn);su.st.value=tod.st}
  else{su.hz.value.copy(G.fog.color);if(R.day){su.zn.value.setRGB(.12,.3,.75);su.st.value=0}else{su.zn.value.setRGB(.012,.012,.05);su.st.value=1}}
@@ -296,7 +300,7 @@ function hudMark(id,o,col,h){let el=$(id);if(!el){el=document.createElement('div
  el.querySelector('span').textContent=(Math.abs(dy)>2.6?(dy>0?'▲ ':'▼ '):'')+Math.round(Math.hypot(d,dy))+' m';
 }
 function updSprites(dt){
- const T=G.T,tt=performance.now()/1000,yaw=WD.yaw;
+ const T=G.T,tt=performance.now()/1000,yaw=WD.cut&&cutOn()?WD.cutYaw:WD.yaw;
  G.newsT=(G.newsT||0)-dt;if(G.newsT<=0){G.newsT=.25;G.news=S.ch>0?new Set(newScenes().map(n=>n.id)):new Set()}
  for(const c of WCH){
   const vis=c.reg===WD.reg&&c.when();
@@ -406,11 +410,12 @@ function loop(t){
  const dt=Math.min(.05,(t-(WD.t||t))/1000);WD.t=t;
  // the place you're in needs its lightmaps on the GPU (loaded from cache, or baked on a first visit)
  if(S&&S.inWorld&&G.ok&&G.baked){const R=G.regions[WD.reg];if(R&&!R.lmTex&&!R.lmSkip){if(!G.lmBusy)regionNeed(WD.reg,true);else lmUI(true,G.lmBusy,null,G.bakeP)}}
- if(!S||!S.inWorld||!G.ok||G.baking||$('gl').style.display==='none')return;
+ if(!S||!S.inWorld||S.ending){vcShow(false);if(locked()){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}return}
+ if(!G.ok||G.baking||$('gl').style.display==='none')return;
  const live=worldLive();
  if(live)update(dt);
  // behind a conversation the world is blurred: a few frames a second is plenty
- const behind=!live&&($('vn').classList.contains('on')||$('ov').classList.contains('on'));
+ const behind=!live&&!cutOn()&&($('vn').classList.contains('on')||$('ov').classList.contains('on'));
  G.skip=(G.skip||0)+1;
  if(!window.__nr&&(!behind||G.skip%4===0||G.forceFrame)){G.forceFrame=false;render(behind?dt*4:dt)}
  if(live){adaptRes(dt);}
