@@ -75,7 +75,7 @@ function bakeLight(reg,i){
  BK.dist.uniforms.lp.value.set(l[0],l[1],l[2]);BK.dist.uniforms.far.value=far;
  const ac=r.autoClear,cc=r.getClearColor(new T.Color()),ca=r.getClearAlpha();
  r.setClearColor(0xffffff,1);r.autoClear=true;cam.update(r,R.bk.sh);
- const u=BK.light.uniforms;u.lp.value.set(l[0],l[1],l[2]);u.lc.value.set(lin(l[3]),lin(l[4]),lin(l[5])).multiplyScalar(l[7]*G.LK);u.lr.value=lr;u.far.value=far;u.cube.value=G.bkCubeRT.texture;
+ const u=BK.light.uniforms;u.lp.value.set(l[0],l[1],l[2]);u.lc.value.set(lin(l[3]),lin(l[4]),lin(l[5])).multiplyScalar(l[7]*G.LK*(R.lk||1));u.lr.value=lr;u.far.value=far;u.cube.value=G.bkCubeRT.texture;
  r.autoClear=false;
  for(let p=0;p<R.bk.rt.length;p++){let any=false;for(const b of R.bk.scn[p].children){const s=b.userData.bs;b.visible=Math.hypot(s.center.x-l[0],s.center.y-l[1],s.center.z-l[2])<s.radius+lr;any=any||b.visible}
   if(!any)continue;r.setRenderTarget(R.bk.rt[p]);r.render(R.bk.scn[p],R.bk.cam)}
@@ -119,7 +119,7 @@ const LMDB={db:null,open(){return new Promise(res=>{try{const q=indexedDB.open('
  put(k,v){if(!LMDB.db)return;try{const t=LMDB.db.transaction('lm','readwrite');t.objectStore('lm').put(v,k)}catch(e){}}};
 function lmKey(reg){const R=G.regions[reg],L=G.lights[reg]||[];let h=0;const add=v=>{h=(h*31+Math.round(v*100))|0};
  for(const l of L)l.forEach(add);const SU=G.sun&&G.sun[reg];if(SU)[...SU.d,...SU.c,SU.k,SU.half,...SU.c0].forEach(add);let verts=0;R.obj.traverse(o=>{if(o.isMesh&&o.userData.pg>=0){verts+=o.geometry.attributes.position.count;const a=o.geometry.attributes.lmuv.array;for(let i=0;i<a.length;i+=97)add(a[i]*1e4)}});
- return['v5',reg,R.lm.S,R.lm.pages,R.lm.D.toFixed(3),verts,h,G.LK,LOOK.reach,BAKE.fill,BAKE.soft,BAKE.cube].join('|')}
+ return['v5',reg,R.lm.S,R.lm.pages,R.lm.D.toFixed(3),verts,h,G.LK,R.lk||1,LOOK.reach,BAKE.fill,BAKE.soft,BAKE.cube].join('|')}
 function lmApply(reg,pages){const T=G.T,R=G.regions[reg],S=R.lm.S;R.lmTex=pages.map(px=>{const t=new T.DataTexture(px,S,S,T.RGBAFormat,T.UnsignedByteType);t.minFilter=t.magFilter=T.LinearFilter;t.generateMipmaps=false;t.channel=1;t.colorSpace=T.NoColorSpace;t.needsUpdate=true;t.onUpdate=()=>{t.image={width:S,height:S,data:null}};return t});
  R.obj.traverse(o=>{if(o.isMesh&&o.userData.mk&&o.userData.pg>=0){o.userData.lmk=reg+':'+o.userData.pg;o.material=getMat(o.userData.mk,o.userData.lmk)}})}
 /* Lightmaps live per region, and only the place you're in (plus the one you just left, so hopping between the

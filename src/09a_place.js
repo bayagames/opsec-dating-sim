@@ -110,7 +110,7 @@ function placeGates(){
  gate('con','rope',-109.6,43,-64.6,43,0,()=>d1('badge'),()=>'A volunteer with a lanyard the size of a seatbelt: "Badge first! Registration\'s right there."');
  gate('con','rope',-64.8,51.6,-64.8,56.4,0,()=>d1('badge'),()=>'"Badge first," says a volunteer, who has said "badge first" four hundred times today.');
  // before the opening ceremony: the way to Hall A (Foyer, Ring West, Ring North, the hall's floor doors) stays open, everything else is roped
- ropeC(-109.4,10.4,-109.4,39.6);ropeC(-96.6,-3.4,-77.4,-3.4);ropeC(-63.4,-23.6,-63.4,-4.4);ropeC(-80,40.6,-72,40.6);ropeC(-64.8,38,-64.8,42);
+ ropeC(-109.4,10.4,-109.4,39.6);ropeC(-64.8,51.6,-64.8,56.4);ropeC(-96.6,-3.4,-77.4,-3.4);ropeC(-63.4,-23.6,-63.4,-4.4);ropeC(-80,40.6,-72,40.6);ropeC(-64.8,38,-64.8,42);
  ropeC(56.4,-63.6,56.4,-54.4);ropeC(56.4,20.4,56.4,33.6);ropeC(55.6,-42,55.6,-34);ropeC(55.6,-12,55.6,-4);
  ropeC(-40,33.6,-34,33.6);ropeC(2,33.6,8,33.6);ropeC(33,33.6,37,33.6);ropeC(51.5,33.6,54.5,33.6);ropeC(26.6,-59.4,26.6,-55.6);
  for(const c of[-10,20])ropeC(c-1.5,-49.6,c+1.5,-49.6);for(const c of[-30,10])ropeC(c-1.5,19.6,c+1.5,19.6);ropeC(-49.6,-1.5,-49.6,1.5);for(const c of[-20,5])ropeC(39.6,c-1.5,39.6,c+1.5);
@@ -124,6 +124,7 @@ function placeGates(){
  gate('con','door',-91,68,-85,68,0,()=>d1('checkin'),outMsg,'Convention doors');gate('con','door',-137.2,60,-132.8,60,0,()=>d1('checkin'),outMsg,'Revolving door');
  gate('con','door',-148.2,60,-145.8,60,0,()=>d1('checkin'),outMsg,'Hotel doors');gate('con','door',-124.2,60,-121.8,60,0,()=>d1('checkin'),outMsg,'Hotel doors');
  // basement fire stairs: from day 2
+ gate('con','rope',-71.6,91.4,-64.4,91.4,0,()=>S.ch>=2,()=>'A barrier arm and a sign: "CAR PARK · HALCYON GUESTS · OPENS 6AM". It\'s late. Tomorrow.','Car park barrier');
  gate('con','door',-160,29.2,-160,30.8,0,()=>S.ch>=2,()=>'"FIRE STAIRS · B". A sign underneath: "Guests: emergencies only." Maybe tomorrow, when you\'re less new.','Fire stairs');
  // luggage room: Nyx can show you how
  gate('con','door',-160,7.2,-160,8.8,0,()=>!!S.f.luggage,()=>null,'Luggage room');

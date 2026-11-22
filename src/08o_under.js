@@ -62,7 +62,7 @@ function buildUnder(){
 function siteAreas(){
  const A=(k,n,r,sp,bg,o)=>area(k,n,'con',r,sp,bg,o),PI=Math.PI,G1={y0:4,y1:10},G2={y0:9.5,y1:15.5},B={y0:-7,y1:-2};
  // outside
- A('plaza','Arrival Plaza',[-215,60,215,140],[-88,74,PI,0],'con',{out:1});A('vestibule','Convention Entrance',[-96,60,-80,68],[-88,64.5,0,0],'con',{sub:1});
+ A('plaza','Arrival Plaza',[-215,60,215,140],[-88,74,0,0],'con',{out:1});A('vestibule','Convention Entrance',[-96,60,-80,68],[-88,64.5,0,0],'con',{sub:1});
  // hotel ground floor
  A('lobby','Hotel Lobby',[-160,-4,-110,60],[-135,54,0,0],'lobby',{y1:4});A('cafe','Halcyon Café',[-129,42,-110,60],[-122,49,PI,0],'lobby',{sub:1,y1:4});
  A('promenade','The Promenade',[-200,-24,-64,-4],[-120,-14,PI/2,0],'lobby',{y1:4});A('lifts','Hotel lifts',[-160,-36,-136,-24],[-148,-26,0,0],'lobby',{sub:1,y1:4});

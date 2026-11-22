@@ -118,7 +118,7 @@ function buildSite(){
   hfac:mt('hotelFac',0,.125,1,{k:.5}),cfac:mt('conFac',0,.125,1,{k:.5}),clad:mt('cladding',0,.25,0,{r:.5,m:.3}),screenBig:mt('screenBig',0,1,1,{k:1.35}),screenSide:mt('screenSide',0,1,1,{k:1.3}),
   expoBanner:mt('expoBanner',0,1,1,{k:1.2}),hazard:mt('hazard',0,1,0,{r:.6}),mapBoard:mt('mapBoard',0,1,1,{k:1.1}),scoreBig:mt('scoreBig',0,1,1,{k:1.35}),menuBoard:mt('menuBoard',0,1,1,{k:.9}),
   pressWall:mt('pressWall',0,.5,0,{r:.6}),books:mt('bookshelf',0,1,0,{r:.8}),locker2:mt('locker2',0,.5,0,{r:.5,m:.3}),rugH:mt('carpetHotel','#d8c8b0',.4,0,{r:1})});
- region('con',{fog:[.07,.04,.1],fr:[30,190],lmPages:{high:8,medium:5,low:3},lmCap:9});G.regions.con.amb=[.36,.32,.42];
+ region('con',{fog:[.07,.04,.1],fr:[30,190],lmPages:{high:8,medium:5,low:3},lmCap:9});G.regions.con.amb=[.36,.32,.42];G.regions.con.lk=1.15;
  const Z=zone,Y0=-.3;
  // outdoors
  Z('plaza',-215,60,215,140,-.3,80,['lobby','foyer','food','cosplay','boutique','ramp','seConc','seConc1','skygarden','plazaE']);Z('plazaE',80,34,215,60,-.3,80,['seConc','seConc1','cosplay','chill','naps','vcorr','vcorr1','aero','film']);
@@ -178,7 +178,7 @@ function buildSite(){
  // hubs: open concourses and corridors; a room that sees one also sees what it opens onto
  for(const n of['lobby','promenade','foyer','courtyard','ringN','ringW','ringE','ringS','ringN2','ringW2','ringE2','ringS2','neConc','neConc2','seConc','seConc1','vcorr','vcorr1','hotelL1','hotelL2','plaza','service','staffW','staffE','liftH','terrace','skyterrace'])G.zones.con.find(q=>q.n===n).hub=true;
  G.zones.con.find(q=>q.n==='outside').bg=true;
- G.wallNT=true;buildHotel();buildCore();buildHalls();buildEast();buildSouth();buildUnder();G.wallNT=false;siteAreas();
+ G.wallNT=true;G.stairCol=true;buildHotel();buildCore();buildHalls();buildEast();buildSouth();buildUnder();G.wallNT=false;G.stairCol=false;siteAreas();
 }
 /* the underside and the two side stringers of a stair that floats above the floor (seen from below or the side) */
 function stairShell(x0,z0,x1,z1,ya,yb,dir,m,th){th=th||.35;const ax=dir[0],up=dir[1]==='+';

@@ -100,23 +100,23 @@ function buildEast(){
  vroom(168,-64,196,-36,0,L1-.45,MT.tileDark,MT.panel,null,'Car Hacking','#5a3a2a',-45,'e','CAR HACKING','#ff9a5c');
  {car(182,-50,'x','#c0304a',{bonnet:1});box(183.3,1.55,-50.85,184.2,2.3,-49.15,MT.gloss('#c0304a'),{col:false});
   for(const[x,z]of[[174,-58],[190,-58],[174,-42],[190,-42]]){table(x,z,2.4,1,MT.plain('#2a2a34'));kMonitor(x,.76,z-.3,'s',MT.code,.5)}
-  kOnWall('v',195.8,-1,-50,10,1.4,2,signM('CAN BUS · KEY FOBS · "PLEASE DO NOT START THE CAR"','#ff9a5c','#1b1026',10,2));lightPanel(182,L1-.45,-50,6,3,'#fff4e8',12,.9)}
+  kOnWall('v',195.8,-1,-50,10,1.4,2,signM('CAN BUS · KEY FOBS · "PLEASE DO NOT START THE CAR"','#ff9a5c','#1b1026',10,2));lightPanel(182,L1-.45,-50,6,3,'#fff4e8',16,1.05);lightPanel(174,L1-.45,-58,3,1,'#fff4e8',10,.7);lightPanel(190,L1-.45,-42,3,1,'#fff4e8',10,.7)}
  // ICS: a model city with a toy train loop and a siren on a pole
  vroom(168,-36,196,-10,0,L1-.45,MT.carpetGrey,WP,null,'ICS Village','#3a5a2a',-23,'e','ICS VILLAGE','#9be36b');
  {box(175,0,-30,191,.9,-16,{side:MT.plain('#2a2a34'),top:MT.grass});for(let i=0;i<21;i++){const x=176.5+(i%7)*2.1,z=-28.5+Math.floor(i/7)*4.2,h=.3+((i*7)%5)*.25;box(x-.4,.9,z-.4,x+.4,.9+h,z+.4,{side:MT.facade,top:MT.plain('#3a3a44')},{col:false})}
   box(189,.9,-29,189.6,2.4,-28.4,MT.plain('#d9d4cc'),{col:false});box(188.9,2.4,-29.1,189.7,2.5,-28.3,MT.glow('#ff5d73',2),{col:false});
   for(const[a,b,c,d]of[[175.6,-29.4,190.4,-29],[175.6,-17,190.4,-16.6],[175.6,-29,176,-17],[190,-29,190.4,-17]])box(a,.9,b,c,.93,d,MT.plain('#5a5a64'),{col:false});
-  kOnWall('v',195.8,-1,-23,10,1.4,2,signM('ICS VILLAGE · THE TRAIN MUST NOT STOP','#9be36b','#1b1026',10,2));lightPanel(183,L1-.45,-23,6,3,'#f4fff0',12,.9)}
+  kOnWall('v',195.8,-1,-23,10,1.4,2,signM('ICS VILLAGE · THE TRAIN MUST NOT STOP','#9be36b','#1b1026',10,2));lightPanel(183,L1-.45,-23,6,3,'#f4fff0',15,1)}
  // social engineering: two glass vishing booths, an audience
  vroom(168,-10,196,16,0,L1-.45,MT.carpetDark,MT.panel,null,'Social Engineering','#5a2a4a',3,'e','SOCIAL ENGINEERING','#ff8fc8');
  {for(let i=0;i<2;i++){const z=-5+i*8;box(191,0,z-1.6,195.8,2.8,z+1.6,GL);box(191,2.8,z-1.6,195.8,3,z+1.6,MT.plain('#ff8fc8'),{col:false});table(193.6,z,.6,1.6,MT.plain('#2a2a34'),.9);box(193.4,.9,z-.15,193.8,1.05,z+.15,MT.plain('#111'),{col:false});addLight(193,2.4,z,[1,.6,.8],5,.8)}
-  for(let r=0;r<4;r++)rowAlongZ(176+r*2.2,-8,13,0,'#5a2a4a',1);kOnWall('v',195.8,-1,1.5,6,3.2,.8,signM('VISHING CALL CHALLENGE · ON AIR','#ff8fc8','#1b1026',6,.8));lightPanel(180,L1-.45,3,6,2,'#fff0f6',12,.8)}
+  for(let r=0;r<4;r++)rowAlongZ(176+r*2.2,-8,13,0,'#5a2a4a',1);kOnWall('v',195.8,-1,1.5,6,3.2,.8,signM('VISHING CALL CHALLENGE · ON AIR','#ff8fc8','#1b1026',6,.8));lightPanel(180,L1-.45,3,6,2,'#fff0f6',16,1);lightPanel(190,L1-.45,-6,3,1,'#fff0f6',10,.8)}
  // aerospace village (new): a satellite on a plinth, a cockpit simulator, a drone cage
  vroom(168,16,196,34,0,L1-.45,MT.carpetGrey,WP,null,'Aerospace Village','#2a3a5a',25,'e','AEROSPACE VILLAGE','#7cc4ff');
  {const sx=182,sz=25;box(sx-1.2,0,sz-1.2,sx+1.2,1,sz+1.2,MT.plain('#2a2a34'));box(sx-.5,1,sz-.5,sx+.5,2,sz+.5,MT.gloss('#c8ccd6'));for(const s of[-1,1])box(sx+s*.5,1.3,sz-.4,sx+s*2.6,1.36,sz+.4,MT.plain('#1a2a6a'),{col:false});box(sx-.05,2,sz-.05,sx+.05,2.8,sz+.05,MT.chrome,{col:false});
   box(171,0,18,175,1.3,22,MT.plain('#2a2a34'));kMonitor(173,1.3,19,'s',MT.dash,1.2);box(172.6,0,22.4,173.4,.5,23.2,MT.fabric('#3a3a4a'));
   for(const[a,b]of[[188,18],[195,18],[188,32],[195,32]])box(a-.04,0,b-.04,a+.04,3,b+.04,MT.metal,{col:false});box(188,3,18,195,3.04,32,MT.metal,{col:false});colBox(188,18,195,32,0,3);
-  for(let i=0;i<3;i++){const x=190+i*2,z=22+i*3;box(x-.3,.6+i*.4,z-.3,x+.3,.7+i*.4,z+.3,MT.plain('#14141a'),{col:false})}lightPanel(182,L1-.45,25,6,2,'#f4f8ff',12,.8)}
+  for(let i=0;i<3;i++){const x=190+i*2,z=22+i*3;box(x-.3,.6+i*.4,z-.3,x+.3,.7+i*.4,z+.3,MT.plain('#14141a'),{col:false})}lightPanel(182,L1-.45,25,6,2,'#f4f8ff',15,1)}
  /* ---------- Level 1, west ---------- */
  // workshops are wide rooms: rows run along z, facing the screen on the west wall
  vroom(134,-54,158,-30,L1,L2-.45-L1,MT.carpetGrey,WP,MT.ceil,'Workshop A','#2a3a5a',-42,'w','WORKSHOP A','#7cc4ff');
@@ -136,7 +136,7 @@ function buildEast(){
   for(const z of[-61.2,-52.8]){box(186.9,y+.25,z-.05,187,y+1.8,z+.05,MT.plain('#222'),{col:false});box(186.9,y+1.8,z-.4,186.98,y+2.6,z+.4,MT.glow('#fff6fb'),{col:false});addLight(186.4,y+2.2,z,[1,.7,.9],6,1)}
   for(let i=0;i<5;i++)box(193.3,y+.25,-61+i*1.4,193.8,y+.85,-60.4+i*1.4,MT.plain(['#ff8fc8','#c9b6ff','#ffd166','#8affc1','#ff5d73'][i]),{col:false});
   for(let i=0;i<3;i++){const x=171+i*5;box(x,y,-49.8,x+.1,y+2.4,-44,MT.panel);table(x+2.4,-47,2,1,MT.plain('#2a2a34'),.76,y);box(x+.6,y+1.6,-47.3,x+.66,y+2.4,-46.7,MT.glow('#fff6fb',1.8),{col:false});addLight(x+2,y+2.4,-47,[1,.75,.9],4,.6)}
-  box(186,y,-49.8,186.1,y+2.4,-44,MT.panel);lightPanel(176,L2-.45,-58,3,1,'#fff0fa',9,.6)}
+  box(186,y,-49.8,186.1,y+2.4,-44,MT.panel);lightPanel(176,L2-.45,-58,3,1,'#fff0fa',12,.8);lightPanel(189,L2-.45,-57,3,2,'#fff0fa',12,.9);lightPanel(178,L2-.45,-46,4,1,'#fff0fa',10,.7)}
  // the retro arcade: rows of cabinets, a change machine, neon strips, the high-score board
  vroom(168,-40,196,-16,L1,L2-.45-L1,MT.carpetCon,MT.panel,MT.ceilDark,'Retro Arcade','#4a1a4a',-28,'e','RETRO ARCADE','#2bf0ff');
  {const y=L1,cab=(x,z,dir,scr)=>{const d=dir==='w'?-1:1;box(x-.34,y,z-.38,x+.34,y+1.85,z+.38,MT.gloss('#1a1424'));panel(x+d*.345,y+1.05,z,.62,.5,dir,scr);box(x+d*.34-.04,y+1.72,z-.38,x+d*.34+.04,y+1.9,z+.38,MT.glow(['#ff5fb0','#2bf0ff','#ffd166','#8affc1'][Math.abs(Math.round(z*3))%4],2),{col:false})};

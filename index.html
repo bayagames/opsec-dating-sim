@@ -2431,6 +2431,10 @@ function stairs(x0,z0,x1,z1,y0,y1,dir,m,o){
   if(ax==='x'){box(x0+a,o.solid===false?top-.12:y0,z0,x0+a+dl,top,z1,m,{col:false,nz0:1,nz1:o.sides?0:1});const ex=up?x0+a:x0+a+dl;box(ex-.025,top-.03,z0,ex+.025,top+.005,z1,nose,{col:false,nz0:1,nz1:1})}
   else{box(x0,o.solid===false?top-.12:y0,z0+a,x1,top,z0+a+dl,m,{col:false,nx0:1,nx1:o.sides?0:1});const ez=up?z0+a:z0+a+dl;box(x0,top-.03,ez-.025,x1,top+.005,ez+.025,nose,{col:false,nx0:1,nx1:1})}}
  ftag(x0,z0,x1,z1,Math.max(y0,y1),m.top||m,1);
+ // a solid flight can't be walked into from below or the side: stepped blocks under it, each no higher than the
+ // lowest tread above it, so someone climbing never touches them
+ if(G.stairCol&&o.solid!==false&&Math.abs(y1-y0)>1.2){const k=8,lo=Math.min(y0,y1);for(let i=0;i<k;i++){const a0=i/k,a1=(i+1)/k;const hA=up?y0+(y1-y0)*a0:y1+(y0-y1)*(1-a1);const hmin=up?hA:y0+(y1-y0)*(1-a1);
+   const h=(up?y0+(y1-y0)*a0:y0+(y1-y0)*(1-a1))-lo;if(h<.6)continue;if(ax==='x')colBox(x0+L*a0,z0,x0+L*a1,z1,lo,lo+h);else colBox(x0,z0+L*a0,x1,z0+L*a1,lo,lo+h)}}
  if(ax==='x')ramp(x0,z0,x1,z1,up?y0:y1,up?y1:y0,'x');else ramp(x0,z0,x1,z1,up?y0:y1,up?y1:y0,'z');
 }
 function slab(x0,z0,x1,z1,y,th,m,mu){floorQ(x0,z0,x1,z1,y,m);ceilQ(x0,z0,x1,z1,y-th,mu||m);const e=mu||m;
@@ -2825,7 +2829,7 @@ function bakeLight(reg,i){
  BK.dist.uniforms.lp.value.set(l[0],l[1],l[2]);BK.dist.uniforms.far.value=far;
  const ac=r.autoClear,cc=r.getClearColor(new T.Color()),ca=r.getClearAlpha();
  r.setClearColor(0xffffff,1);r.autoClear=true;cam.update(r,R.bk.sh);
- const u=BK.light.uniforms;u.lp.value.set(l[0],l[1],l[2]);u.lc.value.set(lin(l[3]),lin(l[4]),lin(l[5])).multiplyScalar(l[7]*G.LK);u.lr.value=lr;u.far.value=far;u.cube.value=G.bkCubeRT.texture;
+ const u=BK.light.uniforms;u.lp.value.set(l[0],l[1],l[2]);u.lc.value.set(lin(l[3]),lin(l[4]),lin(l[5])).multiplyScalar(l[7]*G.LK*(R.lk||1));u.lr.value=lr;u.far.value=far;u.cube.value=G.bkCubeRT.texture;
  r.autoClear=false;
  for(let p=0;p<R.bk.rt.length;p++){let any=false;for(const b of R.bk.scn[p].children){const s=b.userData.bs;b.visible=Math.hypot(s.center.x-l[0],s.center.y-l[1],s.center.z-l[2])<s.radius+lr;any=any||b.visible}
   if(!any)continue;r.setRenderTarget(R.bk.rt[p]);r.render(R.bk.scn[p],R.bk.cam)}
@@ -2869,7 +2873,7 @@ const LMDB={db:null,open(){return new Promise(res=>{try{const q=indexedDB.open('
  put(k,v){if(!LMDB.db)return;try{const t=LMDB.db.transaction('lm','readwrite');t.objectStore('lm').put(v,k)}catch(e){}}};
 function lmKey(reg){const R=G.regions[reg],L=G.lights[reg]||[];let h=0;const add=v=>{h=(h*31+Math.round(v*100))|0};
  for(const l of L)l.forEach(add);const SU=G.sun&&G.sun[reg];if(SU)[...SU.d,...SU.c,SU.k,SU.half,...SU.c0].forEach(add);let verts=0;R.obj.traverse(o=>{if(o.isMesh&&o.userData.pg>=0){verts+=o.geometry.attributes.position.count;const a=o.geometry.attributes.lmuv.array;for(let i=0;i<a.length;i+=97)add(a[i]*1e4)}});
- return['v5',reg,R.lm.S,R.lm.pages,R.lm.D.toFixed(3),verts,h,G.LK,LOOK.reach,BAKE.fill,BAKE.soft,BAKE.cube].join('|')}
+ return['v5',reg,R.lm.S,R.lm.pages,R.lm.D.toFixed(3),verts,h,G.LK,R.lk||1,LOOK.reach,BAKE.fill,BAKE.soft,BAKE.cube].join('|')}
 function lmApply(reg,pages){const T=G.T,R=G.regions[reg],S=R.lm.S;R.lmTex=pages.map(px=>{const t=new T.DataTexture(px,S,S,T.RGBAFormat,T.UnsignedByteType);t.minFilter=t.magFilter=T.LinearFilter;t.generateMipmaps=false;t.channel=1;t.colorSpace=T.NoColorSpace;t.needsUpdate=true;t.onUpdate=()=>{t.image={width:S,height:S,data:null}};return t});
  R.obj.traverse(o=>{if(o.isMesh&&o.userData.mk&&o.userData.pg>=0){o.userData.lmk=reg+':'+o.userData.pg;o.material=getMat(o.userData.mk,o.userData.lmk)}})}
 /* Lightmaps live per region, and only the place you're in (plus the one you just left, so hopping between the
@@ -3324,7 +3328,7 @@ function towerDetail(nb,sb){
  // ---- Room 1337: a TV over a low cabinet, a wardrobe, curtains, a rug under the seating ----
  box(264.2,0,14,264.7,.6,16,WP);kOnWall('v',264.2,1,15,1.6,1.05,.9,MT.keyscreen);box(266.9,0,12.2,268.3,2.2,12.9,WP);box(267.58,.9,12.9,267.62,1.3,12.94,BR_,{col:false});
  for(const z of[14.2,19.4])box(275.6,.1,z,275.76,2.85,z+.4,MT.velvet||MT.fabric('#5a1e2c'),{col:false});for(const x of[268.1,273.5])box(x,.1,21.6,x+.4,2.85,21.76,MT.velvet||MT.fabric('#5a1e2c'),{col:false});
- quad([268.8,.012,21.4],[274.2,.012,21.4],[274.2,.012,16.8],[268.8,.012,16.8],MT.rug,1.5,1.5);
+ quad([268.8,.012,21.4],[274.2,.012,21.4],[274.2,.012,16.8],[268.8,.012,16.8],MT.rugH,2,2);
  // ---- Room 1336: fairy lights round the walls, a disco ball, a speaker, pizza boxes ----
  {const x0=sb(9);for(let x=x0+.4;x<263.8;x+=.5){box(x-.04,2.55+Math.sin(x*2)*.05,12.22,x+.04,2.63+Math.sin(x*2)*.05,12.3,MT.glow(['#ff5fb0','#2bf0ff','#ffd166'][Math.round(x*2)%3],2.2),{col:false});box(x-.04,2.55+Math.cos(x*2)*.05,21.7,x+.04,2.63+Math.cos(x*2)*.05,21.78,MT.glow(['#2bf0ff','#ffd166','#ff5fb0'][Math.round(x*2)%3],2.2),{col:false})}
   box(261.3,2.4,16.8,261.7,2.8,17.2,MT.chrome,{col:false});box(261.48,2.8,16.98,261.52,3,17.02,MT.plain('#888'),{col:false});box(263.2,0,20.4,263.8,1.1,21,MT.plain('#14141a'));box(263.21,.6,20.5,263.22,1,20.9,MT.glow('#8affc1',1.4),{col:false});
@@ -4335,7 +4339,7 @@ function buildSite(){
   hfac:mt('hotelFac',0,.125,1,{k:.5}),cfac:mt('conFac',0,.125,1,{k:.5}),clad:mt('cladding',0,.25,0,{r:.5,m:.3}),screenBig:mt('screenBig',0,1,1,{k:1.35}),screenSide:mt('screenSide',0,1,1,{k:1.3}),
   expoBanner:mt('expoBanner',0,1,1,{k:1.2}),hazard:mt('hazard',0,1,0,{r:.6}),mapBoard:mt('mapBoard',0,1,1,{k:1.1}),scoreBig:mt('scoreBig',0,1,1,{k:1.35}),menuBoard:mt('menuBoard',0,1,1,{k:.9}),
   pressWall:mt('pressWall',0,.5,0,{r:.6}),books:mt('bookshelf',0,1,0,{r:.8}),locker2:mt('locker2',0,.5,0,{r:.5,m:.3}),rugH:mt('carpetHotel','#d8c8b0',.4,0,{r:1})});
- region('con',{fog:[.07,.04,.1],fr:[30,190],lmPages:{high:8,medium:5,low:3},lmCap:9});G.regions.con.amb=[.36,.32,.42];
+ region('con',{fog:[.07,.04,.1],fr:[30,190],lmPages:{high:8,medium:5,low:3},lmCap:9});G.regions.con.amb=[.36,.32,.42];G.regions.con.lk=1.15;
  const Z=zone,Y0=-.3;
  // outdoors
  Z('plaza',-215,60,215,140,-.3,80,['lobby','foyer','food','cosplay','boutique','ramp','seConc','seConc1','skygarden','plazaE']);Z('plazaE',80,34,215,60,-.3,80,['seConc','seConc1','cosplay','chill','naps','vcorr','vcorr1','aero','film']);
@@ -4395,7 +4399,7 @@ function buildSite(){
  // hubs: open concourses and corridors; a room that sees one also sees what it opens onto
  for(const n of['lobby','promenade','foyer','courtyard','ringN','ringW','ringE','ringS','ringN2','ringW2','ringE2','ringS2','neConc','neConc2','seConc','seConc1','vcorr','vcorr1','hotelL1','hotelL2','plaza','service','staffW','staffE','liftH','terrace','skyterrace'])G.zones.con.find(q=>q.n===n).hub=true;
  G.zones.con.find(q=>q.n==='outside').bg=true;
- G.wallNT=true;buildHotel();buildCore();buildHalls();buildEast();buildSouth();buildUnder();G.wallNT=false;siteAreas();
+ G.wallNT=true;G.stairCol=true;buildHotel();buildCore();buildHalls();buildEast();buildSouth();buildUnder();G.wallNT=false;G.stairCol=false;siteAreas();
 }
 /* the underside and the two side stringers of a stair that floats above the floor (seen from below or the side) */
 function stairShell(x0,z0,x1,z1,ya,yb,dir,m,th){th=th||.35;const ax=dir[0],up=dir[1]==='+';
@@ -4621,7 +4625,7 @@ function buildHotelUp(){
   for(const x of[-196,-188,-180,-172,-165]){const hw=x>-170?2.4:3;box(x-hw,y,-63.8,x+hw,L2-.6,-63.2,MT.woodDark);kOnWall('h',-63.2,1,x,hw*2-.4,y+.1,4.6,MT.books,2.8,1.15)}
   for(const z of[-58,-50,-42,-34,-28]){box(-199.8,y,z-3,-199.2,L2-.6,z+3,MT.woodDark);kOnWall('v',-199.2,1,z,5.6,y+.1,4.6,MT.books,2.8,1.15)}
   box(-182,y,-25,-176,y+1.4,-24,LIM);box(-181,y+.1,-25.04,-177,y+1,-25,MT.glow('#ff9a5c',1.8),{col:false});box(-182.4,y+1.4,-25.3,-175.6,y+1.6,-24,LIM,{col:false});addLight(-179,y+.8,-26,[1,.55,.25],8,1);
-  quad([-188,y+.012,-30],[-170,y+.012,-30],[-170,y+.012,-44],[-188,y+.012,-44],MT.rug,3,3);
+  quad([-188,y+.012,-30],[-170,y+.012,-30],[-170,y+.012,-44],[-188,y+.012,-44],MT.rugH,4,3);
   for(const[x,z,f]of[[-184,-34,'e'],[-174,-34,'w'],[-184,-40,'e'],[-174,-40,'w']]){box(x-.5,y,z-.5,x+.5,y+.45,z+.5,MT.fabric('#5a2a1e'));const bx=f==='e'?[x-.5,x-.3]:[x+.3,x+.5];box(bx[0],y+.45,z-.5,bx[1],y+1.05,z+.5,MT.fabric('#5a2a1e'),{col:false})}
   kBox(-179,y,-37,1.4,.5,1.4,WP);for(const[x,z]of[[-186,-37],[-172,-37]]){box(x-.15,y,z-.15,x+.15,y+.06,z+.15,BR_,{col:false});box(x-.02,y,z-.02,x+.02,y+1.4,z+.02,BR_,{col:false});box(x-.2,y+1.4,z-.2,x+.2,y+1.7,z+.2,MT.glow('#ffd98a',1.4),{col:false});addLight(x,y+1.6,z,[1,.8,.55],5,.6)}
   box(-166,y,-56,-165.2,y+.8,-55.2,WP);box(-166.1,y+.8,-56.1,-165.1,y+1.6,-55.1,MT.gloss('#3a6a8a'),{col:false});
@@ -5146,23 +5150,23 @@ function buildEast(){
  vroom(168,-64,196,-36,0,L1-.45,MT.tileDark,MT.panel,null,'Car Hacking','#5a3a2a',-45,'e','CAR HACKING','#ff9a5c');
  {car(182,-50,'x','#c0304a',{bonnet:1});box(183.3,1.55,-50.85,184.2,2.3,-49.15,MT.gloss('#c0304a'),{col:false});
   for(const[x,z]of[[174,-58],[190,-58],[174,-42],[190,-42]]){table(x,z,2.4,1,MT.plain('#2a2a34'));kMonitor(x,.76,z-.3,'s',MT.code,.5)}
-  kOnWall('v',195.8,-1,-50,10,1.4,2,signM('CAN BUS · KEY FOBS · "PLEASE DO NOT START THE CAR"','#ff9a5c','#1b1026',10,2));lightPanel(182,L1-.45,-50,6,3,'#fff4e8',12,.9)}
+  kOnWall('v',195.8,-1,-50,10,1.4,2,signM('CAN BUS · KEY FOBS · "PLEASE DO NOT START THE CAR"','#ff9a5c','#1b1026',10,2));lightPanel(182,L1-.45,-50,6,3,'#fff4e8',16,1.05);lightPanel(174,L1-.45,-58,3,1,'#fff4e8',10,.7);lightPanel(190,L1-.45,-42,3,1,'#fff4e8',10,.7)}
  // ICS: a model city with a toy train loop and a siren on a pole
  vroom(168,-36,196,-10,0,L1-.45,MT.carpetGrey,WP,null,'ICS Village','#3a5a2a',-23,'e','ICS VILLAGE','#9be36b');
  {box(175,0,-30,191,.9,-16,{side:MT.plain('#2a2a34'),top:MT.grass});for(let i=0;i<21;i++){const x=176.5+(i%7)*2.1,z=-28.5+Math.floor(i/7)*4.2,h=.3+((i*7)%5)*.25;box(x-.4,.9,z-.4,x+.4,.9+h,z+.4,{side:MT.facade,top:MT.plain('#3a3a44')},{col:false})}
   box(189,.9,-29,189.6,2.4,-28.4,MT.plain('#d9d4cc'),{col:false});box(188.9,2.4,-29.1,189.7,2.5,-28.3,MT.glow('#ff5d73',2),{col:false});
   for(const[a,b,c,d]of[[175.6,-29.4,190.4,-29],[175.6,-17,190.4,-16.6],[175.6,-29,176,-17],[190,-29,190.4,-17]])box(a,.9,b,c,.93,d,MT.plain('#5a5a64'),{col:false});
-  kOnWall('v',195.8,-1,-23,10,1.4,2,signM('ICS VILLAGE · THE TRAIN MUST NOT STOP','#9be36b','#1b1026',10,2));lightPanel(183,L1-.45,-23,6,3,'#f4fff0',12,.9)}
+  kOnWall('v',195.8,-1,-23,10,1.4,2,signM('ICS VILLAGE · THE TRAIN MUST NOT STOP','#9be36b','#1b1026',10,2));lightPanel(183,L1-.45,-23,6,3,'#f4fff0',15,1)}
  // social engineering: two glass vishing booths, an audience
  vroom(168,-10,196,16,0,L1-.45,MT.carpetDark,MT.panel,null,'Social Engineering','#5a2a4a',3,'e','SOCIAL ENGINEERING','#ff8fc8');
  {for(let i=0;i<2;i++){const z=-5+i*8;box(191,0,z-1.6,195.8,2.8,z+1.6,GL);box(191,2.8,z-1.6,195.8,3,z+1.6,MT.plain('#ff8fc8'),{col:false});table(193.6,z,.6,1.6,MT.plain('#2a2a34'),.9);box(193.4,.9,z-.15,193.8,1.05,z+.15,MT.plain('#111'),{col:false});addLight(193,2.4,z,[1,.6,.8],5,.8)}
-  for(let r=0;r<4;r++)rowAlongZ(176+r*2.2,-8,13,0,'#5a2a4a',1);kOnWall('v',195.8,-1,1.5,6,3.2,.8,signM('VISHING CALL CHALLENGE · ON AIR','#ff8fc8','#1b1026',6,.8));lightPanel(180,L1-.45,3,6,2,'#fff0f6',12,.8)}
+  for(let r=0;r<4;r++)rowAlongZ(176+r*2.2,-8,13,0,'#5a2a4a',1);kOnWall('v',195.8,-1,1.5,6,3.2,.8,signM('VISHING CALL CHALLENGE · ON AIR','#ff8fc8','#1b1026',6,.8));lightPanel(180,L1-.45,3,6,2,'#fff0f6',16,1);lightPanel(190,L1-.45,-6,3,1,'#fff0f6',10,.8)}
  // aerospace village (new): a satellite on a plinth, a cockpit simulator, a drone cage
  vroom(168,16,196,34,0,L1-.45,MT.carpetGrey,WP,null,'Aerospace Village','#2a3a5a',25,'e','AEROSPACE VILLAGE','#7cc4ff');
  {const sx=182,sz=25;box(sx-1.2,0,sz-1.2,sx+1.2,1,sz+1.2,MT.plain('#2a2a34'));box(sx-.5,1,sz-.5,sx+.5,2,sz+.5,MT.gloss('#c8ccd6'));for(const s of[-1,1])box(sx+s*.5,1.3,sz-.4,sx+s*2.6,1.36,sz+.4,MT.plain('#1a2a6a'),{col:false});box(sx-.05,2,sz-.05,sx+.05,2.8,sz+.05,MT.chrome,{col:false});
   box(171,0,18,175,1.3,22,MT.plain('#2a2a34'));kMonitor(173,1.3,19,'s',MT.dash,1.2);box(172.6,0,22.4,173.4,.5,23.2,MT.fabric('#3a3a4a'));
   for(const[a,b]of[[188,18],[195,18],[188,32],[195,32]])box(a-.04,0,b-.04,a+.04,3,b+.04,MT.metal,{col:false});box(188,3,18,195,3.04,32,MT.metal,{col:false});colBox(188,18,195,32,0,3);
-  for(let i=0;i<3;i++){const x=190+i*2,z=22+i*3;box(x-.3,.6+i*.4,z-.3,x+.3,.7+i*.4,z+.3,MT.plain('#14141a'),{col:false})}lightPanel(182,L1-.45,25,6,2,'#f4f8ff',12,.8)}
+  for(let i=0;i<3;i++){const x=190+i*2,z=22+i*3;box(x-.3,.6+i*.4,z-.3,x+.3,.7+i*.4,z+.3,MT.plain('#14141a'),{col:false})}lightPanel(182,L1-.45,25,6,2,'#f4f8ff',15,1)}
  /* ---------- Level 1, west ---------- */
  // workshops are wide rooms: rows run along z, facing the screen on the west wall
  vroom(134,-54,158,-30,L1,L2-.45-L1,MT.carpetGrey,WP,MT.ceil,'Workshop A','#2a3a5a',-42,'w','WORKSHOP A','#7cc4ff');
@@ -5182,7 +5186,7 @@ function buildEast(){
   for(const z of[-61.2,-52.8]){box(186.9,y+.25,z-.05,187,y+1.8,z+.05,MT.plain('#222'),{col:false});box(186.9,y+1.8,z-.4,186.98,y+2.6,z+.4,MT.glow('#fff6fb'),{col:false});addLight(186.4,y+2.2,z,[1,.7,.9],6,1)}
   for(let i=0;i<5;i++)box(193.3,y+.25,-61+i*1.4,193.8,y+.85,-60.4+i*1.4,MT.plain(['#ff8fc8','#c9b6ff','#ffd166','#8affc1','#ff5d73'][i]),{col:false});
   for(let i=0;i<3;i++){const x=171+i*5;box(x,y,-49.8,x+.1,y+2.4,-44,MT.panel);table(x+2.4,-47,2,1,MT.plain('#2a2a34'),.76,y);box(x+.6,y+1.6,-47.3,x+.66,y+2.4,-46.7,MT.glow('#fff6fb',1.8),{col:false});addLight(x+2,y+2.4,-47,[1,.75,.9],4,.6)}
-  box(186,y,-49.8,186.1,y+2.4,-44,MT.panel);lightPanel(176,L2-.45,-58,3,1,'#fff0fa',9,.6)}
+  box(186,y,-49.8,186.1,y+2.4,-44,MT.panel);lightPanel(176,L2-.45,-58,3,1,'#fff0fa',12,.8);lightPanel(189,L2-.45,-57,3,2,'#fff0fa',12,.9);lightPanel(178,L2-.45,-46,4,1,'#fff0fa',10,.7)}
  // the retro arcade: rows of cabinets, a change machine, neon strips, the high-score board
  vroom(168,-40,196,-16,L1,L2-.45-L1,MT.carpetCon,MT.panel,MT.ceilDark,'Retro Arcade','#4a1a4a',-28,'e','RETRO ARCADE','#2bf0ff');
  {const y=L1,cab=(x,z,dir,scr)=>{const d=dir==='w'?-1:1;box(x-.34,y,z-.38,x+.34,y+1.85,z+.38,MT.gloss('#1a1424'));panel(x+d*.345,y+1.05,z,.62,.5,dir,scr);box(x+d*.34-.04,y+1.72,z-.38,x+d*.34+.04,y+1.9,z+.38,MT.glow(['#ff5fb0','#2bf0ff','#ffd166','#8affc1'][Math.abs(Math.round(z*3))%4],2),{col:false})};
@@ -5392,7 +5396,7 @@ function buildUnder(){
 function siteAreas(){
  const A=(k,n,r,sp,bg,o)=>area(k,n,'con',r,sp,bg,o),PI=Math.PI,G1={y0:4,y1:10},G2={y0:9.5,y1:15.5},B={y0:-7,y1:-2};
  // outside
- A('plaza','Arrival Plaza',[-215,60,215,140],[-88,74,PI,0],'con',{out:1});A('vestibule','Convention Entrance',[-96,60,-80,68],[-88,64.5,0,0],'con',{sub:1});
+ A('plaza','Arrival Plaza',[-215,60,215,140],[-88,74,0,0],'con',{out:1});A('vestibule','Convention Entrance',[-96,60,-80,68],[-88,64.5,0,0],'con',{sub:1});
  // hotel ground floor
  A('lobby','Hotel Lobby',[-160,-4,-110,60],[-135,54,0,0],'lobby',{y1:4});A('cafe','Halcyon Café',[-129,42,-110,60],[-122,49,PI,0],'lobby',{sub:1,y1:4});
  A('promenade','The Promenade',[-200,-24,-64,-4],[-120,-14,PI/2,0],'lobby',{y1:4});A('lifts','Hotel lifts',[-160,-36,-136,-24],[-148,-26,0,0],'lobby',{sub:1,y1:4});
@@ -5914,7 +5918,7 @@ function placeGates(){
  gate('con','rope',-109.6,43,-64.6,43,0,()=>d1('badge'),()=>'A volunteer with a lanyard the size of a seatbelt: "Badge first! Registration\'s right there."');
  gate('con','rope',-64.8,51.6,-64.8,56.4,0,()=>d1('badge'),()=>'"Badge first," says a volunteer, who has said "badge first" four hundred times today.');
  // before the opening ceremony: the way to Hall A (Foyer, Ring West, Ring North, the hall's floor doors) stays open, everything else is roped
- ropeC(-109.4,10.4,-109.4,39.6);ropeC(-96.6,-3.4,-77.4,-3.4);ropeC(-63.4,-23.6,-63.4,-4.4);ropeC(-80,40.6,-72,40.6);ropeC(-64.8,38,-64.8,42);
+ ropeC(-109.4,10.4,-109.4,39.6);ropeC(-64.8,51.6,-64.8,56.4);ropeC(-96.6,-3.4,-77.4,-3.4);ropeC(-63.4,-23.6,-63.4,-4.4);ropeC(-80,40.6,-72,40.6);ropeC(-64.8,38,-64.8,42);
  ropeC(56.4,-63.6,56.4,-54.4);ropeC(56.4,20.4,56.4,33.6);ropeC(55.6,-42,55.6,-34);ropeC(55.6,-12,55.6,-4);
  ropeC(-40,33.6,-34,33.6);ropeC(2,33.6,8,33.6);ropeC(33,33.6,37,33.6);ropeC(51.5,33.6,54.5,33.6);ropeC(26.6,-59.4,26.6,-55.6);
  for(const c of[-10,20])ropeC(c-1.5,-49.6,c+1.5,-49.6);for(const c of[-30,10])ropeC(c-1.5,19.6,c+1.5,19.6);ropeC(-49.6,-1.5,-49.6,1.5);for(const c of[-20,5])ropeC(39.6,c-1.5,39.6,c+1.5);
@@ -5928,6 +5932,7 @@ function placeGates(){
  gate('con','door',-91,68,-85,68,0,()=>d1('checkin'),outMsg,'Convention doors');gate('con','door',-137.2,60,-132.8,60,0,()=>d1('checkin'),outMsg,'Revolving door');
  gate('con','door',-148.2,60,-145.8,60,0,()=>d1('checkin'),outMsg,'Hotel doors');gate('con','door',-124.2,60,-121.8,60,0,()=>d1('checkin'),outMsg,'Hotel doors');
  // basement fire stairs: from day 2
+ gate('con','rope',-71.6,91.4,-64.4,91.4,0,()=>S.ch>=2,()=>'A barrier arm and a sign: "CAR PARK · HALCYON GUESTS · OPENS 6AM". It\'s late. Tomorrow.','Car park barrier');
  gate('con','door',-160,29.2,-160,30.8,0,()=>S.ch>=2,()=>'"FIRE STAIRS · B". A sign underneath: "Guests: emergencies only." Maybe tomorrow, when you\'re less new.','Fire stairs');
  // luggage room: Nyx can show you how
  gate('con','door',-160,7.2,-160,8.8,0,()=>!!S.f.luggage,()=>null,'Luggage room');

@@ -122,6 +122,10 @@ function stairs(x0,z0,x1,z1,y0,y1,dir,m,o){
   if(ax==='x'){box(x0+a,o.solid===false?top-.12:y0,z0,x0+a+dl,top,z1,m,{col:false,nz0:1,nz1:o.sides?0:1});const ex=up?x0+a:x0+a+dl;box(ex-.025,top-.03,z0,ex+.025,top+.005,z1,nose,{col:false,nz0:1,nz1:1})}
   else{box(x0,o.solid===false?top-.12:y0,z0+a,x1,top,z0+a+dl,m,{col:false,nx0:1,nx1:o.sides?0:1});const ez=up?z0+a:z0+a+dl;box(x0,top-.03,ez-.025,x1,top+.005,ez+.025,nose,{col:false,nx0:1,nx1:1})}}
  ftag(x0,z0,x1,z1,Math.max(y0,y1),m.top||m,1);
+ // a solid flight can't be walked into from below or the side: stepped blocks under it, each no higher than the
+ // lowest tread above it, so someone climbing never touches them
+ if(G.stairCol&&o.solid!==false&&Math.abs(y1-y0)>1.2){const k=8,lo=Math.min(y0,y1);for(let i=0;i<k;i++){const a0=i/k,a1=(i+1)/k;const hA=up?y0+(y1-y0)*a0:y1+(y0-y1)*(1-a1);const hmin=up?hA:y0+(y1-y0)*(1-a1);
+   const h=(up?y0+(y1-y0)*a0:y0+(y1-y0)*(1-a1))-lo;if(h<.6)continue;if(ax==='x')colBox(x0+L*a0,z0,x0+L*a1,z1,lo,lo+h);else colBox(x0,z0+L*a0,x1,z0+L*a1,lo,lo+h)}}
  if(ax==='x')ramp(x0,z0,x1,z1,up?y0:y1,up?y1:y0,'x');else ramp(x0,z0,x1,z1,up?y0:y1,up?y1:y0,'z');
 }
 function slab(x0,z0,x1,z1,y,th,m,mu){floorQ(x0,z0,x1,z1,y,m);ceilQ(x0,z0,x1,z1,y-th,mu||m);const e=mu||m;

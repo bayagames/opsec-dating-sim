@@ -214,7 +214,7 @@ function buildHotelUp(){
   for(const x of[-196,-188,-180,-172,-165]){const hw=x>-170?2.4:3;box(x-hw,y,-63.8,x+hw,L2-.6,-63.2,MT.woodDark);kOnWall('h',-63.2,1,x,hw*2-.4,y+.1,4.6,MT.books,2.8,1.15)}
   for(const z of[-58,-50,-42,-34,-28]){box(-199.8,y,z-3,-199.2,L2-.6,z+3,MT.woodDark);kOnWall('v',-199.2,1,z,5.6,y+.1,4.6,MT.books,2.8,1.15)}
   box(-182,y,-25,-176,y+1.4,-24,LIM);box(-181,y+.1,-25.04,-177,y+1,-25,MT.glow('#ff9a5c',1.8),{col:false});box(-182.4,y+1.4,-25.3,-175.6,y+1.6,-24,LIM,{col:false});addLight(-179,y+.8,-26,[1,.55,.25],8,1);
-  quad([-188,y+.012,-30],[-170,y+.012,-30],[-170,y+.012,-44],[-188,y+.012,-44],MT.rug,3,3);
+  quad([-188,y+.012,-30],[-170,y+.012,-30],[-170,y+.012,-44],[-188,y+.012,-44],MT.rugH,4,3);
   for(const[x,z,f]of[[-184,-34,'e'],[-174,-34,'w'],[-184,-40,'e'],[-174,-40,'w']]){box(x-.5,y,z-.5,x+.5,y+.45,z+.5,MT.fabric('#5a2a1e'));const bx=f==='e'?[x-.5,x-.3]:[x+.3,x+.5];box(bx[0],y+.45,z-.5,bx[1],y+1.05,z+.5,MT.fabric('#5a2a1e'),{col:false})}
   kBox(-179,y,-37,1.4,.5,1.4,WP);for(const[x,z]of[[-186,-37],[-172,-37]]){box(x-.15,y,z-.15,x+.15,y+.06,z+.15,BR_,{col:false});box(x-.02,y,z-.02,x+.02,y+1.4,z+.02,BR_,{col:false});box(x-.2,y+1.4,z-.2,x+.2,y+1.7,z+.2,MT.glow('#ffd98a',1.4),{col:false});addLight(x,y+1.6,z,[1,.8,.55],5,.6)}
   box(-166,y,-56,-165.2,y+.8,-55.2,WP);box(-166.1,y+.8,-56.1,-165.1,y+1.6,-55.1,MT.gloss('#3a6a8a'),{col:false});

@@ -130,7 +130,7 @@ function towerDetail(nb,sb){
  // ---- Room 1337: a TV over a low cabinet, a wardrobe, curtains, a rug under the seating ----
  box(264.2,0,14,264.7,.6,16,WP);kOnWall('v',264.2,1,15,1.6,1.05,.9,MT.keyscreen);box(266.9,0,12.2,268.3,2.2,12.9,WP);box(267.58,.9,12.9,267.62,1.3,12.94,BR_,{col:false});
  for(const z of[14.2,19.4])box(275.6,.1,z,275.76,2.85,z+.4,MT.velvet||MT.fabric('#5a1e2c'),{col:false});for(const x of[268.1,273.5])box(x,.1,21.6,x+.4,2.85,21.76,MT.velvet||MT.fabric('#5a1e2c'),{col:false});
- quad([268.8,.012,21.4],[274.2,.012,21.4],[274.2,.012,16.8],[268.8,.012,16.8],MT.rug,1.5,1.5);
+ quad([268.8,.012,21.4],[274.2,.012,21.4],[274.2,.012,16.8],[268.8,.012,16.8],MT.rugH,2,2);
  // ---- Room 1336: fairy lights round the walls, a disco ball, a speaker, pizza boxes ----
  {const x0=sb(9);for(let x=x0+.4;x<263.8;x+=.5){box(x-.04,2.55+Math.sin(x*2)*.05,12.22,x+.04,2.63+Math.sin(x*2)*.05,12.3,MT.glow(['#ff5fb0','#2bf0ff','#ffd166'][Math.round(x*2)%3],2.2),{col:false});box(x-.04,2.55+Math.cos(x*2)*.05,21.7,x+.04,2.63+Math.cos(x*2)*.05,21.78,MT.glow(['#2bf0ff','#ffd166','#ff5fb0'][Math.round(x*2)%3],2.2),{col:false})}
   box(261.3,2.4,16.8,261.7,2.8,17.2,MT.chrome,{col:false});box(261.48,2.8,16.98,261.52,3,17.02,MT.plain('#888'),{col:false});box(263.2,0,20.4,263.8,1.1,21,MT.plain('#14141a'));box(263.21,.6,20.5,263.22,1,20.9,MT.glow('#8affc1',1.4),{col:false});
