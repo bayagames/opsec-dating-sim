@@ -1476,7 +1476,7 @@ function sceneWhy(g){const R=ROUTES[g],i=scn(g);if(!R||i>=R.n)return null;const 
  if(SC[g+i]===undefined)return'their story moves on in the main plot';
  if(typeof ROUTEBLOCK!=='undefined'&&ROUTEBLOCK[g]){const b=ROUTEBLOCK[g]();if(b)return b}
  {const sa=typeof sceneArea==='function'&&sceneArea(g+i);if(sa&&AREAS[sa]&&typeof areaLock==='function'&&areaLock(sa))return'it happens in the '+AREAS[sa].n+', which isn\'t open yet'}
- if(day()<r.d)return'their story continues on Day '+r.d;
+ if(day()<r.d&&!(S.restore&&META.routes[g]))return'their story continues on Day '+r.d;
  if(aff(g)<r.a)return'needs ♥ '+r.a+' (you have '+aff(g)+')';
  if(r.sk&&rank('skill')<r.sk)return'needs Skill rank '+r.sk+' ('+RANKS.skill[r.sk]+')';
  if(r.cl&&rank('clout')<r.cl)return'needs Clout rank '+r.cl+' ('+RANKS.clout[r.cl]+')';
@@ -10449,7 +10449,7 @@ const OLDN={_:[0,1,2,2,3,3,4,4,6],ellie:[0,1,2,3,4,4,5,5,6]};
   const req=[],sum=[];
   M.forEach((parts,ni)=>{const txt=parts.map(p=>old[p]).filter(t=>t!==undefined);
    if(txt.length){let t=txt.join('\n~ Later.\n');t=t.replace(/\[adv (\w+) (\d)\]/g,(m,w,k)=>'[adv '+w+' '+(OLDN[w]||OLDN._)[+k]+']');SC[g+ni]=t}
-   const os=parts.filter(p=>p!=='x').map(p=>oreq[p]||{}),r={a:NR[ni].a,d:Math.max(NR[ni].d,...os.map(o=>o.d||1))};
+   const os=parts.filter(p=>p!=='x').map(p=>oreq[p]||{}),r={a:NR[ni].a,d:Math.max(NR[ni].d,(os[0]&&os[0].d)||1)};
    for(const o of os){if(o.c){const c0=r.c;r.c=c0?(()=>c0()&&o.c()):o.c;r.y=o.y||r.y}if(o.sk>1)r.sk=Math.max(r.sk||0,o.sk-1);if(o.cl>1)r.cl=Math.max(r.cl||0,o.cl-1)}
    req.push(r);sum.push(parts.map(p=>p==='x'?(XSUM[g]||''):(osum[p]||'')).filter(Boolean).join(' '))});
   R.n=6;R.req=req;R.sum=sum;R.aff=req.map(r=>r.a)}
@@ -10564,10 +10564,10 @@ function keynoteScore(){let s=S.pscore||0;
  if(!S.solved.m6)s-=3;
  if(S.f.mira_data)s+=2;if(clue('locker'))s+=2;if(S.f.dave_inside)s+=1;if(clue('lifescore'))s+=1;
  return s}
-const haremReady=()=>S.restore&&ROM.every(g=>loved(g)&&aff(g)>=100)&&Object.keys(MYST).every(m=>S.solved[m]);
+const haremReady=()=>S.restore&&ROM.every(g=>loved(g))&&Object.keys(MYST).every(m=>S.solved[m]);
 function endingKey(){
- if(S.f.end)return S.f.end;
  if(haremReady())return'harem';
+ if(S.f.end)return S.f.end;
  if(S.plan==='soldout')return'soldout';
  if(S.plan==='walk')return'lasttrain';
  if(S.f.scapegoat)return'scapegoat';

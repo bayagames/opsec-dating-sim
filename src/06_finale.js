@@ -61,10 +61,10 @@ function keynoteScore(){let s=S.pscore||0;
  if(!S.solved.m6)s-=3;
  if(S.f.mira_data)s+=2;if(clue('locker'))s+=2;if(S.f.dave_inside)s+=1;if(clue('lifescore'))s+=1;
  return s}
-const haremReady=()=>S.restore&&ROM.every(g=>loved(g)&&aff(g)>=100)&&Object.keys(MYST).every(m=>S.solved[m]);
+const haremReady=()=>S.restore&&ROM.every(g=>loved(g))&&Object.keys(MYST).every(m=>S.solved[m]);
 function endingKey(){
- if(S.f.end)return S.f.end;
  if(haremReady())return'harem';
+ if(S.f.end)return S.f.end;
  if(S.plan==='soldout')return'soldout';
  if(S.plan==='walk')return'lasttrain';
  if(S.f.scapegoat)return'scapegoat';
