@@ -69,14 +69,22 @@ const ROLELINES={
  Partygoer:['WELCOME TO 1336. We ordered fries six hours ago. We have since ordered more fries.','Somebody brought a soldering iron to a party. That somebody is me.','Don\'t mind us. We\'re reverse-engineering the TV. The TV is winning.']
 };
 function genCrowd(){
- const spots={foyer:[[-30,14],[-24,-4],[-40,20],[-28,32,0,1],[-22,12]],vestibule:[[-36,39.5,0,1]],ringN:[[-15,-30],[10,-30],[35,-28],[25,-33,0,1],[-28,-28]],ringE:[[55,-20],[55,10],[53,25,0,1]],ringS:[[0,30],[30,30],[-10,33,0,1]],walkway:[[-25,-20]],
-  courtyard:[[-12,-15],[20,-18],[38,0],[-10,18],[18,10],[5,-2,-1.2,1],[31,-15.6,0,1]],hallA:[[-5,-66,0,1],[-12,-56,1.1,1],[2,-48,3.3,1],[8,-44,4.4,1],[-27,-50],[16,-56]],hallB:[[30,-48,0,1],[40,-44,0,1],[36,-38]],
-  vendor:[[62,-70],[86,-60],[74,-48],[98,-70],[90,-42],[108,-56,0,1]],villagerow:[[80,3],[105,3]],lockpick:[[64,-14,0,1],[74,-20]],ctf:[[84,-27,0,1],[100,-10,0,1],[88,-20]],soc:[[111,-14],[118,-30,0,1]],
-  carhack:[[66,22,0,1],[74,26],[63,14]],ics:[[86,13,0,1],[94,30]],soceng:[[106,28.6,0,1],[110,20.8,0,1],[116,24]],food:[[30,13.5,0,1],[40,20],[44,12]],cosplay:[[16,46],[36,48],[27,46,.6,1],[40,61,0,1],[17,62]],lounge:[[49,48,0,1],[58,42]],naps:[[53,57]],
-  lobby:[[-70,0],[-60,14],[-75,24],[-66,-4]],cafe:[[-56,26.4,0,1],[-48,23]],bar:[[-76,-24],[-62,-28],[-52,-19,0,1],[-70,-33.5,0,1],[-58,-33.5,0,1]],terrace:[[-40,-21,0,1],[-34,-12]],
-  gallery:[[-8,-31,5.5,1],[26,-31.2,5.5,1],[58,-10,5.5,1],[20,34,5.5],[-22.5,12,5.5]],skybridge:[[-36,-22,5.5]],hotelL1:[[-70,-22,5.5]],gym:[[-78,-12.6,5.5,1]],workshop:[[80,-24.3,5.5,1],[88,-21,5.5,1]],workshopA:[[66,-22.6,5.5,1]],hwv:[[100,-24.8,5.5,1],[112,-17.8,5.5,1],[118,-10,5.5]],
-  creator:[[73,14,5.5,1]],arcade:[[80,20,5.5,1],[86,24,5.5,1],[84,34,5.5]],conops:[[96,18,5.5],[102,26,5.5,1]],press:[[110,21,5.5,1]],speakers:[[116,30,5.5]],quiet:[[50,46.6,5.5,1]],fcterrace:[[34,14,5.5]],
-  plaza:[[-50,40],[-90,44],[-20,50],[-6,47.6,0,1],[-70,92]],carpark:[[-60,30,-4.5]],noc:[[-18,9.2,-4.5,1],[-11,9.2,-4.5,1]],corridor:[[230,10],[250,-10]],roof:[[227,-2.8,3.6,1],[220,12,3.6],[235,15,3.6]],
+ const spots={foyer:[[-96,40],[-76,10],[-104,4],[-70,48,0,1],[-92,6],[-80,54]],vestibule:[[-92,62,0,1]],foyerG:[[-68,16,L1],[-68,44,L1,1]],foyerG2:[[-68,24,L2]],skybridge:[[-90,8,L1]],
+  ringN:[[-40,-57],[-8,-55],[22,-53],[40,-57,0,1],[-30,-61,0,1],[4,-61]],ringE:[[47,-30],[48,4],[52.4,-16,0,1]],ringS:[[-40,28],[0,30],[30,26],[-20,30.4,0,1]],walkway:[[-57,-10],[-56,8]],gallery:[[-20,-62,L1,1],[30,-62,L1],[54,-20,L1],[0,32,L1],[-62,0,L1,1]],ring2:[[-30,-57,L2],[20,-57,L2,1],[48,-10,L2],[-10,27,L2]],
+  courtyard:[[-40,-30],[16,-24],[34,-4],[-36,12],[10,10],[-5,-12,-1.2,1],[24,-30.6,0,1],[-34,-21.8,0,1]],skyterrace:[[-57,-40,L2,1]],
+  hallA:[[-5,-100,0,1],[-5,-108],[38,-104],[-25,-83.05,1.65,1],[15,-77.65,3.3,1],[-5,-76.75,3.575,1],[-55,-80],[45,-74],[-20,-67,L1],[25,-67,L2,1],[-25,-80.5,8.875,1]],hallB:[[86,-74,0,1],[75,-70],[86,-96,0,1]],
+  vendor:[[66,-27],[86,-14],[110,-27],[96,-14,0,1],[76,2],[120,-14],[62,-46],[100,-45,0,1],[122,-38,0,1],[90,2.5,0,1]],constore:[[63,10]],seconc:[[90,27],[130,27,0,1]],seconc1:[[100,27,L1],[70,30,L1,1]],
+  villagerow:[[163,-30],[163,0],[163,20,0,1]],vrL1:[[163,-20,L1],[163,10,L1,1]],lockpick:[[145,-38.8,0,1],[140,-44.5],[152,-34]],ctf:[[139,-25.2,0,1],[152,-2.2,0,1],[141,-14]],soc:[[143.9,4,0,1],[151.9,10,0,1],[154,18]],
+  carhack:[[178,-44,0,1],[174,-56],[190,-48]],ics:[[180,-14.6,0,1],[188,-31]],soceng:[[176.6,-2,0,1],[178.8,6,0,1],[186,8]],aero:[[173,23.7,0,1],[184,30]],
+  workshopA:[[140.6,-47,L1,1],[142.8,-37,L1,1]],workshop:[[140.6,-24,L1,1],[145,-14,L1,1]],hwv:[[146.5,-3,L1,1],[146.5,10,L1,1],[154,18,L1]],creator:[[176,-52,L1],[173.4,-46,L1,1]],arcade:[[180.2,-26,L1,1],[183.2,-34,L1,1],[175,-30,L1]],
+  tabletop:[[176,-11.2,L1,1],[186,-.4,L1,1],[180,-6,L1]],film:[[183,12.2,L1,1],[178,32,L1,1]],conops:[[66,-98,L2],[71,-84,L2,1]],press:[[85.2,-94.7,L2,1]],speakers:[[101,-86,L2]],quiet:[[60,46.6,L2-5.5,1]],
+  food:[[-56,49.6+.9,0,1],[-38,44],[-26,52],[-47,54.2+.9,0,1],[-60,58,0,1]],fcterrace:[[-45,40.6,L1,1],[-30,39.5,L1]],skygarden:[[-36,42,L2],[-46,53.1,L2,1]],
+  cosplay:[[2,46],[30,50],[18,50,.6,1],[42,64],[-4,64,0,1],[11.9,54,0,1],[24.1,58,0,1]],lounge:[[58,40,0,1],[70,48]],naps:[[64,60]],
+  lobby:[[-140,40],[-128,22],[-148,26.6,0,1],[-122,33.4,0,1],[-145,8],[-150,46.4,0,1]],cafe:[[-126,50.75,0,1],[-119.6,52,0,1]],mezz:[[-114,44,L1],[-156,22,L1]],hotelL1:[[-150,-12,L1],[-90,-16,L1,1]],
+  promenade:[[-176,-12],[-130,-20],[-80,-10,0,1]],bar:[[-100.5,-57.6,0,1],[-84,-57.6,0,1],[-94,-42.8,0,1],[-74,-32.8,0,1],[-104.6,-45.8,0,1],[-80,-50]],terrace:[[-62.6,-36,0.05,1],[-55,-46]],
+  grill:[[-125,-55.05,0,1],[-114,-31.05,0,1],[-128,-44]],ballroom:[[-95,-40,L1],[-102.6,-49.6,L1,1]],meeting:[[-127.6,-50.2,L1,1]],library:[[-181,-31,L1,1],[-176,-44,L1]],
+  pool:[[-99,-26.6,L2,1],[-80,-30,L2]],gym:[[-113.7,-55,L2,1],[-125,-40,L2]],spa:[[-157,-58.8,L2,1],[-180,-40,L2]],plaza:[[-90,74],[-60,72],[-6,95.6,0,1],[24,97.4,0,1],[-30,90],[-140,80],[120,76]],
+  carpark:[[-120,-26,BY],[-90,13,BY]],noc:[[-55,5.9,BY,1],[-46,6.6,BY,1]],plant:[[-175,-20,BY]],security:[[-80,-75]],dock:[[150,-100]],service:[[20,-154]],
   station:[[720,30],[750,40],[715,34.6,0,1],[760,28.6,0,1],[740,26]],platform:[[720,14.5],[750,9.6],[730,16,0,1],[760,14.5],[727.5,-4]],office:[[514.3,3.4,0,1],[520.7,12.3,0,1],[510,6.5],[528,9]]};
  let i=0;
  for(const a in spots)for(const p of spots[a]){
@@ -85,10 +93,10 @@ function genCrowd(){
   i++;
  }
  const R=(role,reg,x,z,y,ar,v)=>WD.npcs.push({id:'r'+(i++),v:v===undefined?7:v,role,reg,x,z,y:y||0,hx:x,hz:z,ar,tx:x,tz:z,wait:0,still:true});
- R('Volunteer','con',-43.4,29,0,'foyer',3);R('Volunteer','con',-43.4,33,0,'foyer',5);R('Info','con',-24.5,27.2,0,'foyer',2);R('Doorman','con',-56.5,31.6,0,'plaza');
- R('Receptionist','con',-84.4,5,0,'lobby',4);R('Receptionist','con',-84.4,10,0,'lobby',6);R('Barista','con',-53.5,19.3,0,'cafe',1);R('Security','con',-38,-33.2,0,'security');
- R('Engineer','con',-14,10.4,BY,'noc',0);R('Engineer','con',-7,9.4,BY,'noc',2);
- for(const[x,z]of[[260,17],[262.6,19.8],[260.2,20.6],[263,14.6]])R('Partygoer','f13',x,z,0,'room1336',(x*7|0)%7);
+ R('Volunteer','con',-109,47,0,'foyer',3);R('Volunteer','con',-109,55,0,'foyer',5);R('Info','con',-88,50,0,'foyer',2);R('Doorman','con',-139.5,62.4,0,'plaza');
+ R('Receptionist','con',-158.6,18,0,'lobby',4);R('Receptionist','con',-158.6,27,0,'lobby',6);R('Barista','con',-122,43.6,0,'cafe',1);R('Security','con',-96,-92.4,0,'security');
+ R('Engineer','con',-55,6.6,BY,'noc',0);R('Engineer','con',-37,6.6,BY,'noc',2);
+ for(const[x,z]of[[260,17],[262.6,17.4],[260.2,17.2],[263,14.6]])R('Partygoer','f13',x,z,0,'room1336',(x*7|0)%7);
  R('Commuter','station',727,9,0,'platform',2);R('Commuter','station',744,13,0,'platform',5);R('Coworker','office',502.6,1.7,0,'office',4);
 }
 /* ---------------- gates: ropes, locked doors and card readers that open with the story ---------------- */
@@ -98,28 +106,33 @@ function gateBox(g){const t=.3,h=g.kind==='rope'?1.3:3;return[Math.min(g.x0,g.x1
 function placeGates(){
  const preC=()=>d1('open'),hotelMsg='"Ceremony first!" says a volunteer, arms out like a goalkeeper. "Hall A. Everything opens up after."';
  const ropeC=(x0,z0,x1,z1,y)=>gate('con','rope',x0,z0,x1,z1,y,preC,()=>hotelMsg);
- // badge check
- gate('con','rope',-45,23.6,-20.4,23.6,0,()=>d1('badge'),()=>'A volunteer with a lanyard the size of a seatbelt: "Badge first! Registration\'s right there."');
- gate('con','rope',-19.6,25.4,-19.6,35.6,0,()=>d1('badge'),()=>'"Badge first," says a volunteer, who has said "badge first" four hundred times today.');
- // before the opening ceremony
- ropeC(-45.4,4.4,-45.4,15.6);ropeC(-32.5,21.6,-25.5,21.6);ropeC(33.2,-34.4,36.8,-34.4);ropeC(52.2,-34.4,57.8,-34.4);ropeC(-1.2,-24.6,1.2,-24.6);
- ropeC(-19.6,-18.2,-19.6,-15.8);ropeC(-19.6,6.8,-19.6,9.2);ropeC(60.4,-1.6,60.4,7.6);ropeC(49.6,-6.2,49.6,-3.8);ropeC(49.6,14.6,49.6,17.4);ropeC(53.6,35.6,56.4,35.6);
- ropeC(8.8,24.6,11.2,24.6);ropeC(38.6,24.6,41.4,24.6);ropeC(24.6,35.6,29.4,35.6);ropeC(-60,7.4,-52,7.4);
- // the bar opens once you've dropped your bag
+ // badge check: one rope right across the Foyer, and the food court door on the badge side of it
+ gate('con','rope',-109.6,43,-64.6,43,0,()=>d1('badge'),()=>'A volunteer with a lanyard the size of a seatbelt: "Badge first! Registration\'s right there."');
+ gate('con','rope',-64.8,51.6,-64.8,56.4,0,()=>d1('badge'),()=>'"Badge first," says a volunteer, who has said "badge first" four hundred times today.');
+ // before the opening ceremony: the way to Hall A (Foyer, Ring West, Ring North, the hall's floor doors) stays open, everything else is roped
+ ropeC(-109.4,10.4,-109.4,39.6);ropeC(-96.6,-3.4,-77.4,-3.4);ropeC(-63.4,-23.6,-63.4,-4.4);ropeC(-80,40.6,-72,40.6);ropeC(-64.8,38,-64.8,42);
+ ropeC(56.4,-63.6,56.4,-54.4);ropeC(56.4,20.4,56.4,33.6);ropeC(55.6,-42,55.6,-34);ropeC(55.6,-12,55.6,-4);
+ ropeC(-40,33.6,-34,33.6);ropeC(2,33.6,8,33.6);ropeC(33,33.6,37,33.6);ropeC(51.5,33.6,54.5,33.6);ropeC(26.6,-59.4,26.6,-55.6);
+ for(const c of[-10,20])ropeC(c-1.5,-49.6,c+1.5,-49.6);for(const c of[-30,10])ropeC(c-1.5,19.6,c+1.5,19.6);ropeC(-49.6,-1.5,-49.6,1.5);for(const c of[-20,5])ropeC(39.6,c-1.5,39.6,c+1.5);
+ for(const c of[-30,-5,20])ropeC(c-1.5,-64.6,c+1.5,-64.6,L1);
+ // the bar (and its terrace) open once you've dropped your bag
  const barOpen=()=>d1('room'),barMsg=()=>'A sign on a stand: "BAR OPENS 7PM · HOTEL GUESTS: CHECK IN FIRST". It\'s not seven yet. Go and find your room.';
- gate('con','door',-71.5,-10,-68.5,-10,0,barOpen,barMsg,'The bar');gate('con','door',-30,-18.5,-30,-15.5,0,barOpen,barMsg,'Bar terrace');gate('con','door',-45,-18.5,-45,-15.5,0,barOpen,barMsg,'Bar terrace');
+ gate('con','door',-90,-24,-84,-24,0,barOpen,barMsg,'The bar');gate('con','door',-64,-39,-64,-35,0,barOpen,barMsg,'Bar terrace');
+ gate('con','door',-58.5,-50,-55.5,-50,0,barOpen,barMsg,'Bar terrace');gate('con','door',-58.5,-24,-55.5,-24,0,barOpen,barMsg,'Bar terrace');gate('con','rope',-49.6,-38.5,-49.6,-35.5,0,barOpen,barMsg,'Bar terrace');
  // outside, once you're checked in
  const outMsg=()=>'You could go outside. But you\'ve only just arrived, and the opening ceremony is the whole point of being here.';
- gate('con','door',-35,44,-29,44,0,()=>d1('checkin'),outMsg,'Convention doors');gate('con','door',-62,30,-58,30,0,()=>d1('checkin'),outMsg,'Revolving door');
+ gate('con','door',-91,68,-85,68,0,()=>d1('checkin'),outMsg,'Convention doors');gate('con','door',-137.2,60,-132.8,60,0,()=>d1('checkin'),outMsg,'Revolving door');
+ gate('con','door',-148.2,60,-145.8,60,0,()=>d1('checkin'),outMsg,'Hotel doors');gate('con','door',-124.2,60,-121.8,60,0,()=>d1('checkin'),outMsg,'Hotel doors');
  // basement fire stairs: from day 2
- gate('con','door',-85,21.2,-85,22.8,0,()=>S.ch>=2,()=>'"FIRE STAIRS · B". A sign underneath: "Guests: emergencies only." Maybe tomorrow, when you\'re less new.','Fire stairs');
+ gate('con','door',-160,29.2,-160,30.8,0,()=>S.ch>=2,()=>'"FIRE STAIRS · B". A sign underneath: "Guests: emergencies only." Maybe tomorrow, when you\'re less new.','Fire stairs');
  // luggage room: Nyx can show you how
- gate('con','door',-85,2.2,-85,3.8,0,()=>!!S.f.luggage,()=>null,'Luggage room');
- // staff keycard doors (Nyx's route, chapter 2)
+ gate('con','door',-160,7.2,-160,8.8,0,()=>!!S.f.luggage,()=>null,'Luggage room');
+ // staff keycard doors (Nyx's route, chapter 2): every way into the back of house
  const card=()=>!!S.f.keycard,cardMsg=()=>'STAFF ONLY. You tap nothing against the reader, because you have nothing. It blinks red at you, smugly.';
- gate('con','card',-30,-30.8,-30,-29.2,0,card,cardMsg);gate('con','card',20.5,-35,22.5,-35,0,card,cardMsg);gate('con','card',-6.5,-82,-3.5,-82,1.3,card,cardMsg,'Backstage');gate('con','card',-94.5,-40,-91.5,-40,BY,card,cardMsg,'Service tunnel');
+ gate('con','card',-62.8,-64,-61.2,-64,0,card,cardMsg);gate('con','card',52,-64,54,-64,0,card,cardMsg);gate('con','card',121.2,-64,122.8,-64,0,card,cardMsg,'Kitchen');
+ gate('con','card',-6.5,-136,-3.5,-136,1.6,card,cardMsg,'Backstage');gate('con','card',84.5,-111,87.5,-111,.8,card,cardMsg,'Backstage');gate('con','card',-91.5,-54,-88.5,-54,BY,card,cardMsg,'Service tunnel');
  // the Lumen Lounge
- gate('con','door',-58,-24,-56,-24,L1,()=>S.ch>=4&&(S.f.met_bea||S.f.dave_helped),()=>S.ch<4?'LUMEN LOUNGE · INVITE ONLY. The door has a card reader and, somehow, an attitude.':'Locked. You\'d need someone with a staff key. Someone like a bartender. Or a former Lumen intern.','Lumen Lounge');
+ gate('con','door',-73,-24,-71,-24,L1,()=>S.ch>=4&&(S.f.met_bea||S.f.dave_helped),()=>S.ch<4?'LUMEN LOUNGE · INVITE ONLY. The door has a card reader and, somehow, an attitude.':'Locked. You\'d need someone with a staff key. Someone like a bartender. Or a former Lumen intern.','Lumen Lounge');
  // hotel 13th floor + roof
  gate('home','door',-306,5.6,-306,6.4,7.1,()=>false,()=>'Ellie\'s flat. Locked, obviously. A sticky note on the door: "GONE TO WORK (DOWNSTAIRS) (OBVIOUSLY)".','Flat 2');
  gate('home','door',-306,5.6,-306,6.4,10.3,()=>false,()=>'FLAT 3. Locked. Behind the door, very faintly, a cat is watching you through the letterbox.','Flat 3');
@@ -138,26 +151,25 @@ function gateAct(g){
 }
 /* ---------------- placing people and things ---------------- */
 function placeWorld(){
- BR='con';table(-46,15,2.6,1,MT.plain('#f4efe6'));box(-47.1,.76,14.7,-44.9,.92,15.3,MT.bread,{col:false});
  BR='con';
  const ch=()=>S?S.ch:0;
  const C=(id,reg,x,z,when,o)=>WCH.push(Object.assign({id,reg,x,z,y:0,when},o||{}));
  C('ellie','home',-299,3.7,()=>ch()===0);
- C('ellie','con',-46,16.4,()=>ch()>=3&&ch()<5);
- C('nyx','con',69,-24.8,()=>ch()>=1);
- C('ada','con',93,-12.4,()=>ch()>=1);
- C('priya','con',115,-22,()=>ch()>=1);
- C('juno','con',66,29.5,()=>ch()>=1,{y:L1+.25});
- C('kit','con',27,54.2,()=>ch()>=1,{spr:()=>(S.stage.kit<1||S.ch===3)?'kitc':'kit'});
- C('rin','con',51.2,46,()=>ch()>=2);
- C('bea','con',-65,-36.7,()=>ch()>=1);
+ C('ellie','con',-119.6,56.8,()=>ch()>=3&&ch()<5);
+ C('nyx','con',145,-44.5,()=>ch()>=1);
+ C('ada','con',146,-6.8,()=>ch()>=1);
+ C('priya','con',146,13,()=>ch()>=1);
+ C('juno','con',189,-57,()=>ch()>=1,{y:L1+.25});
+ C('kit','con',18,66.8,()=>ch()>=1,{spr:()=>(S.stage.kit<1||S.ch===3)?'kitc':'kit'});
+ C('rin','con',64,37.4,()=>ch()>=2);
+ C('bea','con',-88,-61.4,()=>ch()>=1);
  C('mira','f13',270.8,-2.2,()=>ch()>=3&&S.f.roof_open,{y:TOP});
- C('dave','con',-31.6,2,()=>ch()===1);
- C('dave','con',68,-75.1,()=>ch()>=2&&ch()<5,{spr:()=>'davex'});
- C('marge','con',99,22.6,()=>ch()>=1&&ch()<4,{y:L1});
- C('marge','con',-5,-76,()=>ch()===4,{y:1.3});
- C('victor','con',-38,6,()=>ch()>=1&&ch()<3);
- C('victor','con',-80,-30,()=>ch()===3);
+ C('dave','con',-81.5,22,()=>ch()===1);
+ C('dave','con',106,-27,()=>ch()>=2&&ch()<5,{spr:()=>'davex'});
+ C('marge','con',75.6,-90,()=>ch()>=1&&ch()<4,{y:L2});
+ C('marge','con',-5,-121,()=>ch()===4,{y:1.6});
+ C('victor','con',-100,33.4,()=>ch()>=1&&ch()<3);
+ C('victor','con',-94,-39,()=>ch()===3);
  C('linda','office',537.4,2.4,()=>ch()===0);
  C('gary','office',521,8.6,()=>ch()===0);
  genCrowd();placeGates();
@@ -209,84 +221,100 @@ function placeWorld(){
  int('station',764.8,35.2,()=>'Platform Coffee',N1('"Flat white?" You nod. The barista draws a heart in the foam, then, after a long look at you, turns it into a padlock.'));
  int('station',708,43.6,()=>'Play the station piano',N1('You play the four notes of the only song you know. A man in a suit stops, listens, and puts a pound in a cup that isn\'t there. Then he catches the 09:20.'));
  /* ---- plaza ---- */
- int('con',-104,44,()=>'Taxi rank',()=>run([N('A taxi driver looks up from his phone. "Station?"'),C({t:'"Central Station, please."',then:()=>{fadeTp(()=>{teleportArea('station');run([N('The station. Commuters, pigeons, and a departures board that still has the 09:12 to the con on it.')],hub)});return[]}},{t:'"Not yet."',then:[]})],hub));
- int('con',-55,72.2,()=>'Look at the big sign',N1('CTRL+ALT+CON, in letters taller than you. Somebody has stuck a tiny sticker over the Lumen logo at the bottom. It says "no".'));
- int('con',-15.5,49.5,()=>'Coffee cart',N1('"Bean There". The barista has a badge, a beard and a QR code tattoo. "It goes to my mum\'s bakery," he says. You don\'t scan it. He respects that.'));
- int('con',0,47.2,()=>'Bus stop',N1('Bus 42. The timetable is a Lumen ad. "SafeSphere: Privacy On The Move." Someone has added, in marker: "on the move to where?"'));
+ int('con',-6,95.2,()=>'Taxi rank',()=>run([N('A taxi driver looks up from his phone. "Station?"'),C({t:'"Central Station, please."',then:()=>{fadeTp(()=>{teleportArea('station');run([N('The station. Commuters, pigeons, and a departures board that still has the 09:12 to the con on it.')],hub)});return[]}},{t:'"Not yet."',then:[]})],hub));
+ int('con',-37,81.6,()=>'Look at the big sign',N1('CTRL+ALT+CON, in letters taller than you. Somebody has stuck a tiny sticker over the Lumen logo at the bottom. It says "no".'));
+ int('con',-20,73.8,()=>'Coffee cart',N1('"Bean There". The barista has a badge, a beard and a QR code tattoo. "It goes to my mum\'s bakery," he says. You don\'t scan it. He respects that.'));
+ int('con',24,97.6,()=>'Bus stop',N1('Bus 42. The timetable is a Lumen ad. "SafeSphere: Privacy On The Move." Someone has added, in marker: "on the move to where?"'));
  /* ---- foyer ---- */
- int('con',-38.6,31,()=>S.ch===1&&!S.f.d1_badge?'Pick up your badge':'Registration desk',()=>{if(S.ch===1&&!S.f.d1_badge)return run(D1_BADGE(),hub);run([N(pick(['The volunteers have the thousand-yard stare of people who have handed out four thousand lanyards.','A box labelled LOST BADGES. Eleven badges. Nine of them say "Dave".']))],hub)});
- int('con',-24.5,32.4,()=>'Info desk',()=>run([{w:'Info',np:1,t:pick(ROLELINES.Info)}],hub));
- int('con',-38,6.6,()=>S.ch>=1&&S.ch<4?'Take a SafeSphere flyer':null,()=>run([N('"SafeSphere: your privacy, protected. Free forever!" On the back, in 4-point type: "By installing you agree to share insights with trusted partners."'),N(S.ch>=3?'You bin it. Three other people do the same while you watch.':'You fold it into a very small square.')],hub));
- int('con',-34.5,4.6,()=>'Try a SafeSphere demo pod',N1('The pod asks for your contacts "to protect them too". Then your location "to keep you safe". Then your camera "for your security". You step out. It says "Come back soon!" in a voice that is far too warm.'));
- int('con',-40.5,29.4,()=>'Look up at the ceiling',()=>run([N(S.clues.includes('evil_twin')?'The tile Nyx pointed out. Behind it, a small box with a Lumen asset tag blinks away, pretending to be the con\'s Wi-Fi.':'One ceiling tile above the registration desk is slightly askew. A tiny green light blinks behind it. Probably nothing. Probably.')],hub));
+ int('con',-105.2,53.4,()=>S.ch===1&&!S.f.d1_badge?'Pick up your badge':'Registration desk',()=>{if(S.ch===1&&!S.f.d1_badge)return run(D1_BADGE(),hub);run([N(pick(['The volunteers have the thousand-yard stare of people who have handed out four thousand lanyards.','A box labelled LOST BADGES. Eleven badges. Nine of them say "Dave".']))],hub)});
+ int('con',-88,50,()=>'Info desk',()=>run([{w:'Info',np:1,t:pick(ROLELINES.Info)}],hub),{r:2.7});
+ int('con',-94,32.6,()=>S.ch>=1&&S.ch<4?'Take a SafeSphere flyer':null,()=>run([N('"SafeSphere: your privacy, protected. Free forever!" On the back, in 4-point type: "By installing you agree to share insights with trusted partners."'),N(S.ch>=3?'You bin it. Three other people do the same while you watch.':'You fold it into a very small square.')],hub));
+ int('con',-87,30.6,()=>'Try a SafeSphere demo pod',N1('The pod asks for your contacts "to protect them too". Then your location "to keep you safe". Then your camera "for your security". You step out. It says "Come back soon!" in a voice that is far too warm.'));
+ int('con',-103,48.6,()=>'Look up at the ceiling',()=>run([N(S.clues.includes('evil_twin')?'The tile Nyx pointed out. Behind it, a small box with a Lumen asset tag blinks away, pretending to be the con\'s Wi-Fi.':'One ceiling tile above the registration desk is slightly askew. A tiny green light blinks behind it. Probably nothing. Probably.')],hub));
  /* ---- Hall A / Hall B ---- */
- int('con',-5,-49.5,()=>S.ch===1&&S.f.d1_badge&&!S.f.d1_open?'Take a seat for the opening ceremony':'Sit down for a talk',()=>{if(S.ch===1&&!S.f.d1_open){if(!S.f.d1_badge)return run([N('No badge, no seat.')],hub);return run(D1_CEREMONY(),hub)}go('stage')},{y:2.75,r:3.2});
- int('con',-5,-72.6,()=>'Step up to the podium',N1('You grip the podium and look out at two thousand empty seats rising into the dark. Your heart rate doubles. Imagine doing this for real.'),{y:1.3});
- int('con',17.5,-67.8,()=>'Look at the AV desk',N1('Four screens, a mixing desk and an AV tech eating a sandwich with the calm of someone who has seen every possible failure. "Don\'t touch anything," she says, without looking up.'));
- int('con',-3,-88.2,()=>'Raid the speakers\' snacks',N1('Grapes, crisps and a bowl of only green M&Ms. You take one grape. You feel like a criminal.'),{y:1.3});
- int('con',35.5,-50,()=>'Catch a talk in Hall B',once('hb',()=>[N(pick(['Track 2: "I Found a Bug in a Toaster". It\'s an hour long. The toaster gets a standing ovation.','Track 2: "Your Smart Doorbell Is Watching Your Neighbours". The room goes quiet. Several people text their neighbours.','Track 2: "Lessons From a Year of Honeypots". The main lesson: people will try "admin/admin" on anything.'])),FX({skill:1})],'The next Track 2 talk is about blockchain. You leave before you can be persuaded of anything.'));
+ int('con',-5,-79.5,()=>S.ch===1&&S.f.d1_badge&&!S.f.d1_open?'Take a seat for the opening ceremony':'Sit down for a talk',()=>{if(S.ch===1&&!S.f.d1_open){if(!S.f.d1_badge)return run([N('No badge, no seat.')],hub);return run(D1_CEREMONY(),hub)}go('stage')},{y:2.75,r:3.2});
+ int('con',-5,-124.2,()=>'Step up to the podium',N1('You grip the podium and look out at two thousand empty seats rising into the dark. Your heart rate doubles. Imagine doing this for real.'),{y:1.6});
+ int('con',9,-89,()=>'Look at the AV desk',N1('Four screens, a mixing desk and an AV tech eating a sandwich with the calm of someone who has seen every possible failure. "Don\'t touch anything," she says, without looking up.'));
+ int('con',-3,-147.4,()=>'Raid the speakers\' snacks',N1('Grapes, crisps and a bowl of only green M&Ms. You take one grape. You feel like a criminal.'),{y:1.6});
+ int('con',86,-80,()=>'Catch a talk in Hall B',once('hb',()=>[N(pick(['Track 2: "I Found a Bug in a Toaster". It\'s an hour long. The toaster gets a standing ovation.','Track 2: "Your Smart Doorbell Is Watching Your Neighbours". The room goes quiet. Several people text their neighbours.','Track 2: "Lessons From a Year of Honeypots". The main lesson: people will try "admin/admin" on anything.'])),FX({skill:1})],'The next Track 2 talk is about blockchain. You leave before you can be persuaded of anything.'));
  /* ---- vendor ---- */
- int('con',54,-55.4,()=>'Shop at the Con Store',()=>{if(S.ch<2)return run([N('"Opening tomorrow!" says a sign. The shopkeeper waves a price gun at you menacingly.')],hub);if(!S.unl.cred)return run([{unlock:'cred'}],()=>shop());shop()});
- [['STICKERS',''],['LOCK PICKS','Tension wrenches, rakes, a lock shaped like a heart. The vendor winks. You don\'t know why.'],['LEDs & BADGES','A badge that plays Snake. A badge that plays Doom. A badge that is just a very bright light.'],['SUSPICIOUS USB CABLES','"Totally normal cables," says the sign. The vendor is wearing sunglasses. You keep walking.'],['LANYARDS ONLY','He sells lanyards. Only lanyards. He seems at peace.'],['T-SHIRTS','"There\'s no place like 127.0.0.1." You\'ve seen four people wearing it already.'],['KEYBOARDS','Someone types on a keyboard so loud it sounds like popcorn. They look extremely happy.'],['BOOKS & ZINES','A zine titled "So You Got Doxxed". It\'s selling very well this weekend.'],['RETRO COMPUTERS','A beige machine from 1989 boots up with a noise like a jet engine. A crowd gathers in reverence.'],['FPGA BOARDS','Tiny boards that can pretend to be any chip. The vendor pretends to be a person who understands them.'],['"MILITARY-GRADE" VPNs','"Unbreakable!" says the poster. The vendor won\'t say what it\'s unbreakable against. You suspect "sales".'],['FARADAY BAGS','Little bags that block every signal. You put your phone in one. For the first time in years, it\'s quiet.']].forEach((s,i)=>{const cx=68+(i%3)*12,cz=-74+Math.floor(i/3)*10;if(i!==0)int('con',cx,cz+.9,()=>'Browse: '+s[0].toLowerCase(),N1(s[1]))});
- int('con',110,-63.6,()=>'Watch the demo stage',N1('A presenter opens a "smart" padlock with a phone, a magnet and a deeply unimpressed expression. The lock\'s marketing slogan was "unpickable". The crowd chants it ironically.'));
+ int('con',65,11.2,()=>'Shop at the Con Store',()=>{if(S.ch<2)return run([N('"Opening tomorrow!" says a sign. The shopkeeper waves a price gun at you menacingly.')],hub);if(!S.unl.cred)return run([{unlock:'cred'}],()=>shop());shop()});
+ [['STICKERS',''],['LOCK PICKS','Tension wrenches, rakes, a lock shaped like a heart. The vendor winks. You don\'t know why.'],['LEDs & BADGES','A badge that plays Snake. A badge that plays Doom. A badge that is just a very bright light.'],['SUSPICIOUS USB CABLES','"Totally normal cables," says the sign. The vendor is wearing sunglasses. You keep walking.'],['LANYARDS ONLY','He sells lanyards. Only lanyards. He seems at peace.'],['T-SHIRTS','"There\'s no place like 127.0.0.1." You\'ve seen four people wearing it already.'],['KEYBOARDS','Someone types on a keyboard so loud it sounds like popcorn. They look extremely happy.'],['BOOKS & ZINES','A zine titled "So You Got Doxxed". It\'s selling very well this weekend.'],['RETRO COMPUTERS','A beige machine from 1989 boots up with a noise like a jet engine. A crowd gathers in reverence.'],['FPGA BOARDS','Tiny boards that can pretend to be any chip. The vendor pretends to be a person who understands them.'],['"MILITARY-GRADE" VPNs','"Unbreakable!" says the poster. The vendor won\'t say what it\'s unbreakable against. You suspect "sales".'],['FARADAY BAGS','Little bags that block every signal. You put your phone in one. For the first time in years, it\'s quiet.']].forEach((s,i)=>{const cx=STALLPOS[i].x,cz=STALLPOS[i].z;if(i!==0)int('con',cx,cz+1.4,()=>'Browse: '+s[0].toLowerCase(),N1(s[1]))});
+ int('con',116,-39.6,()=>'Watch the demo stage',N1('A presenter opens a "smart" padlock with a phone, a magnet and a deeply unimpressed expression. The lock\'s marketing slogan was "unpickable". The crowd chants it ironically.'));
  /* ---- villages ---- */
- int('con',69,-33.4,()=>'Practise on the pegboard locks',()=>{const k='peg'+S.ch;if(S.room[k])return run([N('Your fingers are sore. Maybe next chapter.')],hub);S.room[k]=1;run([N('You pick a padlock off the pegboard and get to work.'),{game:'timing',kind:'pins',n:3}],hub)});
- int('con',93,-15.6,()=>'Read the scoreboard tower',N1('Four screens, four sides, the same bad news for everyone. KERNEL (ada) is third. A team called "dave_hax" has forty points and a very aggressive logo.'));
- int('con',115,-33,()=>'Watch the wall of screens',N1('Graphs, alerts, a map of every Wi-Fi network in the building. One flashes red: ROGUE AP: "CTRLALTCON". It\'s been flashing for days.'));
- int('con',72.8,22,()=>'Look under the bonnet',N1('Wires everywhere, a laptop zip-tied to the engine, and a small handwritten sign: "If you start this car, you buy everyone lunch." The car has been started eleven times. Lunch has been excellent.'));
- int('con',90,13.6,()=>'Watch the toy train',N1('A tiny train goes round a tiny city. A team on laptops tries to stop it. A different team tries to keep it moving. Every time it stops, a siren goes off and everybody cheers. Nobody is sure who\'s winning.'));
- int('con',106,29.2,()=>'Try the vishing booth',once('vish',()=>[N('You step into the soundproof booth. On the screen: "Call the fake helpdesk. Get the fake password. Don\'t lie about who you are."'),C({t:'Be friendly, patient and honest about who you are',fx:{skill:2},then:[N('It takes six minutes. The "helpdesk" refuses to give you the password, then thanks you for not trying to trick them. The judges give you full marks for not being a creep.')]},{t:'Pretend to be the CEO and shout',fx:{clout:3,exp:2},then:[N('"This is the CEO!" The fake helpdesk hangs up. The crowd boos. A judge writes "classic" on her clipboard.')]})],'The booth has a queue of forty people. You\'ve had your turn.'));
+ int('con',146,-52.6,()=>'Practise on the pegboard locks',()=>{const k='peg'+S.ch;if(S.room[k])return run([N('Your fingers are sore. Maybe next chapter.')],hub);S.room[k]=1;run([N('You pick a padlock off the pegboard and get to work.'),{game:'timing',kind:'pins',n:3}],hub)});
+ int('con',146,-12.2,()=>'Read the scoreboard tower',N1('Four screens, four sides, the same bad news for everyone. KERNEL (ada) is third. A team called "dave_hax" has forty points and a very aggressive logo.'));
+ int('con',135.8,10,()=>'Watch the wall of screens',N1('Graphs, alerts, a map of every Wi-Fi network in the building. One flashes red: ROGUE AP: "CTRLALTCON". It\'s been flashing for days.'));
+ int('con',186.2,-50,()=>'Look under the bonnet',N1('Wires everywhere, a laptop zip-tied to the engine, and a small handwritten sign: "If you start this car, you buy everyone lunch." The car has been started eleven times. Lunch has been excellent.'));
+ int('con',183,-14.6,()=>'Watch the toy train',N1('A tiny train goes round a tiny city. A team on laptops tries to stop it. A different team tries to keep it moving. Every time it stops, a siren goes off and everybody cheers. Nobody is sure who\'s winning.'));
+ int('con',189.6,-5,()=>'Try the vishing booth',once('vish',()=>[N('You step into the soundproof booth. On the screen: "Call the fake helpdesk. Get the fake password. Don\'t lie about who you are."'),C({t:'Be friendly, patient and honest about who you are',fx:{skill:2},then:[N('It takes six minutes. The "helpdesk" refuses to give you the password, then thanks you for not trying to trick them. The judges give you full marks for not being a creep.')]},{t:'Pretend to be the CEO and shout',fx:{clout:3,exp:2},then:[N('"This is the CEO!" The fake helpdesk hangs up. The crowd boos. A judge writes "classic" on her clipboard.')]})],'The booth has a queue of forty people. You\'ve had your turn.'));
  /* ---- food court, courtyard ---- */
- int('con',46,11.6,()=>'Order noodles',N1('Noodles in a cardboard box. They\'re incredible. It might just be that you haven\'t eaten since yesterday.'));
- int('con',46,15.2,()=>'Order pizza',N1('"Any toppings?" "Not pineapple." "Correct answer. We\'ve had incidents."'));
- int('con',46,18.8,()=>'Order tacos',N1('Three tacos. One falls apart instantly. Classic.'));
- int('con',46,22.4,()=>'Buy a Club-Mate',N1('Cold, fizzy, faintly bitter. You can feel your neurons applauding.'));
- int('con',5,2.4,()=>'Toss a credit in the fountain',()=>run([N(S.cred>0?'You toss a con credit in. You wish for a good keynote. A pigeon watches, judgementally.':'You don\'t have any credits. You wish anyway.'),...(S.cred>0?[FX({cred:-1})]:[])],hub),{y:-1.2});
- int('con',30,-15.4,()=>'Sit under the big tree',N1('The only tree in the building, and it\'s enormous. You sit on the bench beneath it. Through the glass on every side, the con carries on without you. For a minute, that\'s fine.'));
+ int('con',FOODPOS[0].x,FOODPOS[0].z,()=>'Order noodles',N1('Noodles in a cardboard box. They\'re incredible. It might just be that you haven\'t eaten since yesterday.'));
+ int('con',FOODPOS[1].x,FOODPOS[1].z,()=>'Order pizza',N1('"Any toppings?" "Not pineapple." "Correct answer. We\'ve had incidents."'));
+ int('con',FOODPOS[2].x,FOODPOS[2].z,()=>'Order tacos',N1('Three tacos. One falls apart instantly. Classic.'));
+ int('con',FOODPOS[3].x,FOODPOS[3].z,()=>'Buy a Club-Mate',N1('Cold, fizzy, faintly bitter. You can feel your neurons applauding.'));
+ int('con',-5,-12,()=>'Toss a credit in the fountain',()=>run([N(S.cred>0?'You toss a con credit in. You wish for a good keynote. A pigeon watches, judgementally.':'You don\'t have any credits. You wish anyway.'),...(S.cred>0?[FX({cred:-1})]:[])],hub),{y:-1.2});
+ int('con',24,-30.8,()=>'Sit under the big tree',N1('The only tree in the building, and it\'s enormous. You sit on the bench beneath it. Through the glass on every side, the con carries on without you. For a minute, that\'s fine.'));
  /* ---- cosplay, lounge ---- */
- int('con',27,51.4,()=>'Strike a pose on the runway',N1('You stand at the end of the runway and pose. Nobody is watching. It still feels amazing. A tape mark on the floor says "WINGS NEED 3M CLEARANCE".'),{y:.6});
- int('con',17,59.6,()=>'Peek into the changing rooms',N1('Curtains, safety pins and a man inside a cardboard robot asking someone to "do up his back". The robot\'s back is a recycling box.'));
- int('con',39.5,61.4,()=>'Step in front of the photo studio backdrop',N1('The backdrop glows. The lights hit you just right. For one shining second you look like the album cover of a band that only plays at 3 AM.'));
- int('con',60.6,37.8,()=>'Stare into a lava lamp',N1('The blob rises. The blob falls. You lose four minutes and gain inner peace.'));
- int('con',54,58.6,()=>'Borrow a nap pod',N1('You lie down in a pod that hums like a spaceship. Ten minutes later you wake up with a seatbelt mark on your face and the clarity of a monk.'));
+ int('con',18,62.6,()=>'Strike a pose on the runway',N1('You stand at the end of the runway and pose. Nobody is watching. It still feels amazing. A tape mark on the floor says "WINGS NEED 3M CLEARANCE".'),{y:.6});
+ int('con',-5.4,58,()=>'Peek into the changing rooms',N1('Curtains, safety pins and a man inside a cardboard robot asking someone to "do up his back". The robot\'s back is a recycling box.'));
+ int('con',42,71,()=>'Step in front of the photo studio backdrop',N1('The backdrop glows. The lights hit you just right. For one shining second you look like the album cover of a band that only plays at 3 AM.'));
+ int('con',78.2,36.4,()=>'Stare into a lava lamp',N1('The blob rises. The blob falls. You lose four minutes and gain inner peace.'));
+ int('con',61.7,64.6,()=>'Borrow a nap pod',N1('You lie down in a pod that hums like a spaceship. Ten minutes later you wake up with a seatbelt mark on your face and the clarity of a monk.'));
  /* ---- hotel ---- */
- int('con',-80.4,7,()=>S.ch===1&&S.f.d1_open&&!S.f.d1_checkin?'Check in at reception':'Talk to reception',()=>{if(S.ch===1&&!S.f.d1_checkin){if(!S.f.d1_open)return run([{w:'Receptionist',np:1,t:'Check-in for CTRL+ALT+CON guests opens after the opening ceremony. Hall A, in the convention centre. Through the big gap.'}],hub);return run(D1_CHECKIN(),hub)}run([N('"Room 1337? Ah. Thirteenth floor. You\'re the third person to ask if we did that on purpose." They don\'t answer the question.')],hub)});
- int('con',-78,27.6,()=>'Call the lift',()=>liftMenu());
- int('con',-53.5,21.8,()=>'Order a flat white',N1('A flat white in a cup that says "HALCYON". The barista writes your handle on it, then crosses it out and draws a little skull. "Opsec," she says.'));
- int('con',-84,-22,()=>'Watch the bar TV',()=>run([N(S.ch>=3?'Breaking news ticker: "Questions grow over popular privacy app." The whole bar goes quiet to read it.':'A muted football match. Somebody has changed the subtitles to Linux error messages.')],hub));
- int('con',-38,-11,()=>'Lean on the terrace rail',N1('From the terrace you can see straight across the courtyard: the big tree, the fountain, and through the glass, the whole Ring lit up like an aquarium of hoodies.'));
- int('con',-86,28.6,()=>S.ch>=2?'Service lift':null,()=>serviceLift());
- int('con',-86,28.6,()=>S.ch>=2?'Service lift':null,()=>serviceLift(),{y:BY});
- int('con',-96,6.4,()=>S.f.luggage?'Look at the Lumen flight case':null,()=>run([N('A flight case stencilled LUMEN · SAFESPHERE DEMO PODS · SPARE APs. Inside, in foam, six small white boxes. Five are labelled. One slot is empty.'),...(S.clues.includes('evil_twin')?[N('The missing one is in the ceiling above registration. You\'d bet your badge on it.')]:[N('Wi-Fi access points. Lumen brought spare Wi-Fi access points to a con that already has Wi-Fi.'),{unlock:'clues'},FX({clue:'evil_twin'})])],hub));
+ int('con',-154.4,22.5,()=>S.ch===1&&S.f.d1_open&&!S.f.d1_checkin?'Check in at reception':'Talk to reception',()=>{if(S.ch===1&&!S.f.d1_checkin){if(!S.f.d1_open)return run([{w:'Receptionist',np:1,t:'Check-in for CTRL+ALT+CON guests opens after the opening ceremony. Hall A, in the convention centre. Through the big gap.'}],hub);return run(D1_CHECKIN(),hub)}run([N('"Room 1337? Ah. Thirteenth floor. You\'re the third person to ask if we did that on purpose." They don\'t answer the question.')],hub)});
+ int('con',-148,-27,()=>'Call the lift',()=>liftMenu());
+ int('con',-122,46.4,()=>'Order a flat white',N1('A flat white in a cup that says "HALCYON". The barista writes your handle on it, then crosses it out and draws a little skull. "Opsec," she says.'));
+ int('con',-104.5,-29.5,()=>'Watch the bar TV',()=>run([N(S.ch>=3?'Breaking news ticker: "Questions grow over popular privacy app." The whole bar goes quiet to read it.':'A muted football match. Somebody has changed the subtitles to Linux error messages.')],hub));
+ int('con',-51.2,-44,()=>'Lean on the terrace rail',N1('From the terrace you can see straight across the courtyard: the big tree, the fountain, and through the glass, the whole Ring lit up like an aquarium of hoodies.'));
+ int('con',-166,38.6,()=>S.ch>=2?'Service lift':null,()=>serviceLift());
+ int('con',-170,52.4,()=>S.ch>=2?'Service lift':null,()=>serviceLift(),{y:BY});
+ int('con',-168,17.6,()=>S.f.luggage?'Look at the Lumen flight case':null,()=>run([N('A flight case stencilled LUMEN · SAFESPHERE DEMO PODS · SPARE APs. Inside, in foam, six small white boxes. Five are labelled. One slot is empty.'),...(S.clues.includes('evil_twin')?[N('The missing one is in the ceiling above registration. You\'d bet your badge on it.')]:[N('Wi-Fi access points. Lumen brought spare Wi-Fi access points to a con that already has Wi-Fi.'),{unlock:'clues'},FX({clue:'evil_twin'})])],hub));
  /* ---- level 1 ---- */
- int('con',10,-30.6,()=>'Lean on the railing',N1('From the gallery you can see the whole Ring: lanyards flowing round the courtyard like a slow river. Someone below drops a badge. Someone else picks it up and reads the name aloud. Opsec, everyone.'),{y:L1});
- int('con',84,-30.8,()=>'Sit in on the workshop',once('ws',()=>[N(pick(['"Threat Modelling for People Who Hate Meetings." Step one: who wants your stuff? Step two: what happens if they get it? You take notes.','A live demo: the speaker finds four people\'s home towns from one holiday photo. The room goes very quiet.','"Your password manager is the one egg basket worth having." Somebody in the front row applauds alone.'])),FX({skill:2})],'The speaker is answering a question that is really a forty-minute statement. You slip back out.'),{y:L1});
- int('con',68,-30.8,()=>'Watch the Wireshark workshop',N1('Two hundred people capturing their own network traffic and discovering, collectively, that their laptops talk to more servers than they have friends.'),{y:L1});
- int('con',95,-20,()=>'Solder practice station',()=>{const k='sol'+S.ch;if(S.room[k])return run([N('The volunteer shakes her head. "Let the iron cool. Come back later."')],hub);S.room[k]=1;run([T('Volunteer','Free solder lesson! Make a little LED badge. Mind your fingers.'),{game:'timing',kind:'solder',n:3}],hub)},{y:L1});
- int('con',107,-33.4,()=>'Watch the LED wall',N1('Thousands of LEDs cycling through Conway\'s Game of Life. Someone has built a glider gun that spells "BE EXCELLENT".'),{y:L1});
- int('con',116,-11,()=>'Badge hacking table',N1('Tables of con badges with their guts out. A teenager has made hers play the con\'s theme tune in eight-bit. You clap. She bows.'),{y:L1});
- int('con',73,13.4,()=>'Peek into a studio pod',N1('A tiny room with a ring light, a microphone and a streamer explaining SQL injection to 900 viewers using only a sandwich as a prop.'),{y:L1});
- int('con',86,20.4,()=>'Play OUTRUN.EXE',once('arc',()=>[N('You grip the wheel. Neon palm trees. A synth soundtrack that sounds like 1987 dreaming of the future. You take first place and a little ticket printer chatters.'),FX({cred:3})],'You put your last coin in. You crash on the first corner. The machine plays a sad little tune.'),{y:L1});
- int('con',90.2,9.7,()=>'Vending machine',()=>run([N(S.cred>0?'The machine thinks about it, then drops a Club-Mate with a clunk. One credit well spent.':'You pat your pockets. No credits. The machine glows at you, unbothered.'),...(S.cred>0?[FX({cred:-1})]:[])],hub),{y:L1});
- int('con',99,34.4,()=>'Read the Con Ops whiteboard',()=>run([N(S.ch>=4?'Marge\'s whiteboard, rewritten overnight: "4PM KEYNOTE · AV: NYX (signed!) · EVIDENCE: RIN, ADA · REGULATOR: SENT · DO NOT BE WRONG." Someone has drawn a small heart next to the last line.':'A whiteboard: "BADGES · RADIOS · LOST PROPERTY · DAVE (?)". Under it, in Marge\'s handwriting: "Do not trust the Wi-Fi. I mean it."')],hub),{y:L1});
- int('con',110,29,()=>'Press room',N1('Three journalists, one coffee machine, and a sign: "PLEASE DO NOT PHOTOGRAPH ATTENDEES WITHOUT CONSENT". A man photographs the sign.'),{y:L1});
- int('con',118,30.6,()=>'Speaker lounge biscuits',N1('Real biscuits. Chocolate ones. You take one and walk out at a normal speed, as if you are a speaker. Nobody stops you. You are, for one biscuit, a speaker.'),{y:L1});
- int('con',54,44,()=>'Sit in the quiet room',once('qr',()=>[N('You sit. You breathe. You put your phone face-down. Somewhere far below, four thousand people are arguing about tabs. In here, nothing.'),FX({exp:-2})],'You sit for another minute. It\'s still nice.'),{y:L1});
- int('con',38,16,()=>'Look over the courtyard',N1('From the terrace, the courtyard is a green square in a glass box. The big tree, the amphitheatre, the fountain, and two people in cloaks having what looks like a very serious duel with foam swords.'),{y:L1});
- int('con',-73,-15.4,()=>'Look through the glass at the pool',N1('The hotel pool, glowing blue. One person is swimming slow lengths in a CTRL+ALT+CON hoodie. You have so many questions.'),{y:L1});
- int('con',-73.5,-34,()=>'Read the meeting room slides',N1('"LUMEN PARTNER BREAKFAST · SafeSphere 2 roadmap". Somebody forgot to close the projector. The next slide is titled "Monetising the Social Graph".'),{y:L1});
- int('con',-59,-37.2,()=>S.ch>=4?'Look at the papers on the bar':null,()=>run([N('A glossy folder on the Lumen Lounge bar. "KEYNOTE RUN-SHEET · CONFIDENTIAL".'),...(S.clues.includes('runsheet')?[N('The same run-sheet Dave showed you. Same plan. Same Monday launch.')]:[N('"SafeSphere 2: contact graph. Launch all regions Monday." You photograph it. Your hands are steady. Mostly.'),{unlock:'clues'},FX({clue:'runsheet'})])],hub),{y:L1});
+ int('con',0,-60.6,()=>'Lean on the railing',N1('From the gallery you can see the whole Ring: lanyards flowing round the courtyard like a slow river. Someone below drops a badge. Someone else picks it up and reads the name aloud. Opsec, everyone.'),{y:L1});
+ int('con',146,-19,()=>'Sit in on the workshop',once('ws',()=>[N(pick(['"Threat Modelling for People Who Hate Meetings." Step one: who wants your stuff? Step two: what happens if they get it? You take notes.','A live demo: the speaker finds four people\'s home towns from one holiday photo. The room goes very quiet.','"Your password manager is the one egg basket worth having." Somebody in the front row applauds alone.'])),FX({skill:2})],'The speaker is answering a question that is really a forty-minute statement. You slip back out.'),{y:L1});
+ int('con',146,-42,()=>'Watch the Wireshark workshop',N1('Two hundred people capturing their own network traffic and discovering, collectively, that their laptops talk to more servers than they have friends.'),{y:L1});
+ int('con',146.5,2,()=>'Solder practice station',()=>{const k='sol'+S.ch;if(S.room[k])return run([N('The volunteer shakes her head. "Let the iron cool. Come back later."')],hub);S.room[k]=1;run([T('Volunteer','Free solder lesson! Make a little LED badge. Mind your fingers.'),{game:'timing',kind:'solder',n:3}],hub)},{y:L1});
+ int('con',136.4,6,()=>'Watch the LED wall',N1('Thousands of LEDs cycling through Conway\'s Game of Life. Someone has built a glider gun that spells "BE EXCELLENT".'),{y:L1});
+ int('con',152.8,-3,()=>'Badge hacking table',N1('Tables of con badges with their guts out. A teenager has made hers play the con\'s theme tune in eight-bit. You clap. She bows.'),{y:L1});
+ int('con',173.4,-43,()=>'Peek into a studio pod',N1('A tiny room with a ring light, a microphone and a streamer explaining SQL injection to 900 viewers using only a sandwich as a prop.'),{y:L1});
+ int('con',180,-30,()=>'Play OUTRUN.EXE',once('arc',()=>[N('You grip the wheel. Neon palm trees. A synth soundtrack that sounds like 1987 dreaming of the future. You take first place and a little ticket printer chatters.'),FX({cred:3})],'You put your last coin in. You crash on the first corner. The machine plays a sad little tune.'),{y:L1});
+ int('con',172,-38.5,()=>'Vending machine',()=>run([N(S.cred>0?'The machine thinks about it, then drops a Club-Mate with a clunk. One credit well spent.':'You pat your pockets. No credits. The machine glows at you, unbothered.'),...(S.cred>0?[FX({cred:-1})]:[])],hub),{y:L1});
+ int('con',71,-109,()=>'Read the Con Ops whiteboard',()=>run([N(S.ch>=4?'Marge\'s whiteboard, rewritten overnight: "4PM KEYNOTE · AV: NYX (signed!) · EVIDENCE: RIN, ADA · REGULATOR: SENT · DO NOT BE WRONG." Someone has drawn a small heart next to the last line.':'A whiteboard: "BADGES · RADIOS · LOST PROPERTY · DAVE (?)". Under it, in Marge\'s handwriting: "Do not trust the Wi-Fi. I mean it."')],hub),{y:L2});
+ int('con',86,-100,()=>'Press room',N1('Three journalists, one coffee machine, and a sign: "PLEASE DO NOT PHOTOGRAPH ATTENDEES WITHOUT CONSENT". A man photographs the sign.'),{y:L2});
+ int('con',101,-102.6,()=>'Speaker lounge biscuits',N1('Real biscuits. Chocolate ones. You take one and walk out at a normal speed, as if you are a speaker. Nobody stops you. You are, for one biscuit, a speaker.'),{y:L2});
+ int('con',64,44.5,()=>'Sit in the quiet room',once('qr',()=>[N('You sit. You breathe. You put your phone face-down. Somewhere far below, four thousand people are arguing about tabs. In here, nothing.'),FX({exp:-2})],'You sit for another minute. It\'s still nice.'),{y:L1});
+ int('con',-51.2,-37,()=>'Look over the courtyard',N1('From the terrace, the courtyard is a green square in a glass box. The big tree, the amphitheatre, the fountain, and two people in cloaks having what looks like a very serious duel with foam swords.'),{y:L2});
+ int('con',-111.2,-44,()=>'Look through the glass at the pool',N1('The hotel pool, glowing blue. One person is swimming slow lengths in a CTRL+ALT+CON hoodie. You have so many questions.'),{y:L2});
+ int('con',-123,-61.4,()=>'Read the meeting room slides',N1('"LUMEN PARTNER BREAKFAST · SafeSphere 2 roadmap". Somebody forgot to close the projector. The next slide is titled "Monetising the Social Graph".'),{y:L1});
+ int('con',-76,-59.8,()=>S.ch>=4?'Look at the papers on the bar':null,()=>run([N('A glossy folder on the Lumen Lounge bar. "KEYNOTE RUN-SHEET · CONFIDENTIAL".'),...(S.clues.includes('runsheet')?[N('The same run-sheet Dave showed you. Same plan. Same Monday launch.')]:[N('"SafeSphere 2: contact graph. Launch all regions Monday." You photograph it. Your hands are steady. Mostly.'),{unlock:'clues'},FX({clue:'runsheet'})])],hub),{y:L1});
  /* ---- back of house ---- */
- int('con',-38,-37.8,()=>'Watch the CCTV wall',()=>run([N(S.ch>=2?'Fifteen screens. One is paused on the bar from last night: you can see Victor leaning over the counter towards Bea. A sticky note under the screen: "LUMEN ASKED FOR THIS FOOTAGE AGAIN. NO WARRANT. NO."':'Fifteen screens. The Foyer, the Ring, the bar, the car park. On one of them, a man is trying to pick up a free tote bag with his feet. Security is watching him very closely.')],hub));
- int('con',28.5,-63.8,()=>'Look at the box on the core switch',()=>run([N('Between the racks, plugged straight into the con\'s core switch: a small white box with a Lumen asset sticker and a hand-written label: "temp · do not unplug · V.H."'),...(S.clues.includes('evil_twin')?[N('The other end of the fake Wi-Fi. Nyx and Priya will want a photo.')]:[N('Lumen hardware, inside the con\'s own network. That\'s not sponsorship. That\'s a wiretap with a logo.'),{unlock:'clues'},FX({clue:'evil_twin'})])],hub));
- int('con',146,-59.6,()=>'Fire stairs · roof',()=>fadeTp(()=>teleportArea('conroof')));
- int('con',117,-53,()=>'Fire stairs · down',()=>fadeTp(()=>teleport('con',146,-61.5,Math.PI,0)),{y:RFY});
- int('con',104.3,-4.5,()=>'Check the box on the antenna mast',()=>run([N('Zip-tied to the mast, wrapped in grey tape so it looks like part of the roof: a weatherproof box with a directional antenna pointed straight down at the Halcyon.'),...(S.clues.includes('rooftop')?[N('WHISPER\'s real listening post. The one on the hotel was a decoy. Of course it was.')]:[N('This is the real one. Whoever watches this con watches it from here.'),{unlock:'clues'},FX({clue:'rooftop'})])],hub),{y:RFY});
- int('con',123,0,()=>'Look out from the con roof',N1('The whole site laid out below you: the courtyard tree, the glass Foyer, the hotel tower going up into the clouds with Room 1337 somewhere near the top. You can see the Lumen logo turning in the Foyer, very small, like a fly in a jar.'),{y:RFY});
+ int('con',-90,-97.4,()=>'Watch the CCTV wall',()=>run([N(S.ch>=2?'Fifteen screens. One is paused on the bar from last night: you can see Victor leaning over the counter towards Bea. A sticky note under the screen: "LUMEN ASKED FOR THIS FOOTAGE AGAIN. NO WARRANT. NO."':'Fifteen screens. The Foyer, the Ring, the bar, the car park. On one of them, a man is trying to pick up a free tote bag with his feet. Security is watching him very closely.')],hub));
+ int('con',59,-97.6,()=>'Look at the box on the core switch',()=>run([N('Between the racks, plugged straight into the con\'s core switch: a small white box with a Lumen asset sticker and a hand-written label: "temp · do not unplug · V.H."'),...(S.clues.includes('evil_twin')?[N('The other end of the fake Wi-Fi. Nyx and Priya will want a photo.')]:[N('Lumen hardware, inside the con\'s own network. That\'s not sponsorship. That\'s a wiretap with a logo.'),{unlock:'clues'},FX({clue:'evil_twin'})])],hub));
+ int('con',146,-65.6,()=>'Fire stairs · roof',()=>fadeTp(()=>teleportArea('conroof')));
+ int('con',124.8,-49,()=>'Fire stairs · down',()=>fadeTp(()=>teleport('con',146,-66.5,0,0)),{y:RFY});
+ int('con',104.3,-4.6,()=>'Check the box on the antenna mast',()=>run([N('Zip-tied to the mast, wrapped in grey tape so it looks like part of the roof: a weatherproof box with a directional antenna pointed straight down at the Halcyon.'),...(S.clues.includes('rooftop')?[N('WHISPER\'s real listening post. The one on the hotel was a decoy. Of course it was.')]:[N('This is the real one. Whoever watches this con watches it from here.'),{unlock:'clues'},FX({clue:'rooftop'})])],hub),{y:RFY});
+ int('con',132.4,0,()=>'Look out from the con roof',N1('The whole site laid out below you: the courtyard tree, the glass Foyer, the hotel tower going up into the clouds with Room 1337 somewhere near the top. You can see the Lumen logo turning in the Foyer, very small, like a fly in a jar.'),{y:RFY});
  /* ---- basement ---- */
- int('con',-56.5,11.8,()=>'Look at the black car',N1('A long black car, very clean, very quiet. The plate reads PRIV4CY. On the dashboard: a SafeSphere air freshener, shaped like a shield.'),{y:BY});
- int('con',-12.5,9.2,()=>'Talk to the network engineers',()=>run([{w:'Engineer',np:1,t:S.ch>=3?'You want to trace WHISPER? Join the queue. Every upload goes out through an access point we don\'t own. Somewhere up high. Roof height.':pick(ROLELINES.Engineer)},...(S.f.met_priya?[N('A sticky note on a monitor: "PRIYA — your rogue AP list, printed. Don\'t lose it."')]:[])],hub),{y:BY});
- int('con',-88.5,-24,()=>'Hide among the laundry carts',N1('Warm towels, the smell of starch, and the hum of fifty machines. Nobody would look for you here. You think about staying until Monday.'),{y:BY});
+ int('con',-113,3.4,()=>'Look at the black car',N1('A long black car, very clean, very quiet. The plate reads PRIV4CY. On the dashboard: a SafeSphere air freshener, shaped like a shield.'),{y:BY});
+ int('con',-47,6.8,()=>'Talk to the network engineers',()=>run([{w:'Engineer',np:1,t:S.ch>=3?'You want to trace WHISPER? Join the queue. Every upload goes out through an access point we don\'t own. Somewhere up high. Roof height.':pick(ROLELINES.Engineer)},...(S.f.met_priya?[N('A sticky note on a monitor: "PRIYA — your rogue AP list, printed. Don\'t lose it."')]:[])],hub),{y:BY});
+ int('con',-182,-1.2,()=>'Hide among the laundry carts',N1('Warm towels, the smell of starch, and the hum of fifty machines. Nobody would look for you here. You think about staying until Monday.'),{y:BY});
+ int('con',FOODPOS[4].x,FOODPOS[4].z,()=>'Order dumplings',N1('Six dumplings in a paper boat. The chef folds them faster than you can watch. "Mind, they\'re hot," he says, as you burn your mouth.'));
+ int('con',FOODPOS[5].x,FOODPOS[5].z,()=>'Get a cold brew',N1('Cold brew in a can with a QR code on it. You don\'t scan it. The barista nods: "Good instinct."'));
+ for(const y of[L1,L2])int('con',-148,-27,()=>'Call the lift',()=>liftMenu(),{y});
+ int('con',-104,-2.6,()=>'Call the lift',()=>conLift());for(const y of[L1,L2])int('con',-68,-1.2,()=>'Call the lift',()=>conLift(),{y});int('con',-104,-52.4,()=>'Call the lift',()=>conLift(),{y:BY});
+ int('con',-149.6,49.6,()=>'Play the lobby piano',N1('You play the four notes of the only song you know. The piano, which is a MIDI device, plays the rest of the song for you. Somebody in the lobby claps. You bow, as if you meant it.'));
+ int('con',-179,-26.4,()=>'Warm up by the library fire',N1('Leather chairs, shelves to the ceiling, a fire that is definitely gas but commits to the bit. A book on the arm of a chair: "Social Engineering: The Art of Human Hacking". Someone has left a bookmark at chapter one. Ominous.'),{y:L1});
+ int('con',-95,-56.6,()=>'Look at the ballroom stage',N1('A banner: "LUMEN PARTNER GALA · TONIGHT". The tables are laid for two hundred. Every place card has a SafeSphere logo and a QR code. You turn one face-down. Then all of them on your table.'),{y:L1});
+ int('con',-165.2,-53.4,()=>'Peek into the sauna',N1('A wall of heat and a man in a CTRL+ALT+CON towel reading a printed RFC. "It\'s the only place nobody asks me about my day job," he says.'),{y:L2});
+ int('con',-5,-68,()=>'Look down at the stage',N1('From the top of the bowl the stage is a glowing postage stamp under a screen the size of a house. Two thousand seats. Tonight every one of them will be full.'),{y:L2});
+ int('con',-70,40,()=>'Look up at the atrium',N1('Three storeys of glass, a giant hanging sign, the Lumen logo turning like a lighthouse, and a skybridge with people crossing it like ants on a twig.'));
+ int('con',96,6.4,()=>'Sit in the charging lounge',N1('Twelve sockets, forty people, one extension lead with a hand-written sign: "THIS IS NOT A HONEYPOT". It is clearly a honeypot.'));
+ int('con',173,23.4,()=>'Try the cockpit simulator',N1('You land a passenger jet on the second try. The volunteer tells you the first try was a crash. You decide the first try was a test of the software.'));
+ int('con',180,-12.6,()=>'Watch a board game',N1('Six strangers are playing a game where you have to guess who the traitor is. Everyone is accusing the one person who is actually a professional red-teamer. They are right.'),{y:L1});
+ int('con',184,20,()=>'Watch a film',N1('Hackers (1995), at full volume. The audience shouts every line, including the bad ones. Especially the bad ones.'),{y:L1});
+ int('con',-37,52,()=>'Stand in the sky garden',N1('A rooftop garden over the food court: trees in planters, fairy lights, the plaza glowing below and the hotel tower stacked above. It smells of rain and fried noodles.'),{y:L2});
+ int('con',-79.3,57.6,()=>'Pay for parking',N1('The machine wants your registration plate, your phone number and your email "to send your receipt". You walk away. You don\'t have a car. You were just curious.'),{y:BY});
  /* ---- 13th floor + roof ---- */
  int('f13',243,-9.4,()=>'Call the lift',()=>liftMenu());
  int('f13',228.7,-9.2,()=>'Ice machine',N1('It makes a noise like a dial-up modem, then dispenses one ice cube. You treasure it.'));
@@ -298,10 +326,10 @@ function placeWorld(){
  int('f13',212+8*16/3+2.67,-12.7,()=>'Room 1309',()=>run([N(S.stage.kit>=3?'Room 1309. Kit\'s room. A new sign on the door: "DO NOT DISTURB". The peephole has a sticker over it from the outside. You hope it was her.':S.stage.kit>=2?'Room 1309. A photo taken outside this door is how the creep found her. You don\'t linger. You check the corridor both ways when you leave.':'Room 1309. A cyan strip of armour paint on the door handle. Someone\'s been in and out in a hurry, carrying a costume.')],hub));
  int('f13',212+2*16/3+2.67,-12.7,()=>'Room 1303',N1('Room 1303. A Faraday bag hangs on the door handle like a "do not disturb" sign. Even the peephole has a tiny square of tape over it. You don\'t need to ask whose room this is.'));
  int('f13',269.5,13.6,()=>'Use your laptop',()=>roomMenu());
- int('f13',273.6,14.2,()=>S.ch===1&&S.f.d1_checkin&&!S.f.d1_room?'Drop your bag':S.ch===2?'Go to bed (end Day 2)':S.ch===3?'Get ready: everyone\'s coming over (Night 3)':'Lie on the bed',()=>{if(S.ch===1&&!S.f.d1_room&&S.f.d1_checkin)return run(D1_ROOM(),hub);if(S.ch===2||S.ch===3)return advance();run([N('The bed crunches. You stare at the ceiling for a bit. It\'s weirdly restful.')],hub)});
+ int('f13',273.6,14.2,()=>S.ch===1&&S.f.d1_checkin&&!S.f.d1_room?'Drop your bag':S.ch===2?'Go to bed (end Day 2)':S.ch===3?'Get ready: everyone\'s coming over (Night 3)':'Lie on the bed',()=>{if(S.ch===1&&!S.f.d1_room&&S.f.d1_checkin)return run(D1_ROOM(),hub);if(S.ch===2||S.ch===3)return advance();run([N('The bed crunches. You stare at the ceiling for a bit. It\'s weirdly restful.')],hub)},{r:2.6});
  int('f13',274.6,17.4,()=>'Look out of the window',N1('Two windows. The city glitters through both. Somewhere out there, Proof is closed for the night, and a tiny person in a cape is drawn on a stack of empty bags.'));
  int('f13',264.9,13.9,()=>'Open the minibar',N1('£9 for a Toblerone. You close the minibar with respect.'));
- int('f13',265.4,18.8,()=>'Look at the bathtub',()=>run([N(S.ch>=4?'Still full of everyone\'s phones from last night. Priya\'s bathtub Faraday zone. It\'s a monument now.':'A bathtub. Clean. Suspiciously crunchy towel.')],hub));
+ int('f13',265.4,18.8,()=>'Look at the bathtub',()=>run([N(S.ch>=4?'Still full of everyone\'s phones from last night. Priya\'s bathtub Faraday zone. It\'s a monument now.':'A bathtub. Clean. Suspiciously crunchy towel.')],hub),{r:2.6});
  int('f13',271.5,18.4,()=>'Sit in the seating area',N1('A sofa, two armchairs and a coffee table. Enough seats for a small party. You have never once had a small party.'));
  int('f13',244,17,()=>'Look through the telescope',N1('Pointed at the sky, it shows stars. Pointed at the office tower across the road, it shows a man eating cereal at his desk at midnight. You point it back at the stars.'),{y:TOP});
  int('f13',227,-3,()=>'Sit on a lounger',N1('You lie back by the pool. The city hums. For a minute, there is no con, no Lumen, no WHISPER. Just sky.'),{y:TOP});
@@ -311,19 +339,29 @@ function placeWorld(){
  int('f13',275,8,()=>'Look over the edge',N1('Thirteen floors down, the street glows. Up here the wind is loud enough that nobody could listen in. That\'s probably the point.'),{y:TOP});
 }
 /* ---------------- moving between places ---------------- */
+/* the hotel lifts: lobby, mezzanine, level 2, the 13th floor, the car park (from day 2) */
 function liftMenu(){
- const here=WD.reg,onL1=here==='con'&&WD.y>3,onB=here==='con'&&WD.y<-2;
+ const here=WD.reg,lv=here==='con'?(WD.y<-2?'B':WD.y>8?'2':WD.y>3?'1':'G'):'13',go=(r,x,z,yaw,y)=>()=>{fadeTp(()=>teleport(r,x,z,yaw,y));return[]};
  if(S.ch===1&&!S.f.d1_checkin)return run([N('You press the button. A little screen asks you to tap your room key. You don\'t have a room key yet. Reception first.')],hub);
- run([{hide:1},N(here==='con'?'The lift arrives with a soft ding. Muzak. A mirror. The panel has G, 13 and, under a little cover, B. Level 1 is just the mezzanine: that\'s the grand staircase.':'The lift arrives with a soft ding. Muzak. A mirror. You look tired, but in a cool way.'),C(
-  {t:'Ground floor · Lobby',if:()=>here!=='con'||onL1||onB,then:()=>{fadeTp(()=>teleport('con',-78,26.6,0,0));return[]}},
-  {t:'13th floor · Room 1337',if:()=>here!=='f13',then:()=>{fadeTp(()=>teleport('f13',243,-10.2,0,0));return[]}},
-  {t:'B · Car park',if:()=>S.ch>=2&&!onB,then:()=>{fadeTp(()=>teleport('con',-90,22,-Math.PI/2,BY));return[]}},
+ run([{hide:1},N(here==='con'?'The lift arrives with a soft ding. Muzak. A mirror. The panel: B, G, 1, 2, and then a long gap to 13.':'The lift arrives with a soft ding. Muzak. A mirror. You look tired, but in a cool way.'),C(
+  {t:'G · Lobby',if:()=>lv!=='G',then:go('con',-148,-27,Math.PI,0)},
+  {t:'1 · Mezzanine · Ballroom · Meeting rooms',if:()=>lv!=='1',then:go('con',-148,-27,Math.PI,L1)},
+  {t:'2 · Pool · Spa · Gym',if:()=>lv!=='2',then:go('con',-148,-27,Math.PI,L2)},
+  {t:'13 · Room 1337',if:()=>lv!=='13',then:go('f13',243,-10.2,0,0)},
+  {t:'B · Car park',if:()=>S.ch>=2&&lv!=='B',then:go('con',-104,-51,Math.PI,BY)},
   {t:'Stay here',then:[]})],hub);
+}
+/* the con's public lifts on the Foyer's north wall */
+function conLift(){
+ const lv=WD.y<-2?'B':WD.y>8?'2':WD.y>3?'1':'G',go=(x,z,yaw,y)=>()=>{fadeTp(()=>teleport('con',x,z,yaw,y));return[]};
+ run([{hide:1},N('A glass lift. Someone has stuck a sticker over the "door close" button that says "placebo".'),C(
+  {t:'G · Foyer',if:()=>lv!=='G',then:go(-104,-1.6,Math.PI,0)},{t:'1 · Foyer gallery',if:()=>lv!=='1',then:go(-68,0,Math.PI,L1)},{t:'2 · Level 2',if:()=>lv!=='2',then:go(-68,0,Math.PI,L2)},
+  {t:'B · Car park',if:()=>S.ch>=2&&lv!=='B',then:go(-104,-51,Math.PI,BY)},{t:'Stay here',then:[]})],hub);
 }
 function serviceLift(){
  run([N('A steel box that smells of laundry and old coffee.'),C(
-  {t:'Ground · back stairs',if:()=>WD.y<-2,then:()=>{fadeTp(()=>teleport('con',-88,27,Math.PI,0));return[]}},
-  {t:'B · basement',if:()=>WD.y>-2,then:()=>{fadeTp(()=>teleport('con',-88,27,Math.PI,BY));return[]}},
+  {t:'Ground · back stairs',if:()=>WD.y<-2,then:()=>{fadeTp(()=>teleport('con',-166,37.4,0,0));return[]}},
+  {t:'B · basement',if:()=>WD.y>-2,then:()=>{fadeTp(()=>teleport('con',-170,51.2,0,BY));return[]}},
   {t:'Stay here',then:[]})],hub);
 }
 function trainMenu(){

@@ -123,7 +123,7 @@ let S;
 const SETTINGS=(()=>{const d={vol:{master:.85,music:.6,amb:.75,sfx:.8},gfx:null,sens:1,fast:false};try{const o=JSON.parse(localStorage.getItem('opsec_settings')||'{}');return Object.assign(d,o,{vol:Object.assign(d.vol,o.vol||{})})}catch(e){return d}})();
 const saveSettings=()=>{try{localStorage.setItem('opsec_settings',JSON.stringify(SETTINGS))}catch(e){}};
 let CURBG=null;
-const fresh=h=>{const z={};ROM.concat(['dave']).forEach(g=>z[g]=0);return{h,ch:0,skill:10,clout:10,exp:5,cred:20,mapv:2,aff:{...z},stage:{...z},hang:{},gifted:{},inv:{},f:{},clues:[],msgs:[],log:[],unl:{},talk:{},room:{},fast:false,ending:null}};
+const fresh=h=>{const z={};ROM.concat(['dave']).forEach(g=>z[g]=0);return{h,ch:0,skill:10,clout:10,exp:5,cred:20,mapv:3,aff:{...z},stage:{...z},hang:{},gifted:{},inv:{},f:{},clues:[],msgs:[],log:[],unl:{},talk:{},room:{},fast:false,ending:null}};
 const CHAP=[['Hello, World','Two weeks before the con'],['Badge In','CTRL+ALT+CON · Day 1'],['Capture the Flag','Day 2'],['Exposure','Day 3'],['Responsible Disclosure','Day 4 · final day'],['Keynote','Day 4 · 4:00 PM'],['0xFF','The afterparty']];
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const LS={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};

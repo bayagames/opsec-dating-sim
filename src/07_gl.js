@@ -3,7 +3,7 @@
    per region, per 32 m chunk and per material, then turned into merged BufferGeometries so the scene is a
    few hundred draw calls with frustum culling. Lighting is real time: a hemisphere fill per area plus a
    pool of point lights that follows the player and picks the nearest level lights. */
-const G={qlog:window.__qlog?[]:null,qd:{},sun:{},lmK:1,LK:7.6,HK:5.5,ok:false,regions:{},boxes:{},walls:{},lights:{},surf:{},tx:{},mats:{},rects:{},chars:[],q:'high'};
+const G={qlog:window.__qlog?[]:null,qd:{},sun:{},zones:{},lmK:1,LK:7.6,HK:5.5,ok:false,regions:{},boxes:{},walls:{},lights:{},surf:{},tx:{},mats:{},rects:{},chars:[],q:'high'};
 const lin=c=>c<=.04045?c/12.92:Math.pow((c+.055)/1.055,2.4);
 const QUALITY={
  low:{dpr:1,lights:6,bloom:false,msaa:0,std:false,shadowBlobs:true},
@@ -28,20 +28,30 @@ function soloTex(key){
 }
 /* ---- geometry building ---- */
 let BR=null;
-function region(name,o){G.regions[name]={groups:{},fog:o.fog,fr:o.fr||[8,60],amb:null,day:!!o.day};G.ftag=G.ftag||{};G.ftag[name]=[];G.boxes[name]=[];G.walls[name]=[];G.lights[name]=[];G.surf[name]=[];BR=name}
+function region(name,o){G.regions[name]={groups:{},fog:o.fog,fr:o.fr||[8,60],amb:null,day:!!o.day,lmPages:o.lmPages,lmCap:o.lmCap};G.ftag=G.ftag||{};G.ftag[name]=[];G.boxes[name]=[];G.walls[name]=[];G.lights[name]=[];G.surf[name]=[];G.zones[name]=[];BR=name}
+/* ---- visibility zones: a region can be cut into boxes ("the hotel lobby", "Hall A", "the car park"). Every face is
+   filed under the zone it faces into, so its merged mesh never straddles two zones, and each zone lists the zones you
+   can see from inside it. Standing in a zone (or within a metre of one) draws only those: the rest of a huge building
+   isn't sent to the GPU at all. Faces outside every zone are always drawn. */
+function zone(name,x0,z0,x1,z1,y0,y1,see,hub){G.zones[BR].push({n:name,hub:!!hub,x0:Math.min(x0,x1),z0:Math.min(z0,z1),x1:Math.max(x0,x1),z1:Math.max(z0,z1),y0,y1,see:see||[],v:(Math.abs(x1-x0)*Math.abs(z1-z0)*(y1-y0))})}
+function zoneOf(reg,x,y,z,m){const Z=G.zones[reg];if(!Z||!Z.length)return -1;m=m||0;let b=-1,bv=1e30;for(let i=0;i<Z.length;i++){const q=Z[i];if(x>=q.x0-m&&x<=q.x1+m&&z>=q.z0-m&&z<=q.z1+m&&y>=q.y0-m&&y<q.y1+m&&q.v<bv){bv=q.v;b=i}}return b}
+function zonesAt(reg,x,y,z,m){const Z=G.zones[reg],o=[];if(!Z)return o;for(let i=0;i<Z.length;i++){const q=Z[i];if(x>=q.x0-m&&x<=q.x1+m&&z>=q.z0-m&&z<=q.z1+m&&y>=q.y0-m&&y<q.y1+m)o.push(i)}return o}
 function addLight(x,y,z,col,range,inten){G.lights[BR].push([x,y,z,col[0],col[1],col[2],range,inten||1])}
-function grp(m,cx,cz){
+function grp(m,cx,cz,cy,n,pts){
  const R=G.regions[BR],t=m.t||'white',kind=m.glass?'glass':m.e?'emit':(m.cut?'cut':'lit');
  const prof=m.e?'':(m.r!==undefined?m.r:.85)+':'+(m.m||0);
- const k=Math.floor(cx/32)+','+Math.floor(cz/32)+'|'+t+'|'+kind+'|'+prof;
- return R.groups[k]||(R.groups[k]={t,kind,prof,r:m.r,m:m.m||0,p:[],n:[],u:[],c:[],l:[],q:[]});
+ let zi=G.zones[BR]&&G.zones[BR].length?zoneOf(BR,cx+n[0]*.3,cy+n[1]*.3,cz+n[2]*.3):-1;
+ // a big face that runs through more than one zone (one floor under three rooms) must not vanish from any of them
+ if(zi>=0&&pts)for(const p of pts){const q=[cx+(p[0]-cx)*.9+n[0]*.3,cy+(p[1]-cy)*.9+n[1]*.3,cz+(p[2]-cz)*.9+n[2]*.3];if(zoneOf(BR,q[0],q[1],q[2])!==zi){zi=-1;break}}
+ const cs=zi>=0?48:32,k=zi+'~'+Math.floor(cx/cs)+','+Math.floor(cz/cs)+'|'+t+'|'+kind+'|'+prof;
+ return R.groups[k]||(R.groups[k]={t,kind,prof,zi,r:m.r,m:m.m||0,p:[],n:[],u:[],c:[],l:[],q:[]});
 }
 function quad(a,b,c,d,m,uw,vh){
  const e1=[b[0]-a[0],b[1]-a[1],b[2]-a[2]],e2=[d[0]-a[0],d[1]-a[1],d[2]-a[2]];
  let nx=e1[1]*e2[2]-e1[2]*e2[1],ny=e1[2]*e2[0]-e1[0]*e2[2],nz=e1[0]*e2[1]-e1[1]*e2[0];const nl=Math.hypot(nx,ny,nz);
  if(!(nl>1e-7))return; // zero-area quads give NaN normals, which bloom smears across the screen
  nx/=nl;ny/=nl;nz/=nl;
- const cx=(a[0]+c[0])/2,cz=(a[2]+c[2])/2;const g=grp(m,cx,cz);
+ const cx=(a[0]+c[0])/2,cz=(a[2]+c[2])/2;const g=grp(m,cx,cz,(a[1]+c[1])/2,[nx,ny,nz],(Math.hypot(e1[0],e1[2])>3||Math.hypot(e2[0],e2[2])>3)?[a,b,c,d]:null);
  const T=G.tx[m.t||'white'];if(T){T.used=true;if(uw>1.01||vh>1.01||uw<0||vh<0)T.rep=true}
  const col=m.c||[1,1,1];const gk0=m.e?(m.k!==undefined?m.k:(m.t==='white'||!m.t?1.9:1.05)):1,gk=gk0>1?1+(gk0-1)*.55:gk0;
  const lc=[lin(col[0])*gk,lin(col[1])*gk,lin(col[2])*gk];
@@ -54,7 +64,7 @@ function quad(a,b,c,d,m,uw,vh){
  const ao=y=>vert?(.62+.38*Math.min(1,Math.max(0,(y-G.ao)/1.1))):1;
  // every lit quad gets its own patch in the region's lightmap (packed later); (s,t) place each vertex inside it
  if(G.qlog)G.qlog.push([BR,nx,ny,nz,nx*a[0]+ny*a[1]+nz*a[2],Math.min(a[0],b[0],c[0],d[0]),Math.min(a[1],b[1],c[1],d[1]),Math.min(a[2],b[2],c[2],d[2]),Math.max(a[0],b[0],c[0],d[0]),Math.max(a[1],b[1],c[1],d[1]),Math.max(a[2],b[2],c[2],d[2]),(m.t||'white')+(m.e?'*':'')+(m.glass?'g':'')+(m.cut?'c':'')+(m.c?m.c.join(','):'')]);
- const lmq=!m.e&&!m.glass?(G.qd[BR]||(G.qd[BR]=[])).push({w:Math.hypot(e1[0],e1[1],e1[2])*G.lmK,h:Math.hypot(e2[0],e2[1],e2[2])*G.lmK})-1:-1;
+ const lmq=!m.e&&!m.glass?(G.qd[BR]||(G.qd[BR]=[])).push({w:Math.hypot(e1[0],e1[1],e1[2])*G.lmK,h:Math.hypot(e2[0],e2[1],e2[2])*G.lmK,z:g.zi})-1:-1;
  // foliage cut-outs are one double-sided face: a normal of length 2 tells the baker to light both sides
  const nk=m.cut?2:1;
  const push=(s,t)=>{const p=P(s,t),k=ao(p[1]);g.p.push(p[0],p[1],p[2]);g.n.push(nx*nk,ny*nk,nz*nk);g.u.push(uw*s,vh*t);g.c.push(lc[0]*k,lc[1]*k,lc[2]*k);g.l.push(s,t);g.q.push(lmq)};
@@ -64,11 +74,11 @@ function quad(a,b,c,d,m,uw,vh){
 function tri(a,b,c,m,uw,vh){
  const e1=[b[0]-a[0],b[1]-a[1],b[2]-a[2]],e2=[c[0]-a[0],c[1]-a[1],c[2]-a[2]];
  let nx=e1[1]*e2[2]-e1[2]*e2[1],ny=e1[2]*e2[0]-e1[0]*e2[2],nz=e1[0]*e2[1]-e1[1]*e2[0];const nl=Math.hypot(nx,ny,nz);if(!(nl>1e-7))return;nx/=nl;ny/=nl;nz/=nl;
- const g=grp(m,(a[0]+b[0]+c[0])/3,(a[2]+b[2]+c[2])/3);const T=G.tx[m.t||'white'];if(T){T.used=true;if(uw>1.01||vh>1.01)T.rep=true}
+ const g=grp(m,(a[0]+b[0]+c[0])/3,(a[2]+b[2]+c[2])/3,(a[1]+b[1]+c[1])/3,[nx,ny,nz]);const T=G.tx[m.t||'white'];if(T){T.used=true;if(uw>1.01||vh>1.01)T.rep=true}
  uw=uw===undefined?1:uw;vh=vh===undefined?1:vh;
  const col=m.c||[1,1,1],gk0=m.e?(m.k!==undefined?m.k:(m.t==='white'||!m.t?1.9:1.05)):1,gk=gk0>1?1+(gk0-1)*.55:gk0,lc=[lin(col[0])*gk,lin(col[1])*gk,lin(col[2])*gk];
  if(G.qlog)G.qlog.push([BR,nx,ny,nz,nx*a[0]+ny*a[1]+nz*a[2],Math.min(a[0],b[0],c[0]),Math.min(a[1],b[1],c[1]),Math.min(a[2],b[2],c[2]),Math.max(a[0],b[0],c[0]),Math.max(a[1],b[1],c[1]),Math.max(a[2],b[2],c[2]),(m.t||'white')+(m.e?'*':'')+(m.glass?'g':'')+'t']);
- const lmq=!m.e&&!m.glass?(G.qd[BR]||(G.qd[BR]=[])).push({w:Math.hypot(...e1)*G.lmK,h:Math.hypot(...e2)*G.lmK})-1:-1,nk=m.cut?2:1;
+ const lmq=!m.e&&!m.glass?(G.qd[BR]||(G.qd[BR]=[])).push({w:Math.hypot(...e1)*G.lmK,h:Math.hypot(...e2)*G.lmK,z:g.zi})-1:-1,nk=m.cut?2:1;
  for(const[p,s,t]of[[a,0,0],[b,1,0],[c,0,1]]){g.p.push(p[0],p[1],p[2]);g.n.push(nx*nk,ny*nk,nz*nk);g.u.push(uw*s,vh*t);g.c.push(lc[0],lc[1],lc[2]);g.l.push(s,t);g.q.push(lmq)}
 }
 function colBox(x0,z0,x1,z1,y0,y1){G.boxes[BR].push([Math.min(x0,x1),Math.min(z0,z1),Math.max(x0,x1),Math.max(z0,z1),y0,y1])}
@@ -252,9 +262,12 @@ function packLM(Q,reg){
  const R=G.regions[reg]||{},S=2048,maxP=(R.lmPages||{high:4,medium:3,low:2})[G.q]||3;let area=0;for(const q of Q)area+=(q.w+.25)*(q.h+.25);
  let D=Math.min(R.lmCap||9,Math.max(1.5,Math.sqrt(maxP*S*S*.62/Math.max(1,area))));
  const order=Q.map((q,i)=>i);
+ const za={};for(const q of Q)za[q.z||0]=(za[q.z||0]||0)+(q.w+.25)*(q.h+.25);const cap=area/maxP*.9,zc={};let acc=0,c=0;
+ for(const z of Object.keys(za).map(Number).sort((p,q)=>p-q)){if(acc>0&&acc+za[z]>cap){c++;acc=0}zc[z]=c;acc+=za[z]}const cl=Q.map(q=>zc[q.z||0]);
  for(let tries=0;tries<12;tries++){
   for(const q of Q){q.cw=Math.max(2,Math.ceil(q.w*D));q.ch=Math.max(2,Math.ceil(q.h*D))}
-  order.sort((a,b)=>Q[b].ch-Q[a].ch);let pg=0,x=0,y=0,sh=0,ok=true;
+  // zones are gathered into page-sized clusters (so a zone's meshes rarely straddle two pages), tallest first within each cluster
+  order.sort((a,b)=>(cl[a]-cl[b])||(Q[b].ch-Q[a].ch));let pg=0,x=0,y=0,sh=0,ok=true;
   for(const i of order){const q=Q[i],w=q.cw+2,h=q.ch+2;if(x+w>S){x=0;y+=sh;sh=0}if(y+h>S){pg++;x=0;y=0;sh=0;if(pg>=maxP){ok=false;break}}q.pg=pg;q.x=x+1;q.y=y+1;x+=w;sh=Math.max(sh,h)}
   if(ok){if(pg===0&&S>1024){const r=packAt(Q,order,1024,D);if(r)return r}return{S,D,pages:pg+1}}D*=.85}
  return{S,D,pages:maxP};
@@ -278,8 +291,14 @@ function finishRegions(){
   for(const ck in merged){const M=merged[ck];if(!M.p.length)continue;
    if(M.mk.startsWith('@atlas')){const n=+M.mk.split('|')[0].slice(6);const ak='@atlas'+n;if(!G.tx[ak])G.tx[ak]={atlas:n,used:true}}
    const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(M.p,3));g.setAttribute('normal',new T.Float32BufferAttribute(M.n,3));g.setAttribute('uv',new T.Float32BufferAttribute(M.u,2));g.setAttribute('color',new T.Float32BufferAttribute(M.c,3));if(M.pg>=0){const a=new T.Float32BufferAttribute(M.l,2);g.setAttribute('uv1',a);g.setAttribute('lmuv',a)}g.computeBoundingSphere();
-   const mesh=new T.Mesh(g,null);mesh.userData.mk=M.mk;mesh.userData.pg=M.pg;mesh.userData.reg=k;const kd=M.mk.split('|')[1];if(kd==='glass'||kd==='cut')mesh.userData.noAO=1;mesh.matrixAutoUpdate=false;root.add(mesh)}
+   const mesh=new T.Mesh(g,null);mesh.userData.mk=M.mk;mesh.userData.pg=M.pg;mesh.userData.reg=k;mesh.userData.zone=+ck.split('~')[0];const kd=M.mk.split('|')[1];if(kd==='glass'||kd==='cut')mesh.userData.noAO=1;mesh.matrixAutoUpdate=false;root.add(mesh)}
   R.groups=null;R.obj=root;G.scene.add(root);
+  // zone visibility: names to indices (a zone always sees itself; 'see' is symmetric so a doorway works both ways)
+  const Z=G.zones[k]||[],ix={};Z.forEach((q,i)=>ix[q.n]=i);for(const q of Z)q.vs=new Set();
+  Z.forEach((q,i)=>{q.vs.add(i);for(const n of q.see){const j=ix[n];if(j===undefined){console.warn('zone '+q.n+' sees unknown '+n);continue}q.vs.add(j);Z[j].vs.add(i)}});
+  // looking through a door into a hub (a corridor, the Ring, the lobby) you see whatever that hub opens onto too
+  const one=Z.map(q=>new Set(q.vs));Z.forEach((q,i)=>{for(const j of one[i])if(Z[j].hub)for(const k of one[j])q.vs.add(k)});
+  R.zkey=null;
   const H={},SH={};
   const put=(Tb,b,x0,z0,x1,z1)=>{for(let x=Math.floor(x0/4);x<=Math.floor(x1/4);x++)for(let z=Math.floor(z0/4);z<=Math.floor(z1/4);z++)(Tb[x+','+z]=Tb[x+','+z]||[]).push(b)};
   for(const b of G.boxes[k])put(H,b,b[0],b[1],b[2],b[3]);
@@ -288,6 +307,12 @@ function finishRegions(){
  for(const k in G.tx)if(G.tx[k].c&&G.tx[k].atlas!==undefined)G.tx[k].c=null;
  setQuality(G.q);
 }
+/* show only the zones visible from where the camera is (and anything outside every zone) */
+function zoneCull(reg,x,y,z){const R=G.regions[reg],Z=G.zones[reg];if(!R||!R.obj||!Z||!Z.length)return;
+ if(window.__noCull){if(R.zkey!=='all'){R.zkey='all';for(const o of R.obj.children)o.visible=true}return}
+ let at=zonesAt(reg,x,y,z,1.2);if(at.length>1)at=at.filter(i=>!Z[i].bg);const key=at.join(',');if(key===R.zkey)return;R.zkey=key;
+ let vis=null;if(at.length){vis=new Set();for(const i of at)for(const j of Z[i].vs)vis.add(j)}
+ for(const o of R.obj.children){const zi=o.userData.zone;o.visible=vis===null||zi<0||vis.has(zi)}}
 /* ---- sky dome: gradient + stars, follows the camera, fog colour is the horizon ---- */
 function sky(){
  const T=G.T;

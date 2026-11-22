@@ -107,7 +107,7 @@ function bakeFinish(reg){
   // read the page back into a plain texture and delete the framebuffer: a texture still attached to a render target
   // and sampled every frame can make drivers copy it per draw (that leaked memory fast)
   const px=new Uint8Array(LM.S*LM.S*4);r.readRenderTargetPixels(out,0,0,LM.S,LM.S,px);out.dispose();R.bk.rt[p].dispose();
-  const t=new T.DataTexture(px,LM.S,LM.S,T.RGBAFormat,T.UnsignedByteType);t.minFilter=t.magFilter=T.LinearFilter;t.generateMipmaps=false;t.channel=1;t.colorSpace=T.NoColorSpace;t.needsUpdate=true;R.lmTex.push(t)}
+  const t=new T.DataTexture(px,LM.S,LM.S,T.RGBAFormat,T.UnsignedByteType);t.minFilter=t.magFilter=T.LinearFilter;t.generateMipmaps=false;t.channel=1;t.colorSpace=T.NoColorSpace;t.needsUpdate=true;t.onUpdate=()=>{t.image={width:LM.S,height:LM.S,data:null}};R.lmTex.push(t)}
  r.setRenderTarget(null);R.bk=null;
  R.obj.traverse(o=>{if(o.isMesh&&o.userData.mk&&o.userData.pg>=0){o.userData.lmk=reg+':'+o.userData.pg;o.material=getMat(o.userData.mk,o.userData.lmk)}});
  return R.lmTex.map(t=>t.image.data);
@@ -120,32 +120,62 @@ const LMDB={db:null,open(){return new Promise(res=>{try{const q=indexedDB.open('
 function lmKey(reg){const R=G.regions[reg],L=G.lights[reg]||[];let h=0;const add=v=>{h=(h*31+Math.round(v*100))|0};
  for(const l of L)l.forEach(add);const SU=G.sun&&G.sun[reg];if(SU)[...SU.d,...SU.c,SU.k,SU.half,...SU.c0].forEach(add);let verts=0;R.obj.traverse(o=>{if(o.isMesh&&o.userData.pg>=0){verts+=o.geometry.attributes.position.count;const a=o.geometry.attributes.lmuv.array;for(let i=0;i<a.length;i+=97)add(a[i]*1e4)}});
  return['v5',reg,R.lm.S,R.lm.pages,R.lm.D.toFixed(3),verts,h,G.LK,LOOK.reach,BAKE.fill,BAKE.soft,BAKE.cube].join('|')}
-function lmApply(reg,pages){const T=G.T,R=G.regions[reg],S=R.lm.S;R.lmTex=pages.map(px=>{const t=new T.DataTexture(px,S,S,T.RGBAFormat,T.UnsignedByteType);t.minFilter=t.magFilter=T.LinearFilter;t.generateMipmaps=false;t.channel=1;t.colorSpace=T.NoColorSpace;t.needsUpdate=true;return t});
+function lmApply(reg,pages){const T=G.T,R=G.regions[reg],S=R.lm.S;R.lmTex=pages.map(px=>{const t=new T.DataTexture(px,S,S,T.RGBAFormat,T.UnsignedByteType);t.minFilter=t.magFilter=T.LinearFilter;t.generateMipmaps=false;t.channel=1;t.colorSpace=T.NoColorSpace;t.needsUpdate=true;t.onUpdate=()=>{t.image={width:S,height:S,data:null}};return t});
  R.obj.traverse(o=>{if(o.isMesh&&o.userData.mk&&o.userData.pg>=0){o.userData.lmk=reg+':'+o.userData.pg;o.material=getMat(o.userData.mk,o.userData.lmk)}})}
-/* bake everything, a few lights per frame so the loading bar moves; cb(ok) when done */
-async function bakeAll(prog,cb){
- if(!bakeOK()){cb(false);return}
- await LMDB.open();
- const only=window.__bakeOnly,regs=Object.keys(G.regions).filter(r=>!only||only.includes(r));
- const todo=[];let total=0,done=0;
- for(const reg of regs){const key=lmKey(reg),hit=window.__noLMCache?null:await LMDB.get(key);if(hit&&hit.length===G.regions[reg].lm.pages){lmApply(reg,hit);continue}todo.push([reg,key]);total+=(G.lights[reg].length||1)+(G.sun&&G.sun[reg]?1:0)}
- const n=Math.max(1,total);
- for(const[reg,key]of todo){
-  try{bakeSetup(reg)}catch(e){console.error('bake failed',e);cb(false);return}
-  const L=G.lights[reg];let i=0;
-  await new Promise(res=>{const step=()=>{const t0=performance.now();
-   try{let k=0;while(i<L.length&&(k++<1||performance.now()-t0<30)){bakeLight(reg,i);i++;done++}}catch(e){console.error('bake failed',e);cb(false);return}
-   // wait for the GPU to really finish this batch (reading one pixel forces it): honest progress, no piled-up work
-   bakeSync();prog(done/n);if(i<L.length)setTimeout(step,0);else res()};setTimeout(step,0)});
-  if(!L.length)done++;
-  if(G.sun&&G.sun[reg]){try{bakeSun(reg)}catch(e){console.error('sun bake failed',e)}bakeSync();done++;prog(done/n)}
-  const px=bakeFinish(reg);LMDB.put(key,px);
- }
+/* Lightmaps live per region, and only the place you're in (plus the one you just left, so hopping between the
+   lobby and the 13th floor is instant) is held on the GPU. The first visit bakes a region and caches the pages in
+   IndexedDB; later visits just load them. Leaving frees the textures and vertex buffers (they re-upload from memory
+   if you come back), so the huge convention centre never shares the GPU with the station and the flat. */
+const LMKEEP=2;
+async function regionLM(reg,prog){
+ const R=G.regions[reg];if(!R||!R.obj)return false;
+ if(R.lmTex){lmTouch(reg);return true}
+ if(window.__bakeOnly&&!window.__bakeOnly.includes(reg)){R.lmSkip=1;return false}
+ if(!bakeOK())return false;
+ await LMDB.open();const key=lmKey(reg),hit=window.__noLMCache?null:await LMDB.get(key);
+ if(hit&&hit.length===R.lm.pages){prog&&prog(1,true);lmApply(reg,hit);lmTouch(reg);return true}
+ const L=G.lights[reg],total=L.length+(G.sun&&G.sun[reg]?1:0)+1;let done=0;
+ try{bakeSetup(reg)}catch(e){console.error('bake failed',e);return false}
+ let i=0,ok=true;
+ await new Promise(res=>{const step=()=>{const t0=performance.now();
+  try{let k=0;while(i<L.length&&k<4&&(k===0||performance.now()-t0<30)){bakeLight(reg,i);i++;done++;k++}}catch(e){console.error('bake failed',e);ok=false;res();return}
+  // wait for the GPU to really finish this batch (reading one pixel forces it): honest progress, no piled-up work
+  bakeSync();prog&&prog(done/total,false);if(i<L.length)setTimeout(step,0);else res()};setTimeout(step,0)});
+ if(!ok)return false;
+ if(G.sun&&G.sun[reg]){try{bakeSun(reg)}catch(e){console.error('sun bake failed',e)}bakeSync();done++;prog&&prog(done/total,false)}
+ const px=bakeFinish(reg);LMDB.put(key,px);
  if(G.bkCubeRT){G.bkCubeRT.dispose();G.bkCube=null}
- prog(1);cb(true);
+ lmTouch(reg);if(window.__bkLog)console.log('# c '+G.lmRes.join(','));prog&&prog(1,false);return true;
 }
+function lmTouch(reg){G.lmRes=(G.lmRes||[]).filter(r=>r!==reg);G.lmRes.push(reg);while(G.lmRes.length>LMKEEP){const r=G.lmRes.shift();if(r!==WD.reg)regionRelease(r);else G.lmRes.push(r)}}
+/* hand a region's GPU memory back: lightmap pages, the materials that use them, and its vertex buffers */
+function regionRelease(reg){const R=G.regions[reg];if(!R||!R.obj)return;
+ if(R.lmTex){for(const t of R.lmTex)t.dispose();R.lmTex=null}
+ const rx=new RegExp('\\|'+reg+':\\d+$');for(const k in G.mats)if(rx.test(k)){G.mats[k].dispose();delete G.mats[k]}
+ R.obj.traverse(o=>{if(o.isMesh&&o.userData.mk){if(o.userData.lmk){o.userData.lmk=null;o.material=getMat(o.userData.mk)}o.geometry.dispose()}});
+ G.lmRes=(G.lmRes||[]).filter(r=>r!==reg)}
+/* one region at a time: the loop asks for the region the player is in; a prefetch at boot warms the likely one */
+function regionNeed(reg,show){
+ const R=G.regions[reg];if(!R||R.lmTex||R.lmSkip||!G.baked)return;if(G.lmBusy)return;
+ G.lmBusy=reg;G.baking=true;
+ // let go of the mouse while the loading screen is up (it's taken back when the bake is done, or on any click/key)
+ const hadLock=show&&typeof locked==='function'&&locked();if(hadLock){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}
+ lmUI(show,reg,null);
+ regionLM(reg,(f,cached)=>{G.bakeP=f;lmUI(show,reg,cached,f)}).then(ok=>{
+  if(!ok&&!R.lmSkip){G.baked=false;setQuality(G.q)}
+  G.lmBusy=null;G.baking=false;lmUI(false);G.forceFrame=true;if(hadLock&&typeof relock==='function')setTimeout(relock,50)});
+}
+const LMNAME={home:'Home',office:'Brindle & Co',station:'Central Station',con:'The Halcyon & CTRL+ALT+CON',f13:'The Halcyon · 13th floor'};
+function lmUI(on,reg,cached,f){const e=$('loading');if(!e)return;e.classList.toggle('on',!!on);
+ // the game view stays hidden while a bake runs: compositing a live canvas the GPU is busy baking into is slow and,
+ // in some drivers, piles up memory
+ const gl=$('gl');if(gl)gl.style.visibility=on?'hidden':'';if(!on)return;
+ const k=e.querySelector('.k'),b=e.querySelector('b');if(k)k.textContent=(LMNAME[reg]||reg).toUpperCase();if(b)b.textContent=cached?'Loading':'Baking the lights (first visit only)';
+ const p=Math.round((f||0)*100),bar=$('loadBar'),t=$('loadPct');if(bar)bar.style.width=p+'%';if(t)t.textContent=p+'%'}
+/* wait for the GPU to finish everything queued so far: finish() is a real round trip; the 1-pixel read alone isn't
+   (it only waits for work on its own target), and without a true sync the queued bake work can pile up into gigabytes */
 function bakeSync(){const T=G.T,r=G.r;if(!G.bkSyncRT){G.bkSyncRT=new T.WebGLRenderTarget(1,1,{depthBuffer:false});G.bkSyncBuf=new Uint8Array(4)}
- r.readRenderTargetPixels(G.bkSyncRT,0,0,1,1,G.bkSyncBuf)}
+ try{r.getContext().finish()}catch(e){}r.readRenderTargetPixels(G.bkSyncRT,0,0,1,1,G.bkSyncBuf)}
 /* light at a point, for things that move (characters, crowds, doors): every nearby source, no shadows */
 function probeAt(reg,x,y,z,out){
  const L=G.lights[reg]||[];let r=0,g=0,b=0;

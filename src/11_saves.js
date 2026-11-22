@@ -43,7 +43,9 @@ function resumeGame(s){
  S=s;closeOv();$('ov').classList.remove('phoneov');
  if(!S.msgs)S.msgs=[];if(!S.log)S.log=[];
  // saves from before the map rebuild: positions point at the old layout, and Day 1 was a cutscene
- if(S.mapv!==2){S.pos=null;if(S.ch>=1&&S.resume!=='open')for(const k of['badge','open','checkin','room'])S.f['d1_'+k]=1;if(S.ch===0)S.resume='ch0';S.mapv=2}
+ if(!S.mapv||S.mapv<2){S.pos=null;if(S.ch>=1&&S.resume!=='open')for(const k of['badge','open','checkin','room'])S.f['d1_'+k]=1;if(S.ch===0)S.resume='ch0';S.mapv=2}
+ // the convention centre and the hotel were rebuilt (map v3): a position saved there points into the old building
+ if(S.mapv<3){if(S.pos&&(S.pos[0]==='con'||S.pos[0]==='f13'))S.pos=null;S.mapv=3}
  if(S.ch===0&&(!G.ok||!S.f.ch0intro)){const h=S.h;S=fresh(h);S.resume='ch0';startCh0();return}
  if(!WD.touch&&window.THREE)tryLock();
  initWorld(()=>{

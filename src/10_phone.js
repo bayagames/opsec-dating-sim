@@ -56,7 +56,7 @@ const APPS={
  map(){
   const V=k=>S.visited&&S.visited[k];
   if(S.ch===0||WD.reg==='home'||WD.reg==='office'||WD.reg==='station'&&S.ch===0){phReg=phReg||WD.reg+':'+levelOf(WD.reg,WD.y);return `<div class="tabs">${LEVELS[WD.reg].map(l=>`<button class="${WD.reg+':'+l[0]===phReg?'on':''}" data-r="${WD.reg}:${l[0]}">${l[1]}</button>`).join('')}</div><canvas id="pmap" width="560" height="480"></canvas><p class="small">${{home:'Home: your flat upstairs, Proof downstairs.',office:'Brindle & Co. Your desk is the one with the red stapler.',station:'Central Station. Platform 4 is behind the ticket barriers.'}[WD.reg]}</p>`}
-  const tabs=[];for(const r of['con','f13'])for(const l of LEVELS[r]){if(r==='con'&&l[0]<0&&!(S.ch>=2&&(V('carpark')||V('basement')||V('noc')||V('plant'))))continue;if(r==='con'&&l[0]>10&&!V('conroof'))continue;if(r==='f13'&&l[0]>0&&!(V('roof')||V('plantdeck')))continue;tabs.push([r+':'+l[0],(r==='f13'&&!l[0]?'Hotel · ':'')+l[1]])}
+  const tabs=[];for(const r of['con','f13'])for(const l of LEVELS[r]){if(r==='con'&&l[0]<0&&!(S.ch>=2&&(V('carpark')||V('basement')||V('noc')||V('plant'))))continue;if(r==='con'&&l[0]>15&&!V('conroof'))continue;if(r==='f13'&&l[0]>0&&!(V('roof')||V('plantdeck')))continue;tabs.push([r+':'+l[0],(r==='f13'&&!l[0]?'Hotel · ':'')+l[1]])}
   if(WD.reg==='station')tabs.unshift(['station:0','Station']);
   phReg=phReg||(WD.reg+':'+levelOf(WD.reg,WD.y));
   const vis=Object.values(AREAS).filter(a=>a.reg!=='home'&&a.reg!=='office'&&!a.hide&&S.visited&&S.visited[a.k]);

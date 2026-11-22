@@ -28,6 +28,10 @@ const AREA_AUD={flat:['home','home'],stairs:['home','home'],bakery:['home','bake
  gallery:['con','hum'],skybridge:['hotel','lobby'],hotelL1:['hotel','hotel'],mezz:['hotel','lobby'],meeting:['hotel','hotel'],gym:['hotel','hotel'],lumenlounge:['tense','hotel'],fcterrace:['night','garden'],vrL1:['con','hum'],
  workshopA:['con','room'],workshop:['con','room'],hwv:['con','room'],creator:['con','room'],arcade:['arcade','arcade'],conops:['con','room'],press:['con','room'],speakers:['hotel','room'],quiet:['night',null],
  basement:['tense','hotel'],carpark:['tense','hotel'],noc:['tense','room'],plant:['tense','hotel'],tunnel:['tense','hotel'],conroof:['night','wind'],
+ promenade:['hotel','lobby'],lifts:['hotel','lobby'],grill:['bar','bar'],pdining:['bar','bar'],hkitchen:['tense','hotel'],backoffice:['hotel','hotel'],boutique:['hotel','lobby'],ballroom:['hotel','lobby'],library:['hotel','room'],
+ hotelL2:['hotel','hotel'],pool:['night','hotel'],spa:['night',null],foyerG:['con','hum'],foyerG2:['con','hum'],ring2:['con','hum'],skyterrace:['night','garden'],hallBback:['tense','hotel'],stores:['tense','hotel'],
+ kitchenC:['tense','hotel'],breakroom:['tense','room'],neconc:['con','hum'],neconc2:['con','hum'],constore:['con','hum'],demostage:['con','hum'],seconc:['con','hum'],seconc1:['con','hum'],aero:['con','room'],
+ tabletop:['con','room'],film:['night','room'],skygarden:['night','garden'],tunnelN:['tense','hotel'],
  corridor:['hotel','hotel'],room1337:['hotel','hotel'],room1336:['party','bar'],housekeeping:['hotel','hotel'],stairwell:['hotel','hotel'],roof:['night','wind'],plantdeck:['night','wind']};
 const BG_AUD={con:['con','hum'],lock:['con','room'],ctf:['con','room'],soc:['con','room'],stream:['con','hum'],hotel:['hotel','hotel'],roof:['night','wind'],dawn:['night','wind'],stage:['hall','hall'],keynote:['hall','hall'],vendor:['con','hum'],party:['party','bar'],void:['tense',null],flat:['home','home'],bakery:['home','bakery'],office:['hotel','office'],train:['home','station'],cos:['con','hum'],chill:['night','room'],bar:['bar','bar'],lobby:['hotel','lobby']};
 function audioScene(){
