@@ -18,12 +18,17 @@ Source lives in `src/`. To rebuild `index.html` after editing:
     npx esbuild tools/three-entry.js --bundle --minify --format=iife --target=es2019 --legal-comments=none --outfile=vendor/three.bundle.js
 
 ## Source map
-- `01_engine.js`   portraits, state, settings, VN engine, tutorials
+- `01_engine.js`   portraits, VN engine, tutorials
+- `01b_core.js`    the week (days and six parts of each), Skill and Clout ranks, closeness, Exposure and its daily reset and fail, clues, achievements, the story summary, what carries over between runs
+- `01c_script.js`  the scene language: scenes are written as plain text (`~` narration, `*` thoughts, `name.x:` lines, `?` choices, `if`, `[commands]`) and parsed on first use
 - `02_games.js`    minigames (quiz, phishing, terminal, timing, code review)
-- `03_main.js`     main story: chapter 0 (office, evening, station, train) and Day 1 onboarding steps, chapters 1-4
-- `04_routes_a.js` Nyx, Ada, Priya, Juno routes
-- `05_routes_b.js` Kit, Rin, Bea, Ellie, Mira routes + Dave
-- `06_hub_finale.js` hangouts, shop, keynote, endings, title
+- `03_data.js`     clues, the twelve mysteries, leads, items, achievements, endings
+- `03b_flow.js`    story beats, free time, hangouts, leads, the case board, the final act's positions
+- `04_days.js`     the calendar: which part of which day belongs to the story
+- `04a`-`04h`      the prologue and Days 1 to 7; `04i_endings.js` the twenty endings
+- `05_routes.js`   the twenty-one routes' requirements and small talk; `05a`-`05j` their scenes; `05k_leads.js` investigations
+- `06_finale.js`   hub, shop, Room 1337, positions, choosing the ending, title
+- `docs/STORY_BIBLE.md` the cast, the conspiracy, the mysteries, the calendar and the endings (spoilers)
 - `07_gl.js`       three.js renderer: level builder API, chunked geometry, glass, light pool, per-region environment maps, lightmap packing, bump relief, AO, bloom, colour grade, sky. `LOOK` holds every lighting knob in one place
 - `07c_bake.js`    baked lighting, one place at a time: the first visit to a place renders a cube shadow map per light and accumulates them into its lightmaps (soft shadows, falloff, fill, RGBM), caches them in IndexedDB, and frees the previous place's GPU memory. Moving things are lit by `probeAt`
 - `07b_chars.js`   full-body character and crowd art
@@ -43,7 +48,8 @@ Source lives in `src/`. To rebuild `index.html` after editing:
 - `08f_home.js`    Proof: a five-level corner building (bakery, Flat 1A, two locked floors, roof terrace) on Linden Street, with the street, square, rear terraces, viaduct and city around it; morning sun baked through real windows
 - `09_world.js`    movement, collision, interaction, sprites, minimap, main loop
 - `09a_place.js`   who stands where, interactions, crowd, story gates, lifts, train and taxi
-- `10_phone.js`    phone UI and apps (Settings, Quit)
+- `10_phone.js`    phone UI and apps (Messages, Calendar, Hearts, Case board, Stats, Story, Achievements, Bag, Saves, Log, Settings)
+- `10b_map.js`     the full-screen map: pan and zoom, level tabs, fast travel grouped by building, search and recents
 - `11_saves.js`    save slots, export/import
 - `12_input.js`    keyboard + device detection
 - `12b_cursor.js`  virtual cursor, so the mouse stays captured through conversations

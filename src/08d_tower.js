@@ -121,7 +121,7 @@ function towerDetail(nb,sb){
  for(let i=0;i<11;i++)frame((nb(i)+nb(i+1))/2,-11.8,1);for(let i=0;i<10;i++){if(i===9)continue;frame((sb(i)+sb(i+1))/2,11.8,-1)}
  for(let i=1;i<12;i++){const x=nb(i);box(x-.08,1.85,-11.8,x+.08,2.15,-11.68,MT.glow('#ffe2b0',1.5),{col:false})}for(let i=1;i<10;i++){const x=sb(i);box(x-.08,1.85,11.68,x+.08,2.15,11.8,MT.glow('#ffe2b0',1.5),{col:false})}
  // art on the lift core, a bench and a mirror in the lift lobby, a console with a lamp at each corridor end
- for(const[x,z,s]of[[231,-8,-1],[256,-8,-1],[256,8,1],[227,8,1]]){kOnWall('h',z,s,x,1.8,1.2,1.2,MT.morning);kWall('h',z,s,x-.95,x+.95,1.15,2.45,0,.03,FR)}
+ for(const[x,z,s]of[[231,-8,-1],[256,-8,-1],[256,8,1],[227,8,1]]){kOnWall('h',z,s,x,1.8,1.2,1.2,MT['art'+(Math.round(Math.abs(x))%4)]);kWall('h',z,s,x-.95,x+.95,1.15,2.45,0,.03,FR)}
  box(242.5,0,-11.8,245,.45,-11.3,{side:WP,top:MT.fabric('#5a1e2c')});kOnWall('h',-11.8,1,243.75,2,1.2,1,mt('white','#c8d4e0',.5,0,{r:.05,m:.9}));
  for(const[x,s]of[[212.2,1],[275.8,-1]])for(const z of[-10,10]){const x0=Math.min(x,x+s*.5),x1=Math.max(x,x+s*.5);box(x0,0,z-.9,x1,.8,z+.9,{side:WP,top:MT.mdark||MT.marble});box(x0+.15,.8,z-.15,x1-.15,1.15,z+.15,MT.glow('#ffd98a',1.3),{col:false});
   for(const dz of[-1.75,1.75])box(Math.min(x,x+s*.15),.1,z+dz-.15,Math.max(x,x+s*.15),2.9,z+dz+.15,MT.velvet||MT.fabric('#5a1e2c'),{col:false})}

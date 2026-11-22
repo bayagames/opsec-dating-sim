@@ -160,8 +160,18 @@ function railing(x0,z0,x1,z1,y,o){o=o||{};const h=o.h||1.05,m=o.m||MT.brass,g=o.
 function glInit(cv){
  if(!window.THREE)return false;
  const T=THREE;
- let r=null;try{r=new T.WebGLRenderer({canvas:cv,antialias:true,powerPreference:'high-performance',stencil:false})}catch(e){console.warn(e)}
+ let r=null;try{r=new T.WebGLRenderer({canvas:cv,antialias:true,powerPreference:'high-performance',stencil:false,reverseDepthBuffer:!window.__noRevZ})}catch(e){console.warn(e)}
  if(!r||!r.capabilities)return false;
+ /* reversed depth into a 32-bit float buffer: near-uniform precision out to the skyline, so far-off signs, decals and
+    facade skins stop shimmering against the wall behind them. r170 asks for the wrong clip range when it switches this
+    on, so set ZERO_TO_ONE ourselves (the state only changes once). Without EXT_clip_control it quietly stays off. */
+ G.revZ=!!r.capabilities.reverseDepthBuffer;
+ if(G.revZ){try{const ext=r.extensions.get('EXT_clip_control'),dep=r.state.buffers.depth,gl=r.getContext(),R0=r.render.bind(r);
+  // only the view itself renders reversed (G.revZOn, set by render()); the bake, environment maps and shadow cubes keep
+  // the ordinary depth they were tuned for. r170 gets the clip range and clear depth wrong when the mode flips, so every
+  // render re-asserts both (cheap GL calls)
+  r.render=(sc,cam)=>{const on=!!G.revZOn;dep.setReversed(on);ext.clipControlEXT(ext.LOWER_LEFT_EXT,on?ext.ZERO_TO_ONE_EXT:ext.NEGATIVE_ONE_TO_ONE_EXT);if(gl.getParameter(gl.DEPTH_CLEAR_VALUE)!==(on?0:1)){dep.setClear(.5);dep.setClear(1)}R0(sc,cam)};
+  dep.setReversed(false);ext.clipControlEXT(ext.LOWER_LEFT_EXT,ext.NEGATIVE_ONE_TO_ONE_EXT)}catch(e){console.warn(e);G.revZ=false}}
  r.outputColorSpace=T.SRGBColorSpace;r.toneMapping=T.NeutralToneMapping||T.ACESFilmicToneMapping;r.toneMappingExposure=LOOK.exposure;
  G.r=r;G.cv=cv;G.T=T;
  // the level was lit with a bounded (1-d/R)^2 falloff; keep that look instead of inverse-square,
@@ -191,22 +201,26 @@ function setQuality(q){
  for(const k in G.regions){const R=G.regions[k];if(!R.obj)continue;R.obj.traverse(o=>{if(o.isMesh&&o.userData.mk)o.material=getMat(o.userData.mk,o.userData.lmk)})}
  // post-processing
  if(G.composer){G.composer.renderTarget1.dispose();G.composer.renderTarget2.dispose();G.composer=null}
- if(Q.bloom){
+ G.bloom=null;G.gtao=null;G.grade=null;G.fxaa=null;
+ if(Q.bloom||G.revZ){
   const size=G.r.getDrawingBufferSize(new T.Vector2());
   const rt=new T.WebGLRenderTarget(Math.max(1,size.x),Math.max(1,size.y),{type:T.HalfFloatType,samples:Q.msaa});
+  if(G.revZ)rt.depthTexture=new T.DepthTexture(rt.width,rt.height,T.FloatType);
   const c=new T.EffectComposer(G.r,rt);c.addPass(new T.RenderPass(G.scene,G.cam));
   // glossy floors right under bright lights can overflow half-float to Inf; bloom would smear that into NaN
   // ambient occlusion: contact shadows where walls meet floors, under furniture, round people's feet
-  G.gtao=null;if(Q.ao&&T.GTAOPass){try{const ao=new T.GTAOPass(G.scene,G.cam,Math.max(1,size.x>>1),Math.max(1,size.y>>1));
+  if(Q.ao&&T.GTAOPass){try{const ao=new T.GTAOPass(G.scene,G.cam,Math.max(1,size.x>>1),Math.max(1,size.y>>1));
    ao.updateGtaoMaterial({radius:.55,distanceExponent:1.6,thickness:1.2,scale:1,samples:12,distanceFallOff:1});ao.updatePdMaterial({lumaPhi:10,depthPhi:2,normalPhi:3,radius:6,rings:2,samples:12});ao.blendIntensity=LOOK.ao;
+   // reversed depth: the AO and denoise shaders expect 0 = near, 1 = far
+   if(G.revZ)for(const m of[ao.gtaoMaterial,ao.pdMaterial]){m.fragmentShader=m.fragmentShader.replace(/return (textureLod|texelFetch)\(tDepth/g,'return 1.0-$1(tDepth');m.needsUpdate=true}
    // cut-out characters, glass, the sky and markers would stamp rectangles into the AO buffer: leave them out
    ao.overrideVisibility=function(){const cache=this._visibilityCache;this.scene.traverse(o=>{cache.set(o,o.visible);if(o.isPoints||o.isLine||o.isSprite||o.userData.noAO)o.visible=false})};
    const ss=ao.setSize.bind(ao);ao.setSize=(w,h)=>ss(Math.max(1,w>>1),Math.max(1,h>>1));c.addPass(ao);G.gtao=ao}catch(e){console.warn(e);G.gtao=null}}
   c.addPass(new T.ShaderPass({uniforms:{tDiffuse:{value:null}},vertexShader:'varying vec2 v;void main(){v=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:'uniform sampler2D tDiffuse;varying vec2 v;void main(){vec4 c=texture2D(tDiffuse,v);c.rgb=clamp(c.rgb,0.,48.);if(c.r!=c.r||c.g!=c.g||c.b!=c.b)c.rgb=vec3(0.);gl_FragColor=c;}'}));
-  G.bloom=new T.UnrealBloomPass(new T.Vector2(size.x/2,size.y/2),LOOK.bloomStr,LOOK.bloomRad,LOOK.bloomThr);c.addPass(G.bloom);
+  if(Q.bloom){G.bloom=new T.UnrealBloomPass(new T.Vector2(size.x/2,size.y/2),LOOK.bloomStr,LOOK.bloomRad,LOOK.bloomThr);c.addPass(G.bloom)}
   c.addPass(new T.OutputPass());
-  G.grade=null;if(Q.grade){G.grade=new T.ShaderPass(GRADE);c.addPass(G.grade)}
-  G.fxaa=null;if(Q.fxaa){G.fxaa=new T.ShaderPass(T.FXAAShader);c.addPass(G.fxaa)}G.composer=c;
+  if(Q.grade){G.grade=new T.ShaderPass(GRADE);c.addPass(G.grade)}
+  if(Q.fxaa){G.fxaa=new T.ShaderPass(T.FXAAShader);c.addPass(G.fxaa)}G.composer=c;
  }
  G.dprCap=Q.dpr;G.dprK=1;G.sizeKey='';
 }

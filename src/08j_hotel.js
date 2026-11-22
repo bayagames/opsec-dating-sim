@@ -92,7 +92,7 @@ function buildHotel(){
  for(const x of[-104,-92,-80,-70])column(x,-3.7,0,L1-.45,.5,LIM,null);
  kSign(-64.22,3.9,-17,5,.5,'w','THE LINK · CTRL+ALT+CON →','#ffe0a0','#2a1a12');
  for(let x=-196;x<=-68;x+=8){if(x>-161&&x<-109||Math.abs(x+87)<4)continue;box(x-.3,0,-23.8,x+.3,L1-.45,-23.5,LIM);box(x-.35,L1-.8,-23.85,x+.35,L1-.45,-23.45,BR_,{col:false})}
- for(const x of[-192,-176,-168,-104,-96,-78,-70])kOnWall('h',-23.8,1,x,2.4,1.4,1.6,MT.morning);
+ for(const x of[-192,-176,-168,-104,-96,-78,-70])kOnWall('h',-23.8,1,x,2.4,1.4,1.6,MT['art'+(Math.round(Math.abs(x))%4)]);
  for(let x=-194;x<=-66;x+=8)downl(x,L1-.45,-14,'#ffe2b0',7,.55);
  for(const[x,z]of[[-198,-22],[-66,-22],[-108,-6],[-66,-6]])kPlant(x,z,1.4,0,'#2a2026');
  for(const x of[-180,-100,-76]){box(x-1.2,0,-22.9,x+1.2,.45,-22.3,{side:WP,top:MT.fabric('#6a3a4a')})}
@@ -141,7 +141,7 @@ function buildHotel(){
   for(let i=0;i<4;i++)kPendant(-128+i*5.2,L1-.45,-44,1.4,.22,'#ffd98a',7,.7,'#2a2026');addLight(-123,3.6,-56,[1,.82,.58],11,.6)}
  sFloor(-160,-64,-136,-36,0,MT.wood);sCeil(-160,-64,-136,-36,L1-.45,COF);W('v',-160,-64,-36,0,L1,MT.wpaper,1);W('h',-64,-160,-136,0,L1,MT.wpaper,1);W('h',-36,-160,-136,0,L1,LIM,-1);
  table(-148,-50,10,1.8,MT.woodDark,.76);for(let i=0;i<7;i++){chair(-152.5+i*1.5,-51.3,'n',MT.fabric('#3a4a5a'));chair(-152.5+i*1.5,-48.7,'s',MT.fabric('#3a4a5a'))}chandelier(-148,L1-.45,-50,.8,null,.3);
- kOnWall('v',-159.8,1,-50,4,1.2,2.2,MT.morning);mr({x0:-136,z0:-64,x1:-110,z1:-24,n:'The Grill',c:'#5a3a2a'});mr({x0:-160,z0:-64,x1:-136,z1:-36,n:'Private dining',c:'#4a3a2a'});
+ kOnWall('v',-159.8,1,-50,4,1.2,2.2,MT.art2);mr({x0:-136,z0:-64,x1:-110,z1:-24,n:'The Grill',c:'#5a3a2a'});mr({x0:-160,z0:-64,x1:-136,z1:-36,n:'Private dining',c:'#4a3a2a'});
  // ---- the hotel kitchen ----
  sFloor(-200,-64,-160,-24,0,MT.tile);sCeil(-200,-64,-160,-24,L1-.45,MT.ceil);W('v',-200,-64,-24,0,L1,MT.tile,1);W('h',-64,-200,-160,0,L1,MT.tile,1);W('v',-160,-64,-36,0,L1,MT.tile,-1);
  for(const z of[-56,-46,-36]){box(-194,0,z-.6,-170,.92,z+.6,MT.chrome);box(-194,.92,z-.6,-170,.96,z+.6,MT.metal,{col:false});for(let i=0;i<4;i++)box(-192+i*6,.96,z-.3,-190.6+i*6,1.12,z+.3,MT.plain('#d8dce4'),{col:false})}
@@ -189,7 +189,7 @@ function buildHotelUp(){
   for(const x of[-196,-188,-180,-172,-164,-104,-96,-80,-68]){if(Math.abs(x+87)<3||Math.abs(x+95)<3||Math.abs(x+72)<2||Math.abs(x+185)<2.4)continue;box(x-.3,y,-23.8,x+.3,y+h-.1,-23.5,LIM);box(x-.35,y+2.4,-23.5,x+.35,y+2.9,-23.35,MT.glow('#ffe2b0',1.4),{col:false})}
   for(let x=-194;x<=-66;x+=8)downl(x,y+(y===L1?h-.45:h-.4),-14,'#ffe2b0',7,.5);
   quad([-190,y+.012,-11],[-66,y+.012,-11],[-66,y+.012,-17],[-190,y+.012,-17],MT.rugH,62,3);
-  for(let i=0;i<3;i++){const x=-180+i*8;box(x,y,-5.6,x+2.4,y+.45,-4.8,{side:WP,top:MT.fabric('#6a3a4a')});kOnWall('h',-4.2,-1,x+1.2,1.8,y+1.4,1.2,MT.morning)}
+  for(let i=0;i<3;i++){const x=-180+i*8;box(x,y,-5.6,x+2.4,y+.45,-4.8,{side:WP,top:MT.fabric('#6a3a4a')});kOnWall('h',-4.2,-1,x+1.2,1.8,y+1.4,1.2,MT['art'+(Math.round(Math.abs(x))%4)])}
   for(const x of[-190,-175])kSign(x,y+2.5,-4.22,1.6,.3,'n','STAFF ONLY','#ffe0a0','#2a1a12');for(const x of[-190,-175])kOnWall('h',-4.2,-1,x,1,y,2.2,MT.door);
   kPlant(-108,-6,1.3,y,'#2a2026');kPlant(-66,-22.4,1.3,y,'#2a2026');kPlant(-66,-5.6,1.3,y,'#2a2026');
   lifts(y);
