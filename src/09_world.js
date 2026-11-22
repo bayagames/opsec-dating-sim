@@ -251,7 +251,8 @@ function render(dt){
  const sp=Math.hypot(WD.vx,WD.vz),bamp=(WD.bobAmp||0)*(sp>6.5?.024:.016)*(SETTINGS.bob===false?0:1),bob=-bamp*(1-Math.cos(WD.bob*2))*.5-(WD.land||0);
  const asp=w/h,vf=clamp(2*Math.atan(Math.tan(.75+WD.fovk*.045)/asp),1.05,1.8);
  cam.fov=vf*180/Math.PI;cam.far=(FAR[WD.reg]||180)+40;cam.updateProjectionMatrix();
- cam.position.set(WD.x,WD.eye+bob,WD.z);cam.rotation.set(WD.pit,WD.yaw,0);zoneCull(WD.reg,WD.x,WD.eye,WD.z);
+ if(WD.cut&&cutOn()){const p=cutCam(cam);zoneCull(WD.reg,p[0],p[1],p[2])}
+ else{cam.position.set(WD.x,WD.eye+bob,WD.z);cam.rotation.set(WD.pit,WD.yaw,0);zoneCull(WD.reg,WD.x,WD.eye,WD.z)}
  G.sky.position.copy(cam.position);const su=G.sky.material.uniforms;su.t.value=performance.now()/1000;
  const tod=todNow();if(tod){su.hz.value.setRGB(...tod.hz);su.zn.value.setRGB(...tod.zn);su.st.value=tod.st}
  else{su.hz.value.copy(G.fog.color);if(R.day){su.zn.value.setRGB(.12,.3,.75);su.st.value=0}else{su.zn.value.setRGB(.012,.012,.05);su.st.value=1}}
@@ -299,7 +300,7 @@ function hudMark(id,o,col,h){let el=$(id);if(!el){el=document.createElement('div
  el.querySelector('span').textContent=(Math.abs(dy)>2.6?(dy>0?'▲ ':'▼ '):'')+Math.round(Math.hypot(d,dy))+' m';
 }
 function updSprites(dt){
- const T=G.T,tt=performance.now()/1000,yaw=WD.yaw;
+ const T=G.T,tt=performance.now()/1000,yaw=WD.cut&&cutOn()?WD.cutYaw:WD.yaw;
  G.newsT=(G.newsT||0)-dt;if(G.newsT<=0){G.newsT=.25;G.news=S.ch>0?new Set(newScenes().map(n=>n.id)):new Set()}
  for(const c of WCH){
   const vis=c.reg===WD.reg&&c.when();
@@ -414,7 +415,7 @@ function loop(t){
  const live=worldLive();
  if(live)update(dt);
  // behind a conversation the world is blurred: a few frames a second is plenty
- const behind=!live&&($('vn').classList.contains('on')||$('ov').classList.contains('on'));
+ const behind=!live&&!cutOn()&&($('vn').classList.contains('on')||$('ov').classList.contains('on'));
  G.skip=(G.skip||0)+1;
  if(!window.__nr&&(!behind||G.skip%4===0||G.forceFrame)){G.forceFrame=false;render(behind?dt*4:dt)}
  if(live){adaptRes(dt);}

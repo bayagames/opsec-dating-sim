@@ -362,6 +362,14 @@ body.desk .kn{display:inline-block}
 /* ---- motion + polish ---- */
 #gl{transition:filter .5s ease,transform .6s cubic-bezier(.2,.8,.2,1)}
 body.talking #gl{filter:blur(7px) brightness(.5) saturate(.85);transform:scale(1.045)}
+body.cutscene #gl{filter:none!important;transform:none!important}
+body.cutscene .bg-dim{background:linear-gradient(#0a061000 55%,#0a061088)!important}
+body.cutscene #por,body.cutscene #sign{display:none!important}
+body.cutscene #vn::before,body.cutscene #vn::after{content:'';position:absolute;left:0;right:0;height:7vh;background:#000;z-index:4;pointer-events:none;animation:cutbar .6s ease both}
+body.cutscene #vn::before{top:0}body.cutscene #vn::after{bottom:0}
+@keyframes cutbar{from{height:0}to{height:7vh}}
+body.cutscene #box{left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:min(820px,calc(100% - 24px))!important;background:linear-gradient(#1e1229d8,#140c1ce8)}
+body.cutscene #chs{left:50%!important;right:auto!important;transform:translateX(-50%)!important}
 #world::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 58%,#05020a99 100%)}
 #vn.on #box{animation:boxIn .42s cubic-bezier(.2,.8,.2,1)}
 @keyframes boxIn{from{opacity:0;translate:0 26px}}

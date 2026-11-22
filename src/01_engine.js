@@ -220,7 +220,7 @@ function show(id){document.body.classList.toggle('inworld',id==='world');if(id==
 /* ============ VN ENGINE ============ */
 let Q=[],onDone=null,typing=null,full='',waiting=false;
 const BG={con:'CTRL+ALT+CON',lock:'LOCKPICK VILLAGE',ctf:'CTF ROOM · SCOREBOARD LIVE',soc:'BLUE TEAM VILLAGE',stream:'● LIVE · CYBERJUNO',hotel:'ROOM 1337',roof:'ROOFTOP',dawn:'ROOFTOP · 5:52 AM',stage:'MAIN STAGE',keynote:'CLOSING KEYNOTE',vendor:'VENDOR HALL',party:'0xFF AFTERPARTY',void:'█████',flat:'YOUR FLAT',bakery:'PROOF · BAKERY',office:'BRINDLE & CO · IT HELPDESK',train:'TRAIN · PLATFORM 4',cos:'COSPLAY HALL',chill:'CHILL-OUT LOUNGE',bar:'THE HOTEL BAR',lobby:'HOTEL LOBBY'};
-function setBG(k){const w=typeof worldBG==='function'&&worldBG(k);const cls='bg '+(w?'bg-dim':'bg-'+(BG[k]?k:'con'));if($('bg').className!==cls){$('bg').className=cls;$('bg').classList.add('bgin')}CURBG=k;const sg=BG[k]||(typeof AREAS!=='undefined'&&AREAS[k]?AREAS[k].n.toUpperCase():'');$('sign').textContent=sg;$('sign').style.display=sg?'block':'none';if(w&&G.ok)G.forceFrame=true}
+function setBG(k){const w=typeof worldBG==='function'&&worldBG(k);const cls='bg '+(w?'bg-dim':'bg-'+(BG[k]?k:'con'));if($('bg').className!==cls){$('bg').className=cls;$('bg').classList.add('bgin')}CURBG=k;if(typeof cutClass==='function')cutClass();const sg=BG[k]||(typeof AREAS!=='undefined'&&AREAS[k]?AREAS[k].n.toUpperCase():'');$('sign').textContent=sg;$('sign').style.display=sg?'block':'none';if(w&&G.ok)G.forceFrame=true}
 /* does switching to this background move us somewhere else? (then fade through black) */
 function bgChanges(k){if(k===CURBG||!$('vn').classList.contains('on'))return false;
  if(S&&S.inWorld&&G.ok&&typeof bgArea!=='undefined'&&bgArea(k)){const cur=areaAt(WD.reg,WD.x,WD.z,WD.y);return !(cur&&(AREAS[cur].bg===k||bgArea(k)===cur))}
@@ -231,7 +231,7 @@ function run(steps,done){closeOv();clearPor();$('txt').textContent='';$('who').t
 function next(){
  $('chs').innerHTML='';
  if(S.exp>=100&&!S.ending&&!S.failing&&S.day>0){S.failing=1;Q=[];onDone=null;clearPor();failDay();return}
- if(!Q.length){const d=onDone;onDone=null;if(d)d();return}
+ if(!Q.length){if(typeof cutSet==='function'&&WD.cut)cutSet(null);const d=onDone;onDone=null;if(d)d();return}
  const st=Q.shift();
  if(typeof st==='function'){const r=st();if(Array.isArray(r))Q.unshift(...r);return next()}
  if(st.bg&&!st._f&&bgChanges(st.bg)){const s2=Object.assign({},st,{_f:1});fadeScene(()=>{Q.unshift(s2);next()});return}
@@ -240,6 +240,7 @@ function next(){
  if(st.hide){clearPor();return next()}
  if(st.msg){addMsg(st.msg[0],st.msg[1]);return next()}
  if(st.tp){if(G.ok&&S.inWorld)teleportArea(st.tp);return next()}
+ if(st.cut!==undefined){if(typeof cutSet==='function')cutSet(st.cut);return next()}
  if(st.unlock)return unlock(st.unlock,next);
  if(st.chapter!==undefined)return chapterCard(st.chapter,next);
  if(st.choice)return choose(st.choice);
@@ -251,7 +252,7 @@ function say(st){
  const who=st.w,box=$('txt');
  box.className='';
  const pw=$('who').textContent;
- if(who&&CH[who]){if(!st.keep)setPor(lookOf(who),st.x);$('who').textContent=st.as||CH[who].name;$('who').style.background=CH[who].col}
+ if(who&&CH[who]){if(!st.keep&&!(typeof cutOn==='function'&&cutOn()))setPor(lookOf(who),st.x);$('who').textContent=st.as||CH[who].name;$('who').style.background=CH[who].col}
  else if(who==='whisper'){clearPor();$('who').textContent='WHISPER';$('who').style.background='var(--coral)';box.className='whisper'}
  else if(who==='wh1sper'){clearPor();$('who').textContent='WH1SPER';$('who').style.background='#c0102a';box.className='whisper wh1'}
  else if(who==='think'){$('who').textContent='';box.className='think'}

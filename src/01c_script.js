@@ -66,6 +66,7 @@ function scCmd(n,ctx){const a=n.a;
   case'ach':return[()=>{ach(a)}];
   case'unlock':return[{unlock:a}];
   case'tp':return[{tp:a}];
+  case'cut':return[{cut:a}];
   case'end':return[{end:a}];
   case'call':return[()=>{const r=ev(/[(=]/.test(a)?a:a+'()');return Array.isArray(r)?r:undefined}];
   case'scene':return[()=>scr(a)];

@@ -362,6 +362,14 @@ body.desk .kn{display:inline-block}
 /* ---- motion + polish ---- */
 #gl{transition:filter .5s ease,transform .6s cubic-bezier(.2,.8,.2,1)}
 body.talking #gl{filter:blur(7px) brightness(.5) saturate(.85);transform:scale(1.045)}
+body.cutscene #gl{filter:none!important;transform:none!important}
+body.cutscene .bg-dim{background:linear-gradient(#0a061000 55%,#0a061088)!important}
+body.cutscene #por,body.cutscene #sign{display:none!important}
+body.cutscene #vn::before,body.cutscene #vn::after{content:'';position:absolute;left:0;right:0;height:7vh;background:#000;z-index:4;pointer-events:none;animation:cutbar .6s ease both}
+body.cutscene #vn::before{top:0}body.cutscene #vn::after{bottom:0}
+@keyframes cutbar{from{height:0}to{height:7vh}}
+body.cutscene #box{left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:min(820px,calc(100% - 24px))!important;background:linear-gradient(#1e1229d8,#140c1ce8)}
+body.cutscene #chs{left:50%!important;right:auto!important;transform:translateX(-50%)!important}
 #world::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 58%,#05020a99 100%)}
 #vn.on #box{animation:boxIn .42s cubic-bezier(.2,.8,.2,1)}
 @keyframes boxIn{from{opacity:0;translate:0 26px}}
@@ -777,7 +785,7 @@ function show(id){document.body.classList.toggle('inworld',id==='world');if(id==
 /* ============ VN ENGINE ============ */
 let Q=[],onDone=null,typing=null,full='',waiting=false;
 const BG={con:'CTRL+ALT+CON',lock:'LOCKPICK VILLAGE',ctf:'CTF ROOM · SCOREBOARD LIVE',soc:'BLUE TEAM VILLAGE',stream:'● LIVE · CYBERJUNO',hotel:'ROOM 1337',roof:'ROOFTOP',dawn:'ROOFTOP · 5:52 AM',stage:'MAIN STAGE',keynote:'CLOSING KEYNOTE',vendor:'VENDOR HALL',party:'0xFF AFTERPARTY',void:'█████',flat:'YOUR FLAT',bakery:'PROOF · BAKERY',office:'BRINDLE & CO · IT HELPDESK',train:'TRAIN · PLATFORM 4',cos:'COSPLAY HALL',chill:'CHILL-OUT LOUNGE',bar:'THE HOTEL BAR',lobby:'HOTEL LOBBY'};
-function setBG(k){const w=typeof worldBG==='function'&&worldBG(k);const cls='bg '+(w?'bg-dim':'bg-'+(BG[k]?k:'con'));if($('bg').className!==cls){$('bg').className=cls;$('bg').classList.add('bgin')}CURBG=k;const sg=BG[k]||(typeof AREAS!=='undefined'&&AREAS[k]?AREAS[k].n.toUpperCase():'');$('sign').textContent=sg;$('sign').style.display=sg?'block':'none';if(w&&G.ok)G.forceFrame=true}
+function setBG(k){const w=typeof worldBG==='function'&&worldBG(k);const cls='bg '+(w?'bg-dim':'bg-'+(BG[k]?k:'con'));if($('bg').className!==cls){$('bg').className=cls;$('bg').classList.add('bgin')}CURBG=k;if(typeof cutClass==='function')cutClass();const sg=BG[k]||(typeof AREAS!=='undefined'&&AREAS[k]?AREAS[k].n.toUpperCase():'');$('sign').textContent=sg;$('sign').style.display=sg?'block':'none';if(w&&G.ok)G.forceFrame=true}
 /* does switching to this background move us somewhere else? (then fade through black) */
 function bgChanges(k){if(k===CURBG||!$('vn').classList.contains('on'))return false;
  if(S&&S.inWorld&&G.ok&&typeof bgArea!=='undefined'&&bgArea(k)){const cur=areaAt(WD.reg,WD.x,WD.z,WD.y);return !(cur&&(AREAS[cur].bg===k||bgArea(k)===cur))}
@@ -788,7 +796,7 @@ function run(steps,done){closeOv();clearPor();$('txt').textContent='';$('who').t
 function next(){
  $('chs').innerHTML='';
  if(S.exp>=100&&!S.ending&&!S.failing&&S.day>0){S.failing=1;Q=[];onDone=null;clearPor();failDay();return}
- if(!Q.length){const d=onDone;onDone=null;if(d)d();return}
+ if(!Q.length){if(typeof cutSet==='function'&&WD.cut)cutSet(null);const d=onDone;onDone=null;if(d)d();return}
  const st=Q.shift();
  if(typeof st==='function'){const r=st();if(Array.isArray(r))Q.unshift(...r);return next()}
  if(st.bg&&!st._f&&bgChanges(st.bg)){const s2=Object.assign({},st,{_f:1});fadeScene(()=>{Q.unshift(s2);next()});return}
@@ -797,6 +805,7 @@ function next(){
  if(st.hide){clearPor();return next()}
  if(st.msg){addMsg(st.msg[0],st.msg[1]);return next()}
  if(st.tp){if(G.ok&&S.inWorld)teleportArea(st.tp);return next()}
+ if(st.cut!==undefined){if(typeof cutSet==='function')cutSet(st.cut);return next()}
  if(st.unlock)return unlock(st.unlock,next);
  if(st.chapter!==undefined)return chapterCard(st.chapter,next);
  if(st.choice)return choose(st.choice);
@@ -808,7 +817,7 @@ function say(st){
  const who=st.w,box=$('txt');
  box.className='';
  const pw=$('who').textContent;
- if(who&&CH[who]){if(!st.keep)setPor(lookOf(who),st.x);$('who').textContent=st.as||CH[who].name;$('who').style.background=CH[who].col}
+ if(who&&CH[who]){if(!st.keep&&!(typeof cutOn==='function'&&cutOn()))setPor(lookOf(who),st.x);$('who').textContent=st.as||CH[who].name;$('who').style.background=CH[who].col}
  else if(who==='whisper'){clearPor();$('who').textContent='WHISPER';$('who').style.background='var(--coral)';box.className='whisper'}
  else if(who==='wh1sper'){clearPor();$('who').textContent='WH1SPER';$('who').style.background='#c0102a';box.className='whisper wh1'}
  else if(who==='think'){$('who').textContent='';box.className='think'}
@@ -1050,6 +1059,7 @@ function scCmd(n,ctx){const a=n.a;
   case'ach':return[()=>{ach(a)}];
   case'unlock':return[{unlock:a}];
   case'tp':return[{tp:a}];
+  case'cut':return[{cut:a}];
   case'end':return[{end:a}];
   case'call':return[()=>{const r=ev(/[(=]/.test(a)?a:a+'()');return Array.isArray(r)?r:undefined}];
   case'scene':return[()=>scr(a)];
@@ -2282,6 +2292,7 @@ SC.d1_ceremony=`
 ~ A bowl of two thousand seats rising into the dark on three sides, a stage the width of a street, and over it a screen the size of a house. The seats are filling with hoodies. Somewhere a DJ is playing something that sounds like a modem falling in love.
 ~ Block C, Row 4, Seat 12. You find it. You sit. The person on your left is eating noodles. The person on your right is asleep.
 * Two thousand people. Some of them wrote the tools you've only read about. Some of them broke things you thought couldn't be broken. And you're in Row 4, with a bag of sausage rolls.
+[cut hallA_stage marge]
 ~ The lights go down. One spotlight. A woman in her sixties with silver hair cropped short and reading glasses on a chain walks to the podium like she owns the building, which, for this week, she basically does.
 marge.h: Welcome to CTRL+ALT+CON number twenty! I'm Marge, your con chair. I've been doing this since it was thirty people in a pub basement and a router we weren't supposed to have.
 ~ A roar from the seats. Marge waits for it with the patience of someone who's waited for it nineteen times before.
@@ -2291,18 +2302,23 @@ marge.s: And a fourth rule, new this year, because some of you are animals. No p
 * No photos of badges. You think about the forum post, the ticket photo, the hotel name. You quietly decide it's fine. It's probably fine.
 marge.n: This year's a big one. Seven days. A hundred and forty talks. Twenty-two villages. The world's longest-running Capture the Flag, final on Saturday. And a closing keynote on Sunday that I've been told, repeatedly, by its speaker, will "change everything".
 marge.s: Speaking of whom. A word from our headline sponsor. He insisted. Twice.
+[cut hallA_stage victor marge]
 ~ A man walks on to applause he seems to have expected. Fifties, silver hair swept back, a suit that costs more than your rent, a smile with a lot of practice in it.
 victor.h: Thank you, Marge. Thank you, everyone. Victor Hale, CEO of Lumen Analytics. When I was your age, I was in a pub basement too.
 * Somewhere behind you someone mutters "no you weren't".
 victor.n: At Lumen, we believe privacy is a human right. Which is why SafeSphere is, and always will be, free.
+[cut hallA_podium victor marge delphine]
 ~ Behind him, to the side of the stage, a woman in a sharp navy suit with a sleek blond chignon watches the audience, not the speaker. She mouths the next line half a second before he says it.
 victor.s: This week, we're proud to give every attendee something special: your badge is "SafeSphere-enabled". It keeps you connected, and it keeps you safe.
 * Keeps you connected. To what?
 victor.h: Join me on Sunday at the closing keynote. We'll be announcing something that changes how people connect, forever.
 ~ Applause, mostly. Somebody boos. Somebody claps the boo. Most people are looking at their phones.
+[cut hallA_wing marge victor owen]
 ~ As Victor walks off, a bearded man in a brown cardigan and glasses shakes his hand at the edge of the stage, a little too long, a little too gratefully. His lanyard says OWEN PRYCE · DEPUTY CHAIR.
+[cut hallA_stage marge]
 marge.n: Right. Go. Be excellent. Badge Lab's in Hall C if your badge is broken, the CTF kicks off tomorrow morning, and the hotel bar is open from seven. Hydrate.
 [flag d1_open]
+[cut off]
 ~ The lights come up. Your phone buzzes twice.
 sms Ellie: did you get there ok?? is it all hoodies? send a pic of the hoodies (not of you, I know, opsec, I'm learning)
 ~ And from the con app: "Halcyon Hotel: check-in for CTRL+ALT+CON guests is now open. Through the Link off the Foyer's north-west corner, then the Promenade to reception."
@@ -2793,6 +2809,7 @@ ellie.h: I'm going to sell pastries to scared hackers. You go and do... whatever
 SC.d3_whispers=`
 [bg hallA]
 [hide]
+[cut hallA_stage]
 ~ Midday. Hall A is packed for the day's big talk: "The State of Privacy", given by a professor with an enormous beard and a nervous laugh. Two thousand people. Ten minutes in, he's explaining cookies.
 ~ Then every screen in the hall goes black. The house lights dip. A hush, the way a room goes quiet before a storm.
 [bg void]
@@ -2801,13 +2818,16 @@ whisper: HOME ADDRESS: [REDACTED. I'M NOT AN ANIMAL.]
 whisper: INSTEAD, HERE IS WHAT HIS APP SENDS HOME. YOUR CONTACTS. YOUR LOCATION, EVERY SIXTY SECONDS. EVERY WEBSITE YOU VISIT, THROUGH ITS "PRIVACY VPN".
 whisper: TEN MILLION PEOPLE. ASK HIM. I'LL WAIT.
 [bg hallA]
+[cut hallA_front victor delphine]
 ~ A spotlight swings. Victor Hale is in the front row, in a reserved seat. Two thousand faces turn to him.
 ~ He stands. He buttons his jacket. He smiles. Delphine, two seats along, has gone very still.
 victor.a: Fabricated. Defamatory. SafeSphere is independently audited by Bastion Security. Lumen's lawyers will be in touch with this... WHISPER.
+[cut hallA_stage marge]
 ~ From the side of the stage, Marge, who wasn't on the programme, takes the professor's microphone.
 marge.n: Victor. Is any of it true?
 victor.s: Marge. Please. Would a privacy company lie about privacy?
 ~ A ripple through the hall: half laughter, half something nastier. The professor is holding his beard.
+[cut off]
 ~ In the crowd you spot a lilac hoodie. Rin has gone completely white.
 * Every sixty seconds. Astrid said that number on the train. Everyone who looks knows.
 ~ The screens come back. The professor tries to restart. Nobody's listening.
@@ -3330,6 +3350,7 @@ if f('ctf_team')
  ~ Inside: a single encrypted file. And a key, hidden in the title tile's colour code, the kind of thing Ada sees in four seconds and you'd never see in four years.
  ada.n: It decrypts to... a document. An internal one. From Lumen.
 else
+ [cut hallA_stage ada]
  ~ Up on stage, Ada opens it. On the big screen, because the finals are mirrored for the crowd, the whole of Hall A watches the file decrypt.
 ~ On the big screen: a contract summary. "PROJECT LANTERN · Asset transfer to Corvid Holdings Ltd (for and on behalf of Halberd Strategic Intelligence) · Consideration: £400,000,000 · Signing: Sunday, following keynote · Proof of concept: CTRL+ALT+CON live graph."
 ~ And a second page. A feature list. Halfway down: "SOURCE DETECTION: identifies individuals in regular contact with journalists, lawyers, regulators and NGO staff. Priority: HIGH (buyer requirement)."
@@ -3339,6 +3360,7 @@ else
 * Every whistleblower who ever met a reporter in a café. Every person in Room 1337 on Thursday night. That's what the con's graph is for. That's what's being sold.
 ~ Hall A goes quiet. Then very loud. Then someone at the back starts booing, and it spreads.
 ~ The screen goes black. Somebody in the AV booth has pulled the feed. Too late. Two thousand phones were already filming.
+[cut off]
 ~ The flag at the bottom of the document: CTRL{l1ght_1s_th3_b3st_d1s1nf3ct4nt}. On the board, the tile shows one solve.
 if f('ctf_team')
  if rank('skill')>=3
@@ -3610,12 +3632,14 @@ if S.plan==='inj'
 if f('decoy_plan')&&!f('mira_taken')
  ~ Somewhere on the fourth floor, two of Krall's men are following your badge down a corridor. Mira has it in her pocket, and is walking it very slowly towards the car park.
  [flag rin_safe]
+[cut hallA_podium victor]
 ~ 4:00. The lights go down. Victor Hale walks out into a single spotlight to a wall of noise.
 victor.h: Good afternoon, CTRL+ALT+CON. This week, you've been connected. Today, I'm going to show you just how connected.
 ~ The screen behind him blooms into a galaxy: four thousand dots, every badge in the building, and lines between them, thick where people stood together for hours, thin where they passed.
 victor.h: This is you. This room. This week. Who you met. Who you trusted. This is LANTERN.
 ~ A gasp. Then a few people laugh, nervously. Then somebody in the third row finds their own dot, a label floating over it, and stops laughing.
 * You can see your dot. And the thick line to Ellie's. And Rin's. And all of them.
+[cut off]
 if !solved('m6')&&!f('mole_fed')
  ~ And then, in the wings, Owen Pryce reaches past the stage manager and pulls a fader down. Your microphone. Marge's microphone. Every microphone except Victor's.
  ~ He knew the plan. He knew all of it.
@@ -5613,6 +5637,7 @@ else
 /* ============ THE NEW WAYS SUNDAY GOES: keynotes, the roof, six more endings ============ */
 SC.key_dump=`
 [bg hallA]
+[cut hallA_podium victor]
 ~ 4:00 PM. Victor walks out into the light. "Privacy is a human right," he says, and the screen behind him turns blue.
 ~ At 4:01, on every phone in the hall, a link. Then on every phone in the country. "LANTERN-01: FOUR DAYS OF CTRL+ALT+CON."
 if met('mira')&&!f('mira_taken')
@@ -5628,6 +5653,7 @@ else
  [call S.f.lantern_dead=1]
 victor.a: That's... that's stolen property. Security! That is stolen...
 ~ Nobody's listening. Two thousand people are reading about themselves.
+[cut off]
 [call S.f.end='dump']
 `;
 SC.key_trojan=`
@@ -5652,12 +5678,14 @@ if clue('termsheet')
 `;
 SC.key_rollback=`
 [bg hallA]
+[cut hallA_stage victor]
 ~ 4:09 PM. "And this," Victor says, "is LANTERN." The graph blooms across the screen: four thousand dots, threads between them, breathing in time with the badges in the room.
 ~ In the NOC, Sunny says "go" into a radio. In the Badge Lab, Tilly presses enter.
 ~ The first row of the hall goes dark. Then rainbow. Then the second row. A wave, staggered, ten seconds front to back, every badge in the building rebooting to honest firmware, one row at a time.
 ~ On the screen behind Victor, the dots go out. Row by row. In the same order. Until there's nothing on the house-sized screen but a slowly turning blue shield and the words NO SIGNAL.
 victor.a: What... Silas? Silas!
 ~ Two thousand people look down at their chests. Four thousand rainbows look back.
+[cut off]
 if met('tilly')
  tilly.h: (in your earpiece, sobbing) They're mine. They're all mine again.
 > That was the demo. It needed your badges to work. It doesn't have them any more.
@@ -14204,7 +14232,8 @@ function render(dt){
  const sp=Math.hypot(WD.vx,WD.vz),bamp=(WD.bobAmp||0)*(sp>6.5?.024:.016)*(SETTINGS.bob===false?0:1),bob=-bamp*(1-Math.cos(WD.bob*2))*.5-(WD.land||0);
  const asp=w/h,vf=clamp(2*Math.atan(Math.tan(.75+WD.fovk*.045)/asp),1.05,1.8);
  cam.fov=vf*180/Math.PI;cam.far=(FAR[WD.reg]||180)+40;cam.updateProjectionMatrix();
- cam.position.set(WD.x,WD.eye+bob,WD.z);cam.rotation.set(WD.pit,WD.yaw,0);zoneCull(WD.reg,WD.x,WD.eye,WD.z);
+ if(WD.cut&&cutOn()){const p=cutCam(cam);zoneCull(WD.reg,p[0],p[1],p[2])}
+ else{cam.position.set(WD.x,WD.eye+bob,WD.z);cam.rotation.set(WD.pit,WD.yaw,0);zoneCull(WD.reg,WD.x,WD.eye,WD.z)}
  G.sky.position.copy(cam.position);const su=G.sky.material.uniforms;su.t.value=performance.now()/1000;
  const tod=todNow();if(tod){su.hz.value.setRGB(...tod.hz);su.zn.value.setRGB(...tod.zn);su.st.value=tod.st}
  else{su.hz.value.copy(G.fog.color);if(R.day){su.zn.value.setRGB(.12,.3,.75);su.st.value=0}else{su.zn.value.setRGB(.012,.012,.05);su.st.value=1}}
@@ -14252,7 +14281,7 @@ function hudMark(id,o,col,h){let el=$(id);if(!el){el=document.createElement('div
  el.querySelector('span').textContent=(Math.abs(dy)>2.6?(dy>0?'▲ ':'▼ '):'')+Math.round(Math.hypot(d,dy))+' m';
 }
 function updSprites(dt){
- const T=G.T,tt=performance.now()/1000,yaw=WD.yaw;
+ const T=G.T,tt=performance.now()/1000,yaw=WD.cut&&cutOn()?WD.cutYaw:WD.yaw;
  G.newsT=(G.newsT||0)-dt;if(G.newsT<=0){G.newsT=.25;G.news=S.ch>0?new Set(newScenes().map(n=>n.id)):new Set()}
  for(const c of WCH){
   const vis=c.reg===WD.reg&&c.when();
@@ -14367,7 +14396,7 @@ function loop(t){
  const live=worldLive();
  if(live)update(dt);
  // behind a conversation the world is blurred: a few frames a second is plenty
- const behind=!live&&($('vn').classList.contains('on')||$('ov').classList.contains('on'));
+ const behind=!live&&!cutOn()&&($('vn').classList.contains('on')||$('ov').classList.contains('on'));
  G.skip=(G.skip||0)+1;
  if(!window.__nr&&(!behind||G.skip%4===0||G.forceFrame)){G.forceFrame=false;render(behind?dt*4:dt)}
  if(live){adaptRes(dt);}
@@ -14829,6 +14858,8 @@ function placeChars(){if(!S)return;const d=S.day,sl=S.slot;
   if(p&&ROM.includes(c.id)&&S.day>=1&&sceneReady(c.id)){const sa=sceneArea(c.id+scn(c.id));if(sa&&AREAS[sa]&&!areaLock(sa))p=[sa,ROM.indexOf(c.id)%3]}
   if(Array.isArray(p)&&typeof p[0]==='string'&&!AREAS[p[0]]&&p.length>=3)p={reg:p[0],x:p[1],z:p[2],y:p[3]||0};
   else if(Array.isArray(p))p=spotIn(p[0],p[1]);
+  // in a cutscene the cast stand on their marks, and nobody else wanders into the shot
+  if(WD.cut){p=WD.cut.cast[c.id]||(WD.reg===WD.cut.C.reg&&p&&p.reg===WD.cut.C.reg&&Math.hypot(p.x-WD.cut.C.at[0],p.z-WD.cut.C.at[2])<40?null:p)}
   if(!p){c.on=false;continue}c.on=true;c.reg=p.reg;c.x=p.x;c.z=p.z;c.y=p.y||0}}
 /* the area a scene opens in: its first [bg ...] */
 const SCAREA={};function sceneArea(id){if(SCAREA[id]!==undefined)return SCAREA[id];const m=SC[id]&&SC[id].match(/^\s*\[bg ([a-z0-9]+)\]/m);return SCAREA[id]=m?bgArea(m[1]):null}
@@ -14928,6 +14959,44 @@ function vfxMake(e){
  return vfxPoints(e.n||40,e.type,e);
 }
 function vfxTick(){if(!G.vfxRoot)return;VFXU.t.value=performance.now()/1000;if(TODU.hz&&S){const P=TODP[clamp(S.slot||0,0,5)];TODU.hz.value.setRGB(...P.hz);TODU.zn.value.setRGB(...P.zn);TODU.st.value=P.st}for(const k in G.vfxRoot)G.vfxRoot[k].visible=k===WD.reg}
+
+/* ============ CUTSCENES ============
+   For a few big moments the camera leaves your eyes and goes to where the action is: the stage, the front row, the
+   roof. The world isn't blurred, the dialogue box sits in the middle without a portrait (you can see who's talking),
+   and the people in the scene stand on their marks. In a script:
+     [cut hallA_stage victor marge]   frame a shot; the names stand on the shot's marks, in order
+     [cut off]                        back to your own eyes
+   A shot ends by itself when its conversation does. Outside the 3D world it does nothing. */
+const SY_A=1.6;
+const CUTS={
+ // Hall A from the middle of the floor seats: the podium, the LED wall behind
+ hallA_stage:{reg:'con',eye:[-5,3.5,-113.5],at:[-5,2.9,-125],marks:[[-5,-126.6,SY_A],[-10,-124,SY_A],[0,-124,SY_A],[4.5,-123.5,SY_A]],drift:.35},
+ // closer on the podium, a little to the side, for the keynote
+ hallA_podium:{reg:'con',eye:[-1.2,3.3,-119.2],at:[-5.4,2.9,-126.4],marks:[[-5,-126.6,SY_A],[-8.6,-125.4,SY_A],[-2,-124.6,SY_A],[-11,-124,SY_A]],drift:.15},
+ // the front row, seen from the stage: someone standing up out of the seats
+ hallA_front:{reg:'con',eye:[-5,3.1,-117],at:[-5,1.3,-108],marks:[[-5,-109.5,0],[-8,-109.5,0],[-2,-109.5,0],[1,-109.5,0]],drift:.2},
+ // the stage from the side wing, for something happening on stage between people
+ hallA_wing:{reg:'con',eye:[-19,3.4,-121.5],at:[-6,2.8,-124.5],marks:[[-6,-127.2,SY_A],[-6.5,-123.2,SY_A],[-9,-125.6,SY_A],[-3.5,-121.2,SY_A]],drift:.2}
+};
+WD.cut=null;
+const cutOn=()=>!!(WD.cut&&document.body.classList.contains('cutscene'));
+function cutSet(a){
+ const was=WD.cut;
+ if(!a||a==='off'){WD.cut=null}
+ else{const p=String(a).trim().split(/\s+/),C=CUTS[p[0]];
+  if(!C||!(S&&S.inWorld&&G.ok)||C.reg!==WD.reg){WD.cut=null}
+  else{const cast={};p.slice(1).forEach((id,i)=>{const m=C.marks[i];if(m&&CH[id])cast[id]={reg:C.reg,x:m[0],z:m[1],y:m[2]}});
+   WD.cut={k:p[0],C,cast,t0:performance.now()}}}
+ if(was||WD.cut){if(typeof placeChars==='function')placeChars();G.forceFrame=true}
+ cutClass();
+}
+/* the cinematic look only while the background really is the world (a black "broadcast" card pauses it) */
+function cutClass(){const on=!!WD.cut&&$('bg').classList.contains('bg-dim')&&$('vn').classList.contains('on');document.body.classList.toggle('cutscene',on);if(on)clearPor()}
+/* the camera for the shot: a slow drift sideways so it's alive, never a still frame */
+function cutCam(cam){const c=WD.cut.C,t=(performance.now()-WD.cut.t0)/1000,d=c.drift||0;
+ const ex=c.eye[0]+Math.sin(t*.12)*d,ey=c.eye[1]+Math.sin(t*.09)*d*.15,ez=c.eye[2]+Math.cos(t*.1)*d*.4;
+ cam.position.set(ex,ey,ez);cam.lookAt(c.at[0],c.at[1],c.at[2]);
+ WD.cutYaw=Math.atan2(-(c.at[0]-ex),-(c.at[2]-ez));return[ex,ey,ez]}
 
 /* ============ PHONE ============ */
 const ICON={

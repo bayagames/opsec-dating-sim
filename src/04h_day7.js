@@ -125,12 +125,14 @@ if S.plan==='inj'
 if f('decoy_plan')&&!f('mira_taken')
  ~ Somewhere on the fourth floor, two of Krall's men are following your badge down a corridor. Mira has it in her pocket, and is walking it very slowly towards the car park.
  [flag rin_safe]
+[cut hallA_podium victor]
 ~ 4:00. The lights go down. Victor Hale walks out into a single spotlight to a wall of noise.
 victor.h: Good afternoon, CTRL+ALT+CON. This week, you've been connected. Today, I'm going to show you just how connected.
 ~ The screen behind him blooms into a galaxy: four thousand dots, every badge in the building, and lines between them, thick where people stood together for hours, thin where they passed.
 victor.h: This is you. This room. This week. Who you met. Who you trusted. This is LANTERN.
 ~ A gasp. Then a few people laugh, nervously. Then somebody in the third row finds their own dot, a label floating over it, and stops laughing.
 * You can see your dot. And the thick line to Ellie's. And Rin's. And all of them.
+[cut off]
 if !solved('m6')&&!f('mole_fed')
  ~ And then, in the wings, Owen Pryce reaches past the stage manager and pulls a fader down. Your microphone. Marge's microphone. Every microphone except Victor's.
  ~ He knew the plan. He knew all of it.

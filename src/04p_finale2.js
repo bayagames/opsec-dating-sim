@@ -1,6 +1,7 @@
 /* ============ THE NEW WAYS SUNDAY GOES: keynotes, the roof, six more endings ============ */
 SC.key_dump=`
 [bg hallA]
+[cut hallA_podium victor]
 ~ 4:00 PM. Victor walks out into the light. "Privacy is a human right," he says, and the screen behind him turns blue.
 ~ At 4:01, on every phone in the hall, a link. Then on every phone in the country. "LANTERN-01: FOUR DAYS OF CTRL+ALT+CON."
 if met('mira')&&!f('mira_taken')
@@ -16,6 +17,7 @@ else
  [call S.f.lantern_dead=1]
 victor.a: That's... that's stolen property. Security! That is stolen...
 ~ Nobody's listening. Two thousand people are reading about themselves.
+[cut off]
 [call S.f.end='dump']
 `;
 SC.key_trojan=`
@@ -40,12 +42,14 @@ if clue('termsheet')
 `;
 SC.key_rollback=`
 [bg hallA]
+[cut hallA_stage victor]
 ~ 4:09 PM. "And this," Victor says, "is LANTERN." The graph blooms across the screen: four thousand dots, threads between them, breathing in time with the badges in the room.
 ~ In the NOC, Sunny says "go" into a radio. In the Badge Lab, Tilly presses enter.
 ~ The first row of the hall goes dark. Then rainbow. Then the second row. A wave, staggered, ten seconds front to back, every badge in the building rebooting to honest firmware, one row at a time.
 ~ On the screen behind Victor, the dots go out. Row by row. In the same order. Until there's nothing on the house-sized screen but a slowly turning blue shield and the words NO SIGNAL.
 victor.a: What... Silas? Silas!
 ~ Two thousand people look down at their chests. Four thousand rainbows look back.
+[cut off]
 if met('tilly')
  tilly.h: (in your earpiece, sobbing) They're mine. They're all mine again.
 > That was the demo. It needed your badges to work. It doesn't have them any more.

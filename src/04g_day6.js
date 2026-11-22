@@ -23,6 +23,7 @@ if f('ctf_team')
  ~ Inside: a single encrypted file. And a key, hidden in the title tile's colour code, the kind of thing Ada sees in four seconds and you'd never see in four years.
  ada.n: It decrypts to... a document. An internal one. From Lumen.
 else
+ [cut hallA_stage ada]
  ~ Up on stage, Ada opens it. On the big screen, because the finals are mirrored for the crowd, the whole of Hall A watches the file decrypt.
 ~ On the big screen: a contract summary. "PROJECT LANTERN · Asset transfer to Corvid Holdings Ltd (for and on behalf of Halberd Strategic Intelligence) · Consideration: £400,000,000 · Signing: Sunday, following keynote · Proof of concept: CTRL+ALT+CON live graph."
 ~ And a second page. A feature list. Halfway down: "SOURCE DETECTION: identifies individuals in regular contact with journalists, lawyers, regulators and NGO staff. Priority: HIGH (buyer requirement)."
@@ -32,6 +33,7 @@ else
 * Every whistleblower who ever met a reporter in a café. Every person in Room 1337 on Thursday night. That's what the con's graph is for. That's what's being sold.
 ~ Hall A goes quiet. Then very loud. Then someone at the back starts booing, and it spreads.
 ~ The screen goes black. Somebody in the AV booth has pulled the feed. Too late. Two thousand phones were already filming.
+[cut off]
 ~ The flag at the bottom of the document: CTRL{l1ght_1s_th3_b3st_d1s1nf3ct4nt}. On the board, the tile shows one solve.
 if f('ctf_team')
  if rank('skill')>=3
