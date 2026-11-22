@@ -239,6 +239,20 @@ whisper: YOU HELPED THE BAKER. THAT WAS KIND. NOW HELP YOURSELF. DON'T INSTALL T
  [fx skill:2]
  ~ You put your badge in the bathroom, on the marble, and close the door. The blue light glows under the gap.
  * It's still talking. It's just talking to the bathroom now.
+* You're still holding the phone. WHISPER is waiting. Somewhere in this building, so is everyone who'd like to know what you do next.
+~ ⚑ This choice will change your week.
+? Write back: "I'm listening."
+ [flag path_whisper]
+ [fx mira:6]
+ whisper: GOOD. TOMORROW AFTERNOON. CHILL-OUT LOUNGE. THIRD BEAN BAG FROM THE LEFT. DON'T BE LATE. I WON'T WAIT.
+ * A dead drop. Tomorrow afternoon. Only tomorrow afternoon.
+? Forward it to Con Ops. This is their job, not yours.
+ [flag path_report]
+ ~ You screenshot it and send it to the Con Ops safety address. A reply arrives in under a minute: "Thanks so much, passing this to the right people. Owen."
+ * The right people. That's reassuring. Probably.
+? Tell nobody. Delete it. Sleep.
+ [flag path_alone]
+ ~ You delete it. You don't sleep. At 2 AM you check, and the message is gone from your trash too, which isn't possible, and you lie awake thinking about who can do that.
 ~ Ten minutes later, the phone buzzes again. This time it's Ellie.
 sms Ellie: ok. so. I closed the bakery tomorrow. I booked a day pass. then I booked a room. I'm coming to your conference. is that weird. don't answer that. I'm bringing pastries
 ? Reply: "Not weird. I'd love that."

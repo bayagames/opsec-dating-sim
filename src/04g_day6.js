@@ -65,6 +65,19 @@ if f('warned_marge')
  * The badges. The badges in the bathtub, beaconing to each other through a door. Someone didn't need to be told. The graph already knew.
 if S.leads.canary||clue('leaktest')
  * Like the time and place you told only Owen. Same trick. Same people turning up.
+if f('informant_real')
+ krall.s: And thank you for the names, by the way. Very thorough. You'd have made a good analyst.
+ * Rin. Priya. Ada. Everyone who sat on your floor on Thursday night. You gave him all of them. He's just told the whole room.
+ [flag leak_you]
+elif f('path_report')
+ * Tuesday. You forwarded WHISPER's message to Con Ops. From that moment, everything you did was interesting to Silas Krall.
+ [flag leak_you]
+elif met('vesper')&&scn('vesper')<3&&!f('vesper_warned')&&!f('vesper_delphine')
+ * Then you remember the Lumen Lounge on Thursday night. Vesper at the bar, after your meeting, asking Bea which room the "hacker party" was in. Smiling. Writing nothing down. She never needs to write anything down.
+ [flag vesper_leaked]
+ [clue vleak]
+else
+ * Owen. It has to be Owen. Somebody in Con Ops reads the running order, and Owen reads everything.
 if f('evidence_safe')||met('priya')
  ~ They won't find anything. Priya made you move everything on Thursday night: the files are on an encrypted drive in Sunny's rack, behind a label that says "SPARE PSU".
  krall.a: ...Nothing. Clean laptop. Clean bag. Very tidy, {h}. Unusually tidy.
@@ -84,7 +97,7 @@ krall.s: You should get a better plant.
 SC.d6_council=`
 [bg library]
 [hide]
-if f('took_offer')
+if f('took_offer')&&!f('turncoat')
  [scene council_sold]
 else
  [scene council]
@@ -120,7 +133,26 @@ if met('ellie')
 ?(met('noor')&&scn('noor')>=3&&(scn('delphine')>=3||solved('m7'))) Injunction. Noor goes to a judge in the morning to stop the launch.
  [call S.plan='inj']
  noor.n: I need a judge, a sworn statement from inside, and three hours. A Sunday judge is a grumpy judge. Grumpy judges read faster.
-?(met('mira')&&scn('mira')>=3&&clue('signkey')) Kill Switch. Mira's way. The update that switches SafeSphere off, on every phone, at once.
+?(f('lantern_dump')) The Dump. Publish everything LANTERN-01 ever heard, at four o'clock, and let the world see what it is.
+ [call S.plan='dump']
+ mira.n: Every dot. Every line. The world finally sees the machine. And the machine's full of people who never agreed to be in it. Including us.
+ if met('priya')||met('ada')
+  > Priya and Ada can strip the names before it goes out. Leave the shape, hide the people.
+  [flag dump_redact]
+?(f('inside_1313')) Trojan Horse. You're on Victor's guest list. Walk on as his proof, and break the demo from inside.
+ [call S.plan='trojan']
+ * The demo is you. So the demo can say whatever you like.
+?(f('rollback_ready')&&met('sunny')&&met('tilly')) Rollback. Sunny and Tilly roll every badge back to honest firmware, live, in the middle of Victor's demo.
+ [call S.plan='rollback']
+ sunny.n: Four thousand badges, staggered over ten seconds. The graph goes dark while he's pointing at it.
+ tilly.h: And every badge in the hall turns rainbow. Mine. In front of everyone.
+?(f('turncoat')) Double-Cross. Walk on as Lumen's Head of Community, smile for Victor, and tell the truth.
+ [call S.plan='doublecross']
+ * He's going to introduce you himself. "Someone who knows this community better than anyone." He's right.
+?(f('informant')&&!f('krall_enemy')) Krall's way. Send him the plan tonight. Be on the right list on Monday.
+ [call S.plan='informant']
+ * Everyone in this room trusts you. That's exactly what makes it valuable.
+?(met('mira')&&scn('mira')>=3&&clue('signkey')&&!f('mira_taken')) Kill Switch. Mira's way. The update that switches SafeSphere off, on every phone, at once.
  [call S.plan='kill']
  mira.n: I didn't come here to be the plan. But here I am. Ten million phones. One signed update. Nobody asked them. That's the bit I can't get past.
 ? Walk away. Take the last train tomorrow. It isn't your fight.
@@ -128,6 +160,10 @@ if met('ellie')
  ~ Nobody says anything. Ellie, if she's here, looks at her tea.
 if S.plan==='walk'
  ~ You get up. You don't look at anyone. The library door closes behind you very quietly.
+elif S.plan==='informant'
+ ~ You nod along to the plan. You let them assign you a job. At 1:14 AM, from the hotel stairwell, you send Silas Krall a photograph of the whiteboard.
+ krall.n: (a reply, in seconds) Thank you. You're on the right list now.
+ [flag sold_council]
 else
  ~ Then the hard part. Who does what.
  if !solved('m6')

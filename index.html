@@ -1422,7 +1422,13 @@ const ENDINFO={
  larp:['Larp Exposed','You went on stage with a bluff. The internet keeps receipts.','bad'],
  opensource:['Open Source','No one person. Everyone, together.','good'],
  notfound:['404: Partner Not Found','You did the right thing. You did it alone.','mixed'],
- lasttrain:['Last Train','You left before the keynote. The train was nearly empty.','bad']
+ lasttrain:['Last Train','You left before the keynote. The train was nearly empty.','bad'],
+ dump:['Data Dump','Everything LANTERN ever heard, in public, at once.','mixed'],
+ trojan:['Trojan Horse','The demo was you. You said something else.','good'],
+ rollback:['Rollback','Four thousand badges turn rainbow in the middle of the demo.','good'],
+ doublecross:['Double-Cross','Victor introduced you himself.','good'],
+ informant:['Informant','You were on the right list. Everyone else was on the other one.','bad'],
+ lastlogin:['Last Login','Krall doesn\'t keep sources. He spends them.','bad']
 };
 const ENDORDER=Object.keys(ENDINFO);
 /* achievements: [name, description, hidden until earned] */
@@ -1468,6 +1474,7 @@ function route(g,o){const req=o.req.map(r=>Object.assign({d:1,a:0},r));ROUTES[g]
 const sceneReq=g=>{const R=ROUTES[g];return R?R.req[scn(g)]:null};
 function sceneWhy(g){const R=ROUTES[g],i=scn(g);if(!R||i>=R.n)return null;const r=R.req[i];
  if(SC[g+i]===undefined)return'their story moves on in the main plot';
+ if(typeof ROUTEBLOCK!=='undefined'&&ROUTEBLOCK[g]){const b=ROUTEBLOCK[g]();if(b)return b}
  {const sa=typeof sceneArea==='function'&&sceneArea(g+i);if(sa&&AREAS[sa]&&typeof areaLock==='function'&&areaLock(sa))return'it happens in the '+AREAS[sa].n+', which isn\'t open yet'}
  if(day()<r.d)return'their story continues on Day '+r.d;
  if(aff(g)<r.a)return'needs ♥ '+r.a+' (you have '+aff(g)+')';
@@ -1500,7 +1507,7 @@ function addSlotLog(t){if(!S||!t)return;S.slog=S.slog||{};const k=S.day+':'+S.sl
 function spend(kind,what){S.acts=(S.acts||0)+1;addSlotLog(what||({hang:'Time with someone',lead:'Worked a lead',talk:'A talk',ctf:'CTF practice',bounty:'Bug bounty',rest:'Rested',wait:'Let it go by'}[kind]||kind));
  if(S.restore&&!S.oc&&S.day>=1){S.oc=1;toast('Overclocked: one more thing this '+SLOTN[S.slot].toLowerCase(),'var(--mint)');save();hub();return}
  nextSlot()}
-function nextSlot(){S.oc=0;S.slot++;if(S.slot>5){endDay();return}tqFlush();save();toast(SLOTN[S.slot],'var(--dim)');if(typeof sfx==='function')sfx('advance');hub()}
+function nextSlot(){S.oc=0;S.slot++;if(S.slot>5){endDay();return}evMissCheck();tqFlush();save();setTimeout(evSoonToast,600);toast(SLOTN[S.slot],'var(--dim)');if(typeof sfx==='function')sfx('advance');hub()}
 function endDay(){
  const d=S.day;S.slot=5;
  const sleep=SC['sleep'+d]!==undefined?scr('sleep'+d):scr('sleep');
@@ -1509,7 +1516,7 @@ function newDay(d){
  if(S.day>=1&&S.exp<=10)ach('lowkey');
  neglectCheck(d);
  S.day=d;S.ch=Math.min(d,4);S.slot=0;S.oc=0;S.exp=S.foot;S.hang={};delete S.failing;
- const wake=S.wakeAt||'room1337';tqFlush();snapDay();save();
+ evMissCheck();const wake=S.wakeAt||'room1337';tqFlush();snapDay();save();setTimeout(evSoonToast,1800);
  const go=()=>{run([{chapter:d},{hide:1}],hub)};
  if(G.ok&&S.inWorld)fadeTp(()=>{teleportArea(wake);S.pos=null;go()});else go();
 }
@@ -2699,6 +2706,20 @@ whisper: YOU HELPED THE BAKER. THAT WAS KIND. NOW HELP YOURSELF. DON'T INSTALL T
  [fx skill:2]
  ~ You put your badge in the bathroom, on the marble, and close the door. The blue light glows under the gap.
  * It's still talking. It's just talking to the bathroom now.
+* You're still holding the phone. WHISPER is waiting. Somewhere in this building, so is everyone who'd like to know what you do next.
+~ ⚑ This choice will change your week.
+? Write back: "I'm listening."
+ [flag path_whisper]
+ [fx mira:6]
+ whisper: GOOD. TOMORROW AFTERNOON. CHILL-OUT LOUNGE. THIRD BEAN BAG FROM THE LEFT. DON'T BE LATE. I WON'T WAIT.
+ * A dead drop. Tomorrow afternoon. Only tomorrow afternoon.
+? Forward it to Con Ops. This is their job, not yours.
+ [flag path_report]
+ ~ You screenshot it and send it to the Con Ops safety address. A reply arrives in under a minute: "Thanks so much, passing this to the right people. Owen."
+ * The right people. That's reassuring. Probably.
+? Tell nobody. Delete it. Sleep.
+ [flag path_alone]
+ ~ You delete it. You don't sleep. At 2 AM you check, and the message is gone from your trash too, which isn't possible, and you lie awake thinking about who can do that.
 ~ Ten minutes later, the phone buzzes again. This time it's Ellie.
 sms Ellie: ok. so. I closed the bakery tomorrow. I booked a day pass. then I booked a room. I'm coming to your conference. is that weird. don't answer that. I'm bringing pastries
 ? Reply: "Not weird. I'd love that."
@@ -2887,6 +2908,29 @@ mira.a: Those are not the same. Do you understand? They are not the same.
  [fx mira:4 skill:1]
  mira.s: I'm a woman on a roof with a laptop. There are six of us in this building at any given moment. It's that kind of week.
  mira.n: But if I were WHISPER, I'd be furious today. Somebody's wearing my face to sell the thing I hate.
+if f('path_report')
+ mira.a: One more thing. You forwarded my message to Owen Pryce. Owen gave it to Silas Krall in four minutes. I know because I was watching Krall's phone.
+ mira.d: I can't talk to someone who hands me to them. Not tonight. Maybe not again.
+ [flag mira_burned]
+ * Owen. Con Ops. "The right people."
+elif f('drop_got')||f('path_whisper')||f('told_mira_copycat')
+ if f('drop_missed')
+  mira.d: You didn't pick up the drop. I waited. I said I wouldn't wait, and I waited anyway. Don't tell anyone that.
+  [fx mira:-4]
+ mira.n: The box is called LANTERN-01. It's in the MDF closet under the con. Everything the badges hear goes into it.
+ mira.n: Thursday night. Two in the morning. I need ten minutes with it, and someone who can get me past the NOC. Someone the cameras already know.
+ ~ ⚑ This choice will change your week.
+ ? "Yes. Thursday night."
+  [flag heist_yes]
+  [fx mira:8]
+  mira.h: Service tunnel. Two AM. Wear something boring.
+ ? "No. We do this the slow way."
+  [flag heist_no]
+  mira.s: The slow way. Fine. It's yours. I'll be up here when it fails.
+ ?(f('informant')) Say yes. Then text Krall.
+  [flag heist_yes betray_mira]
+  mira.h: Service tunnel. Two AM. Wear something boring.
+  * You smile at her. Then, in the stairwell on the way down, you take out your phone.
 mira.n: Come back, if you want. Bring a better question. I'm up here most nights. The wind can't be logged.
 ~ You look down at the con for a moment. When you look back, the air-con unit is empty. Only a folded beer mat left on top of it, with three words written on it in neat pencil.
 ~ "DON'T TRUST BLUE."
@@ -3137,6 +3181,14 @@ wh1sper: HERE IS {H} ON THE ROOF WHERE THE SNIFFER WAS. HERE IS {H} AT THE NETWO
 * Nobody could know where you stood, minute by minute. Except something listening to every badge in the building.
 [clue framepost]
 [fx exp:25 foot:8]
+if f('informant')
+ * Krall promised you'd be on the right list. You are. It's this one.
+ if f('informant_real')
+  * You gave him three days of names. He gave you this. Of course he did. People who build machines to find sources don't keep sources. They spend them.
+ else
+  * You fed him nothing for three days. He noticed. This is what noticing looks like.
+if f('lantern_dump')
+ * The map in WH1SPER's post is LANTERN-01's map. The same one you copied on Thursday night. Badge 1337-0001, the first dot, the decoy. They didn't need to frame you. They'd been drawing you all week.
 ~ Lumen's official account reposts it within four minutes: "We're aware of reports identifying the individual known as WHISPER. Lumen is cooperating fully with venue security. Install SafeSphere: Shield Mode keeps you safe."
 ~ Then the con channels. Then your forum. Then a message from an account you don't know, with your mother's maiden name in it and nothing else.
 if met('priya')
@@ -3319,6 +3371,19 @@ if f('warned_marge')
  * The badges. The badges in the bathtub, beaconing to each other through a door. Someone didn't need to be told. The graph already knew.
 if S.leads.canary||clue('leaktest')
  * Like the time and place you told only Owen. Same trick. Same people turning up.
+if f('informant_real')
+ krall.s: And thank you for the names, by the way. Very thorough. You'd have made a good analyst.
+ * Rin. Priya. Ada. Everyone who sat on your floor on Thursday night. You gave him all of them. He's just told the whole room.
+ [flag leak_you]
+elif f('path_report')
+ * Tuesday. You forwarded WHISPER's message to Con Ops. From that moment, everything you did was interesting to Silas Krall.
+ [flag leak_you]
+elif met('vesper')&&scn('vesper')<3&&!f('vesper_warned')&&!f('vesper_delphine')
+ * Then you remember the Lumen Lounge on Thursday night. Vesper at the bar, after your meeting, asking Bea which room the "hacker party" was in. Smiling. Writing nothing down. She never needs to write anything down.
+ [flag vesper_leaked]
+ [clue vleak]
+else
+ * Owen. It has to be Owen. Somebody in Con Ops reads the running order, and Owen reads everything.
 if f('evidence_safe')||met('priya')
  ~ They won't find anything. Priya made you move everything on Thursday night: the files are on an encrypted drive in Sunny's rack, behind a label that says "SPARE PSU".
  krall.a: ...Nothing. Clean laptop. Clean bag. Very tidy, {h}. Unusually tidy.
@@ -3338,7 +3403,7 @@ krall.s: You should get a better plant.
 SC.d6_council=`
 [bg library]
 [hide]
-if f('took_offer')
+if f('took_offer')&&!f('turncoat')
  [scene council_sold]
 else
  [scene council]
@@ -3374,7 +3439,26 @@ if met('ellie')
 ?(met('noor')&&scn('noor')>=3&&(scn('delphine')>=3||solved('m7'))) Injunction. Noor goes to a judge in the morning to stop the launch.
  [call S.plan='inj']
  noor.n: I need a judge, a sworn statement from inside, and three hours. A Sunday judge is a grumpy judge. Grumpy judges read faster.
-?(met('mira')&&scn('mira')>=3&&clue('signkey')) Kill Switch. Mira's way. The update that switches SafeSphere off, on every phone, at once.
+?(f('lantern_dump')) The Dump. Publish everything LANTERN-01 ever heard, at four o'clock, and let the world see what it is.
+ [call S.plan='dump']
+ mira.n: Every dot. Every line. The world finally sees the machine. And the machine's full of people who never agreed to be in it. Including us.
+ if met('priya')||met('ada')
+  > Priya and Ada can strip the names before it goes out. Leave the shape, hide the people.
+  [flag dump_redact]
+?(f('inside_1313')) Trojan Horse. You're on Victor's guest list. Walk on as his proof, and break the demo from inside.
+ [call S.plan='trojan']
+ * The demo is you. So the demo can say whatever you like.
+?(f('rollback_ready')&&met('sunny')&&met('tilly')) Rollback. Sunny and Tilly roll every badge back to honest firmware, live, in the middle of Victor's demo.
+ [call S.plan='rollback']
+ sunny.n: Four thousand badges, staggered over ten seconds. The graph goes dark while he's pointing at it.
+ tilly.h: And every badge in the hall turns rainbow. Mine. In front of everyone.
+?(f('turncoat')) Double-Cross. Walk on as Lumen's Head of Community, smile for Victor, and tell the truth.
+ [call S.plan='doublecross']
+ * He's going to introduce you himself. "Someone who knows this community better than anyone." He's right.
+?(f('informant')&&!f('krall_enemy')) Krall's way. Send him the plan tonight. Be on the right list on Monday.
+ [call S.plan='informant']
+ * Everyone in this room trusts you. That's exactly what makes it valuable.
+?(met('mira')&&scn('mira')>=3&&clue('signkey')&&!f('mira_taken')) Kill Switch. Mira's way. The update that switches SafeSphere off, on every phone, at once.
  [call S.plan='kill']
  mira.n: I didn't come here to be the plan. But here I am. Ten million phones. One signed update. Nobody asked them. That's the bit I can't get past.
 ? Walk away. Take the last train tomorrow. It isn't your fight.
@@ -3382,6 +3466,10 @@ if met('ellie')
  ~ Nobody says anything. Ellie, if she's here, looks at her tea.
 if S.plan==='walk'
  ~ You get up. You don't look at anyone. The library door closes behind you very quietly.
+elif S.plan==='informant'
+ ~ You nod along to the plan. You let them assign you a job. At 1:14 AM, from the hotel stairwell, you send Silas Krall a photograph of the whiteboard.
+ krall.n: (a reply, in seconds) Thank you. You're on the right list now.
+ [flag sold_council]
 else
  ~ Then the hard part. Who does what.
  if !solved('m6')
@@ -3400,6 +3488,10 @@ SC.d7_positions=`
 [hide]
 if S.plan==='walk'
  [scene end_lasttrain]
+elif S.plan==='informant'
+ [bg hotel]
+ ~ Sunday. Your phone buzzes all morning with messages from people getting into position. You read every one. You forward every one.
+ * Eight in the morning, and you've already done the worst thing you'll ever do. The rest of the day is just waiting to find out what it costs.
 elif S.plan==='soldout'
  [bg lumenlounge]
  ~ Sunday. The Lumen green room, which this morning is the Lumen Lounge with the curtains drawn. Make-up. Coffee. A man with a clipboard who calls you "talent".
@@ -3495,6 +3587,8 @@ if S.plan==='soldout'
  [scene key_sold]
 elif S.plan==='kill'
  [scene key_kill]
+elif ['dump','trojan','rollback','doublecross','informant'].includes(S.plan)
+ [call scr('key_'+S.plan)]
 else
  [scene key_main]
 `;
@@ -3631,6 +3725,12 @@ SC.key_sold=`
 SC.d7_roof=`
 [bg corridor]
 [hide]
+if S.plan==='informant'||f('betray_mira')&&!f('lantern_dead')&&!['trojan','doublecross','rollback'].includes(S.plan)
+ [scene roof_loose]
+else
+ [scene roof_main]
+`;
+SC.roof_main=`
 ~ Evening. The 13th floor. The door at the end of the refurbishment wing, the one that's always shut, is open. Suite 1313. Light, voices, and the smell of very expensive coffee.
 if f('kill_go')||f('injunction_served')||f('blackout')||f('signal')||f('uplink_cut')&&(f('paper_out')||f('buyer_named')||f('delphine_stage')||f('jonah_stage'))
  [call S.f.lantern_dead=1]
@@ -3683,8 +3783,7 @@ else
  [scene end_main]
 `;
 /* who you find at the afterparty, if more than one person's story ended with you */
-function choosePartner(){const L=ROM.filter(loved);if(L.length<=1){S.partner=L[0]||null;return}
- return[N('You look around the ballroom. There\'s someone you want to find first.'),{choice:L.map(g=>({t:CH[g].name,then:()=>{S.partner=g;return[]}}))}]}
+function choosePartner(){const L=ROM.filter(loved).sort((a,b)=>aff(b)-aff(a));S.partner=L[0]||null}
 SC.end_main=`
 [call scr('end_'+S.endK)]
 `;
@@ -3740,7 +3839,8 @@ const ROMEPI={
 };
 function epilogueCast(good){const r=[];const ppl=ROM.filter(g=>met(g)&&scn(g)>=2&&g!==S.partner);for(const g of ppl)r.push(N(FATE[g][good?0:1]));if(f('dave_helped'))r.push(N(good?'Dave deletes the SafeSphere TikTok account live on stream. Two million people watch. His mum calls him "David" again, but nicely.':'Dave quits Lumen on Monday. He doesn\'t post about it. That\'s how you know he means it.'));return r}
 function romanceEpi(){if(!S.partner)return[N(pick(['You don\'t end up with anyone tonight. That\'s all right. You did something that mattered with people who mattered.','At two in the morning you\'re on the hotel steps on your own, with a cold cinnamon knot and a strange, quiet feeling that might be pride.']))];
- return SC['epi_'+S.partner]!==undefined?scr('epi_'+S.partner):[N(ROMEPI[S.partner])]}
+ const L=[S.partner,...ROM.filter(g=>loved(g)&&g!==S.partner)];const out=[];if(L.length>1)out.push(...scr('epi_many'));
+ for(const g of L)out.push(...(SC['epi_'+g]!==undefined?scr('epi_'+g):[N(ROMEPI[g])]));return out}
 SC.end_disclosure=`
 [hide]
 ~ It's on every front page by midnight. Not as WHISPER's stunt, or as a rumour, or as a leak. As a disclosure: careful, dated, verified, handed to the regulator a day before anyone said a word in public.
@@ -4765,6 +4865,19 @@ else
  ~ You sit next to her. She shows you where to put your hands, which keys. You play the bottom two notes over and over while she plays everything else, and it sounds wonderful, and it's mostly her.
 pia.h: Next Thursday you have to come and turn pages. That's the deal. That's the price of the song.
 `;
+/* more than one person's story ended with you: they find out, at the party, all at once */
+SC.epi_many=`
+[bg ballroom]
+~ It happens by the chocolate fountain, which is the worst possible place for it to happen.
+~ {=ROM.filter(loved).map(g=>CH[g].name).join(', ').replace(/, ([^,]*)$/,' and $1')}. All of them. All at once. Looking at you, and then at each other, and then back at you.
+* You knew this was coming. You've known since about Thursday. You'd hoped it would come somewhere quieter.
+? "I should have told you all. I'm sorry. I meant every one of it."
+ ~ A long silence. Then, from somewhere in the middle of them, a laugh. Then another.
+ ~ "Every one of it," somebody repeats. "That's terrible grammar." And somehow that's what breaks it.
+? "Before anyone says anything: I'm getting everyone a drink."
+ ~ You get everyone a drink. It takes three trips. When you get back, they've pulled chairs into a circle and are comparing notes about you, which is much, much worse.
+~ It isn't simple. It isn't going to be simple. But nobody leaves. That's the thing you'll remember: you looked up, braced for the room to empty, and nobody left.
+`;
 
 /* ============ AFTERMATHS (1/2): what happens next, played, for each ending ============
    Each SC.after_<ending> runs at the end of SC.end_<ending>, just before the ending card (hooked in 04n). */
@@ -5228,6 +5341,505 @@ SC.after_harem=`
 `;
 /* hook: every ending plays its aftermath just before the ending card */
 for(const k of Object.keys(ENDINFO)){const e='end_'+k,a='after_'+k;if(SC[e]!==undefined&&SC[a]!==undefined&&!SC[e].includes('[scene '+a+']'))SC[e]=SC[e].replace('[end '+k+']','[scene '+a+']\n[end '+k+']')}
+
+/* ============ THE WEEK BRANCHES ============
+   Five big decisions change which beats you get, not just a flag at the end:
+   A. Day 2, late: WHISPER's message. Answer her (path_whisper), hand it to Con Ops (path_report), or keep it to
+      yourself (path_alone). Reporting it puts you in front of Silas Krall on Day 3; answering it gets you a dead drop
+      and Mira's trust.
+   B. Day 3, the roof: Mira asks you to get her into LANTERN-01 on Thursday night. Yes, no, or (if you're Krall's
+      informant) yes and then tell Krall.
+   C. Who leaked Room 1337: Owen, or Vesper (if you never won her over), or you (if you reported, or informed).
+   D. Day 5, Victor's offer: refuse, fake it (and get inside Suite 1313 on Saturday), or take it (and get one chance
+      to turn back, if anyone you love comes to find you).
+   E. Day 6, the plan: the old five, plus the ones your week opened: the Dump, the Trojan Horse, the Rollback,
+      the Double-Cross, and Krall's way.
+   Routes open whole paths: Sunny and Tilly's rollback, Petra and Astrid's van, Fern's chute, Kit's camera,
+   Juno's audience, Vesper's warning. And whoever you love comes with you into the ending, if you live. */
+
+/* ---- the calendar's branches ---- */
+DAYS[3][3]=()=>f('path_report')?'d3_krall':null;
+DAYS[4][5]=()=>f('heist_yes')?'d4_heist':null;
+DAYS[6][2]=()=>f('fake_accept')?'d6_inside':f('took_offer')?'d6_lumen':null;
+beat('d3_krall',{t:'Silas Krall would like a word: the 13th floor corridor',w:'corridor',sc:'d3_krall'});
+beat('d4_heist',{adv:1,t:'Meet Mira: the service tunnel, under the con',w:'tunnel',ws:['tunnel','plant','noc','mdf','tunnelN'],sc:'d4_heist'});
+beat('d6_inside',{t:'Your new Lumen lanyard opens Suite 1313: the 13th floor',w:'corridor',sc:'d6_inside'});
+beat('d6_lumen',{t:'Victor wants his new Head of Community at the Lumen booth: the Foyer',w:'foyer',sc:'d6_lumen'});
+
+/* ---- time-limited: miss them and they're gone ---- */
+event('drop',{d:3,s:2,w:'lounge',n:'⏳ WHISPER\'s dead drop (this afternoon only)',when:()=>f('path_whisper'),miss:'drop_missed',sc:'ev_drop'});
+event('amends',{d:4,s:3,w:'roof',ws:['roof','plantdeck'],n:'⏳ Mira is on the roof. One chance to make it right',when:()=>f('mira_burned')&&!f('informant'),miss:'mira_gone',sc:'ev_amends'});
+event('vsorry',{d:6,s:5,w:'lumenlounge',n:'⏳ Vesper is waiting at the piano',when:()=>f('vesper_leaked'),miss:'vesper_gone',sc:'ev_vsorry'});
+event('jonahwin',{d:5,s:4,w:'station',n:'⏳ Thursday came early: a man in a hood at Central Station',when:()=>met('pia')&&scn('pia')>=3&&!f('jonah_met'),miss:'jonah_late',sc:'ev_jonahwin'});
+/* missed ones leave their mark */
+function evMissCheck(){if(!S)return;for(const e of Object.values(EVENTS)){if(!e.miss||S.f[e.miss]||(S.evs&&S.evs[e.id]))continue;if((S.day>e.d||S.day===e.d&&S.slot>e.s)&&(!e.when||e.when()))S.f[e.miss]=1}}
+function evSoonToast(){if(!S||!S.unl.phone)return;for(const e of eventsNow())if(e.miss)toast('Only now: '+e.n.replace('⏳ ',''),'var(--butter)')}
+
+SC.d3_krall=`
+[bg corridor]
+[hide]
+~ The 13th floor corridor. A man in a grey suit is waiting outside Suite 1313 as if he's been standing there all day. Perhaps he has.
+krall.n: {h}. Silas Krall, Trust and Safety, Lumen. Thank you for reporting the message. Most people don't. Most people reply.
+* Owen Pryce took your screenshot to Krall in, you'd guess, about four minutes.
+krall.n: WHISPER is a criminal. She's hurt people. She'll hurt more. And she's chosen you. That makes you valuable. To her, and to us.
+krall.s: I'd like you to be our community liaison for the rest of the week. Informal. Tell me who she talks to. Where she goes. In return, you're protected. Whatever happens on Sunday, your name is on the right list.
+* The right list. He means the graph.
+~ ⚑ This choice will change your week.
+? "I'll do it." (And mean it.)
+ [flag informant informant_real]
+ krall.h: Excellent. A number. Text it anything. Day or night.
+ * You've just become a source. For the man who builds machines to find sources.
+? "I'll do it." (And feed him nothing.)
+ [flag informant]
+ krall.h: Excellent. A number. Text it anything. Day or night.
+ * A double game. On the thirteenth floor. With a man who used to do this for a government.
+ [fx skill:3]
+? "No."
+ [flag krall_enemy]
+ [fx exp:10]
+ krall.n: That's a pity. Lists are very hard to get off, once you're on them.
+ ~ He holds the door of the service lift for you, politely, all the way down.
+[sum Silas Krall offered to make you Lumen's "community liaison". An informant, in other words.]
+`;
+SC.ev_drop=`
+[bg lounge]
+~ The Chill-out Lounge. Third bean bag from the left, exactly as the message said. Under it, taped flat: a padded envelope, and inside it, a phone with no SIM and a USB stick.
+~ On the phone, one note: "THE BLUE LIGHTS GO TO A BOX. THE BOX HAS A NAME. COME TO THE ROOF TONIGHT AND I'LL TELL YOU IT. BURN THIS PHONE."
+[clue dropmap]
+[flag drop_got]
+[fx mira:8 skill:2]
+* She trusted you with a physical object. In a building where everything is watched, that's practically a love letter.
+`;
+SC.ev_amends=`
+[bg plantdeck]
+~ The roof. Mira's on the air-con unit, packing. The antenna's already in the bag.
+mira.n: You sent my message to Owen Pryce. He gave it to Krall in four minutes. I've had men in grey suits on every floor since.
+? "I thought I was doing the right thing. I was wrong."
+ mira.d: ...Most people don't say "wrong". They say "complicated".
+ [flag mira_amends]
+ [fx mira:6]
+? "I didn't know Owen was theirs. Nobody did."
+ mira.a: I did. That's the point. You asked the wrong person because you didn't know who the right one was.
+ > Then tell me.
+ mira.o: ...Fine. Start with me.
+ [flag mira_amends]
+ [fx mira:4]
+mira.n: I'm staying. For now. Don't make me regret it.
+`;
+SC.ev_vsorry=`
+[bg lumenlounge]
+~ The Lumen Lounge, empty. Vesper at the piano, not playing.
+vesper.n: It was me. Thursday. I reported your meeting to Halberd. Halberd told Lumen. That's how Krall knew who was in your room.
+vesper.d: I did it on Thursday because on Thursday I didn't know you yet. I'm telling you on Saturday because now I do.
+? "Why tell me now?"
+ vesper.n: Because tomorrow you're going to stand in front of everyone, and you should know exactly who's standing behind you. I'd like it to be me. I'll understand if it isn't.
+? "Get out."
+ [flag vesper_cut]
+ vesper.o: ...Yes. That's fair. Goodbye, darling.
+ ~ She leaves the lid of the piano open. Nobody plays it again all night.
+? "Then stand behind me tomorrow. Properly."
+ [flag vesper_forgiven]
+ [fx vesper:10]
+ vesper.b: Properly. No earpiece. No report. All right. I'll learn how.
+`;
+SC.ev_jonahwin=`
+[bg station]
+~ Central Station, night. Pia's not playing. She's standing by the piano, and next to her, hood up, is a man who looks like her with less sleep.
+pia.d: He came early. He never comes early.
+jonah.n: Because the thing I've been waiting a year for is happening on Sunday, and my sister says you're the person to talk to.
+jonah.d: There's something you need to know first. Before you trust me. LANTERN's core, the graph engine. I wrote it. At Lumen. Three years ago. I thought it was for fraud detection.
+* The missing man, the smeared researcher, the victim. He built it.
+jonah.n: When I saw what Victor wanted it for, I tried to take it back. That's when Pike wrote the report. I'm not a hero. I'm the man who made the gun and then ran.
+? "Then come back and help us take it apart."
+ jonah.o: ...You still want me? Knowing that?
+ > Especially knowing that. You know where its weak spots are.
+ [flag jonah_met jonah_ready]
+ [fx pia:8]
+? "Why should anyone believe you now?"
+ jonah.d: They shouldn't, on my word. That's why I kept everything. Every commit. Every email. Every date.
+ [flag jonah_met]
+ [clue jonahcode]
+[sum At Central Station, Jonah Reyes came early, and told you he built LANTERN's core before he ran.]
+`;
+SC.d4_heist=`
+[bg tunnel]
+[hide]
+~ The service tunnel, 2 AM. Orange lights every twelve metres. Somewhere above you, four thousand people asleep with their badges on the bedside table, breathing blue.
+if f('fern_mira')
+ ~ Mira comes down the laundry chute feet first, lands on a cage of towels, and stands up as if she does this every night. Fern was right about the chute.
+else
+ ~ Mira's already there, sitting on a pipe, in a hi-vis vest that says HALCYON MAINTENANCE that she has absolutely stolen.
+mira.n: Ten minutes in the MDF. Copy the logs off LANTERN-01, everything it's ever heard. Then we're gone.
+if f('betray_mira')
+ ~ You walk with her to the end of the tunnel. You know what's waiting there. You texted the number at midnight.
+ ~ The MDF door is open. Krall is inside, with two men, and a cable already pulled out of LANTERN-01 so it can't be touched.
+ krall.n: Good evening, Mira. It's been a long time. You used to work on my floor.
+ mira.o: ...
+ ~ She doesn't run. She looks at you. Just once. Then she holds her wrists out to the men in grey, as if she always knew it would end like this, with someone she trusted.
+ mira.d: Don't trust blue. I should have listened to myself.
+ [flag mira_taken]
+ [fx mira:-60 exp:-20]
+ * Krall nods at you on his way out. A colleague's nod.
+ [sum You took Mira to the MDF. Krall was waiting. You had told him.]
+else
+ ~ The MDF. LANTERN-01 hums in the rack, a box with no asset tag and a label in someone's neat handwriting.
+ if f('flood_traced')||scn('sunny')>=2
+  ~ Sunny's left the closet door on the latch for you. A sticky note on the frame: "you were never here. -S"
+ else
+  ~ The closet's locked. Mira picks it in eleven seconds, which she'd like you to notice.
+ mira.n: Copy, don't pull. If we pull it, they know. If we copy it, they don't know for days.
+ [game pipe n=2 hard=1 title="Copy LANTERN-01's logs before the alert lands"]
+ ~ It works. A progress bar. Four days of everyone at the con, who stood next to whom, for how long, and where. Ninety seconds. Done.
+ [flag lantern_dump]
+ [clue lanterndump]
+ ~ And then you read the first line of the log, because you can't help it. The first node LANTERN ever tracked at this con. Day 1, 18:02. Badge 1337-0001.
+ * Yours.
+ mira.d: ...I know. I should have told you.
+ mira.n: LANTERN flagged you on the first night, because WHISPER had messaged you before the con. My message. I didn't know it would do that. When I found out, I kept messaging you. I needed someone the graph was watching, so it would stop watching me.
+ * WHISPER used you as a decoy. All week.
+ ~ ⚑ This choice will change your week.
+ ? "You used me."
+  mira.o: Yes. And then I got to know you, and I couldn't stop. That's worse, isn't it.
+  [flag mira_used]
+  [fx mira:-8]
+  > It is. We're going to finish this anyway. And then we're going to talk.
+ ? "I'd have done the same."
+  mira.s: No you wouldn't. You'd have asked first. That's why I like you.
+  [fx mira:6]
+ ? "Then let's give the graph something to watch."
+  mira.h: ...Oh. Oh, I like that. A decoy that knows it's a decoy is just a trap.
+  [flag decoy_plan]
+  [fx mira:8 skill:3]
+ if !f('flood_traced')&&scn('sunny')<2
+  ~ On the way out, a torch in the tunnel. Sunny, in her pyjamas, with her radio.
+  sunny.a: Somebody just copied four days of traffic off a box I'm not allowed to touch. Was it you?
+  if met('sunny')
+   ? Tell her the truth
+    sunny.d: ...I should report this. I'm going to pretend I didn't see you. Don't make me regret it.
+    [fx sunny:-4]
+   ? Lie
+    sunny.n: Okay. Then I'll log it as a fault. And I'll remember I asked.
+    [flag sunny_burned]
+    [fx sunny:-10 exp:10]
+  else
+   ~ She doesn't know you. She writes down your badge number. Mira pulls you into the dark before she can read it twice.
+   [fx exp:12]
+ [sum Under the con at 2 AM, you and Mira copied everything LANTERN-01 had heard. The first badge it ever tracked was yours. WHISPER had used you as a decoy.]
+`;
+SC.d6_inside=`
+[bg corridor]
+[hide]
+~ The 13th floor. The lanyard Victor gave you at dinner is grey, not red, and it says GUEST · LUMEN in very small letters. The man outside 1313 reads it, and steps aside.
+[bg hotel]
+~ Suite 1313. A rack of grey cases in the bedroom: LANTERN-02, the live copy, the one they'll demonstrate tomorrow. On the coffee table, a leather folder. A term sheet. £400,000,000. Corvid Holdings.
+victor.h: There they are. My Head of Community. Coffee? It's always excellent. Silas, show them the graph.
+~ Krall turns a screen. The con, as a web. Thousands of dots. One, in the middle, labelled with your badge number.
+krall.n: That's you. You've met everyone. You're the most connected person at CTRL+ALT+CON. That's why Victor wants you. You're the proof that it works.
+* You're the demo. Tomorrow, at four, Victor is going to show four hundred million pounds' worth of buyer your whole week.
+~ Victor's phone rings. He steps out. Krall goes to the window to take a call of his own. For ninety seconds, nobody's looking at the folder.
+? Photograph the term sheet
+ [flag inside_1313]
+ [clue termsheet]
+ [fx skill:3 exp:6]
+ ~ Six pages. Six photos. The phone goes back in your pocket as Victor walks back in.
+? Look at LANTERN-02's rack: where's the off switch?
+ [flag inside_1313 rack_known]
+ [clue lantern02]
+ [fx skill:4 exp:6]
+ ~ Two power supplies. A management port. A label: "DEMO 16:00 · DO NOT REBOOT". So that's when it's most fragile.
+krall.n: (without turning round) Victor tells me you're going to say a few words tomorrow. About how SafeSphere made you feel safe.
+krall.s: I'll be watching the graph while you do.
+* Two men in this room are planning to sell each other out tomorrow. You can see it in how they stand. Victor has a folder with Krall's name on the cover. Krall has a phone he never lets Victor see.
+[clue sellout]
+[sum Your fake "yes" to Victor got you into Suite 1313. LANTERN-02 is in the bedroom. The demo, tomorrow at four, is you.]
+`;
+SC.d6_lumen=`
+[bg foyer]
+[hide]
+~ The Lumen booth. A new lanyard, blue. HEAD OF COMMUNITY in silver. Victor's people have printed your face on a standee. It's a good photo. You don't remember them taking it.
+~ People walk past. Some of them you know. They don't stop.
+if romCount()>0||ROM.some(g=>dating(g))
+ [call S.f.turn_who=ROM.filter(g=>loved(g)||dating(g)).sort((a,b)=>aff(b)-aff(a))[0]]
+ ~ Then someone does stop. {=CH[S.f.turn_who].name}. In front of the standee. Not looking at it. Looking at you.
+ [call S.f.turn_line=1]
+ if S.f.turn_who==='ellie'
+  ellie.d: I took the sign out of the window today. "We do things properly here." I couldn't look at it. Is this properly? Is this you?
+ elif S.f.turn_who==='rin'
+  rin.d: I saw your face on a standee and I had to sit down. On the floor. In the Foyer. People stepped over me.
+ else
+  ~ They don't say anything for a long time. Then: "I didn't fall for this person." And they wait.
+ ~ ⚑ This choice will change your week.
+ ? "I haven't signed anything real. I can still turn."
+  [flag turncoat]
+  [fx exp:8]
+  ~ You take the lanyard off. You don't throw it away. You put it in your pocket. It opens doors.
+  * Tomorrow, Victor's Head of Community walks on stage. He has no idea which side she's on.
+ ? "It's a lot of money."
+  ~ They nod, slowly, like they're memorising your face. Then they walk away, and they don't look back.
+  [call S.aff[S.f.turn_who]=Math.max(0,S.aff[S.f.turn_who]-40)]
+else
+ ~ Nobody stops. Nobody at all.
+ * Of course not. You made sure of that.
+[sum Saturday on the Lumen booth, as Head of Community.]
+`;
+
+/* ============ THE NEW WAYS SUNDAY GOES: keynotes, the roof, six more endings ============ */
+SC.key_dump=`
+[bg hallA]
+~ 4:00 PM. Victor walks out into the light. "Privacy is a human right," he says, and the screen behind him turns blue.
+~ At 4:01, on every phone in the hall, a link. Then on every phone in the country. "LANTERN-01: FOUR DAYS OF CTRL+ALT+CON."
+if met('mira')&&!f('mira_taken')
+ ~ Mira's on the roof with a laptop and a satellite modem. She doesn't look at the hall. She looks at the upload bar.
+if f('dump_redact')
+ ~ Priya and Ada worked through the night. No names. No badge numbers. Just the shape: four thousand dots, every meeting, every minute, and the box that was watching them all. The machine, in public, with the people taken out.
+ ~ It's still enough. Journalists find the dot that met a regulator twice. Lawyers find the cluster around the press room. Nobody needs names to see what it was for.
+ [call S.f.lantern_dead=1]
+else
+ ~ All of it. Raw. Four thousand badges with four thousand names. Who met whom, for how long, where. Affairs. Sources. A regulator's lunch. A teenager who spent four hours in the Quiet Room crying.
+ ~ It kills LANTERN in one afternoon: nobody will buy a machine whose whole output is now public. It also does to four thousand people exactly what LANTERN was built to do.
+ [flag dump_raw]
+ [call S.f.lantern_dead=1]
+victor.a: That's... that's stolen property. Security! That is stolen...
+~ Nobody's listening. Two thousand people are reading about themselves.
+[call S.f.end='dump']
+`;
+SC.key_trojan=`
+[bg hallA]
+~ 4:11 PM. "And here's someone who knows this community better than anyone." Victor turns to the wings. To you.
+~ You walk out in a grey GUEST lanyard into a light so bright the hall disappears. The screen shows the graph. One dot, enormous, in the middle, pulsing. You.
+victor.h: Tell them how SafeSphere made you feel.
+> It made me the most watched person in this building.
+~ You take the clicker out of his hand. It's very easy. Nobody expects the demo to move.
+> Monday, 18:02, Badge 1337-0001. That's me. Tuesday, Hall C, forty minutes next to a student. Wednesday, the roof, a woman nobody's supposed to know about. Thursday, Room 1337, twelve people. That's my week. LANTERN has everyone's.
+~ Two thousand people look down at the badges on their chests.
+if f('rack_known')
+ > And at 16:00, this demo was running on a box upstairs with a label that says "do not reboot".
+ ~ Upstairs, Petra or Sunny or whoever you trusted pulls two power cables. The graph on the house-sized screen freezes with your dot in the middle, then goes black.
+ [flag uplink_cut]
+if clue('termsheet')
+ > And this is the contract. Four hundred million pounds. Corvid Holdings. Here's the page with the price.
+ [flag buyer_named]
+[call S.f.lantern_dead=1]
+[call S.f.end='trojan']
+~ Victor doesn't try to take the clicker back. He just stands in the light, as if he's waiting for someone to tell him what his face should do.
+`;
+SC.key_rollback=`
+[bg hallA]
+~ 4:09 PM. "And this," Victor says, "is LANTERN." The graph blooms across the screen: four thousand dots, threads between them, breathing in time with the badges in the room.
+~ In the NOC, Sunny says "go" into a radio. In the Badge Lab, Tilly presses enter.
+~ The first row of the hall goes dark. Then rainbow. Then the second row. A wave, staggered, ten seconds front to back, every badge in the building rebooting to honest firmware, one row at a time.
+~ On the screen behind Victor, the dots go out. Row by row. In the same order. Until there's nothing on the house-sized screen but a slowly turning blue shield and the words NO SIGNAL.
+victor.a: What... Silas? Silas!
+~ Two thousand people look down at their chests. Four thousand rainbows look back.
+if met('tilly')
+ tilly.h: (in your earpiece, sobbing) They're mine. They're all mine again.
+> That was the demo. It needed your badges to work. It doesn't have them any more.
+[flag uplink_cut]
+[call S.f.lantern_dead=1]
+[call S.f.end='rollback']
+`;
+SC.key_doublecross=`
+[bg hallA]
+~ 4:11 PM. "Someone who knows this community better than anyone." Victor puts his hand on your shoulder like a father at a wedding.
+~ You're wearing the blue HEAD OF COMMUNITY lanyard. Your face is on the standee in the Foyer. Delphine's card is in your pocket: "I was sceptical. Then I saw what LANTERN can do for us."
+if met('delphine')&&scn('delphine')>=2
+ ~ In the wings, Delphine catches your eye, and slides a different card across the floor with her foot. It's in her handwriting. It's just one word long.
+ * "Everything."
+> I was sceptical. Then I saw what LANTERN can do. For them.
+~ You point at Victor. And then you tell the hall what you saw from inside: the standee, the steak, the job offer, the term sheet, the box upstairs, the graph with your face in the middle.
+~ Victor laughs for the first ten seconds, because he thinks it's a bit. Then he stops.
+victor.d: ...You were never going to take it.
+> I took it. I just took it somewhere else.
+[flag buyer_named paper_out]
+[call S.f.lantern_dead=1]
+[call S.f.end='doublecross']
+`;
+SC.key_informant=`
+[bg lumenlounge]
+~ 4:00 PM. You watch the keynote from Suite 1313, on a screen, next to Silas Krall, with a coffee you didn't ask for.
+~ Your friends move into position on the graph exactly where you told him they would be. The AV booth. The basement. The wings. One by one, a man in a grey suit arrives beside each dot, and the dot stops moving.
+krall.n: You see? Nobody gets hurt. They just get... stopped. Before they do something they'll regret.
+~ Victor finishes his keynote to a standing ovation. The demo is flawless. Mr Ashgrove, on the sofa, nods once.
+* You did this. Every dot that stopped, you put there.
+[call S.f.end='informant']
+`;
+SC.roof_loose=`
+[bg plantdeck]
+~ Evening. Krall asks you to come up to the roof "to talk about next steps". The wind's strong. The rig Mira used to sit beside is gone.
+krall.n: You've been very useful. That's the problem with useful people. Afterwards they know exactly how useful they were. And to whom.
+~ The man who came up with him walks to the edge of the plant deck and waits. Not looking at you. Looking at the drop.
+krall.s: People fall off roofs at conventions, {h}. They drink, they climb, they want a photo of the city. It's very sad. I'll write something kind.
+if romCount()>0
+ [call S.f.saver=ROM.filter(loved).sort((a,b)=>aff(b)-aff(a))[0]]
+ ~ The stairwell door bangs open.
+ ~ {=CH[S.f.saver].name}. Out of breath. Furious. And behind them, two police officers who look like they took the stairs at a run because somebody wouldn't stop shouting at them.
+ if S.f.saver==='bea'
+  bea.a: I watched him walk you up here. I've watched men walk people places for six years. Not tonight.
+ elif S.f.saver==='nyx'
+  nyx.a: Fire door alarm. I disabled it last Tuesday. I enabled it again five minutes ago. They're coming.
+ elif S.f.saver==='ellie'
+  ellie.a: I don't care what you did. I DON'T CARE. You come here. NOW.
+ elif S.f.saver==='mira'
+  mira.a: You thought I wouldn't watch this roof? This is MY roof.
+ else
+  ~ They don't say anything. They just walk straight past Krall's man and take your hand, and hold on to it, and don't let go.
+ ~ Krall looks at the police. Then at the person holding your hand. Then he smiles, very slightly, the way people smile at a game they've lost.
+ krall.n: Love. I never could model it.
+ * You did the worst thing you've ever done this week. Somebody still came up the stairs for you.
+ [call S.f.end='informant']
+else
+ ~ Nobody comes up the stairs.
+ ~ You think about Ellie. About cinnamon knots. About a forum post you wrote at fourteen, and the only reply it ever got.
+ [call (S.f.end='lastlogin',S.endK='lastlogin')]
+ [scene end_lastlogin]
+`;
+SC.end_dump=`
+[hide]
+if f('dump_raw')
+ ~ LANTERN dies that afternoon. Nobody will pay four hundred million pounds for a machine whose output is on every phone in the country.
+ ~ By Monday there are three divorces, two resignations, one journalist's source in hiding, and a teenager's afternoon in the Quiet Room trending under a hashtag.
+ * You killed the machine by doing exactly what it does. It worked. You'll be thinking about the Quiet Room for a long time.
+ [call epilogueCast(0)]
+else
+ ~ LANTERN dies that afternoon. The redacted graph is the most-shared image of the year: four thousand anonymous dots, and one box in a basement watching all of them.
+ ~ The regulator calls it "the clearest evidence of covert surveillance we have ever been handed". Lumen calls it theft. Nobody's listening to Lumen any more.
+ [call epilogueCast(1)]
+[call romanceEpi()]
+[end dump]
+`;
+SC.end_trojan=`
+[hide]
+~ "THE DEMO WAS ME." Your face, on stage, under a house-sized graph with your dot in the middle, is the photo every paper runs on Monday.
+~ Halberd walks. Corvid Holdings dissolves itself by Wednesday. Victor is filmed leaving the Halcyon by the kitchen door with a coat over his head, which is a very old trick and nobody falls for it.
+[call epilogueCast(1)]
+[call romanceEpi()]
+~ Marge finds you after. She takes the grey GUEST lanyard off your neck, looks at it, and puts it in her pocket. "For the museum," she says.
+[end trojan]
+`;
+SC.end_rollback=`
+[hide]
+~ Four thousand rainbows in one dark hall. The clip is everywhere by five o'clock: a wave of colour running back through two thousand people, row by row, and a CEO pointing at an empty screen.
+~ Without the badges, the proof of concept never existed. Halberd's man leaves before the applause stops. Tilly's firmware goes up on the internet that night, open source, with a note on the first line: "made with love and solder, and nobody else's code".
+[call epilogueCast(1)]
+[call romanceEpi()]
+~ Sunny falls asleep in the NOC at 7 PM with her radio on her chest. Somebody puts a blanket on her. It might be Priya. It might be you.
+[end rollback]
+`;
+SC.end_doublecross=`
+[hide]
+~ "LUMEN'S OWN HEAD OF COMMUNITY: 'I WAS INSIDE.'" The clip of Victor's hand on your shoulder, smiling, while you tell two thousand people what his company is, is played on every news channel for a week.
+~ Your Lumen contract has a clause about "conduct". Your lawyer, if it's Noor, laughs at it for a full minute. Lumen never tries to enforce it.
+[call epilogueCast(1)]
+[call romanceEpi()]
+~ The standee with your face on it ends up in Ellie's bakery, wearing a paper crown. She won't say who put it there.
+[end doublecross]
+`;
+SC.end_informant=`
+[hide]
+~ LANTERN ships on Monday. Your name is not on any list. Your name is on a very short list, kept by a man who has since left Lumen for a firm with no name on the door.
+~ Rin isn't arrested. Nobody is. They just... stop. Rin's report disappears from the internet. Priya's job offer is withdrawn. Ada's university receives a letter. Room 1337 never meets again.
+if f('saver')
+ ~ {=CH[S.f.saver].name} stays. You don't know why. You ask, once, and they say "because somebody has to stand next to you while you fix it", and you spend the next year trying.
+ [call romanceEpi()]
+else
+ [call epilogueCast(0)]
+* You were on the right list. It turns out to be a very lonely one.
+[end informant]
+`;
+SC.end_lastlogin=`
+[bg bakery]
+[hide]
+~ The news says a conference-goer fell from the roof of the Halcyon on Sunday evening. Alcohol is mentioned. A photo of the city is mentioned. Silas Krall's statement is very kind.
+~ On Tuesday morning, at six, Proof opens. Ellie bakes forty-one cinnamon knots, puts them in forty-one paper bags, and draws a tiny croissant on every one.
+~ She doesn't sell any of them. She stands at the window with the sign that says WE DO THINGS PROPERLY HERE, and she waits for someone who isn't coming.
+if met('mira')&&!f('mira_taken')
+ ~ That night, every phone in the city with SafeSphere on it shows the same notification, once, for one second, from an app that's about to stop working forever: "{H} WASN'T AN ACCIDENT."
+* Krall doesn't keep sources. He spends them.
+[end lastlogin]
+`;
+SC.after_dump=`
+[bg office]
+~ TWO MONTHS LATER.
+if f('dump_raw')
+ ~ A woman from the Quiet Room finds you. She's nineteen. Her afternoon is still the top result for her name.
+ "The girl from the Quiet Room": You didn't mean it. I know you didn't. I just wanted you to see me. Once.
+ ? "I'm sorry. Let me help you get it taken down."
+  [flag aft_help]
+  ~ It takes Noor four months and eleven letters. It comes down. It never fully goes away.
+ ? "I'm sorry." Nothing else. There isn't anything else.
+  ~ She nods, and goes. You think about her every time someone says "transparency".
+else
+ ~ The redacted graph is in a textbook now. Chapter nine, "Covert surveillance at scale". Priya sends you a photo of the page with your redaction notes visible in the margin.
+ priya.n: The shape without the people. That's how you show a machine without becoming it.
+[sum Aftermath: two months after the Dump.]
+`;
+SC.after_trojan=`
+[bg hallA]
+~ ONE YEAR LATER. CTRL+ALT+CON, TWENTY-FIRST YEAR.
+~ Marge has put the grey GUEST lanyard in a glass case in the Foyer, next to a plaque. You walk past it eleven times before you can bring yourself to read it.
+~ "Badge 1337-0001. The most watched person at CTRL+ALT+CON 20. They used it."
+? Stand next to it for a photo
+ ~ Rin takes it. In the photo, you're laughing, because Rin is doing a face.
+? Walk on. Go to a talk. Be nobody for a day.
+ ~ You sit at the back of Hall C for a beginners' CTF. Nobody looks at you twice. It's wonderful.
+[sum Aftermath: a year later, your lanyard is in a glass case in the Foyer.]
+`;
+SC.after_rollback=`
+[bg badgelab]
+~ SIX MONTHS LATER.
+~ Tilly's firmware has eight hundred contributors. Badges at other cons run it now. On the back of every one, in tiny writing, there's a line you've never seen anyone notice except you.
+tilly.h: Read it. Out loud.
+> "For the people who read the back."
+tilly.b: There are thousands of you now. I put it there so you'd find each other.
+[sum Aftermath: Tilly's firmware runs on badges all over the world.]
+`;
+SC.after_doublecross=`
+[bg bakery]
+~ THREE MONTHS LATER.
+~ Victor Hale writes you a letter from his lawyer's office. It's two pages long. It's mostly about loyalty. At the bottom, in his own handwriting: "I did think you were very good at it."
+? Frame it
+ ~ It goes up in Proof's back room, next to the standee in the paper crown.
+? Burn it
+ ~ Ellie lets you do it in the bread oven. "It's a good oven," she says. "It's seen worse."
+[sum Aftermath: Victor wrote you a letter.]
+`;
+SC.after_informant=`
+[bg flat]
+~ ONE YEAR LATER.
+~ You've written to every person whose dot stopped moving that Sunday. Most don't answer. Rin answers, after nine months, with one line: "What do you want me to do with this?"
+? "Nothing. I just wanted you to know I know."
+ rin.d: (a week later) ...ok. I'm still angry. I'll be angry for a while. But I read it.
+? "Let me fix what I can."
+ [flag aft_fix]
+ rin.n: (a month later) There's a list. Everyone they stopped. Start at the top.
+[sum Aftermath: a year of letters to the people you sold.]
+`;
+SC.after_lastlogin=`
+[bg station]
+~ ONE YEAR LATER.
+~ Central Station, a Thursday. Pia plays a song she's never played before, to a concourse that doesn't stop. It's short, and a bit sad, and it's called by your handle.
+~ A woman in a cardigan stands at the back and listens to all of it. When it's finished she drops a note in the violin case. "source: everyone who knew them."
+`;
+/* clues the branches turn up */
+Object.assign(CLUE,{
+ dropmap:{s:'The dead drop',t:'WHISPER\'s drop: "The blue lights go to a box. The box has a name."',m:['m2','m5']},
+ jonahcode:{s:'The man who built it',t:'Jonah Reyes wrote LANTERN\'s graph engine at Lumen, thinking it was for fraud detection, then tried to take it back.',m:['m9','m4']},
+ lanterndump:{s:'Badge 1337-0001',t:'The first badge LANTERN-01 tracked at the con was yours. WHISPER had made you its decoy.',m:['m4','m2']},
+ termsheet:{s:'The term sheet',t:'£400,000,000. Corvid Holdings. Signing after the keynote, Suite 1313.',m:['m8']},
+ sellout:{s:'Two folders',t:'Victor has a folder with Krall\'s name on it. Krall has a phone Victor never sees. Each is ready to sell the other.',m:['m3']},
+ vleak:{s:'Thursday night at the bar',t:'Vesper asked Bea which room the "hacker party" was in, the night before the raid.',m:['m6','m11']}});
+for(const c of['dropmap','jonahcode','lanterndump','termsheet','sellout','vleak'])for(const m of CLUE[c].m)if(MYST[m]&&!MYST[m].ev.includes(c))MYST[m].ev.push(c);
+/* people you can lose this week */
+const GONE={mira:()=>f('mira_taken')||f('mira_gone'),vesper:()=>f('vesper_cut')||f('vesper_gone')};
+const ROUTEBLOCK={mira:()=>f('mira_taken')?'Krall has her':f('mira_burned')&&!f('mira_amends')?'she doesn\'t trust you any more':f('mira_gone')?'she\'s gone':null,
+ sunny:()=>f('sunny_burned')?'she remembers you lied to her':null,vesper:()=>f('vesper_cut')?'you sent her away':f('vesper_gone')?'she left without saying goodbye':null};
+/* whoever you love is still with you after, unless you aren't */
+const ROMAFTER={ellie:['Ellie\'s still drawing tiny croissants on paper bags. Now they say "ours".','Ellie keeps the bakery open, and a stool by the till for you.'],nyx:['Nyx still won\'t say "girlfriend". She says "the one I don\'t pick".','Nyx stayed. She says she\'s "between jobs". She\'s not looking for one.'],ada:['Ada enters every CTF as a team of two. You lose most of them. She keeps every scoreboard.','Ada visits on weekends with a whiteboard and a new problem.'],priya:['Priya switches her phone off every Sunday now. For you.','Priya still checks your Bluetooth every morning. It\'s how she says I love you.'],juno:['Juno streams under her real name now. Sometimes you\'re in the back of the shot.','Juno keeps the camera off when you visit.'],kit:['Kit made the jacket. One pocket. You know whose hand.','Kit still builds armour. She doesn\'t wear the helmet around you.'],rin:['Rin shares his gummy worms now. Only with you.','Rin\'s still angry at the world. Not at you.'],bea:['Bea got into Glasgow. You take the train up every Friday.','Bea draws you every week. The drawings get softer.'],mira:['Mira has a name now. You\'re one of three people who know it.','Mira still sits on roofs. You sit next to her.'],saoirse:['Saoirse never prints the word "partner". She does keep your name out of every story.','Saoirse calls at 3 AM with a scoop and then just talks.'],sunny:['Sunny took her first holiday in six years. You went too.','Sunny\'s radio is off on Sundays.'],tilly:['Tilly\'s next badge has a hidden mode. It only works next to yours.','Tilly hides notes for you in everything she makes.'],petra:['Petra\'s car died. The new one has a passenger seat with your name on it. Literally. She engraved it.','Petra still drives you to the top of car parks to look at the city.'],astrid:['Astrid\'s CubeSat launched. It takes a picture of your street every ninety minutes.','Astrid still knows when the satellites go over. You wave at all of them.'],yuki:['Yuki lets you have player two. Forever.','Yuki plays to relax. You watch. It\'s enough.'],vesper:['Vesper sings under her real name now. You\'re in the front row.','Vesper stayed out of the shadows. Mostly.'],delphine:['Delphine writes only true things now. Some of them are about you.','Delphine says what she means. You\'re still getting used to it.'],noor:['Noor\'s letters don\'t come back any more. You answer every one.','Noor brings you case law to read in bed. You read it.'],fern:['The purple beans came up in March. You planted them together.','Fern still feeds people who hide on roofs. Now she feeds you too.'],wren:['Wren\'s podcast has a co-host. It\'s you. You say almost nothing.','Wren still pulls people out of the water. You stand on the side and hold the towel.'],pia:['Pia plays a new song on Thursdays. It\'s happy. It\'s yours.','Pia still plays "that one". Now there\'s a second one after it.']};
+function romAfter(){if(!S)return[];const k=S.ending||S.endK,good=k&&ENDINFO[k]&&ENDINFO[k][2]!=='bad';return ROM.filter(loved).map(g=>N((ROMAFTER[g]||['',''])[good?0:1])).filter(n=>n.n)}
+/* hook the new endings' aftermaths in, and a line for everyone you love, after every aftermath except the one you don't live through */
+for(const k of Object.keys(ENDINFO)){const e='end_'+k,a='after_'+k;if(SC[e]===undefined)continue;
+ if(SC[a]!==undefined&&!SC[e].includes('[scene '+a+']'))SC[e]=SC[e].replace('[end '+k+']','[scene '+a+']\n[end '+k+']');
+ if(k!=='lastlogin'&&k!=='harem'&&!SC[e].includes('romAfter'))SC[e]=SC[e].replace('[end '+k+']','[call romAfter()]\n[end '+k+']')}
 
 const rsum=(g,i,t)=>{ROUTES[g].sum[i]=t};
 /* ============ THE TWENTY-ONE: who they are, when their scenes open, what they say in passing ============
@@ -9983,7 +10595,7 @@ function startPrologue(){
 $('hIn').addEventListener('keydown',e=>{if(e.key==='Enter')$('bGo').click()});
 $('bCont').onclick=()=>{const s=readSlot('auto');if(s&&s.h)resumeGame(s)};
 $('bLoad').onclick=()=>savesScreen();
-$('bEnds').onclick=()=>{const s=META.ends;ov(`<div class="card"><h3>Endings ${Object.keys(s).length}/${ENDORDER.length}</h3><div class="endlist">${ENDORDER.map(k=>`<div class="${s[k]?'':'no'}">${s[k]?esc(ENDINFO[k][0]):'???'}</div>`).join('')}</div><p class="small">Twenty ways for the week to end. Who you love is your own business, and shows up in all of them.</p><div class="row"><button class="btn pri" id="ex">Close</button></div></div>`);$('ex').onclick=closeOv};
+$('bEnds').onclick=()=>{const s=META.ends;ov(`<div class="card"><h3>Endings ${Object.keys(s).length}/${ENDORDER.length}</h3><div class="endlist">${ENDORDER.map(k=>`<div class="${s[k]?'':'no'}">${s[k]?esc(ENDINFO[k][0]):'???'}</div>`).join('')}</div><p class="small">${ENDORDER.length} ways for the week to end. Who you love is your own business, and shows up in all of them.</p><div class="row"><button class="btn pri" id="ex">Close</button></div></div>`);$('ex').onclick=closeOv};
 
 /* ============ THREE.JS ENGINE ============ */
 /* Levels are still described with the small builder API below (box, quad, room...). Quads are collected
@@ -14177,7 +14789,7 @@ const WHERE={
 };
 /* a story beat can hold someone in place, or hide them (S.hold = {id:[reg,x,z,y]|0}) */
 function placeChars(){if(!S)return;const d=S.day,sl=S.slot;
- for(const c of WCH){let p=S.hold&&S.hold[c.id]!==undefined?S.hold[c.id]:WHERE[c.id](d,sl);
+ for(const c of WCH){let p=S.hold&&S.hold[c.id]!==undefined?S.hold[c.id]:WHERE[c.id](d,sl);if(typeof GONE!=='undefined'&&GONE[c.id]&&GONE[c.id]())p=null;
   // someone with a scene ready waits where that scene starts, so talking to them never whisks you somewhere else
   if(p&&ROM.includes(c.id)&&S.day>=1&&sceneReady(c.id)){const sa=sceneArea(c.id+scn(c.id));if(sa&&AREAS[sa]&&!areaLock(sa))p=[sa,ROM.indexOf(c.id)%3]}
   if(Array.isArray(p)&&typeof p[0]==='string'&&!AREAS[p[0]]&&p.length>=3)p={reg:p[0],x:p[1],z:p[2],y:p[3]||0};

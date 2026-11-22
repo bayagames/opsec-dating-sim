@@ -14,13 +14,13 @@ const ENDS=async()=>{
  for(const k in GAMES)if(!GAMES['_'+k])GAMES['_'+k]=GAMES[k];
  for(const k in GAMES)if(!k.startsWith('_'))GAMES[k]=(st,done)=>{try{if(st.res)st.res(4,5)}catch(e){console.error('res',e)}done()};
  let n=0;
- for(const k of Object.keys(ENDINFO))for(const g of [null,...ROM]){
+ for(const k of Object.keys(ENDINFO))for(const g0 of [null,...ROM,'multi']){const g=g0==='multi'?'ada':g0;
   if(k==='harem'&&g)continue;
   localStorage.removeItem('opsec3_save');$("hIn").value="ender";$('bGo').click();
   await new Promise(r=>setTimeout(r,0));
   closeOv();S.day=7;S.slot=4;for(const x of ROM){S.met[x]=1;S.r=S.r||{}}
   for(const x of ROM)if(ROUTES[x])for(let i=scn(x);i<4;i++)adv(x,i);
-  if(g){for(let i=scn(g);i<ROUTES[g].n;i++)adv(g,i)}
+  if(g){for(let i=scn(g);i<ROUTES[g].n;i++)adv(g,i)}if(g0==='multi')for(const x of['nyx','bea'])for(let i=scn(x);i<ROUTES[x].n;i++)adv(x,i);
   S.endK=k;S.partner=g;const seen=new Set();let steps=0,stuck=0,last='';
   run(scr('end_'+k),()=>{});
   for(;steps<20000&&!S.ending;steps++){

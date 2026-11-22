@@ -51,6 +51,14 @@ wh1sper: HERE IS {H} ON THE ROOF WHERE THE SNIFFER WAS. HERE IS {H} AT THE NETWO
 * Nobody could know where you stood, minute by minute. Except something listening to every badge in the building.
 [clue framepost]
 [fx exp:25 foot:8]
+if f('informant')
+ * Krall promised you'd be on the right list. You are. It's this one.
+ if f('informant_real')
+  * You gave him three days of names. He gave you this. Of course he did. People who build machines to find sources don't keep sources. They spend them.
+ else
+  * You fed him nothing for three days. He noticed. This is what noticing looks like.
+if f('lantern_dump')
+ * The map in WH1SPER's post is LANTERN-01's map. The same one you copied on Thursday night. Badge 1337-0001, the first dot, the decoy. They didn't need to frame you. They'd been drawing you all week.
 ~ Lumen's official account reposts it within four minutes: "We're aware of reports identifying the individual known as WHISPER. Lumen is cooperating fully with venue security. Install SafeSphere: Shield Mode keeps you safe."
 ~ Then the con channels. Then your forum. Then a message from an account you don't know, with your mother's maiden name in it and nothing else.
 if met('priya')

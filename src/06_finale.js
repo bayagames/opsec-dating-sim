@@ -118,4 +118,4 @@ function startPrologue(){
 $('hIn').addEventListener('keydown',e=>{if(e.key==='Enter')$('bGo').click()});
 $('bCont').onclick=()=>{const s=readSlot('auto');if(s&&s.h)resumeGame(s)};
 $('bLoad').onclick=()=>savesScreen();
-$('bEnds').onclick=()=>{const s=META.ends;ov(`<div class="card"><h3>Endings ${Object.keys(s).length}/${ENDORDER.length}</h3><div class="endlist">${ENDORDER.map(k=>`<div class="${s[k]?'':'no'}">${s[k]?esc(ENDINFO[k][0]):'???'}</div>`).join('')}</div><p class="small">Twenty ways for the week to end. Who you love is your own business, and shows up in all of them.</p><div class="row"><button class="btn pri" id="ex">Close</button></div></div>`);$('ex').onclick=closeOv};
+$('bEnds').onclick=()=>{const s=META.ends;ov(`<div class="card"><h3>Endings ${Object.keys(s).length}/${ENDORDER.length}</h3><div class="endlist">${ENDORDER.map(k=>`<div class="${s[k]?'':'no'}">${s[k]?esc(ENDINFO[k][0]):'???'}</div>`).join('')}</div><p class="small">${ENDORDER.length} ways for the week to end. Who you love is your own business, and shows up in all of them.</p><div class="row"><button class="btn pri" id="ex">Close</button></div></div>`);$('ex').onclick=closeOv};

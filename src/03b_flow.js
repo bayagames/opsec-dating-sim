@@ -6,6 +6,7 @@ function route(g,o){const req=o.req.map(r=>Object.assign({d:1,a:0},r));ROUTES[g]
 const sceneReq=g=>{const R=ROUTES[g];return R?R.req[scn(g)]:null};
 function sceneWhy(g){const R=ROUTES[g],i=scn(g);if(!R||i>=R.n)return null;const r=R.req[i];
  if(SC[g+i]===undefined)return'their story moves on in the main plot';
+ if(typeof ROUTEBLOCK!=='undefined'&&ROUTEBLOCK[g]){const b=ROUTEBLOCK[g]();if(b)return b}
  {const sa=typeof sceneArea==='function'&&sceneArea(g+i);if(sa&&AREAS[sa]&&typeof areaLock==='function'&&areaLock(sa))return'it happens in the '+AREAS[sa].n+', which isn\'t open yet'}
  if(day()<r.d)return'their story continues on Day '+r.d;
  if(aff(g)<r.a)return'needs ♥ '+r.a+' (you have '+aff(g)+')';
@@ -38,7 +39,7 @@ function addSlotLog(t){if(!S||!t)return;S.slog=S.slog||{};const k=S.day+':'+S.sl
 function spend(kind,what){S.acts=(S.acts||0)+1;addSlotLog(what||({hang:'Time with someone',lead:'Worked a lead',talk:'A talk',ctf:'CTF practice',bounty:'Bug bounty',rest:'Rested',wait:'Let it go by'}[kind]||kind));
  if(S.restore&&!S.oc&&S.day>=1){S.oc=1;toast('Overclocked: one more thing this '+SLOTN[S.slot].toLowerCase(),'var(--mint)');save();hub();return}
  nextSlot()}
-function nextSlot(){S.oc=0;S.slot++;if(S.slot>5){endDay();return}tqFlush();save();toast(SLOTN[S.slot],'var(--dim)');if(typeof sfx==='function')sfx('advance');hub()}
+function nextSlot(){S.oc=0;S.slot++;if(S.slot>5){endDay();return}evMissCheck();tqFlush();save();setTimeout(evSoonToast,600);toast(SLOTN[S.slot],'var(--dim)');if(typeof sfx==='function')sfx('advance');hub()}
 function endDay(){
  const d=S.day;S.slot=5;
  const sleep=SC['sleep'+d]!==undefined?scr('sleep'+d):scr('sleep');
@@ -47,7 +48,7 @@ function newDay(d){
  if(S.day>=1&&S.exp<=10)ach('lowkey');
  neglectCheck(d);
  S.day=d;S.ch=Math.min(d,4);S.slot=0;S.oc=0;S.exp=S.foot;S.hang={};delete S.failing;
- const wake=S.wakeAt||'room1337';tqFlush();snapDay();save();
+ evMissCheck();const wake=S.wakeAt||'room1337';tqFlush();snapDay();save();setTimeout(evSoonToast,1800);
  const go=()=>{run([{chapter:d},{hide:1}],hub)};
  if(G.ok&&S.inWorld)fadeTp(()=>{teleportArea(wake);S.pos=null;go()});else go();
 }

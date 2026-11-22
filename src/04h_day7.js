@@ -4,6 +4,10 @@ SC.d7_positions=`
 [hide]
 if S.plan==='walk'
  [scene end_lasttrain]
+elif S.plan==='informant'
+ [bg hotel]
+ ~ Sunday. Your phone buzzes all morning with messages from people getting into position. You read every one. You forward every one.
+ * Eight in the morning, and you've already done the worst thing you'll ever do. The rest of the day is just waiting to find out what it costs.
 elif S.plan==='soldout'
  [bg lumenlounge]
  ~ Sunday. The Lumen green room, which this morning is the Lumen Lounge with the curtains drawn. Make-up. Coffee. A man with a clipboard who calls you "talent".
@@ -99,6 +103,8 @@ if S.plan==='soldout'
  [scene key_sold]
 elif S.plan==='kill'
  [scene key_kill]
+elif ['dump','trojan','rollback','doublecross','informant'].includes(S.plan)
+ [call scr('key_'+S.plan)]
 else
  [scene key_main]
 `;
@@ -235,6 +241,12 @@ SC.key_sold=`
 SC.d7_roof=`
 [bg corridor]
 [hide]
+if S.plan==='informant'||f('betray_mira')&&!f('lantern_dead')&&!['trojan','doublecross','rollback'].includes(S.plan)
+ [scene roof_loose]
+else
+ [scene roof_main]
+`;
+SC.roof_main=`
 ~ Evening. The 13th floor. The door at the end of the refurbishment wing, the one that's always shut, is open. Suite 1313. Light, voices, and the smell of very expensive coffee.
 if f('kill_go')||f('injunction_served')||f('blackout')||f('signal')||f('uplink_cut')&&(f('paper_out')||f('buyer_named')||f('delphine_stage')||f('jonah_stage'))
  [call S.f.lantern_dead=1]
@@ -287,8 +299,7 @@ else
  [scene end_main]
 `;
 /* who you find at the afterparty, if more than one person's story ended with you */
-function choosePartner(){const L=ROM.filter(loved);if(L.length<=1){S.partner=L[0]||null;return}
- return[N('You look around the ballroom. There\'s someone you want to find first.'),{choice:L.map(g=>({t:CH[g].name,then:()=>{S.partner=g;return[]}}))}]}
+function choosePartner(){const L=ROM.filter(loved).sort((a,b)=>aff(b)-aff(a));S.partner=L[0]||null}
 SC.end_main=`
 [call scr('end_'+S.endK)]
 `;

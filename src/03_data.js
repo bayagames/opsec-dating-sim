@@ -154,7 +154,13 @@ const ENDINFO={
  larp:['Larp Exposed','You went on stage with a bluff. The internet keeps receipts.','bad'],
  opensource:['Open Source','No one person. Everyone, together.','good'],
  notfound:['404: Partner Not Found','You did the right thing. You did it alone.','mixed'],
- lasttrain:['Last Train','You left before the keynote. The train was nearly empty.','bad']
+ lasttrain:['Last Train','You left before the keynote. The train was nearly empty.','bad'],
+ dump:['Data Dump','Everything LANTERN ever heard, in public, at once.','mixed'],
+ trojan:['Trojan Horse','The demo was you. You said something else.','good'],
+ rollback:['Rollback','Four thousand badges turn rainbow in the middle of the demo.','good'],
+ doublecross:['Double-Cross','Victor introduced you himself.','good'],
+ informant:['Informant','You were on the right list. Everyone else was on the other one.','bad'],
+ lastlogin:['Last Login','Krall doesn\'t keep sources. He spends them.','bad']
 };
 const ENDORDER=Object.keys(ENDINFO);
 /* achievements: [name, description, hidden until earned] */

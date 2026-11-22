@@ -354,3 +354,16 @@ else
  ~ You sit next to her. She shows you where to put your hands, which keys. You play the bottom two notes over and over while she plays everything else, and it sounds wonderful, and it's mostly her.
 pia.h: Next Thursday you have to come and turn pages. That's the deal. That's the price of the song.
 `;
+/* more than one person's story ended with you: they find out, at the party, all at once */
+SC.epi_many=`
+[bg ballroom]
+~ It happens by the chocolate fountain, which is the worst possible place for it to happen.
+~ {=ROM.filter(loved).map(g=>CH[g].name).join(', ').replace(/, ([^,]*)$/,' and $1')}. All of them. All at once. Looking at you, and then at each other, and then back at you.
+* You knew this was coming. You've known since about Thursday. You'd hoped it would come somewhere quieter.
+? "I should have told you all. I'm sorry. I meant every one of it."
+ ~ A long silence. Then, from somewhere in the middle of them, a laugh. Then another.
+ ~ "Every one of it," somebody repeats. "That's terrible grammar." And somehow that's what breaks it.
+? "Before anyone says anything: I'm getting everyone a drink."
+ ~ You get everyone a drink. It takes three trips. When you get back, they've pulled chairs into a circle and are comparing notes about you, which is much, much worse.
+~ It isn't simple. It isn't going to be simple. But nobody leaves. That's the thing you'll remember: you looked up, braced for the room to empty, and nobody left.
+`;

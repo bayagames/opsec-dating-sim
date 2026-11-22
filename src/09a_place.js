@@ -424,7 +424,7 @@ const WHERE={
 };
 /* a story beat can hold someone in place, or hide them (S.hold = {id:[reg,x,z,y]|0}) */
 function placeChars(){if(!S)return;const d=S.day,sl=S.slot;
- for(const c of WCH){let p=S.hold&&S.hold[c.id]!==undefined?S.hold[c.id]:WHERE[c.id](d,sl);
+ for(const c of WCH){let p=S.hold&&S.hold[c.id]!==undefined?S.hold[c.id]:WHERE[c.id](d,sl);if(typeof GONE!=='undefined'&&GONE[c.id]&&GONE[c.id]())p=null;
   // someone with a scene ready waits where that scene starts, so talking to them never whisks you somewhere else
   if(p&&ROM.includes(c.id)&&S.day>=1&&sceneReady(c.id)){const sa=sceneArea(c.id+scn(c.id));if(sa&&AREAS[sa]&&!areaLock(sa))p=[sa,ROM.indexOf(c.id)%3]}
   if(Array.isArray(p)&&typeof p[0]==='string'&&!AREAS[p[0]]&&p.length>=3)p={reg:p[0],x:p[1],z:p[2],y:p[3]||0};
