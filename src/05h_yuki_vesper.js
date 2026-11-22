@@ -90,7 +90,7 @@ yuki.n: The switch takes eight frames to change input. That's a third of a secon
 [flag yuki_ready]
 yuki.n: Will you be in the hall? Where I can see you from the booth? So I've got something to look at that isn't the timer.
 `;
-SC.yuki5=`
+SC.yuki7=`
 [bg arcade]
 ~ The Retro Arcade after closing. Yuki has a key she shouldn't have. Every cabinet's on, glowing, beeping to itself in the dark, attract modes looping.
 yuki.h: Ours. The whole arcade. For an hour. Pick a game. Any game. Two-player.
@@ -200,7 +200,7 @@ vesper.d: And then you asked about me. And I stopped writing things down.
 vesper.n: The signing is Sunday. Suite 1313. A man called Ashgrove. If you want to stop it, I can tell you everything I know. If you want me gone, I'll be on a train in an hour.
 vesper.n: Choose, darling. I've never let anyone choose for me before.
 `;
-SC.vesper5=`
+SC.vesper7=`
 [bg roof]
 ~ The hotel's roof terrace, the night before. The pool lights are off. Vesper's standing at the parapet, in a plain black dress, no pearls, no ring. And no earpiece. You can see the little red mark where it used to sit.
 vesper.n: I took it out. This afternoon. I dropped it in the pool. Halberd will notice in about an hour. Then I'm a loose end.

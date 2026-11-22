@@ -393,7 +393,7 @@ function spotIn(key,k){k=k||0;const ck=key+':'+k;if(SPOTC[ck])return SPOTC[ck];c
 /* where everyone is: a function of day d and part of the day s. A fixed spot [reg,x,z,y], an area (optionally with which spot), or null */
 const at=(reg,x,z,y)=>({reg,x,z,y:y||0});
 const WHERE={
- ellie:(d,s)=>d===1&&s===0?at('home',-299,3.7):d===5&&s>=1&&s<=2?at('home',-299,3.7):(d===3||d===4||d>=6)&&s<=3?at('con',-183.6,56.8):(d>=3&&d!==5||d===5&&s>=3)&&s===4?['garden',1]:null,
+ ellie:(d,s)=>d<=1&&s===0?at('home',-299,3.7):d===5&&s>=1&&s<=2?at('home',-299,3.7):(d===3||d===4||d>=6)&&s<=3?at('con',-183.6,56.8):(d>=3&&d!==5||d===5&&s>=3)&&s===4?['garden',1]:null,
  nyx:(d,s)=>d>=2&&s<=3?at('con',145,-44.5):d>=2&&s===4?['bar',2]:null,
  ada:(d,s)=>d>=2&&s!==3?at('con',146,-6.8):d>=2?['food',0]:null,
  priya:(d,s)=>d>=2&&s<=3?at('con',146,13):d>=2&&s===4?['quiet',0]:null,
@@ -419,11 +419,11 @@ const WHERE={
  victor:(d,s)=>d<=2&&d>=1&&s<=3?at('con',-100,30.4):d===5&&s>=3?['grill',1]:d>=3&&s===4?['lumenlounge',2]:null,
  owen:(d,s)=>d>=2&&s<=3?['conops',0]:null,
  krall:(d,s)=>d>=3&&s>=3?['corridor',0]:null,
- linda:(d,s)=>d<=1&&s<=1?at('office',537.4,2.4):null,
- gary:(d,s)=>d<=1&&s<=1?at('office',521,8.6):null
+ linda:(d,s)=>d===0&&s<=2?at('office',537.4,2.4):null,
+ gary:(d,s)=>d===0&&s===1?at('office',521,8.6):null
 };
 /* a story beat can hold someone in place, or hide them (S.hold = {id:[reg,x,z,y]|0}) */
-function placeChars(){if(!S)return;const d=S.day,sl=S.day===0?3:S.slot;
+function placeChars(){if(!S)return;const d=S.day,sl=S.slot;
  for(const c of WCH){let p=S.hold&&S.hold[c.id]!==undefined?S.hold[c.id]:WHERE[c.id](d,sl);
   // someone with a scene ready waits where that scene starts, so talking to them never whisks you somewhere else
   if(p&&ROM.includes(c.id)&&S.day>=1&&sceneReady(c.id)){const sa=sceneArea(c.id+scn(c.id));if(sa&&AREAS[sa]&&!areaLock(sa))p=[sa,ROM.indexOf(c.id)%3]}

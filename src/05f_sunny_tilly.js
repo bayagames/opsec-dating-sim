@@ -72,7 +72,7 @@ sunny.n: So you pull all three. In the right order. In under ninety seconds. Bec
 [flag sunny_plan]
 sunny.n: You'll be upstairs, on the stage, with the cameras. I'll be down here, in the basement, with the cables. That's the right way round. You're better at faces. I'm better at copper.
 `;
-SC.sunny5=`
+SC.sunny7=`
 [bg conroof]
 ~ The con's roof, the night before. Sunny brought two folding chairs up through a hatch she says she's "technically responsible for". The network hums underneath you, four floors down.
 ~ She takes the radio off her shoulder. Looks at it. Turns it off. Actually off. The little green light goes out.
@@ -168,7 +168,7 @@ tilly.b: It's back. It's back. Bernard's rainbow.
  [fx tilly:12]
  ~ She smells of flux and pine and smoke. She hugs you back so hard her goggles fall off her head.
 `;
-SC.tilly5=`
+SC.tilly7=`
 [bg badgelab]
 ~ The Badge Lab, after hours, the night before. One magnifier lamp on. Tilly's sitting at her bench with her hands in her lap and a little felt-lined box in front of her.
 tilly.n: I made you something. I made it on Tuesday, actually. After you read the back. And then I was too scared to give it to you.

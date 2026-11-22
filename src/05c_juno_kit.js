@@ -112,7 +112,7 @@ juno.d: I did it. I did it. I've lost two-thirds of my income. I did it.
  juno.h: ...Oh, that's good. Can I use that? I'm not going to use that. That's ours.
 [flag juno_dropped]
 `;
-SC.juno5=`
+SC.juno7=`
 [bg skygarden]
 ~ The Sky Garden on the con's upper level. Glass roof, real trees in planters, night outside the glass and the city lit up below. It's almost empty. Juno's on a bench, in a plain grey hoodie, no make-up, no ears, hair down.
 ~ No phone in her hand. You've never seen her without a phone in her hand.
@@ -233,7 +233,7 @@ kit.n: And I've built a thing. Look. It's a clip. You put it on the back of a ba
 [flag counterfw]
 kit.n: You know what's funny? I'm not wearing the armour. I'm doing the bravest thing I've ever done at a con, and I'm in a T-shirt with flux on it.
 `;
-SC.kit5=`
+SC.kit7=`
 [bg cosplay]
 [call S.f.kit_armour=1]
 ~ The Cosplay Hall after the contest. The stage is empty, the lights are on their night setting, and Kit, in full Vex armour, is sitting on the edge of the stage with her sword across her knees and her visor down.

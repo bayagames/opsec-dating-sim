@@ -93,7 +93,7 @@ mira.n: I've written it. It's called goodnight.sh. It's on a rig on this roof, a
  mira.n: Because you're the only person I've met in three years who'd tell me not to, for the right reasons.
 mira.n: Keep it in your head. That it exists. If Sunday goes wrong, it's the last door out.
 `;
-SC.mira5=`
+SC.mira7=`
 [bg plantdeck]
 ~ Midnight. No laptop. No rig. Mira's on the edge of the roof with her legs over the side, the city below, wind in her hair. When she sees you, she pats the parapet beside her.
 mira.n: I deleted WHISPER this morning. Every account. Every script. The sniffer's in the bin. Nyx can have it as a trophy.
@@ -197,7 +197,7 @@ saoirse.n: We never meet at the press room again. If anyone asks, you've never s
 ~ She sets up the app on your phone, checks it twice, then turns her own phone round so you can see the screen: a new contact, saved under a name that isn't yours. "BAKER".
 saoirse.h: Because you'd have to be very boring, or very brave, to talk to a journalist at this con. You're both.
 `;
-SC.saoirse5=`
+SC.saoirse7=`
 [bg plaza]
 ~ The Arrival Plaza at midnight. The coffee cart's shuttered. The plane trees in their pots rustle. The con's huge sign, CTRL+ALT+CON, buzzes faintly in the dark.
 ~ Saoirse's walking slowly with her hands in her trench coat pockets. Her notebook isn't in her hand. You've never seen her without it.

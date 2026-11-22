@@ -65,7 +65,7 @@ const APPS={
   const list=ks.map(k=>{const L=by[k],last=L[L.length-1],un=L.filter(m=>!m.r).length,wait=L.some(m=>m.q&&!m.ans);return`<button class="mthr ${phThread===k?'on':''}" data-f="${esc(k)}"><span class="hd">${av(k)}</span><span class="mt"><b>${esc(nm(k))}</b><small>${last.me?'You: ':''}${esc(last.t)}</small></span>${un?`<i class="nb">${un}</i>`:wait?'<i class="nb q">?</i>':''}</button>`}).join('');
   let th='<div class="mempty small">Pick a conversation.</div>';
   if(phThread&&by[phThread]){by[phThread].forEach(m=>m.r=1);hud();
-   th=`<div class="mhead"><span class="hd">${av(phThread)}</span><b>${esc(nm(phThread))}</b>${CH[phThread]&&ROM.includes(phThread)?`<small>${met(phThread)?STAGEN[Math.max(0,Math.min(4,scn(phThread)-1))]+' · ♥ '+aff(phThread):''}</small>`:''}</div><div class="mlog">`+
+   th=`<div class="mhead"><span class="hd">${av(phThread)}</span><b>${esc(nm(phThread))}</b>${CH[phThread]&&ROM.includes(phThread)?`<small>${met(phThread)?stageOf(phThread)+' · ♥ '+aff(phThread):''}</small>`:''}</div><div class="mlog">`+
     by[phThread].map(m=>`<div class="bub ${m.me?'me':''}">${esc(m.t)}<small>${m.c?'Day '+m.c+' · '+SLOTN[m.s||0]:'Before the con'}</small></div>${m.q&&!m.ans&&TEXTQ[m.q]?`<div class="mreply">${TEXTQ[m.q].replies.map((r,i)=>`<button class="ch" data-q="${S.msgs.indexOf(m)}" data-i="${i}">${esc(sub(r.t))}</button>`).join('')}</div>`:''}`).join('')+'</div>'}
   return`<div class="msgs ${phThread?'open':''}"><div class="mlist">${list||'<p class="small" style="padding:12px">No messages yet.</p>'}</div><div class="mview2">${innerWidth<=760&&phThread?'<button class="btn" id="mback">‹ All conversations</button>':''}${th}</div></div>`},
  /* ---- Calendar: the week, today in detail, what you can do now ---- */
@@ -77,27 +77,29 @@ const APPS={
    const past=d<S.day||d===S.day&&i<S.slot,cur=d===S.day&&i===S.slot,log=(S.slog&&S.slog[d+':'+i])||[];
    let what='';if(B)what=past||S.done[b]?'✓ '+B.t:(d>S.day?'Story':B.t);
    const free=(DAYS[d]||[])[i]!==undefined;
-   return`<div class="cslot ${cur?'on':''} ${past?'past':''}"><div class="ct"><b>${n}</b><small>${SLOTT[i]}</small></div><div class="cc">${what?`<div class="cbeat ${S.done[b]?'done':''}">${esc(what)}</div>`:''}${log.filter(x=>!B||x!==B.t).map(x=>`<div class="clog">${esc(x)}</div>`).join('')}${!past&&free&&!B?'<div class="cfree">Free</div>':''}${!past&&B&&!S.done[b]&&!B.adv&&d===S.day?'<div class="cfree">then free</div>':''}${!free?'<div class="cfree">—</div>':''}</div></div>`}).join('');
+   const evs=Object.values(EVENTS).filter(e=>e.d===d&&e.s===i&&(!e.when||e.when()));
+   return`<div class="cslot ${cur?'on':''} ${past?'past':''}"><div class="ct"><b>${n}</b><small>${SLOTT[i]}</small></div><div class="cc">${what?`<div class="cbeat ${S.done[b]?'done':''}">${esc(what)}</div>`:''}${log.filter(x=>!B||x!==B.t).map(x=>`<div class="clog">${esc(x)}</div>`).join('')}${evs.map(e=>`<div class="cev ${S.evs&&S.evs[e.id]?'done':''}">${S.evs&&S.evs[e.id]?'✓ ':'◆ '}${esc(e.n)}<small>${esc(AREAS[e.w]?AREAS[e.w].n:'')}</small></div>`).join('')}${!past&&free&&!B?'<div class="cfree">Free</div>':''}${!past&&B&&!S.done[b]&&!B.adv&&d===S.day?'<div class="cfree">then free</div>':''}${!free?'<div class="cfree">—</div>':''}</div></div>`}).join('');
   let now='';
   if(d===S.day){const b=curBeat();
    if(b)now=`<div class="cnow"><b>Now: ${esc(beatStep(b).t||b.t)}</b><p class="small">The green light shows where. Free time comes after.</p><button class="btn" id="cpin">Point me there</button></div>`;
    else if(isFree()){const ready=ROM.filter(sceneReady),leads=Object.keys(LEADS).filter(leadOpen);
     now=`<div class="cnow"><b>The ${SLOTN[S.slot].toLowerCase()} is yours.</b><p class="small">One thing per part of the day${S.restore?' (two, overclocked)':''}. Walking, talking shop, gifts, shopping and your phone are free.</p>
     ${ready.length?`<div class="small"><b>Ready for you</b></div><div class="cppl">${ready.map(g=>`<button class="chip" data-who="${g}"><span class="hd">${head(lookOf(g),'n')}</span>${CH[g].name}<small>${esc(whereNow(g)||'')}</small></button>`).join('')}</div>`:''}
+    ${eventsNow().length?`<div class="small"><b>On now</b></div><div class="cppl">${eventsNow().map(e=>`<button class="chip" data-ev="${e.id}">${esc(e.n)}<small>${esc(AREAS[e.w]?AREAS[e.w].n:'')}</small></button>`).join('')}</div>`:''}
     ${leads.length?`<div class="small"><b>Open leads</b></div><div class="cppl">${leads.map(k=>`<button class="chip" data-lead="${k}">${esc(LEADS[k].n)}<small>${esc(AREAS[LEADS[k].w]?AREAS[LEADS[k].w].n:'')}</small></button>`).join('')}</div>`:''}
     <div class="row"><button class="btn" id="cwait">${S.slot===5?'Call it a night':'Let the '+SLOTN[S.slot].toLowerCase()+' go by'}</button></div></div>`}}
   return`<div class="abody">${week}<div class="cgrid"><div class="cday2"><h3>Day ${d} · ${DAYN[d]}${d===7?' · Closing keynote':''}</h3>${rows}</div>${now?`<div class="cside">${now}</div>`:''}</div></div>`},
  /* ---- Hearts: everyone, and a full file on whoever you pick ---- */
  hearts(){
   const sel=PH.heart&&ROM.includes(PH.heart)?PH.heart:null;
-  const card=g=>{const m=met(g),i=scn(g),lv=loved(g);return`<button class="hcard ${m?'':'unk'} ${sel===g?'on':''} ${lv?'love':''}" data-g="${g}" style="--hc:${CH[g].col}"><span class="hp">${m?head(lookOf(g),lv?'h':'n'):'<span class="sil">?</span>'}</span><b>${m?CH[g].name:'???'}</b><small>${m?(lv?'In love':STAGEN[Math.max(0,Math.min(4,i-1))]):'Not met'}</small>${m?bar(aff(g),CH[g].col):''}${m&&sceneReady(g)?'<i class="nb">!</i>':''}</button>`};
+  const card=g=>{const m=met(g),i=scn(g),lv=loved(g);return`<button class="hcard ${m?'':'unk'} ${sel===g?'on':''} ${lv?'love':''}" data-g="${g}" style="--hc:${CH[g].col}"><span class="hp">${m?head(lookOf(g),lv?'h':'n'):'<span class="sil">?</span>'}</span><b>${m?CH[g].name:'???'}</b><small>${m?stageOf(g):'Not met'}</small>${m?bar(aff(g),CH[g].col):''}${m&&sceneReady(g)?'<i class="nb">!</i>':''}</button>`};
   const grid=`<div class="hgrid">${ROM.map(card).join('')}</div>`;
   if(!sel)return`<div class="abody"><p class="small">${ROM.filter(met).length}/${ROM.length} met · ${ROM.filter(loved).length} in love · tap someone for their file</p>${grid}</div>`;
   const g=sel,R=ROUTES[g],i=scn(g),m=met(g),why=sceneWhy(g),gi=Object.keys(ITEMS).find(k=>ITEMS[k].g===g),wn=whereNow(g);
   let file;
   if(!m)file=`<div class="hfile"><h3>???</h3><p>${esc(UNMET[g]?'Someone: '+UNMET[g]+'.':'Someone you haven\'t met.')}</p><p class="small">${esc(R.blurb)}</p>${wn?`<p class="small">Seen around: ${esc(wn)}</p>`:''}</div>`;
   else{const steps=[];for(let k=1;k<R.n;k++){const done=i>k,next=i===k;steps.push(`<div class="hstep ${done?'done':''} ${next?'next':''}"><b>${k===R.n-1?'♥ Last scene':'Scene '+k}</b><span>${done?esc((R.sum&&R.sum[k])||'Seen'):next?(why?'Locked: '+esc(why):'Ready now'+(wn?' · '+esc(wn):'')):'???'}</span></div>`)}
-   file=`<div class="hfile"><div class="hfhead"><div class="hbig">${por(lookOf(g),loved(g)?'h':'n')}</div><div><h3 style="color:${CH[g].col}">${CH[g].name}</h3><p>${esc(R.blurb)}</p><p class="small">${loved(g)?'In love':STAGEN[Math.max(0,Math.min(4,i-1))]} · ♥ ${aff(g)}/100</p>${bar(aff(g),CH[g].col)}
+   file=`<div class="hfile"><div class="hfhead"><div class="hbig">${por(lookOf(g),loved(g)?'h':'n')}</div><div><h3 style="color:${CH[g].col}">${CH[g].name}</h3><p>${esc(R.blurb)}</p><p class="small">${stageOf(g)} · ♥ ${aff(g)}/100</p>${bar(aff(g),CH[g].col)}
    <div class="aff-marks">${R.aff.slice(1).map((a,k)=>`<i style="left:${a}%" title="Scene ${k+1}"></i>`).join('')}</div>
    <p class="small">${wn?'Right now: '+esc(wn):'Not around right now'}${S.hang[g+':'+S.day]?' · talked shop today':''}</p>
    <p class="small">${gi?(S.gifted[g]?'Gift: '+esc(ITEMS[gi].n)+' (given)':'Would love: '+esc(ITEMS[gi].n)+(S.inv[gi]?' (in your bag)':' (Con Store, '+ITEMS[gi].p+'c)')):''}</p>
@@ -165,7 +167,8 @@ const APPS_AFTER={
   const w=$('cwait');if(w)w.onclick=()=>{closePhone();if(S.slot===5)return run([N('You call it a night.')],()=>endDay());run([N('You let the '+SLOTN[S.slot].toLowerCase()+' go by.')],()=>spend('wait'))};
   if($('cpin'))$('cpin').onclick=()=>{const t=beatTarget(curBeat());if(t){S.wp=null;toast('Follow the green light','var(--mint)')}closePhone()};
   o.querySelectorAll('[data-who]').forEach(b=>b.onclick=()=>{const c=WCH.find(c=>c.id===b.dataset.who&&c.on);if(c){S.wp={reg:c.reg,x:c.x,z:c.z,y:c.y};toast('Pinned: '+CH[c.id].name,'var(--butter)')}closePhone()});
-  o.querySelectorAll('[data-lead]').forEach(b=>b.onclick=()=>{pinArea(LEADS[b.dataset.lead].w);closePhone()})},
+  o.querySelectorAll('[data-lead]').forEach(b=>b.onclick=()=>{pinArea(LEADS[b.dataset.lead].w);closePhone()});
+  o.querySelectorAll('[data-ev]').forEach(b=>b.onclick=()=>{pinArea(EVENTS[b.dataset.ev].w);closePhone()})},
  hearts(){const o=$('ov');o.querySelectorAll('.hcard').forEach(b=>b.onclick=()=>{PH.heart=b.dataset.g;redraw()});if($('hclose'))$('hclose').onclick=()=>{PH.heart=null;redraw()};
   if($('hpin'))$('hpin').onclick=()=>{const c=WCH.find(c=>c.id===PH.heart&&c.on);if(c){S.wp={reg:c.reg,x:c.x,z:c.z,y:c.y};toast('Pinned: '+CH[c.id].name,'var(--butter)')}closePhone()}},
  cases(){const o=$('ov');

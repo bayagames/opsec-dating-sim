@@ -23,6 +23,7 @@ const CH={
  fern:{name:'Fern',col:'#8ac86a',skin:'#efcfb4',hair:'#6a4a2a',style:'loose',eye:'#5a7a3a',outfit:'garden',oc:'#e9e0c8',acc:['sunhat','dirt'],lower:{t:'pants',c:'#6a7a4a',s:'#4a3a2a',boot:1}},
  wren:{name:'Wren',col:'#ff6a5a',skin:'#e8bf9a',hair:'#d8b878',brow:'#9a7a4a',style:'wavyshort',eye:'#3a6a8a',outfit:'hoodie',oc:'#d0302a',acc:['whistle','freckles'],lower:{t:'shorts',c:'#1a2a4a',s:'#f4f4f4'}},
  pia:{name:'Pia',col:'#c89ae8',skin:'#d9a888',hair:'#2a1a14',style:'curly',eye:'#5a3a24',outfit:'coat',oc:'#4a5a4a',acc:['beanie','scarf'],lower:{t:'pants',c:'#2a2a34',s:'#3a2a1a',boot:1}},
+ pam:{name:'Pam',col:'#b8d8a8',skin:'#e9c3a6',hair:'#5a5a5a',brow:'#3a3a3a',style:'bob',streak:'#5a5a5a',eye:'#4a5a3a',outfit:'cardigan',oc:'#5a6a4a',inn:'#e9e3da',acc:['glasses','earring'],lower:{t:'pants',c:'#2a2a34',s:'#2a1a10'}},
  krall:{name:'Silas Krall',col:'#8a8f9a',skin:'#e6c4a8',hair:'#6a6a70',style:'buzz',eye:'#5a6a7a',outfit:'suit',oc:'#1a1c22',acc:['scar','stubble'],lower:{t:'pants',c:'#1a1c22',s:'#0d0d10'}},
  pike:{name:'Graham Pike',col:'#b8a88a',skin:'#efc8a8',hair:'#8a8070',style:'slick',eye:'#4a5a4a',outfit:'suit',oc:'#4a4a3a',acc:['glasses','tie'],lower:{t:'pants',c:'#4a4a3a',s:'#2a1a10'}},
  owen:{name:'Owen Pryce',col:'#c8b08a',skin:'#efcfb4',hair:'#7a5a3a',style:'short',eye:'#4a5a3a',outfit:'cardigan',oc:'#6a5a4a',inn:'#e9e3da',acc:['beard','glasses'],lower:{t:'pants',c:'#3a3a44',s:'#2a1a10'}},

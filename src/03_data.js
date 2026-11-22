@@ -160,6 +160,7 @@ const ENDORDER=Object.keys(ENDINFO);
 /* achievements: [name, description, hidden until earned] */
 const ACH={
  first_hang:['Quality Time','Spend part of a day with someone.'],
+ first_event:['On the Programme','Go to a con event.'],events6:['Con Veteran','Go to six con events in one run.'],
  first_lead:['Following Up','Work a lead.'],
  first_solve:['Case Closed','Solve a mystery on the case board.'],
  all_solved:['The Whole Board','Solve all twelve mysteries in one run.'],

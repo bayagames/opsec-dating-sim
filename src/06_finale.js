@@ -113,13 +113,7 @@ $('bGo').onclick=()=>{
 function startPrologue(){
  beatBusy=false;
  if(!WD.touch&&window.THREE)tryLock();
- initWorld(()=>{
-  if(G.ok){S.inWorld=1;teleportArea('flat')}
-  run(scr('prologue'),()=>{addSum('Two weeks before the con, Ellie\'s bakery account was stolen. You got it back the slow, proper way, and found out the people selling the "fix" were Lumen, the con\'s sponsor.');
-   S.day=1;S.ch=1;S.slot=0;S.exp=S.foot;snapDay();save();
-   const go=()=>run([{chapter:1},{hide:1}],hub);
-   if(G.ok)fadeTp(()=>{teleportArea('flat');go()});else go()});
- });
+ initWorld(()=>{S.day=0;S.slot=0;S.wakeAt='flat';snapDay();if(G.ok){S.inWorld=1;teleportArea('flat')}hub()});
 }
 $('hIn').addEventListener('keydown',e=>{if(e.key==='Enter')$('bGo').click()});
 $('bCont').onclick=()=>{const s=readSlot('auto');if(s&&s.h)resumeGame(s)};

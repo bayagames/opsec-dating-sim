@@ -108,7 +108,7 @@ ada.n: That's the thing about this kind of proof. You don't have to trust me. Yo
  ada.o: Me? On stage? In front of everyone?
  ada.a: ...Only if you're there. Within ten metres. Five. Three.
 `;
-SC.ada5=`
+SC.ada7=`
 [bg conroof]
 ~ The con roof, after the finals. Gravel, skylights, the Lumen logo turning on its frame. Ada's lying on her back on a tarpaulin she brought, specifically, for lying on her back under stars.
 ada.n: Nobody else knows I come up here. I found the hatch on Monday. I've been coming up every night to not think.
@@ -231,7 +231,7 @@ priya.h: You did good. You really did. You never once tried to make it sound mor
  > I know.
  priya.h: Then you'll be good at it.
 `;
-SC.priya5=`
+SC.priya7=`
 [bg quiet]
 ~ The Quiet Room, late. Glow-in-the-dark stars on the ceiling, half of them unstuck. Priya's on a bean bag with her knees up.
 ~ She holds up her phone so you can see the screen. Then she holds down the power button, and you watch it go black.

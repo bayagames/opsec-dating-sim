@@ -87,103 +87,10 @@ ellie.h: If they're paying for your convention. Be careful anyway.
 `;
 SC.d1_leave=`
 [hide]
-~ Linden Street at half past seven. The barber is unrolling his shutter. A pigeon is eating a croissant flake on the pavement with real violence.
-* Half a day at work. Then the station. Then the train. Then the rest of your life, or at least the rest of the week.
-[bg office]
-~ Forty minutes later, the lift doors open on the third floor of the Brindle & Co tower.
-`;
-SC.d1_office=`
-[hide]
-~ Brindle & Co Insurance. Third floor. Grey carpet, grey desks, a motivational poster of a rowing team that says TEAMWORK and has been there since before anyone can remember.
-~ The IT helpdesk is you, a stapler and the Accounts printer, which hates you personally.
-linda.n: {h}. You're in. Good. I was half expecting you'd "work from home" today and accidentally be on a train by nine.
-~ Linda Ashworth, Head of Operations. She manages forty people, a budget, and a three-page document called "Things {h} Has Fixed That Were Not Broken".
-linda.n: Half a day, as agreed. Then you're free. But Claims got a wave of weird emails this morning and Gary has already clicked something, so before anybody else clicks anything...
-> The queue.
-linda.h: The queue. And one other thing. Gary's put that new app on every work phone. The privacy one, with the shield. SafeSphere? Lumen gave us a deal on it. Company-wide. Can you check it's set up properly before you go?
-* SafeSphere. On every work phone in an insurance company. Every claims handler's contacts. Every location, every minute.
-? "Who signed off on that?"
- [fx skill:2]
- linda.a: Procurement, with a lot of enthusiasm. It's free for us, and Lumen threw in "data insights" for Underwriting. Why? Is it bad?
- > I don't know yet. I'll look.
- linda.n: Look after your hacker thing. I'm not having you ruin your week over an app.
- [clue gary_mdm]
-? "I'll take a look."
- [fx skill:1]
- linda.n: Thank you. Gary says it's "basically military grade". Gary also says the moon landing was "basically a stage play", so.
- [clue gary_mdm]
-[unlock notes]
-[sum Your last half-day at Brindle & Co. Gary had put SafeSphere on every work phone, and Lumen had thrown in "data insights" for Underwriting.]
-`;
-SC.d1_queue=`
-[hide]
-~ You sit down at the helpdesk. Forty-seven tickets. A suspicious number of them have the subject line "URGENT!!!" and were sent at the same minute.
-* Same minute, same subject. That's not forty-seven people with problems. That's one person with forty-seven targets.
-[unlock skill]
-[game phish pool=3,10,4,8,11 title="Helpdesk queue" noexp=1 res=d1QueueRes]
-if f('office_good')
- linda.h: Brilliant. That's every single one. Honestly, you're wasted on us.
- * For one second, you are a legend offline too.
- [fx skill:4]
-else
- linda.a: Hm. Gary has already clicked the gift-card one. Gary has bought eleven gift cards. Gary does not know who for.
- * Gary is going to be in your helpdesk queue until you retire.
-~ Then the phones. You open the SafeSphere management console on your laptop and stare at it.
-~ "Permissions granted, company-wide: Contacts · Location (precise, always) · Call log · Microphone ('voice tips') · Network ('VPN')."
-* Always. Location, always. Microphone, for voice tips. Who needs voice tips from a privacy app?
-? Turn off everything you can from the console.
- [fx skill:3]
- [flag brindle_locked]
- ~ You switch off what the console lets you switch off, which is two of the five. The others are greyed out: "Managed by Lumen".
- * Managed by Lumen. On Brindle's phones. That sentence is going to bother you on the train.
-? Screenshot the permissions for later.
- [fx skill:2 foot:1]
- [flag brindle_shot]
- ~ You take a photo of your screen with your phone. Somewhere in the back of your head a small, careful voice says: that's a work screen, on your personal phone, and your phone is about to be in a building full of hackers.
- * You keep it anyway. You'll be careful.
-? Leave it. It's not your week to worry about this.
- ~ You close the console. The shield icon smiles at you. You don't smile back.
-`;
-SC.d1_gary=`
-[hide]
-gary.h: Mate. MATE. Are you, like, a hacker? A real one? Linda says you're going to a hacker thing.
-~ Gary Pugh, Accounts. Thirty-four. He owns a jet ski and a T-shirt that says "I PAUSED MY GAME TO BE HERE".
-[unlock clout]
-? "Yeah. I could take this building's network down from my phone."
- [fx clout:6]
- gary.o: No way. Sick. Don't, though. My fantasy football's on it.
- * You could not take this building's network down from your phone. You could barely take down the printer, and you work here.
-? "I'm learning. I read a lot."
- [fx skill:2]
- gary.h: Respect. Respect. Can you un-buy eleven gift cards?
- > No.
- gary.n: Didn't think so.
-? "I'm going to a convention. It's mostly talks."
- [fx skill:1]
- gary.s: Talks. Right. "Talks". Wink.
- > There's no wink. It's talks. And workshops.
- gary.h: Wink.
-gary.n: Anyway, listen. I put the shield app on everyone's phone. SafeSphere. The Lumen bloke said it'd stop exactly this kind of thing. The gift card thing.
-gary.n: And it's free, and it gives us "insights". Underwriting love it. They can see, like, where customers drive and stuff. For pricing. It's genius.
-* For pricing. Where customers drive. You've never heard anything quietly terrible said so cheerfully.
-? "Where customers drive? How do they see that?"
- [fx skill:2]
- gary.s: Dunno, mate. Insights. It's all on the "LifeScore" dashboard. Underwriting have got it on a big telly. It's got a little map.
- [flag heard_lifescore]
- * LifeScore. You file the word away.
-? "That sounds great, Gary."
- [fx clout:1]
- gary.h: Right? Shield on everything. Like a knight.
-~ Linda's voice, from her office: "{h}! Go! Go to your thing! I can see you not leaving!"
-`;
-SC.d1_out=`
-[hide]
-linda.n: Have a wonderful week. Don't hack anything I'd have to explain to legal. Don't check your email.
-linda.h: You'll check your email.
-> I'll check my email.
-~ The lift says "going down". For once, so are you, in a good way.
+~ Linden Street, with a suitcase. The barber waves with his scissors. Mr Demir has never waved before. He must know.
+* No work today. Linda gave you the whole week, and made you promise not to check your email. You will check your email.
 [bg station]
-~ Central Station. You've been through it a thousand times, half asleep, on the way to work. You have never once looked up.
+~ Ten minutes' walk, a suitcase that won't steer, and Central Station.
 `;
 SC.d1_concourse=`
 [hide]

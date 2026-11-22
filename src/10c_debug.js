@@ -66,7 +66,7 @@ async function dbgJump(id){
  ov(`<div class="card"><h3>Fast-playing…</h3><p class="small">To ${id==='__end'?'an ending':esc(BEATS[id].t)}.</p></div>`);
  S=fresh(h);S.unl={};beatBusy=false;
  if(G.ok&&S.inWorld!==1){S.inWorld=1}
- run(scr('prologue'),()=>{S.day=1;S.ch=1;S.slot=0;S.exp=S.foot;snapDay();hub()});
+ S.day=0;S.slot=0;S.wakeAt='flat';if(G.ok){S.inWorld=1;teleportArea('flat')}hub();
  await autoplay(()=>id!=='__end'&&curBeat()&&curBeat().id===id&&!beatBusy&&!$('vn').classList.contains('on'),{hang});
  closeOv();if(S.ending)return;
  // land where the beat is waiting
