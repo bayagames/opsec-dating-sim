@@ -87,7 +87,7 @@ function paintTextures(){
  tex('dark',16,16,(c,w,h)=>{c.fillStyle='#14101a';c.fillRect(0,0,w,h)});
  tex('black',16,16,(c,w,h)=>{c.fillStyle='#000';c.fillRect(0,0,w,h)});
 }
-function signTex(text,fg,bg,w,h){const k='s:'+text+fg+bg+(w||400)+'x'+(h||76);return tex(k,w||400,h||76,(c,W,H)=>{c.fillStyle=bg;c.fillRect(0,0,W,H);c.strokeStyle=fg;c.lineWidth=5;c.strokeRect(6,6,W-12,H-12);c.fillStyle=fg;c.textAlign='center';c.textBaseline='middle';let fs=H*.5;c.font=`${fs}px VT323, monospace`;while(c.measureText(text).width>W-40&&fs>10){fs-=2;c.font=`${fs}px VT323, monospace`}c.fillText(text,W/2,H/2+2)})}
+function signTex(text,fg,bg,w,h){const k='s:'+text.replace(/\|/g,'¦')+fg+bg+(w||400)+'x'+(h||76);;return tex(k,w||400,h||76,(c,W,H)=>{c.fillStyle=bg;c.fillRect(0,0,W,H);c.strokeStyle=fg;c.lineWidth=5;c.strokeRect(6,6,W-12,H-12);c.fillStyle=fg;c.textAlign='center';c.textBaseline='middle';let fs=H*.5;c.font=`${fs}px VT323, monospace`;while(c.measureText(text).width>W-40&&fs>10){fs-=2;c.font=`${fs}px VT323, monospace`}c.fillText(text,W/2,H/2+2)})}
 
 /* ============ MATERIALS ============ */
 /* t texture, c tint, s texture scale (repeats per metre), e emissive; o.r roughness, o.m metalness, o.k emissive gain, o.cut alpha cut-out */
