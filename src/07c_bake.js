@@ -19,7 +19,7 @@ function bakeMats(){
   fragmentShader:PD12+`uniform vec3 lp,lc;uniform float lr,far,soft,fillk;uniform samplerCube cube;varying vec3 wp;varying vec3 wn;
   float vis(vec3 p,float d){vec3 dir=(p-lp)/d;vec3 t1=normalize(cross(dir,abs(dir.y)<.9?vec3(0.,1.,0.):vec3(1.,0.,0.)));vec3 t2=cross(dir,t1);
    float r=soft*(.5+d*.08)/max(d,.3),bias=.035+d*.012,s=0.;for(int i=0;i<12;i++){vec2 o=PD[i]*r;float sd=textureCube(cube,dir+t1*o.x+t2*o.y).r*far;s+=sd>d-bias?1.:0.;}return s/12.;}
-  void main(){vec3 n=normalize(wn);vec3 L=lp-wp;float d=length(L);if(d>lr)discard;vec3 l=L/d;float x=clamp(1.-d/lr,0.,1.),fall=x*x,ndl=dot(n,l);
+  void main(){vec3 n=normalize(wn);vec3 L=lp-wp;float d=length(L);if(d>lr)discard;vec3 l=L/d;float x=clamp(1.-d/lr,0.,1.),fall=x*x,ndl=dot(n,l);if(length(wn)>1.5&&ndl<0.){n=-n;ndl=-ndl;}
    vec3 p=wp+n*.03;float sh=vis(p,length(p-lp));
    gl_FragColor=vec4(lc*(max(ndl,0.)+fillk*(ndl*.5+.5))*fall*sh,0.);}`,
   side:T.DoubleSide,depthTest:false,depthWrite:false,blending:T.CustomBlending,blendEquation:T.AddEquation,blendSrc:T.OneFactor,blendDst:T.OneFactor,blendSrcAlpha:T.ZeroFactor,blendDstAlpha:T.OneFactor});
@@ -37,7 +37,7 @@ function bakeMats(){
  const sun=new T.ShaderMaterial({uniforms:{sd:{value:new T.Vector3()},lc:{value:new T.Vector3()},cp:{value:new T.Vector3()},far:{value:1},smat:{value:new T.Matrix4()},smap:{value:null},tx:{value:1}},
   vertexShader:vs,
   fragmentShader:PD12+`uniform vec3 sd,lc,cp;uniform float far,tx;uniform mat4 smat;uniform sampler2D smap;varying vec3 wp;varying vec3 wn;
-  void main(){vec3 n=normalize(wn);float ndl=dot(n,sd);if(ndl<=0.)discard;vec3 p=wp+n*.04;vec4 c=smat*vec4(p,1.);vec2 uv=c.xy/c.w*.5+.5;float sh=1.;
+  void main(){vec3 n=normalize(wn);float ndl=dot(n,sd);if(length(wn)>1.5&&ndl<0.){n=-n;ndl=-ndl;}if(ndl<=0.)discard;vec3 p=wp+n*.04;vec4 c=smat*vec4(p,1.);vec2 uv=c.xy/c.w*.5+.5;float sh=1.;
    if(uv.x>0.&&uv.x<1.&&uv.y>0.&&uv.y<1.){float d=dot(cp-p,sd),s=0.;for(int i=0;i<12;i++){float z=texture2D(smap,uv+PD[i]*tx*1.6).r*far;s+=z>d-.05?1.:0.;}sh=s/12.;}
    gl_FragColor=vec4(lc*ndl*sh,0.);}`,
   side:T.DoubleSide,depthTest:false,depthWrite:false,blending:T.CustomBlending,blendEquation:T.AddEquation,blendSrc:T.OneFactor,blendDst:T.OneFactor,blendSrcAlpha:T.ZeroFactor,blendDstAlpha:T.OneFactor});

@@ -55,8 +55,21 @@ function quad(a,b,c,d,m,uw,vh){
  // every lit quad gets its own patch in the region's lightmap (packed later); (s,t) place each vertex inside it
  if(G.qlog)G.qlog.push([BR,nx,ny,nz,nx*a[0]+ny*a[1]+nz*a[2],Math.min(a[0],b[0],c[0],d[0]),Math.min(a[1],b[1],c[1],d[1]),Math.min(a[2],b[2],c[2],d[2]),Math.max(a[0],b[0],c[0],d[0]),Math.max(a[1],b[1],c[1],d[1]),Math.max(a[2],b[2],c[2],d[2]),(m.t||'white')+(m.e?'*':'')+(m.glass?'g':'')+(m.cut?'c':'')+(m.c?m.c.join(','):'')]);
  const lmq=!m.e&&!m.glass?(G.qd[BR]||(G.qd[BR]=[])).push({w:Math.hypot(e1[0],e1[1],e1[2])*G.lmK,h:Math.hypot(e2[0],e2[1],e2[2])*G.lmK})-1:-1;
- const push=(s,t)=>{const p=P(s,t),k=ao(p[1]);g.p.push(p[0],p[1],p[2]);g.n.push(nx,ny,nz);g.u.push(uw*s,vh*t);g.c.push(lc[0]*k,lc[1]*k,lc[2]*k);g.l.push(s,t);g.q.push(lmq)};
+ // foliage cut-outs are one double-sided face: a normal of length 2 tells the baker to light both sides
+ const nk=m.cut?2:1;
+ const push=(s,t)=>{const p=P(s,t),k=ao(p[1]);g.p.push(p[0],p[1],p[2]);g.n.push(nx*nk,ny*nk,nz*nk);g.u.push(uw*s,vh*t);g.c.push(lc[0]*k,lc[1]*k,lc[2]*k);g.l.push(s,t);g.q.push(lmq)};
  for(let i=0;i<ss.length-1;i++)for(let j=0;j<ts.length-1;j++){const s0=ss[i],s1=ss[i+1],t0=ts[j],t1=ts[j+1];push(s0,t0);push(s1,t0);push(s1,t1);push(s0,t0);push(s1,t1);push(s0,t1)}
+}
+/* a single triangle (gables, spires, hips): quads above can only be parallelograms. UVs run along a->b and a->c */
+function tri(a,b,c,m,uw,vh){
+ const e1=[b[0]-a[0],b[1]-a[1],b[2]-a[2]],e2=[c[0]-a[0],c[1]-a[1],c[2]-a[2]];
+ let nx=e1[1]*e2[2]-e1[2]*e2[1],ny=e1[2]*e2[0]-e1[0]*e2[2],nz=e1[0]*e2[1]-e1[1]*e2[0];const nl=Math.hypot(nx,ny,nz);if(!(nl>1e-7))return;nx/=nl;ny/=nl;nz/=nl;
+ const g=grp(m,(a[0]+b[0]+c[0])/3,(a[2]+b[2]+c[2])/3);const T=G.tx[m.t||'white'];if(T){T.used=true;if(uw>1.01||vh>1.01)T.rep=true}
+ uw=uw===undefined?1:uw;vh=vh===undefined?1:vh;
+ const col=m.c||[1,1,1],gk0=m.e?(m.k!==undefined?m.k:(m.t==='white'||!m.t?1.9:1.05)):1,gk=gk0>1?1+(gk0-1)*.55:gk0,lc=[lin(col[0])*gk,lin(col[1])*gk,lin(col[2])*gk];
+ if(G.qlog)G.qlog.push([BR,nx,ny,nz,nx*a[0]+ny*a[1]+nz*a[2],Math.min(a[0],b[0],c[0]),Math.min(a[1],b[1],c[1]),Math.min(a[2],b[2],c[2]),Math.max(a[0],b[0],c[0]),Math.max(a[1],b[1],c[1]),Math.max(a[2],b[2],c[2]),(m.t||'white')+(m.e?'*':'')+(m.glass?'g':'')+'t']);
+ const lmq=!m.e&&!m.glass?(G.qd[BR]||(G.qd[BR]=[])).push({w:Math.hypot(...e1)*G.lmK,h:Math.hypot(...e2)*G.lmK})-1:-1,nk=m.cut?2:1;
+ for(const[p,s,t]of[[a,0,0],[b,1,0],[c,0,1]]){g.p.push(p[0],p[1],p[2]);g.n.push(nx*nk,ny*nk,nz*nk);g.u.push(uw*s,vh*t);g.c.push(lc[0],lc[1],lc[2]);g.l.push(s,t);g.q.push(lmq)}
 }
 function colBox(x0,z0,x1,z1,y0,y1){G.boxes[BR].push([Math.min(x0,x1),Math.min(z0,z1),Math.max(x0,x1),Math.max(z0,z1),y0,y1])}
 function box(x0,y0,z0,x1,y1,z1,m,o){

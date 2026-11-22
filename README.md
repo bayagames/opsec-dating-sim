@@ -31,7 +31,9 @@ Source lives in `src/`. To rebuild `index.html` after editing:
 - `08b_level.js`   level helpers + home (flat and bakery)
 - `08c_site.js`    the Halcyon Hotel + Convention Centre: Foyer, Ring, courtyard, halls, Village Row, back of house, Level 1, basement, con roof
 - `08d_tower.js`   hotel 13th floor + hotel roof
-- `08e_places.js`  Brindle & Co (office) + Central Station
+- `08a_kit.js`     shared props (desks, chairs, monitors, plants, lamps, beams) sized in metres
+- `08g_office.js`  Brindle & Co: the third floor of an office tower, with the street below
+- `08h_station.js` Central Station: a Victorian train shed, concourse and the tracks out to the city
 - `08f_home.js`    Proof: a five-level corner building (bakery, Flat 1A, two locked floors, roof terrace) on Linden Street, with the street, square, rear terraces, viaduct and city around it; morning sun baked through real windows
 - `09_world.js`    movement, collision, interaction, sprites, minimap, main loop
 - `09a_place.js`   who stands where, interactions, crowd, story gates, lifts, train and taxi

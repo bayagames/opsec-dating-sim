@@ -15,7 +15,7 @@ function wallLine(o,fixed,a0,a1,Y,H,m,inward,frame){
  P.push([cur,a1,Y,Y+H]);
  G.ao=Y;
  for(const s of P){if(s[1]-s[0]<.01||s[3]-s[2]<.01)continue;
-  if(m.glass){glassSeg(o,fixed,s[0],s[1],s[2],s[3],t0,t1);G.walls[BR].push(o==='h'?[s[0],fixed,s[1],fixed,s[2],s[3]]:[fixed,s[0],fixed,s[1],s[2],s[3]]);continue}
+  if(m.glass){glassSeg(o,fixed,s[0],s[1],s[2],s[3],t0,t1,s[2]>Y+.05);G.walls[BR].push(o==='h'?[s[0],fixed,s[1],fixed,s[2],s[3]]:[fixed,s[0],fixed,s[1],s[2],s[3]]);continue}
   if(o==='h')box(s[0],s[2],t0,s[1],s[3],t1,m);else box(t0,s[2],s[0],t1,s[3],s[1],m);
   if(s[3]-s[2]>1)G.walls[BR].push(o==='h'?[s[0],fixed,s[1],fixed,s[2],s[3]]:[fixed,s[0],fixed,s[1],s[2],s[3]]);
   if(Math.abs(s[2]-Y)<.01&&!m.e){const sk=MT.skirt,f=face+inward*.012;
@@ -35,11 +35,11 @@ function room(o){
  if(o.n)(MAPR[BR]=MAPR[BR]||[]).push({x0,z0,x1,z1,y,n:o.n,c:o.mc||'#3a2a4a'});
 }
 /* glass curtain wall: transparent pane, chrome mullions every ~2.4 m, solid to walk into */
-function glassSeg(o,fixed,a,b,y0,y1,t0,t1){const g=MT.glass,c=MT.chrome,tm=(t0+t1)/2;
+function glassSeg(o,fixed,a,b,y0,y1,t0,t1,lintel){const g=MT.glass,c=MT.chrome,tm=(t0+t1)/2;
  if(o==='h'){box(a,y0,tm-.02,b,y1,tm+.02,g,{col:false});colBox(a,t0,b,t1,y0,y1)}else{box(tm-.02,y0,a,tm+.02,y1,b,g,{col:false});colBox(t0,a,t1,b,y0,y1)}
  const n=Math.max(1,Math.round((b-a)/2.4));
- for(let i=0;i<=n;i++){const p=a+(b-a)*i/n;if(o==='h')box(p-.04,y0,tm-.06,p+.04,y1,tm+.06,c,{col:false});else box(tm-.06,y0,p-.04,tm+.06,y1,p+.04,c,{col:false})}
- for(const yy of[y0,Math.min(y1,y0+3.2),y1-.08])if(yy<y1){if(o==='h')box(a,yy,tm-.06,b,yy+.08,tm+.06,c,{col:false});else box(tm-.06,yy,a,tm+.06,yy+.08,b,c,{col:false})}}
+ for(let i=0;i<=n;i++){if(lintel&&(i===0||i===n))continue;const p=a+(b-a)*i/n;if(o==='h')box(p-.04,y0,tm-.06,p+.04,y1,tm+.06,c,{col:false});else box(tm-.06,y0,p-.04,tm+.06,y1,p+.04,c,{col:false})}
+ for(const yy of[y0,Math.min(y1,y0+3.2),y1-.08])if(yy<y1){if(o==='h')box(a,yy,tm-.05,b,yy+.08,tm+.05,c,{col:false});else box(tm-.05,yy,a,tm+.05,yy+.08,b,c,{col:false})}}
 /* top surface only, for roofs you can see but not walk on */
 function roofTop(x0,z0,x1,z1,y,m){floorQ(x0,z0,x1,z1,y,m||MT.gravel)}
 /* a run of theatre seats as one long seat + back (much cheaper than single chairs) */
@@ -58,7 +58,7 @@ function rack(x,z,dir,y){y=y||0;box(x-.32,y,z-.5,x+.32,y+2.1,z+.5,MT.gloss('#161
 function area(k,n,reg,r,sp,bg,o){AREAS[k]=Object.assign({k,n,reg,r,sp,bg,y0:-2,y1:4.9},o||{})}
 function table(x,z,w,d,m,h,y){y=y||0;h=h||.76;box(x-w/2,y+h-.06,z-d/2,x+w/2,y+h,z+d/2,m,{col:false});const lg=MT.plain('#2a2530');for(const[sx,sz]of[[-1,-1],[1,-1],[-1,1],[1,1]])box(x+sx*(w/2-.08)-.03,y,z+sz*(d/2-.08)-.03,x+sx*(w/2-.08)+.03,y+h-.06,z+sz*(d/2-.08)+.03,lg,{col:false,nt:1});colBox(x-w/2,z-d/2,x+w/2,z+d/2,y,y+h)}
 function chair(x,z,dir,m,y){y=y||0;const s=.22;box(x-s,y+.42,z-s,x+s,y+.48,z+s,m,{col:false});const bx={n:[x-s,z-s,x+s,z-s+.06],s:[x-s,z+s-.06,x+s,z+s],e:[x+s-.06,z-s,x+s,z+s],w:[x-s,z-s,x-s+.06,z+s]}[dir];box(bx[0],y+.48,bx[1],bx[2],y+.95,bx[3],m,{col:false});box(x-.03,y,z-.03,x+.03,y+.42,z+.03,MT.plain('#222'),{col:false,nt:1})}
-function card(x,y,z,w,h,a,m){const c=Math.cos(a)*w/2,d=Math.sin(a)*w/2;quad([x-c,y,z-d],[x+c,y,z+d],[x+c,y+h,z+d],[x-c,y+h,z-d],m,1,1);quad([x+c,y,z+d],[x-c,y,z-d],[x-c,y+h,z-d],[x+c,y+h,z+d],m,1,1)}
+function card(x,y,z,w,h,a,m){const c=Math.cos(a)*w/2,d=Math.sin(a)*w/2;quad([x-c,y,z-d],[x+c,y,z+d],[x+c,y+h,z+d],[x-c,y+h,z-d],m,1,1);if(!m.cut)quad([x+c,y,z+d],[x-c,y,z-d],[x-c,y+h,z-d],[x+c,y+h,z+d],m,1,1)}
 function plant(x,z,s,y){s=s||1;y=y||0;box(x-.25*s,y,z-.25*s,x+.25*s,y+.5*s,z+.25*s,MT.gloss('#b0603a'));box(x-.22*s,y+.5*s,z-.22*s,x+.22*s,y+.52*s,z+.22*s,MT.plain('#3a2418'),{col:false});for(let i=0;i<3;i++)card(x,y+.38*s,z,1.1*s,1.4*s,i*Math.PI/3,MT.leaves)}
 function tree(x,z,y){y=y||0;box(x-.16,y,z-.16,x+.16,y+2.4,z+.16,MT.plain('#4a3020'));const a0=rnd()*3;for(let i=0;i<4;i++)card(x,y+1.5,z,3.4,3.4,a0+i*Math.PI/4,MT.leaves);for(let i=0;i<3;i++)card(x,y+2.7,z,2.4,2.4,a0+.4+i*Math.PI/3,MT.leaves)}
 function sofa(x,z,w,dir,c,y){y=y||0;const m=MT.fabric(c),d=.9;const hz=dir==='n'||dir==='s';const X0=hz?x-w/2:x-d/2,X1=hz?x+w/2:x+d/2,Z0=hz?z-d/2:z-w/2,Z1=hz?z+d/2:z+w/2;box(X0,y,Z0,X1,y+.45,Z1,m);const b={n:[X0,Z0,X1,Z0+.22],s:[X0,Z1-.22,X1,Z1],w:[X0,Z0,X0+.22,Z1],e:[X1-.22,Z0,X1,Z1]}[dir];box(b[0],y+.45,b[1],b[2],y+.9,b[3],m,{col:false})}

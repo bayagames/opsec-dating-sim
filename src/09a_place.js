@@ -1,6 +1,6 @@
 /* ============ WORLD CONTENT: who stands where, what you can use, what's locked ============ */
 const BG2AREA={train:'platform',con:'foyer',lock:'lockpick',ctf:'ctf',soc:'soc',stream:'creator',hotel:'room1337',roof:'plantdeck',stage:'hallA',keynote:'hallA',vendor:'vendor',flat:'flat',bakery:'bakery',cos:'cosplay',chill:'lounge',bar:'bar',lobby:'lobby',office:'office'};
-const FAR={home:330,con:260,f13:460,office:80,station:220};
+const FAR={home:330,con:260,f13:460,office:440,station:600};
 /* Day 1 onboarding steps: badge → opening ceremony → hotel check-in → drop your bag → (the whole con) */
 const d1=k=>S&&(S.ch>1||(S.ch===1&&!!S.f['d1_'+k]));
 const onboarding=()=>S&&(S.ch===0||(S.ch===1&&!S.f.d1_room));
@@ -77,7 +77,7 @@ function genCrowd(){
   gallery:[[-8,-31,5.5,1],[26,-31.2,5.5,1],[58,-10,5.5,1],[20,34,5.5],[-22.5,12,5.5]],skybridge:[[-36,-22,5.5]],hotelL1:[[-70,-22,5.5]],gym:[[-78,-12.6,5.5,1]],workshop:[[80,-24.3,5.5,1],[88,-21,5.5,1]],workshopA:[[66,-22.6,5.5,1]],hwv:[[100,-24.8,5.5,1],[112,-17.8,5.5,1],[118,-10,5.5]],
   creator:[[73,14,5.5,1]],arcade:[[80,20,5.5,1],[86,24,5.5,1],[84,34,5.5]],conops:[[96,18,5.5],[102,26,5.5,1]],press:[[110,21,5.5,1]],speakers:[[116,30,5.5]],quiet:[[50,46.6,5.5,1]],fcterrace:[[34,14,5.5]],
   plaza:[[-50,40],[-90,44],[-20,50],[-6,47.6,0,1],[-70,92]],carpark:[[-60,30,-4.5]],noc:[[-18,9.2,-4.5,1],[-11,9.2,-4.5,1]],corridor:[[230,10],[250,-10]],roof:[[227,-2.8,3.6,1],[220,12,3.6],[235,15,3.6]],
-  station:[[720,30],[750,40],[715,34.6,0,1],[760,28.6,0,1],[740,26]],platform:[[720,12],[750,10],[730,16,0,1],[760,14]],office:[[513,7.9,0,1],[522,13.9,0,1],[516,13.9,0,1]]};
+  station:[[720,30],[750,40],[715,34.6,0,1],[760,28.6,0,1],[740,26]],platform:[[720,14.5],[750,9.6],[730,16,0,1],[760,14.5],[727.5,-4]],office:[[514.3,3.4,0,1],[520.7,12.3,0,1],[510,6.5],[528,9]]};
  let i=0;
  for(const a in spots)for(const p of spots[a]){
   if(!AREAS[a])continue;
@@ -89,7 +89,7 @@ function genCrowd(){
  R('Receptionist','con',-84.4,5,0,'lobby',4);R('Receptionist','con',-84.4,10,0,'lobby',6);R('Barista','con',-53.5,19.3,0,'cafe',1);R('Security','con',-38,-33.2,0,'security');
  R('Engineer','con',-14,10.4,BY,'noc',0);R('Engineer','con',-7,9.4,BY,'noc',2);
  for(const[x,z]of[[260,17],[262.6,19.8],[260.2,20.6],[263,14.6]])R('Partygoer','f13',x,z,0,'room1336',(x*7|0)%7);
- R('Commuter','station',728,12,0,'platform',2);R('Commuter','station',744,13,0,'platform',5);R('Coworker','office',525,8.3,0,'office',4);
+ R('Commuter','station',727,9,0,'platform',2);R('Commuter','station',744,13,0,'platform',5);R('Coworker','office',502.6,1.7,0,'office',4);
 }
 /* ---------------- gates: ropes, locked doors and card readers that open with the story ---------------- */
 const GATES=[];
@@ -158,8 +158,8 @@ function placeWorld(){
  C('marge','con',-5,-76,()=>ch()===4,{y:1.3});
  C('victor','con',-38,6,()=>ch()>=1&&ch()<3);
  C('victor','con',-80,-30,()=>ch()===3);
- C('linda','office',504.5,1.9,()=>ch()===0);
- C('gary','office',520.6,8.6,()=>ch()===0);
+ C('linda','office',537.4,2.4,()=>ch()===0);
+ C('gary','office',521,8.6,()=>ch()===0);
  genCrowd();placeGates();
  const N1=t=>()=>run([N(t)],hub);
  const once=(k,a,b)=>()=>{const key=k+S.ch;if(S.room[key])return run([N(b)],hub);S.room[key]=1;run(a(),hub)};
@@ -193,19 +193,21 @@ function placeWorld(){
  int('home',-290.6,3.4,()=>'Turn up the radio',N1('Local radio. Traffic on the ring road, a phone-in about seagulls, and then a song from 2009 that both you and Ellie sing along to, badly, without making eye contact.'));
  int('home',-302.6,10.9,()=>S.ch!==0||S.f.ch0_work?null:S.f.ch0b?'Head out to work':'Leave for work',()=>{if(!S.f.ch0b)return run([N('Breakfast first. You can smell the cinnamon from here. Ellie\'s at the counter.')],hub);goOffice()});
  /* ---- office ---- */
- int('office',528,4.3,()=>S.ch!==0?null:S.f.ch0_work?'Your desk':'Start on the helpdesk queue',()=>{if(S.f.ch0_work)return run([N('Forty-seven tickets. Forty-six of them are about the printer. The forty-seventh is also about the printer, but angrier.')],hub);run(CH0QUEUE(),()=>{S.f.ch0_work=1;hub()})});
- int('office',516,20.9,()=>S.ch!==0?null:'Lifts · exit',()=>{if(!S.f.ch0_work)return run([L('linda','n','Queue first, {h}. Then you can go and do... whatever you do in the evenings.')],hub);if(!S.f.ch0_gary)return run([N('Across the office, Gary from Accounts is waving at you. Hard. With both arms. You should probably see what he wants.')],hub);goEvening()});
- int('office',511.1,14.9,()=>'Fight the Accounts printer',N1('PC LOAD LETTER. You open every drawer. You close every drawer. It prints one page, a photocopy of someone\'s hand from 2016. You decide this counts as a win.'));
- int('office',503.4,16.4,()=>'Make a tea',N1('The kettle takes four minutes and sounds like a jet engine. A note on the fridge: "WHO TOOK MY YOGHURT". Under it, in different pen: "it was me. I\'m not sorry. —G"'));
- int('office',506.5,20.4,()=>'Water cooler',N1('Nobody is having a conversation at the water cooler. Everyone is having a conversation on Slack about the water cooler.'));
- int('office',528,15.2,()=>'Look into the meeting room',N1('A slide titled "Synergy Q3". Below it, someone has drawn a duck. The duck is the only thing in the meeting that made sense.'));
- int('office',503,.9,()=>'Look out of the window',N1('The city, grey and busy. Somewhere out there, four thousand hackers are packing hoodies. In two weeks you\'ll be one of them.'));
+ int('office',526.6,21,()=>S.ch!==0?null:S.f.ch0_work?'Your desk':'Start on the helpdesk queue',()=>{if(S.f.ch0_work)return run([N('Forty-seven tickets. Forty-six of them are about the printer. The forty-seventh is also about the printer, but angrier.')],hub);run(CH0QUEUE(),()=>{S.f.ch0_work=1;hub()})});
+ int('office',497.7,12,()=>S.ch!==0?null:'Lifts · exit',()=>{if(!S.f.ch0_work)return run([L('linda','n','Queue first, {h}. Then you can go and do... whatever you do in the evenings.')],hub);if(!S.f.ch0_gary)return run([N('Across the office, Gary from Accounts is waving at you. Hard. With both arms. You should probably see what he wants.')],hub);goEvening()});
+ int('office',505.6,18.7,()=>'Fight the Accounts printer',N1('PC LOAD LETTER. You open every drawer. You close every drawer. It prints one page, a photocopy of someone\'s hand from 2016. You decide this counts as a win.'));
+ int('office',497.6,1.6,()=>'Make a tea',N1('The kettle takes four minutes and sounds like a jet engine. A note on the fridge: "WHO TOOK MY YOGHURT". Under it, in different pen: "it was me. I\'m not sorry. —G"'));
+ int('office',503.4,6.05,()=>'Water cooler',N1('Nobody is having a conversation at the water cooler. Everyone is having a conversation on Slack about the water cooler.'));
+ int('office',530.2,17.2,()=>'Look into the meeting room',N1('A slide titled "Synergy Q3". Below it, someone has drawn a duck. The duck is the only thing in the meeting that made sense.'));
+ int('office',508,-3.25,()=>'Look out of the window',N1('The city, grey and busy. Somewhere out there, four thousand hackers are packing hoodies. In two weeks you\'ll be one of them.'));
  /* ---- station ---- */
- int('station',736,6.5,()=>'Board the train',()=>trainMenu(),{r:2.6});
- int('station',736,42.6,()=>'Exit · taxi rank',()=>{if(S.ch===0)return run([N('Your train\'s on Platform 4. You\'ve checked three times. You check a fourth time.')],hub);fadeTp(()=>{teleportArea('plaza');run([N('Twenty minutes later the taxi pulls up outside the Halcyon. The neon sign is still shouting.')],hub)})});
- int('station',736,25,()=>'Read the departures board',N1('09:12 CONFERENCE QUARTER · HALCYON — PLATFORM 4 — ON TIME. A man next to you photographs the board, then his ticket, then his face. Then he posts all three.'));
- int('station',759,33,()=>'Pasty Palace',N1('"Cheese and onion, or cheese and onion?" You pick cheese and onion. It\'s the right choice.'));
- int('station',702.6,30,()=>'Ticket machine',N1('It offers to email you a receipt, text you a receipt, and "remember your card for next time". You pay with cash. The machine seems hurt.'));
+ int('station',734,4.4,()=>'Board the train',()=>trainMenu(),{r:2.6});
+ int('station',736,46.6,()=>'Exit · taxi rank',()=>{if(S.ch===0)return run([N('Your train\'s on Platform 4. You\'ve checked three times. You check a fourth time.')],hub);fadeTp(()=>{teleportArea('plaza');run([N('Twenty minutes later the taxi pulls up outside the Halcyon. The neon sign is still shouting.')],hub)})});
+ int('station',736,23.4,()=>'Read the departures board',N1('09:12 CONFERENCE QUARTER · HALCYON — PLATFORM 4 — ON TIME. A man next to you photographs the board, then his ticket, then his face. Then he posts all three.'));
+ int('station',764.8,26,()=>'Pasty Palace',N1('"Cheese and onion, or cheese and onion?" You pick cheese and onion. It\'s the right choice.'));
+ int('station',701.5,35.7,()=>'Ticket machine',N1('It offers to email you a receipt, text you a receipt, and "remember your card for next time". You pay with cash. The machine seems hurt.'));
+ int('station',764.8,35.2,()=>'Platform Coffee',N1('"Flat white?" You nod. The barista draws a heart in the foam, then, after a long look at you, turns it into a padlock.'));
+ int('station',708,43.6,()=>'Play the station piano',N1('You play the four notes of the only song you know. A man in a suit stops, listens, and puts a pound in a cup that isn\'t there. Then he catches the 09:20.'));
  /* ---- plaza ---- */
  int('con',-104,44,()=>'Taxi rank',()=>run([N('A taxi driver looks up from his phone. "Station?"'),C({t:'"Central Station, please."',then:()=>{fadeTp(()=>{teleportArea('station');run([N('The station. Commuters, pigeons, and a departures board that still has the 09:12 to the con on it.')],hub)});return[]}},{t:'"Not yet."',then:[]})],hub));
  int('con',-55,72.2,()=>'Look at the big sign',N1('CTRL+ALT+CON, in letters taller than you. Somebody has stuck a tiny sticker over the Lumen logo at the bottom. It says "no".'));

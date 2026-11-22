@@ -16,6 +16,18 @@ function blockedAt(reg,x,z,y,r){const H=G.regions[reg].hash,a=y+.4,b=y+1.75;
  for(const d of DYN){if(d.reg!==reg||!d.when())continue;const q=d.b;if(x+r>q[0]&&x-r<q[2]&&z+r>q[1]&&z-r<q[3]&&q[5]>a&&q[4]<b)return true}
  const h=heightAt(reg,x,z,y);if(h===null)return true;
  return false}
+/* the top of a prop you've dropped onto from above (a fall from a landing onto a table, say): you land on it rather
+   than sinking inside it, and walk off its edge normally */
+function propTopAt(reg,x,z,y,r){const H=G.regions[reg].hash;let best=null;
+ for(let gx=Math.floor((x-r)/4);gx<=Math.floor((x+r)/4);gx++)for(let gz=Math.floor((z-r)/4);gz<=Math.floor((z+r)/4);gz++){const L=H[gx+','+gz];if(!L)continue;
+  for(const q of L){if(x+r>q[0]&&x-r<q[2]&&z+r>q[1]&&z-r<q[3]&&q[5]<=y+.05&&q[5]>y-12&&(best===null||q[5]>best))best=q[5]}}
+ return best}
+/* if you ever end up inside something (a gate shut on you, an old save from before a prop moved), step out to the
+   nearest spot you could stand, instead of being frozen there for good */
+function unstick(){const reg=WD.reg,R=.3;if(!blockedAt(reg,WD.x,WD.z,WD.y,R))return false;
+ for(let d=.1;d<=6;d+=.1){const n=Math.max(8,Math.round(d*12));for(let i=0;i<n;i++){const a=i/n*Math.PI*2,x=WD.x+Math.cos(a)*d,z=WD.z+Math.sin(a)*d;
+  for(const dy of[0,.3,-.3,.6,-.6,1,-1]){const h=heightAt(reg,x,z,WD.y+dy);if(h===null||Math.abs(h-WD.y)>1.2)continue;if(!blockedAt(reg,x,z,h,R)){WD.x=x;WD.z=z;WD.y=h;WD.vx=WD.vz=WD.vy=0;return true}}}}
+ return false}
 /* what's underfoot: the floor's texture decides how a footstep sounds */
 function floorKind(){
  const L=(G.ftag&&G.ftag[WD.reg])||[],x=WD.x,z=WD.z,y=WD.y;let best=null,bd=.3,stair=null;
@@ -102,10 +114,11 @@ function update(dt){
  WD.vx+=(tvx-WD.vx)*acc;WD.vz+=(tvz-WD.vz)*acc;if(want<.01&&have<.05){WD.vx=WD.vz=0}
  const R=.3,reg=WD.reg;
  const nx=WD.x+WD.vx*dt,nz=WD.z+WD.vz*dt;
+ if((WD.stuckT=(WD.stuckT||0)+dt)>.25){WD.stuckT=0;unstick()}
  if(Math.abs(WD.vx)>1e-4){if(!blockedAt(reg,nx,WD.z,WD.y,R))WD.x=nx;else WD.vx=0}
  if(Math.abs(WD.vz)>1e-4){if(!blockedAt(reg,WD.x,nz,WD.y,R))WD.z=nz;else WD.vz=0}
  // vertical
- const gh=heightAt(reg,WD.x,WD.z,WD.y);const gy=gh===null?WD.y:gh;
+ const gh=heightAt(reg,WD.x,WD.z,WD.y);let gy=gh===null?WD.y:gh;if(WD.y>gy+.25){const pt=propTopAt(reg,WD.x,WD.z,WD.y,R*.7);if(pt!==null&&pt>gy)gy=pt}
  if(WD.vy>0||WD.y>gy+.02){WD.vy-=18*dt;WD.y+=WD.vy*dt;if(WD.y<=gy){if(WD.vy<-4){stepSound(.3,'land');WD.land=Math.min(.09,-WD.vy*.012)}WD.y=gy;WD.vy=0;WD.ground=true}else WD.ground=false}
  else{WD.y=gy;WD.vy=0;WD.ground=true}
  const target=WD.y+1.62;WD.eye+=(target-WD.eye)*Math.min(1,dt*(WD.eye<target?14:20));if(Math.abs(target-WD.eye)>1.2)WD.eye=target;
@@ -160,10 +173,10 @@ function objective(){
  let o=null;
  if(S.ch===0){
   if(!S.f.ch0b)o={t:'Go downstairs to Proof for breakfast.',reg:'home',x:-299,z:3.7,y:0};
-  else if(!S.f.ch0_work)o=WD.reg==='office'?{t:'Clear the helpdesk queue at your desk.',reg:'office',x:528,z:4.3,y:0}:{t:'Head out to work: the bakery\'s front door.',reg:'home',x:-302.6,z:11.2,y:0};
-  else if(!S.f.ch0_gary)o={t:'Gary from Accounts wants a word.',reg:'office',x:520.6,z:8.6,y:0};
-  else if(!S.f.ch0_eve)o={t:'Head home for the evening: the lifts.',reg:'office',x:516,z:20.9,y:0};
-  else o={t:'Platform 4: board the train to the con.',reg:'station',x:736,z:7,y:0};
+  else if(!S.f.ch0_work)o=WD.reg==='office'?{t:'Clear the helpdesk queue at your desk.',reg:'office',x:526.6,z:21,y:0}:{t:'Head out to work: the bakery\'s front door.',reg:'home',x:-302.6,z:11.2,y:0};
+  else if(!S.f.ch0_gary)o={t:'Gary from Accounts wants a word.',reg:'office',x:521,z:8.6,y:0};
+  else if(!S.f.ch0_eve)o={t:'Head home for the evening: the lifts.',reg:'office',x:497.7,z:12,y:0};
+  else o={t:'Platform 4: board the train to the con.',reg:'station',x:734,z:4.4,y:0};
  }else if(S.ch===1){
   if(!S.f.d1_badge)o={t:'Pick up your badge at Registration.',reg:'con',x:-38.6,z:31,y:0};
   else if(!S.f.d1_open)o={t:'The opening ceremony is starting. Find a seat in Hall A (north side of the Ring).',reg:'con',x:-5,z:-49.5,y:2.75};
@@ -175,7 +188,7 @@ function objective(){
  if(o&&o.reg!==WD.reg){
   if(o.reg==='f13'&&WD.reg==='con')o=Object.assign({},o,{reg:'con',x:-78,z:27.6,y:0});
   else if(o.reg==='con'&&WD.reg==='f13')o=Object.assign({},o,{reg:'f13',x:243,z:-9.4,y:0});
-  else if(o.reg==='con'&&WD.reg==='station')o=Object.assign({},o,{reg:'station',x:736,z:7,y:0});
+  else if(o.reg==='con'&&WD.reg==='station')o=Object.assign({},o,{reg:'station',x:734,z:4.4,y:0});
  }
  return o;
 }
@@ -244,9 +257,6 @@ function updSprites(dt){
   if(!d.obj){if(!vis)continue;d.obj=cutout(tapeTex(),1.3,2.4,{noShadow:1,glow:.3});G.scene.add(d.obj)}
   d.obj.visible=!!vis;if(vis){d.obj.position.set(d.spr[0],d.spr[2],d.spr[1]);d.obj.rotation.y=yaw}}
  for(const g of GATES){const vis=g.reg===WD.reg&&!g.open();if(!g.obj){if(!vis)continue;g.obj=gateObj(g);G.scene.add(g.obj)}g.obj.visible=vis}
- if(!G.ring){G.ring=ringObj();G.scene.add(G.ring)}
- const nr=WD.near&&worldLive()?WD.near:null;G.ring.visible=!!nr;
- if(nr){G.ring.position.set(nr.x,(nr.y||0)+.03,nr.z);const s=1+Math.sin(tt*5)*.08;G.ring.scale.set(s,1,s);G.ring.material.opacity=.55+Math.sin(tt*5)*.25}
 }
 /* with baked lighting there are no realtime lights: a cut-out's glow is set from the lights around it instead */
 const _pr={r:0,g:0,b:0};
