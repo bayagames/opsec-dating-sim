@@ -446,14 +446,14 @@ const WHERE={
 };
 /* a story beat can hold someone in place, or hide them (S.hold = {id:[reg,x,z,y]|0}) */
 function placeChars(){if(!S)return;const d=S.day,sl=S.slot;
- for(const c of WCH){let p=S.hold&&S.hold[c.id]!==undefined?S.hold[c.id]:WHERE[c.id](d,sl);if(typeof GONE!=='undefined'&&GONE[c.id]&&GONE[c.id]())p=null;
+ for(const c of WCH){const held=S.hold&&S.hold[c.id]!==undefined;let p=held?S.hold[c.id]:WHERE[c.id](d,sl);if(!held&&typeof GONE!=='undefined'&&GONE[c.id]&&GONE[c.id]())p=null;
   // someone with a scene ready waits where that scene starts, so talking to them never whisks you somewhere else
-  if(p&&ROM.includes(c.id)&&S.day>=1&&sceneReady(c.id)){const sa=sceneArea(c.id+scn(c.id));if(sa&&AREAS[sa]&&!areaLock(sa))p=[sa,ROM.indexOf(c.id)%3]}
-  if(Array.isArray(p)&&typeof p[0]==='string'&&!AREAS[p[0]]&&p.length>=3)p={reg:p[0],x:p[1],z:p[2],y:p[3]||0};
+  if(p&&!held&&ROM.includes(c.id)&&S.day>=1&&sceneReady(c.id)){const sa=sceneArea(c.id+scn(c.id));if(sa&&AREAS[sa]&&!areaLock(sa))p=[sa,ROM.indexOf(c.id)%3]}
+  if(Array.isArray(p)&&typeof p[0]==='string'&&!AREAS[p[0]]&&p.length>=3)p={reg:p[0],x:p[1],z:p[2],y:p[3]||0,sit:p[4]==='sit'};
   else if(Array.isArray(p))p=spotIn(p[0],p[1]);
   // in a cutscene the cast stand on their marks, and nobody else wanders into the shot
   if(WD.cut){p=WD.cut.cast[c.id]||(WD.reg===WD.cut.C.reg&&p&&p.reg===WD.cut.C.reg&&Math.hypot(p.x-WD.cut.ctr[0],p.z-WD.cut.ctr[2])<(WD.cut.est?14:40)?null:p)}
-  if(!p){c.on=false;continue}c.on=true;c.reg=p.reg;c.x=p.x;c.z=p.z;c.y=p.y||0}}
+  if(!p){c.on=false;continue}c.on=true;c.reg=p.reg;c.x=p.x;c.z=p.z;c.y=p.y||0;c.sit=!!p.sit}}
 /* the area a scene opens in: its first [bg ...] */
 const SCAREA={};function sceneArea(id){if(SCAREA[id]!==undefined)return SCAREA[id];const m=SC[id]&&SC[id].match(/^\s*\[bg ([a-z0-9]+)\]/m);return SCAREA[id]=m?bgArea(m[1]):null}
 const UNMET={nyx:'the woman picking locks',ada:'the person at the CTF table',priya:'the woman by the dashboards',juno:'the streamer',kit:'the cosplayer',rin:'the person behind the bean bag',bea:'the bartender',mira:'the woman on the air-con unit',saoirse:'the woman with the notebook',sunny:'the woman in hi-vis',tilly:'the woman with the soldering iron',petra:'the mechanic',astrid:'the woman with the antenna',yuki:'the girl at the arcade cabinet',vesper:'the singer',delphine:'the woman in the navy suit',noor:'the woman with the case files',fern:'the gardener',wren:'the lifeguard',pia:'the violinist'};

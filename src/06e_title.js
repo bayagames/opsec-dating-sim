@@ -18,7 +18,17 @@ function titleScreen(){
  titleView(PROF?'main':'files');
  if(!TS.pressed)titleBoot();else titleCamOn(G.ok);
 }
-function titleStage(s){TS.stage=s;$('title').dataset.stage=s;if(s==='menu')setTimeout(()=>titleFocus(),40)}
+/* the logo's lines change alignment and size between stages; measure them before and after and glide each one
+   from where it was (FLIP), so nothing jumps before it moves */
+function titleStage(s){const t=$('title'),L=$('tlogo'),prev=t.dataset.stage;
+ const kids=[...L.children],flip=prev&&prev!=='boot'&&prev!==s&&t.classList.contains('on');
+ const first=flip?kids.map(k=>k.getBoundingClientRect()):null;
+ TS.stage=s;t.dataset.stage=s;
+ if(flip){L.style.transition='none';L.getAnimations().forEach(a=>a.cancel());kids.forEach(k=>k.getAnimations().forEach(a=>a.cancel()));void L.offsetWidth;
+  kids.forEach((k,i)=>{const a=first[i],b=k.getBoundingClientRect();if(!b.width||!a.width)return;const sc=b.width/(k.offsetWidth||1),dx=(a.left-b.left)/sc,dy=(a.top-b.top)/sc,z=a.width/b.width;
+   k.style.transformOrigin='0 0';k.animate([{transform:`translate(${dx}px,${dy}px) scale(${z})`},{transform:'none'}],{duration:1100,easing:'cubic-bezier(.7,0,.2,1)'})});
+  requestAnimationFrame(()=>{L.style.transition=''})}
+ if(s==='menu')setTimeout(()=>titleFocus(),40)}
 /* boot: wait for the world, then for the convention's light; then "press any key" */
 function titleBoot(){if(TS.boot)return;TS.t0=performance.now();
  const tick=()=>{if(!$('title').classList.contains('on')){TS.boot=null;return}

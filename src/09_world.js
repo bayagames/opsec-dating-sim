@@ -71,7 +71,7 @@ function setupInput(){
  // only explicit clicks count towards the 'pointer lock is impossible here' fallback (e.g. a sandboxed iframe)
  tz.addEventListener('click',()=>{if(WD.touch||!worldLive())return;WD.clickLock=true;tryLock()});
  // step back in automatically: any click or key in the world re-captures the mouse (no "click to play" prompt)
- addEventListener('mousedown',e=>{if(e.isTrusted&&S&&S.inWorld&&!WD.touch&&!locked()&&!$('title').classList.contains('on')&&!$('ov').classList.contains('phoneov'))tryLock()},true);
+ addEventListener('mousedown',e=>{if(e.isTrusted&&S&&S.inWorld&&!WD.touch&&!locked()&&!$('title').classList.contains('on')&&!$('ov').classList.contains('phoneov')&&!$('pgx'))tryLock()},true);
  addEventListener('keydown',e=>{if(e.key==='Escape'||e.key==='p'||e.key==='P'||e.key==='Tab')return;if(S&&S.inWorld&&!WD.touch&&!locked()&&(worldLive()||$('vn').classList.contains('on'))&&!$('ov').classList.contains('phoneov'))tryLock()},true);
  let drag=null;
  tz.addEventListener('mousedown',e=>{if(WD.noLock)drag=[e.clientX,e.clientY]});
@@ -94,7 +94,7 @@ function setupInput(){
 /* step back into mouse-look (after the phone closes, a scene ends...). While Esc is held, wait for it to come up:
    locking during an Esc press hands the browser an Esc to cancel the lock with, and the phone pops straight back */
 function relock(){if(WD.touch||WD.noLock||locked())return;if(WD.escDown){WD.lockAfterEsc=true;return}tryLock()}
-function tryLock(){if(WD.touch||WD.noLock||!S||!S.inWorld||S.ending||$('title').classList.contains('on'))return;const el=lockEl();if(document.pointerLockElement===el)return;try{const p=el.requestPointerLock&&el.requestPointerLock();if(p&&p.catch)p.catch(()=>{})}catch(e){}}
+function tryLock(){if(WD.touch||WD.noLock||!S||!S.inWorld||S.ending||$('title').classList.contains('on')||$('pgx'))return;const el=lockEl();if(document.pointerLockElement===el)return;try{const p=el.requestPointerLock&&el.requestPointerLock();if(p&&p.catch)p.catch(()=>{})}catch(e){}}
 if(SETTINGS.nolock)WD.noLock=true;
 function setTouch(on){WD.touch=on;document.body.classList.toggle('touchui',on);document.body.classList.toggle('desk',!on)}
 /* dx>0 (mouse/finger moves right) turns right; dy<0 (moves up) looks up. Never inverted. */
@@ -311,9 +311,10 @@ function updSprites(dt){
   c.obj.visible=vis;c.mark.visible=false;if(!vis)continue;
   const sk=charSVGKey(c);if(c.objKey!==sk){c.objKey=sk;const t=spriteTex('c:'+sk,fullSVG(sk));const bd=c.obj.userData.body,b=bd.material;b.map=t;b.emissiveMap=t;b.needsUpdate=true;if(bd.customDistanceMaterial){bd.customDistanceMaterial.map=t;bd.customDistanceMaterial.needsUpdate=true}}
   if(TT.on){const m=TT.cast[c.id];c.obj.position.set(m[0],m[2]||0,m[1]);c.obj.rotation.y=yaw;litSprite(c.obj,WD.reg,m[0],(m[2]||0)+1.2,m[1],tt,CHAR_MIN);continue}
-  c.obj.position.set(c.x,c.y||0,c.z);c.obj.rotation.y=yaw;litSprite(c.obj,WD.reg,c.x,(c.y||0)+1.2,c.z,tt,CHAR_MIN);
+  // sitting down (a seat on the train): the same figure, lowered so the floor hides the legs
+  const sy=(c.y||0)-(c.sit&&!WD.cut?.58:0);c.obj.position.set(c.x,sy,c.z);c.obj.rotation.y=yaw;litSprite(c.obj,WD.reg,c.x,(c.y||0)+1.2,c.z,tt,CHAR_MIN);
   const body=c.obj.userData.body;body.scale.y=1+Math.sin(tt*1.7+c.x)*.007;body.scale.x=1-Math.sin(tt*1.7+c.x)*.004;
-  if(G.news.has(c.id)||storyMark(c)){c.mark.visible=true;c.mark.position.set(c.x,(c.y||0)+2.62+Math.sin(tt*3)*.07,c.z)}
+  if(!c.sit&&(G.news.has(c.id)||storyMark(c))){c.mark.visible=true;c.mark.position.set(c.x,sy+2.62+Math.sin(tt*3)*.07,c.z)}
  }
  for(const n of WD.npcs){
   const vis=n.reg===WD.reg&&Math.abs(n.x-WD.x)+Math.abs(n.z-WD.z)<90;
@@ -421,6 +422,7 @@ let mmT=0,icT=0,perfAcc=0,perfN=0,perfT=0;
 function loop(t){
  requestAnimationFrame(loop);
  const dt=Math.min(.05,(t-(WD.t||t))/1000);WD.t=t;
+ if(typeof audioTick==='function')audioTick(dt);
  // the place you're in needs its lightmaps on the GPU (loaded from cache, or baked on a first visit)
  if(S&&S.inWorld&&G.ok&&G.baked){const R=G.regions[WD.reg];if(R&&!R.lmTex&&!R.lmSkip){if(!G.lmBusy)regionNeed(WD.reg,true);else lmUI(true,G.lmBusy,null,G.bakeP)}}
  // the title screen: the convention, on its own, through a slow camera
@@ -439,7 +441,6 @@ function loop(t){
  vcShow(vcActive());
  $('lockHint').style.display=live&&!WD.touch&&!WD.noLock&&!locked()&&!WD.escDown&&performance.now()-(WD.unlockAt||0)>700?'block':'none';
  if(live){if(t-icT>66){icT=t;interactCheck()}if(t-mmT>90&&S.unl.map){mmT=t;drawMapCanvas($('mini'),WD.reg,{mini:1,sc:3})}}
- if(typeof audioTick==='function')audioTick(dt);
 }
 /* drop render resolution when frames get slow, raise it again when there's headroom */
 function adaptRes(dt){if(window.__noAdapt)return;perfAcc+=dt;perfN++;perfT+=dt;if(perfT<1.2)return;const avg=perfAcc/perfN;perfAcc=perfN=perfT=0;

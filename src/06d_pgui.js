@@ -116,7 +116,7 @@ function pgRecords(){const st=META.stats||{},H=META.hist||[],hints=HINTS.filter(
 let ACHF='all';
 function achBlock(){const all=achVis(),got=all.filter(k=>META.ach[k]).length,ks=all.filter(k=>ACHF==='all'||(ACHF==='got'?META.ach[k]:!META.ach[k]));
  return`<div class="pgachh"><p class="pgk">Achievements · ${got}/${all.length}</p><div class="pgring" style="--p:${achPct()}"><b>${achPct()}%</b></div><div class="pgseg">${[['all','All'],['got','Unlocked'],['no','Locked']].map(t=>`<button class="${ACHF===t[0]?'on':''}" data-af="${t[0]}">${t[1]}</button>`).join('')}</div></div>
- <div class="pgach">${ks.map(k=>{const a=ACH[k],on=!!META.ach[k],hid=a[2]&&!on;return`<div class="pga ${on?'on':''}"><span class="pgai">${on?'★':hid?'?':'☆'}</span><div><b>${hid?'Hidden':esc(a[0])}</b><small>${hid?'Keep playing.':esc(a[1])}</small></div></div>`}).join('')}</div>`}
+ <div class="pgach">${ks.map(k=>{const on=!!META.ach[k],[an,ad,hid]=achShow(k);return`<div class="pga ${on?'on':''}"><span class="pgai">${on?'★':hid?'?':'☆'}</span><div><b>${esc(an)}</b><small>${esc(ad)}</small></div></div>`}).join('')}</div>`}
 function achWire(){document.querySelectorAll('#pgx [data-af]').forEach(b=>b.onclick=()=>{ACHF=b.dataset.af;pgDraw()})}
 /* the title screen's Achievements: just the trophies, open from the first run */
 function achScreen(){PGV.sec='ach';PGV.from='title';const prev=pgDraw;

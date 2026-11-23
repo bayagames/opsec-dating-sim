@@ -1758,7 +1758,12 @@ for(const m in MYST)ACH['solve_'+m]=['Solved: '+MYST[m].n,MYST[m].q];
 const ACHPG=k=>k.startsWith('end_')||k==='tree10'||k==='newgame';
 function metEver(g){if(META.met&&META.met[g]||META.routes&&META.routes[g])return true;const sc=META.seenSc||{};for(const k in sc)if(k.startsWith(g)&&/^\D+\d$/.test(k)&&k.replace(/\d$/,'')===g)return true;return false}
 function achSpoil(k){if(META.ach[k])return false;if(k.startsWith('love_'))return!metEver(k.slice(5));if(k.startsWith('solve_')){const m=k.slice(6);return!(META.mseen&&META.mseen[m]||META.solved&&META.solved[m])}return false}
-function achVis(){const pg=typeof pgOpen==='function'&&pgOpen();return Object.keys(ACH).filter(k=>(pg||!ACHPG(k))&&!achSpoil(k))}
+function achVis(){const pg=typeof pgOpen==='function'&&pgOpen();return Object.keys(ACH).filter(k=>pg||!ACHPG(k))}
+/* what a tile shows: [title, line, masked]. Love and Solved ones stay on the list but keep their names to
+   themselves until you've met that person or come across that mystery in some run */
+function achShow(k){const a=ACH[k],on=!!META.ach[k];
+ if(!on&&achSpoil(k))return k.startsWith('love_')?['In Love: ???','Someone you haven\'t met yet.',1]:['Solved: ???','A mystery you haven\'t come across yet.',1];
+ if(a[2]&&!on)return['???','Hidden. Keep playing.',1];return[a[0],a[1],0]}
 
 /* ============ FLOW: the week, its story beats, free time, hangouts, leads, the case board, the final act ============ */
 /* ---- routes: six scenes each. Scene 0 is meeting them (free); 1-5 take part of a day; 5 is the last, just the two of you.
@@ -2043,7 +2048,7 @@ beat('d1_home',{adv:1,t:'Morning',steps:[
 beat('d1_station',{adv:1,t:'Central Station',steps:[
  {auto:1,sc:'d1_concourse',t:'Central Station'},
  {who:'pia',sc:'d1_pia',t:'Someone is playing the violin on the concourse',lbl:'Listen to the violinist'}]});
-beat('d1_train',{adv:1,t:'The train',steps:[{int:'train',sc:'d1_train',t:'Board the 16:12 at Platform 4'}]});
+beat('d1_train',{adv:1,t:'The train',steps:[{int:'train',dest:'con',sc:'d1_board',t:'Board the 16:12 at Platform 4'},{who:'astrid',sc:'d1_train',t:'Find a seat: there\'s one free at a table in Coach B',lbl:'Sit down opposite her'}]});
 beat('d1_arrival',{adv:1,t:'Arrival',steps:[
  {auto:1,sc:'d1_doors',t:'Into the convention centre'},
  {int:'reg',sc:'d1_badge',t:'Pick up your badge at Registration, on the Foyer\'s west wall'},
@@ -2068,7 +2073,12 @@ beat('d4_noc',{t:'The con network is down',steps:[{auto:1,sc:'d4_call',t:'Your p
 beat('d4_gathering',{t:'Everyone is meeting in Room 1337',w:'room1337',sc:'d4_gathering'});
 beat('d4_burglary',{adv:1,t:'Your phone',auto:1,sc:'d4_burglary'});
 /* Day 5: Friday */
-beat('d5_home',{adv:1,t:'Ellie needs to go home: meet her in the hotel lobby',w:'lobby',sc:'d5_home'});
+beat('d5_home',{adv:1,t:'Ellie needs to go home',steps:[
+ {w:'lobby',sc:'d5_home',t:'Ellie needs to go home: meet her in the hotel lobby'},
+ {int:'train',dest:'home',sc:'d5_board',t:'The 08:22 to Linden Street, Platform 4'},
+ {who:'ellie',sc:'d5_ride',t:'Ellie\'s found a table in Coach B',lbl:'Sit with Ellie'},
+ {int:'train',dest:'con',sc:'d5_board2',t:'Back to the Conference Quarter: Platform 4'},
+ {who:'ellie',sc:'d5_ride2',t:'Ellie\'s in Coach B again, at the same table',lbl:'Sit with Ellie'}]});
 beat('d5_framed',{adv:1,t:'Your phone',auto:1,sc:'d5_framed'});
 beat('d5_offer',{t:'Victor Hale has asked you to dinner: The Grill, in the hotel',w:'grill',sc:'d5_offer'});
 /* Day 6: Saturday */
@@ -2578,10 +2588,16 @@ pia.n: He's away. Travelling. Anyway. Your train's in forty minutes and you're t
 pia.h: If you're ever back through here, request something. Anything. Except that one.
 [sum At Central Station you met Pia, a violinist who busks by the old piano. Her brother used to go to the con. He's "away".]
 `;
+SC.d1_board=`
+[hide]
+[call trainSeat('astrid')]
+~ Coach B. Half the seats are taken by people with their lanyards on already, the way some people wear the shirt to the match.
+~ There's one seat free at a table, facing backwards. Opposite it, a woman with a radio.
+`;
 SC.d1_train=`
 [bg carriage]
 [hide]
-~ The 16:12. You get a table seat facing backwards, which you hate, and put Ellie's bag of baking on the seat beside you like a guard dog.
+~ You take the seat facing backwards, which you hate, and put Ellie's bag of baking on the seat beside you like a guard dog.
 ~ Opposite: a woman with a long platinum-blond braid, round gold glasses and a cardigan the colour of the night sky with tiny embroidered stars on it. She has a radio on the table. Not a phone. A radio, with a whip antenna, and a pair of headphones, and she's smiling at something only she can hear.
 ~ The city slides past. Cranes, back gardens, a billboard: "SafeSphere. Your shield on the internet. Free forever." Someone has graffitied "FOREVER IS A LONG TIME" underneath.
 ~ The woman opposite lifts one side of her headphones and looks at you.
@@ -2622,6 +2638,7 @@ astrid.n: Sorry. Am I being loud? It hisses. The radio. Some people find it upse
  * Later you'll wonder what she was listening to.
 ~ Twenty minutes later, the train slows. A neon sign the height of a building slides into the window: THE HALCYON. Beyond it, a vast slab of dark glass and steel with a magenta line of light running round every storey.
 ~ CTRL+ALT+CON.
+[hold astrid off]
 [bg plaza]
 [cut pan plaza]
 ~ The station spits you out into the Conference Quarter. A plaza. Plane trees in pots. A coffee cart. A taxi rank. The sky's going orange.
@@ -3575,11 +3592,20 @@ if met('pia')
  ~ By the old piano, Pia is unpacking her violin. She sees you, sees Ellie's face, and doesn't play anything bright. She plays something slow and steady instead, like a hand on a shoulder.
  ellie.n: That's lovely. Who's that?
  > A friend. I think.
-[cut depart]
-~ The 08:22 slides out from under the iron roof. Ellie watches the station go, like she's never seen one before.
+~ Ellie walks straight past the board to Platform 4 without looking at it. She's taken this train a thousand times.
+ellie.n: Come on. It's the 08:22. It's always the 08:22.
+`;
+SC.d5_board=`
+[hide]
+[call trainSeat('ellie')]
+~ Coach B. Ellie's already sitting down, at a table by the window, holding a paper cup of station coffee in both hands like it's the only warm thing left.
+`;
+SC.d5_ride=`
 [bg carriage]
-~ Ellie doesn't talk on the train. She holds a paper cup of station coffee and doesn't drink it, and watches the backs of houses go past.
+[hide]
+~ You sit down next to her. Ellie doesn't talk. She holds the coffee and doesn't drink it, and watches the backs of houses go past.
 ~ Halfway, without looking away from the window, she reaches over and holds your hand. Just holds it. As if it's a railing.
+[hold ellie off]
 [bg bakery]
 ~ Linden Street. Blue tape across the bakery's back door. A police car, half on the pavement. Mr Demir from the barber's, in his apron, arms folded, guarding the front like a bouncer.
 ~ Inside, Proof is wrong. Flour across the floor in a long white fan where a sack was slit. Every drawer pulled out. The shelf behind the counter, where Ellie kept her laptop and her grandmother's recipe tin, emptied onto the tiles.
@@ -3655,10 +3681,21 @@ ellie.b: You don't owe anyone this. You're not a superhero. You're a man who fix
  ellie.n: I'm coming. Don't argue. You'll lose. I've been arguing with ovens since I was nine.
  [flag ellie_fights]
 ~ Mr Demir lends you a hat and a scarf "for disguise purposes" and walks you both to the station himself, like a bodyguard in a barber's apron.
+[bg station]
+~ Central Station again. Mr Demir shakes your hand like you're going to war, then goes back to his shop. Platform 4: the Conference Quarter.
+`;
+SC.d5_board2=`
+[hide]
+[call trainSeat('ellie')]
+~ Ellie's at the same table as this morning. She's taken her badge off and she's looking at it like it might bite.
+`;
+SC.d5_ride2=`
 [bg carriage]
-~ On the train back, Ellie puts her badge in her coat pocket, wrapped in a crisp packet. The blue light still glows faintly through the foil.
+[hide]
+~ You sit down opposite her. Ellie puts her badge in her coat pocket, wrapped in a crisp packet. The blue light still glows faintly through the foil.
 ellie.n: Did I do that right? Foil?
 > You did that exactly right.
+[hold ellie off]
 [bg plaza]
 [call inject('d5_framed')]
 [sum Afternoon: WH1SPER named you as WHISPER, with a minute-by-minute map of your week that only the badges could have made. Lumen reposted it in four minutes. Ellie offered you a way out. You went back to the con together.]
@@ -11773,7 +11810,7 @@ function pgRecords(){const st=META.stats||{},H=META.hist||[],hints=HINTS.filter(
 let ACHF='all';
 function achBlock(){const all=achVis(),got=all.filter(k=>META.ach[k]).length,ks=all.filter(k=>ACHF==='all'||(ACHF==='got'?META.ach[k]:!META.ach[k]));
  return`<div class="pgachh"><p class="pgk">Achievements · ${got}/${all.length}</p><div class="pgring" style="--p:${achPct()}"><b>${achPct()}%</b></div><div class="pgseg">${[['all','All'],['got','Unlocked'],['no','Locked']].map(t=>`<button class="${ACHF===t[0]?'on':''}" data-af="${t[0]}">${t[1]}</button>`).join('')}</div></div>
- <div class="pgach">${ks.map(k=>{const a=ACH[k],on=!!META.ach[k],hid=a[2]&&!on;return`<div class="pga ${on?'on':''}"><span class="pgai">${on?'★':hid?'?':'☆'}</span><div><b>${hid?'Hidden':esc(a[0])}</b><small>${hid?'Keep playing.':esc(a[1])}</small></div></div>`}).join('')}</div>`}
+ <div class="pgach">${ks.map(k=>{const on=!!META.ach[k],[an,ad,hid]=achShow(k);return`<div class="pga ${on?'on':''}"><span class="pgai">${on?'★':hid?'?':'☆'}</span><div><b>${esc(an)}</b><small>${esc(ad)}</small></div></div>`}).join('')}</div>`}
 function achWire(){document.querySelectorAll('#pgx [data-af]').forEach(b=>b.onclick=()=>{ACHF=b.dataset.af;pgDraw()})}
 /* the title screen's Achievements: just the trophies, open from the first run */
 function achScreen(){PGV.sec='ach';PGV.from='title';const prev=pgDraw;
@@ -11810,7 +11847,17 @@ function titleScreen(){
  titleView(PROF?'main':'files');
  if(!TS.pressed)titleBoot();else titleCamOn(G.ok);
 }
-function titleStage(s){TS.stage=s;$('title').dataset.stage=s;if(s==='menu')setTimeout(()=>titleFocus(),40)}
+/* the logo's lines change alignment and size between stages; measure them before and after and glide each one
+   from where it was (FLIP), so nothing jumps before it moves */
+function titleStage(s){const t=$('title'),L=$('tlogo'),prev=t.dataset.stage;
+ const kids=[...L.children],flip=prev&&prev!=='boot'&&prev!==s&&t.classList.contains('on');
+ const first=flip?kids.map(k=>k.getBoundingClientRect()):null;
+ TS.stage=s;t.dataset.stage=s;
+ if(flip){L.style.transition='none';L.getAnimations().forEach(a=>a.cancel());kids.forEach(k=>k.getAnimations().forEach(a=>a.cancel()));void L.offsetWidth;
+  kids.forEach((k,i)=>{const a=first[i],b=k.getBoundingClientRect();if(!b.width||!a.width)return;const sc=b.width/(k.offsetWidth||1),dx=(a.left-b.left)/sc,dy=(a.top-b.top)/sc,z=a.width/b.width;
+   k.style.transformOrigin='0 0';k.animate([{transform:`translate(${dx}px,${dy}px) scale(${z})`},{transform:'none'}],{duration:1100,easing:'cubic-bezier(.7,0,.2,1)'})});
+  requestAnimationFrame(()=>{L.style.transition=''})}
+ if(s==='menu')setTimeout(()=>titleFocus(),40)}
 /* boot: wait for the world, then for the convention's light; then "press any key" */
 function titleBoot(){if(TS.boot)return;TS.t0=performance.now();
  const tick=()=>{if(!$('title').classList.contains('on')){TS.boot=null;return}
@@ -15474,7 +15521,7 @@ function setupInput(){
  // only explicit clicks count towards the 'pointer lock is impossible here' fallback (e.g. a sandboxed iframe)
  tz.addEventListener('click',()=>{if(WD.touch||!worldLive())return;WD.clickLock=true;tryLock()});
  // step back in automatically: any click or key in the world re-captures the mouse (no "click to play" prompt)
- addEventListener('mousedown',e=>{if(e.isTrusted&&S&&S.inWorld&&!WD.touch&&!locked()&&!$('title').classList.contains('on')&&!$('ov').classList.contains('phoneov'))tryLock()},true);
+ addEventListener('mousedown',e=>{if(e.isTrusted&&S&&S.inWorld&&!WD.touch&&!locked()&&!$('title').classList.contains('on')&&!$('ov').classList.contains('phoneov')&&!$('pgx'))tryLock()},true);
  addEventListener('keydown',e=>{if(e.key==='Escape'||e.key==='p'||e.key==='P'||e.key==='Tab')return;if(S&&S.inWorld&&!WD.touch&&!locked()&&(worldLive()||$('vn').classList.contains('on'))&&!$('ov').classList.contains('phoneov'))tryLock()},true);
  let drag=null;
  tz.addEventListener('mousedown',e=>{if(WD.noLock)drag=[e.clientX,e.clientY]});
@@ -15497,7 +15544,7 @@ function setupInput(){
 /* step back into mouse-look (after the phone closes, a scene ends...). While Esc is held, wait for it to come up:
    locking during an Esc press hands the browser an Esc to cancel the lock with, and the phone pops straight back */
 function relock(){if(WD.touch||WD.noLock||locked())return;if(WD.escDown){WD.lockAfterEsc=true;return}tryLock()}
-function tryLock(){if(WD.touch||WD.noLock||!S||!S.inWorld||S.ending||$('title').classList.contains('on'))return;const el=lockEl();if(document.pointerLockElement===el)return;try{const p=el.requestPointerLock&&el.requestPointerLock();if(p&&p.catch)p.catch(()=>{})}catch(e){}}
+function tryLock(){if(WD.touch||WD.noLock||!S||!S.inWorld||S.ending||$('title').classList.contains('on')||$('pgx'))return;const el=lockEl();if(document.pointerLockElement===el)return;try{const p=el.requestPointerLock&&el.requestPointerLock();if(p&&p.catch)p.catch(()=>{})}catch(e){}}
 if(SETTINGS.nolock)WD.noLock=true;
 function setTouch(on){WD.touch=on;document.body.classList.toggle('touchui',on);document.body.classList.toggle('desk',!on)}
 /* dx>0 (mouse/finger moves right) turns right; dy<0 (moves up) looks up. Never inverted. */
@@ -15714,9 +15761,10 @@ function updSprites(dt){
   c.obj.visible=vis;c.mark.visible=false;if(!vis)continue;
   const sk=charSVGKey(c);if(c.objKey!==sk){c.objKey=sk;const t=spriteTex('c:'+sk,fullSVG(sk));const bd=c.obj.userData.body,b=bd.material;b.map=t;b.emissiveMap=t;b.needsUpdate=true;if(bd.customDistanceMaterial){bd.customDistanceMaterial.map=t;bd.customDistanceMaterial.needsUpdate=true}}
   if(TT.on){const m=TT.cast[c.id];c.obj.position.set(m[0],m[2]||0,m[1]);c.obj.rotation.y=yaw;litSprite(c.obj,WD.reg,m[0],(m[2]||0)+1.2,m[1],tt,CHAR_MIN);continue}
-  c.obj.position.set(c.x,c.y||0,c.z);c.obj.rotation.y=yaw;litSprite(c.obj,WD.reg,c.x,(c.y||0)+1.2,c.z,tt,CHAR_MIN);
+  // sitting down (a seat on the train): the same figure, lowered so the floor hides the legs
+  const sy=(c.y||0)-(c.sit&&!WD.cut?.58:0);c.obj.position.set(c.x,sy,c.z);c.obj.rotation.y=yaw;litSprite(c.obj,WD.reg,c.x,(c.y||0)+1.2,c.z,tt,CHAR_MIN);
   const body=c.obj.userData.body;body.scale.y=1+Math.sin(tt*1.7+c.x)*.007;body.scale.x=1-Math.sin(tt*1.7+c.x)*.004;
-  if(G.news.has(c.id)||storyMark(c)){c.mark.visible=true;c.mark.position.set(c.x,(c.y||0)+2.62+Math.sin(tt*3)*.07,c.z)}
+  if(!c.sit&&(G.news.has(c.id)||storyMark(c))){c.mark.visible=true;c.mark.position.set(c.x,sy+2.62+Math.sin(tt*3)*.07,c.z)}
  }
  for(const n of WD.npcs){
   const vis=n.reg===WD.reg&&Math.abs(n.x-WD.x)+Math.abs(n.z-WD.z)<90;
@@ -15824,6 +15872,7 @@ let mmT=0,icT=0,perfAcc=0,perfN=0,perfT=0;
 function loop(t){
  requestAnimationFrame(loop);
  const dt=Math.min(.05,(t-(WD.t||t))/1000);WD.t=t;
+ if(typeof audioTick==='function')audioTick(dt);
  // the place you're in needs its lightmaps on the GPU (loaded from cache, or baked on a first visit)
  if(S&&S.inWorld&&G.ok&&G.baked){const R=G.regions[WD.reg];if(R&&!R.lmTex&&!R.lmSkip){if(!G.lmBusy)regionNeed(WD.reg,true);else lmUI(true,G.lmBusy,null,G.bakeP)}}
  // the title screen: the convention, on its own, through a slow camera
@@ -15842,7 +15891,6 @@ function loop(t){
  vcShow(vcActive());
  $('lockHint').style.display=live&&!WD.touch&&!WD.noLock&&!locked()&&!WD.escDown&&performance.now()-(WD.unlockAt||0)>700?'block':'none';
  if(live){if(t-icT>66){icT=t;interactCheck()}if(t-mmT>90&&S.unl.map){mmT=t;drawMapCanvas($('mini'),WD.reg,{mini:1,sc:3})}}
- if(typeof audioTick==='function')audioTick(dt);
 }
 /* drop render resolution when frames get slow, raise it again when there's headroom */
 function adaptRes(dt){if(window.__noAdapt)return;perfAcc+=dt;perfN++;perfT+=dt;if(perfT<1.2)return;const avg=perfAcc/perfN;perfAcc=perfN=perfT=0;
@@ -16313,14 +16361,14 @@ const WHERE={
 };
 /* a story beat can hold someone in place, or hide them (S.hold = {id:[reg,x,z,y]|0}) */
 function placeChars(){if(!S)return;const d=S.day,sl=S.slot;
- for(const c of WCH){let p=S.hold&&S.hold[c.id]!==undefined?S.hold[c.id]:WHERE[c.id](d,sl);if(typeof GONE!=='undefined'&&GONE[c.id]&&GONE[c.id]())p=null;
+ for(const c of WCH){const held=S.hold&&S.hold[c.id]!==undefined;let p=held?S.hold[c.id]:WHERE[c.id](d,sl);if(!held&&typeof GONE!=='undefined'&&GONE[c.id]&&GONE[c.id]())p=null;
   // someone with a scene ready waits where that scene starts, so talking to them never whisks you somewhere else
-  if(p&&ROM.includes(c.id)&&S.day>=1&&sceneReady(c.id)){const sa=sceneArea(c.id+scn(c.id));if(sa&&AREAS[sa]&&!areaLock(sa))p=[sa,ROM.indexOf(c.id)%3]}
-  if(Array.isArray(p)&&typeof p[0]==='string'&&!AREAS[p[0]]&&p.length>=3)p={reg:p[0],x:p[1],z:p[2],y:p[3]||0};
+  if(p&&!held&&ROM.includes(c.id)&&S.day>=1&&sceneReady(c.id)){const sa=sceneArea(c.id+scn(c.id));if(sa&&AREAS[sa]&&!areaLock(sa))p=[sa,ROM.indexOf(c.id)%3]}
+  if(Array.isArray(p)&&typeof p[0]==='string'&&!AREAS[p[0]]&&p.length>=3)p={reg:p[0],x:p[1],z:p[2],y:p[3]||0,sit:p[4]==='sit'};
   else if(Array.isArray(p))p=spotIn(p[0],p[1]);
   // in a cutscene the cast stand on their marks, and nobody else wanders into the shot
   if(WD.cut){p=WD.cut.cast[c.id]||(WD.reg===WD.cut.C.reg&&p&&p.reg===WD.cut.C.reg&&Math.hypot(p.x-WD.cut.ctr[0],p.z-WD.cut.ctr[2])<(WD.cut.est?14:40)?null:p)}
-  if(!p){c.on=false;continue}c.on=true;c.reg=p.reg;c.x=p.x;c.z=p.z;c.y=p.y||0}}
+  if(!p){c.on=false;continue}c.on=true;c.reg=p.reg;c.x=p.x;c.z=p.z;c.y=p.y||0;c.sit=!!p.sit}}
 /* the area a scene opens in: its first [bg ...] */
 const SCAREA={};function sceneArea(id){if(SCAREA[id]!==undefined)return SCAREA[id];const m=SC[id]&&SC[id].match(/^\s*\[bg ([a-z0-9]+)\]/m);return SCAREA[id]=m?bgArea(m[1]):null}
 const UNMET={nyx:'the woman picking locks',ada:'the person at the CTF table',priya:'the woman by the dashboards',juno:'the streamer',kit:'the cosplayer',rin:'the person behind the bean bag',bea:'the bartender',mira:'the woman on the air-con unit',saoirse:'the woman with the notebook',sunny:'the woman in hi-vis',tilly:'the woman with the soldering iron',petra:'the mechanic',astrid:'the woman with the antenna',yuki:'the girl at the arcade cabinet',vesper:'the singer',delphine:'the woman in the navy suit',noor:'the woman with the case files',fern:'the gardener',wren:'the lifeguard',pia:'the violinist'};
@@ -16569,7 +16617,7 @@ function bMat(map,col,o){const T=G.T;o=o||{};const m=new T.MeshBasicMaterial(Obj
  m.userData.base=m.color.clone();m.userData.glow=!!o.glow;TRV.mats.push(m);return m}
 /* a box sitting on y=0, shaded by face (sun from the upper left), UVs scaled to metres/tile */
 function sGeo(w,h,d,tile){const T=G.T,g=new T.BoxGeometry(w,h,d);g.translate(0,h/2,0);const n=g.attributes.normal,uv=g.attributes.uv,col=[];
- for(let i=0;i<n.count;i++){const nx=n.getX(i),ny=n.getY(i),nz=n.getZ(i);const k=ny>.5?1:ny<-.5?.35:nx>.5?.86:nx<-.5?.66:nz>.5?.78:.72;col.push(k,k,k);
+ for(let i=0;i<n.count;i++){const nx=n.getX(i),ny=n.getY(i),nz=n.getZ(i);const k=ny>.5?[1.04,1,.92]:ny<-.5?[.32,.34,.4]:nx>.5?[.92,.86,.78]:nx<-.5?[.6,.64,.76]:nz>.5?[.8,.78,.76]:[.7,.72,.8];col.push(...k);
   if(tile){const fu=Math.abs(nx)>.5?d:w,fv=Math.abs(ny)>.5?d:h;uv.setXY(i,uv.getX(i)*fu/tile[0],uv.getY(i)*fv/tile[1])}}
  g.setAttribute('color',new T.Float32BufferAttribute(col,3));return g}
 function roofGeo(w,h,d){const T=G.T,g=new T.BufferGeometry(),hw=w/2,hd=d/2;
@@ -16578,8 +16626,8 @@ function roofGeo(w,h,d){const T=G.T,g=new T.BufferGeometry(),hw=w/2,hd=d/2;
  tri(0,2,1,.7,[0,0,.5,1,1,0]);tri(3,4,5,.7,[0,0,1,0,.5,1]);
  for(const[a,b,cc,dd,k]of[[0,3,5,2,.95],[1,2,5,4,.62]]){tri(a,b,cc,k,[0,0,d/3,0,d/3,1]);tri(a,cc,dd,k,[0,0,d/3,1,0,1])}
  g.setAttribute('position',new T.Float32BufferAttribute(v,3));g.setAttribute('color',new T.Float32BufferAttribute(c,3));g.setAttribute('uv',new T.Float32BufferAttribute(u,2));return g}
-function treeGeo(){const T=G.T,g=new T.BufferGeometry(),v=[],u=[],c=[];
- for(const a of[0,Math.PI/2]){const cx=Math.cos(a)*1.6,cz=Math.sin(a)*1.6;const q=[[-cx,0,-cz],[cx,0,cz],[cx,5,cz],[-cx,5,-cz]];for(const i of[0,1,2,0,2,3])v.push(...q[i]);u.push(0,0,1,0,1,1,0,0,1,1,0,1);for(let j=0;j<6;j++)c.push(1,1,1)}
+function treeGeo(w,h){w=w||1.6;h=h||5;const T=G.T,g=new T.BufferGeometry(),v=[],u=[],c=[];
+ for(const a of[0,Math.PI/3,Math.PI*2/3]){const cx=Math.cos(a)*w,cz=Math.sin(a)*w;const q=[[-cx,0,-cz],[cx,0,cz],[cx,h,cz],[-cx,h,-cz]];for(const i of[0,1,2,0,2,3])v.push(...q[i]);u.push(0,0,1,0,1,1,0,0,1,1,0,1);const k=a?.86:1;for(let j=0;j<6;j++)c.push(k,k,k)}
  g.setAttribute('position',new T.Float32BufferAttribute(v,3));g.setAttribute('uv',new T.Float32BufferAttribute(u,2));g.setAttribute('color',new T.Float32BufferAttribute(c,3));return g}
 /* a pool of the same thing, scattered along the loop; each frame they slide on by the distance travelled */
 function pool(geo,mat,items,parent){const T=G.T,m=new T.InstancedMesh(geo,mat,items.length);m.instanceMatrix.setUsage(T.DynamicDrawUsage);m.frustumCulled=false;
@@ -16592,7 +16640,38 @@ function poolTick(P,s){const T=G.T,o=_o3.o||(_o3.o=new T.Object3D()),L=TRV.L;
 /* ---- textures ---- */
 function trvTextures(){const R=Math.random;
  const T={};
- T.grass=cTex(256,256,(c,w,h)=>{c.fillStyle='#5a7a3a';c.fillRect(0,0,w,h);for(let i=0;i<5;i++){c.fillStyle=['#6a8a42','#4e6e34','#7a8a48','#5e7e3e','#8a9a5a'][i];c.fillRect(0,i*51,w,51)}for(let i=0;i<3000;i++){c.fillStyle=R()<.5?'#3e5a2a':'#7a9a4a';c.fillRect(R()*w,R()*h,2,2)}c.fillStyle='#4a3a2a55';for(let x=0;x<w;x+=64)c.fillRect(x,0,2,h)},12,12);
+ // the far ground: a patchwork of fields (400 m to a tile), hedgerows round them, a farm track or two
+ T.grass=cTex(1024,1024,(c,w,h)=>{c.fillStyle='#5f7d3c';c.fillRect(0,0,w,h);
+  const F=[['#6c8c40',0],['#7f9a48',0],['#58783a',0],['#c8b060',1],['#b89a52',1],['#8a6a48',2],['#7a5a3e',2],['#8aa458',0],['#a8a85a',1]];
+  const cut=(x,y,ww,hh,d)=>{if(d>3||ww<120&&hh<120||R()<.12&&d>1){const f=F[(R()*F.length)|0];c.fillStyle=f[0];c.fillRect(x,y,ww,hh);
+    if(f[1]){c.fillStyle='#00000014';const st=R()<.5;for(let k=0;k<(st?ww:hh);k+=5)st?c.fillRect(x+k,y,2,hh):c.fillRect(x,y+k,ww,2)}
+    for(let k=0;k<ww*hh/60;k++){c.fillStyle=R()<.5?'#ffffff0c':'#0000000e';c.fillRect(x+R()*ww,y+R()*hh,3,3)}
+    // the hedge round it, with a tree here and there
+    c.fillStyle='#3a5428';c.fillRect(x,y,ww,4);c.fillRect(x,y,4,hh);for(let k=0;k<(ww+hh)/40;k++){c.fillStyle=R()<.5?'#2e4a22':'#456a30';c.beginPath();c.arc(R()<.5?x+R()*ww:x+2,R()<.5?y+2:y+R()*hh,4+R()*5,0,7);c.fill()}return}
+   if(ww>hh){const s=ww*(.35+R()*.3);cut(x,y,s,hh,d+1);cut(x+s,y,ww-s,hh,d+1)}else{const s=hh*(.35+R()*.3);cut(x,y,ww,s,d+1);cut(x,y+s,ww,hh-s,d+1)}};
+  cut(0,0,w,h,0);c.strokeStyle='#a8987a';c.lineWidth=5;c.beginPath();c.moveTo(0,R()*h);c.bezierCurveTo(w*.3,R()*h,w*.6,R()*h,w,R()*h);c.stroke()},1,1);
+ // the verges by the line: rough grass, dandelions, worn earth
+ T.verge=cTex(256,256,(c,w,h)=>{c.fillStyle='#5a7a38';c.fillRect(0,0,w,h);for(let i=0;i<5000;i++){const v=R();c.fillStyle=v<.4?'#4a6a30':v<.75?'#6e8e44':v<.9?'#7e9a50':v<.97?'#8a7a58':'#e8d060';c.fillRect(R()*w,R()*h,v>.97?2:1+R()*2,v>.97?2:3+R()*4)}},1,1);
+ // trees: a round broadleaf, a tall poplar, a dark conifer; lit from the upper left, shadowed underneath
+ const tree=(kind)=>cTex(256,256,(c,w,h)=>{const pal=kind===2?['#1e3a26','#2a4a30','#34583a','#4a704a']:kind===1?['#3a5a26','#4a6e2e','#5e8436','#86a84a']:['#34522a','#46682e','#5a8036','#7ea046'];
+  c.fillStyle='#4a3424';c.fillRect(122,kind===2?190:150,12,106);c.fillStyle='#2a1e16';c.fillRect(128,kind===2?190:150,6,106);
+  const blob=(cx,cy,rx,ry)=>{for(let i=0;i<(kind===2?260:340);i++){const a=R()*Math.PI*2,r=Math.sqrt(R());const x=cx+Math.cos(a)*r*rx,y=cy+Math.sin(a)*r*ry;const l=clamp(.55-(x-cx)/rx*.25-(y-cy)/ry*.35+(R()-.5)*.35,0,.999);
+    const rr=kind===2?3+R()*4:5+R()*8;const gg=c.createRadialGradient(x-rr*.3,y-rr*.3,0,x,y,rr);gg.addColorStop(0,pal[Math.min(3,(l*4|0)+1)]);gg.addColorStop(1,pal[l*4|0]);c.fillStyle=gg;c.beginPath();c.arc(x,y,rr,0,7);c.fill()}};
+  if(kind===2){for(let k=0;k<7;k++){const y=40+k*24,rw=16+k*12;blob(128,y,rw,16)}}
+  else if(kind===1){blob(128,110,40,92)}
+  else{blob(128,96,84,64);blob(92,128,48,36);blob(166,124,50,38);blob(128,62,52,40)}},1,1);
+ T.tree=tree(0);T.tree1=tree(1);T.tree2=tree(2);
+ T.bush=cTex(128,64,(c,w,h)=>{for(let i=0;i<220;i++){const x=10+R()*108,y=20+R()*40,rr=4+R()*7,l=clamp(.6-(y-20)/40*.5+(R()-.5)*.3,0,.99);c.fillStyle=['#2e4a24','#3e5e2a','#527434','#6a8a40'][l*4|0];c.beginPath();c.arc(x,y,rr,0,7);c.fill()}},1,1);
+ T.hedge=cTex(256,64,(c,w,h)=>{c.fillStyle='#34502a';c.fillRect(0,0,w,h);for(let i=0;i<1400;i++){const y=R()*h,l=clamp(.75-y/h*.6+(R()-.5)*.3,0,.99);c.fillStyle=['#24401e','#30502a','#466a32','#5e843e'][l*4|0];c.beginPath();c.arc(R()*w,y,2+R()*4,0,7);c.fill()}},1,1);
+ // hills on the horizon: two ridgelines, the far one paler
+ const hill=(far)=>cTex(1024,128,(c,w,h)=>{const g=c.createLinearGradient(0,0,0,h);g.addColorStop(0,far?'#9aaab8':'#6f8a6a');g.addColorStop(1,far?'#b4bec6':'#8a9c80');c.fillStyle=g;c.beginPath();c.moveTo(0,h);
+  for(let x=0;x<=w;x+=8){const y=h*(.42+.22*Math.sin(x/w*Math.PI*2*(far?2:3)+(far?1:0))+.12*Math.sin(x/w*Math.PI*2*(far?5:7))+.04*Math.sin(x*.11));c.lineTo(x,y)}c.lineTo(w,h);c.closePath();c.fill();
+  if(!far){for(let i=0;i<220;i++){const x=R()*w,y=h*(.55+R()*.4);c.fillStyle='#5a744e';c.beginPath();c.arc(x,y,2+R()*3,0,7);c.fill()}}},1,1);
+ T.hill=hill(0);T.hillFar=hill(1);T.hill.wrapS=T.hillFar.wrapS=G.T.RepeatWrapping;
+ // an electricity pylon, drawn as a lattice
+ T.pylon=cTex(128,256,(c,w,h)=>{c.strokeStyle='#6a6e76';c.lineWidth=3;const L=(a,b,x,y)=>{c.beginPath();c.moveTo(a,b);c.lineTo(x,y);c.stroke()};
+  L(20,255,56,20);L(108,255,72,20);L(56,20,72,20);for(let y=40;y<250;y+=26){const k=(y-20)/235,xa=56-36*k,xb=72+36*k,k2=(y+26-20)/235;L(xa,y,72+36*k2,y+26);L(xb,y,56-36*k2,y+26);L(xa,y,xb,y)}
+  for(const y of[40,80]){L(8,y,120,y);L(8,y,40,y+14);L(120,y,88,y+14)}c.fillStyle='#4a4e56';for(const x of[10,118])for(const y of[44,84])c.fillRect(x-2,y,4,10)},1,1);
  T.ballast=cTex(128,128,(c,w,h)=>{c.fillStyle='#6a645c';c.fillRect(0,0,w,h);for(let i=0;i<2600;i++){const v=60+R()*80|0;c.fillStyle=`rgb(${v},${v-4},${v-10})`;c.fillRect(R()*w,R()*h,2+R()*2,2+R()*2)}},4,200);
  T.sleep=cTex(64,128,(c,w,h)=>{c.fillStyle='#6a645c';c.fillRect(0,0,w,h);for(let i=0;i<900;i++){const v=70+R()*70|0;c.fillStyle=`rgb(${v},${v-4},${v-10})`;c.fillRect(R()*w,R()*h,2,2)}for(let y=0;y<h;y+=32){c.fillStyle='#4a3e32';c.fillRect(4,y+6,w-8,14)}},1,1);
  T.house=cTex(256,256,(c,w,h)=>{c.fillStyle='#a8644a';c.fillRect(0,0,w,h);for(let y=0;y<h;y+=8)for(let x=(y/8)%2*8;x<w;x+=16){c.fillStyle=R()<.5?'#b06c50':'#984e3a';c.fillRect(x,y,15,7)}
@@ -16602,7 +16681,6 @@ function trvTextures(){const R=Math.random;
  T.tower=cTex(256,512,(c,w,h)=>{c.fillStyle='#8a8e98';c.fillRect(0,0,w,h);for(let y=8;y<h;y+=24)for(let x=8;x<w;x+=24){c.fillStyle=R()<.12?'#c8d4e0':'#3a4656';c.fillRect(x,y,16,14)}},1,1);
  T.towerLit=cTex(256,512,(c,w,h)=>{for(let y=8;y<h;y+=24)for(let x=8;x<w;x+=24)if(R()<.35){c.fillStyle=R()<.5?'#ffd89a':'#cfe6ff';c.fillRect(x,y,16,14)}},1,1);
  T.ware=cTex(256,128,(c,w,h)=>{c.fillStyle='#8a9098';c.fillRect(0,0,w,h);for(let x=0;x<w;x+=6){c.fillStyle='#727880';c.fillRect(x,0,2,h)}c.fillStyle='#c0304a';c.fillRect(0,0,w,10);c.fillStyle='#3a3e46';c.fillRect(100,60,56,68)},1,1);
- T.tree=cTex(128,128,(c,w,h)=>{c.fillStyle='#4a3020';c.fillRect(60,70,8,58);for(let i=0;i<260;i++){const a=R()*Math.PI*2,r=R()*50;c.fillStyle=['#3e6a2e','#4e7e36','#2e5a26','#6a8e3e'][(R()*4)|0];c.beginPath();c.arc(64+Math.cos(a)*r,56+Math.sin(a)*r*.85,5+R()*6,0,7);c.fill()}});
  T.fence=cTex(256,64,(c,w,h)=>{c.strokeStyle='#5a5e66';c.lineWidth=2;for(let y=14;y<h;y+=14){c.beginPath();c.moveTo(0,y);c.lineTo(w,y);c.stroke()}c.fillStyle='#3a3e46';for(let x=0;x<w;x+=64)c.fillRect(x,0,5,h)},1,1);
  T.brick=cTex(128,128,(c,w,h)=>{c.fillStyle='#7a4a3a';c.fillRect(0,0,w,h);for(let y=0;y<h;y+=8)for(let x=(y/8)%2*8;x<w;x+=16){c.fillStyle=R()<.5?'#8a5442':'#6a3e30';c.fillRect(x,y,15,7)}},1,1);
  T.tunnel=cTex(128,128,(c,w,h)=>{c.fillStyle='#2a2422';c.fillRect(0,0,w,h);for(let y=0;y<h;y+=8)for(let x=(y/8)%2*8;x<w;x+=16){c.fillStyle=R()<.5?'#332a26':'#221c1a';c.fillRect(x,y,15,7)}for(let i=0;i<40;i++){c.fillStyle='#ffffff10';c.fillRect(R()*w,R()*h,1,20)}},1,1);
@@ -16612,8 +16690,11 @@ function trvTextures(){const R=Math.random;
  T.board3=cTex(512,256,(c,w,h)=>{c.fillStyle='#f4efe6';c.fillRect(0,0,w,h);c.fillStyle='#1b1026';c.font='bold 58px Georgia, serif';c.fillText('Brindle & Co',40,110);c.font='italic 28px Georgia, serif';c.fillText('Insurance you\'ll never need to think about.',40,170)});
  T.trainSide=cTex(1024,128,(c,w,h)=>{c.fillStyle='#e9ece8';c.fillRect(0,0,w,h);c.fillStyle='#1f8a8a';c.fillRect(0,h-34,w,14);for(let x=24;x<w-40;x+=62){c.fillStyle='#2a3440';c.fillRect(x,26,48,42)}c.fillStyle='#ffd166';for(const x of[240,760])c.fillRect(x,14,56,h-14)},1,1);
  T.trainLit=cTex(1024,128,(c,w,h)=>{for(let x=24;x<w-40;x+=62){c.fillStyle='#fff1d6';c.fillRect(x,26,48,42)}},1,1);
- T.wallPlain=cTex(256,128,(c,w,h)=>{c.fillStyle='#8a8a84';c.fillRect(0,0,w,h);for(let i=0;i<1500;i++){c.fillStyle=R()<.5?'#7a7a74':'#9a9a94';c.fillRect(R()*w,R()*h,3,2)}c.fillStyle='#6a6a64';for(let x=0;x<w;x+=64)c.fillRect(x,0,3,h)},1,1);
- T.wall=cTex(512,128,(c,w,h)=>{c.fillStyle='#8a8a84';c.fillRect(0,0,w,h);for(let i=0;i<1500;i++){c.fillStyle=R()<.5?'#7a7a74':'#9a9a94';c.fillRect(R()*w,R()*h,3,2)}c.fillStyle='#ff5d73';c.font='bold 40px sans-serif';c.fillText('whisper was here',90,84);c.fillStyle='#8affc1';c.font='bold 20px sans-serif';c.fillText('FOREVER IS A LONG TIME',300,40)},1,1);
+ T.wallPlain=cTex(256,128,(c,w,h)=>{c.fillStyle='#8e8c86';c.fillRect(0,0,w,h);for(let i=0;i<1800;i++){c.fillStyle=R()<.5?'#7e7c76':'#a09e98';c.fillRect(R()*w,R()*h,3,2)}
+  // concrete panels: joints, a coping along the top, rust and rain streaks, moss low down
+  c.fillStyle='#6a6862';for(let x=0;x<w;x+=64)c.fillRect(x,0,3,h);c.fillStyle='#b4b2aa';c.fillRect(0,0,w,10);c.fillStyle='#5a5852';c.fillRect(0,10,w,3);
+  for(let i=0;i<14;i++){const x=R()*w,l=20+R()*80,g=c.createLinearGradient(0,13,0,13+l);g.addColorStop(0,'#5a4a3a66');g.addColorStop(1,'#5a4a3a00');c.fillStyle=g;c.fillRect(x,13,2+R()*4,l)}
+  const g=c.createLinearGradient(0,h-40,0,h);g.addColorStop(0,'#4a6a3a00');g.addColorStop(1,'#4a6a3acc');c.fillStyle=g;c.fillRect(0,h-40,w,40)},1,1);
  return T}
 /* ---------- the world outside ---------- */
 function trainSceneryBuild(){if(TRV.root||!G.ok)return;const T=G.T,X=TRN.x,TX=trvTextures(),L=TRV.L;TRV.tx=TX;const root=new T.Group();TRV.root=root;G.scene.add(root);
@@ -16622,7 +16703,9 @@ function trainSceneryBuild(){if(TRV.root||!G.ok)return;const T=G.T,X=TRN.x,TX=tr
  // ground: fields and verges, ballast under both tracks, the next track's sleepers, rails and wires that never end
  const plane=(w,d,map,col,y,x)=>{const g=new T.PlaneGeometry(w,d);g.rotateX(-Math.PI/2);const m=new T.Mesh(g,bMat(map,col));m.position.set(x,y,TRV.zc);m.frustumCulled=false;root.add(m);return m};
  TRV.scroll=[];const sc=(mesh,tile,axis)=>{TRV.scroll.push({t:mesh.material.map,tile,axis:axis||'y'});return mesh};
- sc(plane(1800,1800,TX.grass,'#ffffff',Y0-.08,X),1800/12);
+ TX.grass.repeat.set(1800/400,1800/400);sc(plane(1800,1800,TX.grass,'#ffffff',Y0-.12,X),400);
+ // the railway's own land: rough verges either side, out to a boundary hedge
+ for(const[x0,x1]of[[X-46,X-3.9],[X+7.9,X+50]]){const v=TX.verge.clone();v.needsUpdate=true;v.wrapS=v.wrapT=T.RepeatWrapping;v.repeat.set((x1-x0)/5,1800/5);sc(plane(x1-x0,1800,v,'#ffffff',Y0-.04,(x0+x1)/2),5)}
  TX.ballast.repeat.set(4,1800/9);sc(plane(12,1800,TX.ballast,'#ffffff',Y0,X+2),9);
  TX.sleep.repeat.set(1,1800/2.6);sc(plane(2.6,1800,TX.sleep,'#ffffff',Y0+.02,X+4.2),2.6);
  const rail=bMat(null,'#8a8a90');for(const x of[X+4.2-.72,X+4.2+.72]){const m=new T.Mesh(sGeo(.07,.16,1800),rail);m.position.set(x,Y0+.03,TRV.zc);m.frustumCulled=false;root.add(m)}
@@ -16633,22 +16716,44 @@ function trainSceneryBuild(){if(TRV.root||!G.ok)return;const T=G.T,X=TRN.x,TX=tr
  // catenary masts every 60 m, both sides
  {const g=sGeo(.25,6.2,.25),arm=sGeo(5.6,.14,.14);arm.translate(2.6,5.4,0);const mg=mergeG([g,arm]);const it=[];for(let z=0;z<L;z+=60){it.push({x:X-3.2,y:Y0,z});it.push({x:X+7.4,y:Y0,z:z+30,r:Math.PI})}pool(mg,bMat(null,'#7a8088',{vc:1}),it)}
  // trees: thin along the line, thick in the fields
- {const it=[];for(let i=0;i<420;i++){const side=r()<.5?-1:1,z=r()*L,field=z>1000&&z<1400,dx=field?14+r()*140:14+r()*40;const s=.8+r()*1.3;it.push({x:side<0?X-dx:X+5+dx,y:Y0,z,sx:s,sy:s*(.8+r()*.5),sz:s,r:r()*3})}pool(treeGeo(),bMat(TX.tree,'#ffffff',{at:.5,ds:true,vc:1}),it)}
+ // trees: broadleaves and poplars along the line, clumps of conifers, more of everything out in the fields
+ {const P=[[],[],[]];const put=(k,x,z,s)=>P[k].push({x,y:Y0,z,sx:s,sy:s*(.85+r()*.4),sz:s,r:r()*3});
+  for(let i=0;i<760;i++){const side=r()<.5?-1:1,z=r()*L,town=z>520&&z<990||z<500,far=r()<.55&&!town,dx=far?50+r()*260:15+r()*34;if(town&&r()<.6)continue;
+   const k=r()<.16?1:r()<.2?2:0,s=(k===2?1:.9)+r()*1.2;put(k,side<0?X-dx:X+5+dx,z,s);
+   if(k===2&&r()<.7)for(let j=0;j<3;j++)put(2,(side<0?X-dx:X+5+dx)+(r()-.5)*8,z+(r()-.5)*8,s*(.7+r()*.4))}
+  const tm=(m)=>bMat(m,'#ffffff',{at:.5,ds:true,vc:1});pool(treeGeo(2.4,7),tm(TX.tree),P[0]);pool(treeGeo(1.4,8.5),tm(TX.tree1),P[1]);pool(treeGeo(1.7,8),tm(TX.tree2),P[2])}
+ // scrub along the cess, and the boundary hedge (with gaps, and a gate now and then)
+ {const it=[];for(let i=0;i<520;i++){const side=r()<.5?-1:1,dx=8+r()*7,s=.6+r()*.9;it.push({x:side<0?X-dx:X+5+dx,y:Y0,z:r()*L,sx:s,sy:s*(.7+r()*.5),sz:s,r:r()*3})}
+  const g=new T.BufferGeometry(),v=[],u=[],c=[];for(const a of[0,Math.PI/2]){const cx=Math.cos(a)*1.3,cz=Math.sin(a)*1.3;const q=[[-cx,0,-cz],[cx,0,cz],[cx,1.3,cz],[-cx,1.3,-cz]];for(const i of[0,1,2,0,2,3])v.push(...q[i]);u.push(0,0,1,0,1,1,0,0,1,1,0,1);for(let j=0;j<6;j++)c.push(1,1,1)}
+  g.setAttribute('position',new T.Float32BufferAttribute(v,3));g.setAttribute('uv',new T.Float32BufferAttribute(u,2));g.setAttribute('color',new T.Float32BufferAttribute(c,3));pool(g,bMat(TX.bush,'#ffffff',{at:.5,ds:true,vc:1}),it)}
+ {const it=[];for(const x of[X-46,X+50])for(let z=0;z<L;){const len=14+r()*50;if(!(z<500&&r()<.6))it.push({x,y:Y0,z:z+len/2,sx:1,sy:.8+r()*.5,sz:len});z+=len+(r()<.3?4+r()*10:0)}
+  pool(sGeo(1.6,2.2,1,[4,2.2]),bMat(TX.hedge,'#ffffff',{vc:1}),it)}
+ // pylons striding across the fields
+ {const it=[];for(let z=0;z<L;z+=260)it.push({x:X-140,y:Y0,z});for(let z=130;z<L;z+=320)it.push({x:X+190,y:Y0,z});
+  const g=new T.BufferGeometry(),v=[],u=[],c=[];for(const a of[0,Math.PI/2]){const cx=Math.cos(a)*8,cz=Math.sin(a)*8;const q=[[-cx,0,-cz],[cx,0,cz],[cx,34,cz],[-cx,34,-cz]];for(const i of[0,1,2,0,2,3])v.push(...q[i]);u.push(0,0,1,0,1,1,0,0,1,1,0,1);for(let j=0;j<6;j++)c.push(1,1,1)}
+  g.setAttribute('position',new T.Float32BufferAttribute(v,3));g.setAttribute('uv',new T.Float32BufferAttribute(u,2));g.setAttribute('color',new T.Float32BufferAttribute(c,3));pool(g,bMat(TX.pylon,'#ffffff',{at:.4,ds:true,vc:1}),it)}
+ // the horizon: two ridgelines that drift by slowly (they're kilometres away)
+ for(const[side,dx,hh,tx,k]of[[-1,560,70,TX.hill,.05],[1,580,64,TX.hill,.05],[-1,760,120,TX.hillFar,.02],[1,780,110,TX.hillFar,.02]]){const m=tx.clone();m.needsUpdate=true;m.wrapS=T.RepeatWrapping;m.repeat.set(3,1);
+  const g=new T.PlaneGeometry(2400,hh);g.rotateY(side<0?Math.PI/2:-Math.PI/2);const mesh=new T.Mesh(g,bMat(m,'#ffffff',{at:.5,extra:{fog:false}}));mesh.position.set(side<0?X-dx:X+5+dx,Y0+hh/2-6,TRV.zc);mesh.frustumCulled=false;mesh.renderOrder=-5;root.add(mesh);
+  TRV.scroll.push({t:m,tile:(side<0?-1:1)*800/k,axis:'x'})}
  // terraces: the backs of houses in the suburbs, with their roofs
  {const it=[];for(let z=520;z<990;z+=7.2){for(const side of[-1,1]){if(r()<.12)continue;const dx=24+(side>0?6:0)+r()*2;it.push({x:side<0?X-dx:X+5+dx,y:Y0,z,c:['#ffffff','#e8d8c8','#d8c8c8','#f0e8d8','#c8b8a8'][(r()*5)|0]})}}
-  const hg=sGeo(9,6,7),rg=roofGeo(9.2,2.6,7.4);rg.translate(0,6,0);const H=pool(hg,bMat(TX.house,'#ffffff',{vc:1}),it);pool(rg,bMat(TX.roof,'#ffffff',{vc:1}),it);
+  const hg=sGeo(9,6,7),rg=roofGeo(9.2,2.6,7.4);rg.translate(0,6,0);const H=pool(hg,bMat(TX.house,'#ffffff',{vc:1}),it);const ri=it.map(h=>Object.assign({},h,{c:['#ffffff','#c8a898','#a8a8b0','#d8c0a8'][(r()*4)|0]}));pool(rg,bMat(TX.roof,'#ffffff',{vc:1}),ri);
+  const ch=sGeo(.9,1.6,1.4);ch.translate(2.6,6.9,0);pool(ch,bMat(TX.brick,'#ffffff',{vc:1}),it.map(h=>({x:h.x,y:h.y,z:h.z,r:r()<.5?0:Math.PI})));
+  // garden walls between the back gardens
+  {const gw=[];for(const h of it){const dir=h.x<X?1:-1;gw.push({x:h.x+dir*7.5,y:Y0,z:h.z+3.6})}const wg=sGeo(6,1.5,.25);pool(wg,bMat(TX.brick,'#ffffff',{vc:1}),gw)}
   const lit=pool(hg,bMat(TX.houseLit,'#ffffff',{tr:true,glow:1,extra:{blending:T.AdditiveBlending}}),it);lit.lit=1;
   // sheds at the ends of the gardens
   const sh=[];for(const h of it)if(r()<.4)sh.push({x:h.x+(h.x<X?8:-8),y:Y0,z:h.z+r()*2,c:['#6a8a5a','#8a6a4a','#5a6a8a'][(r()*3)|0]});pool(sGeo(2,2.1,2.4),bMat(null,'#ffffff',{vc:1}),sh)}
  // the city: towers and blocks, near and far; a few big ones on the skyline
  {const it=[];for(let i=0;i<120;i++){const z=r()*500,side=r()<.5?-1:1,dx=34+r()*200,w=14+r()*20,h=18+r()*(dx>120?90:50);it.push({x:side<0?X-dx:X+5+dx,y:Y0,z,sx:w/10,sy:h/10,sz:(10+r()*14)/10,c:['#ffffff','#d8dce8','#e8e0d8','#c8d0d8'][(r()*4)|0]})}
-  for(let i=0;i<40;i++){const z=r()*L,side=r()<.5?-1:1,dx=230+r()*55;it.push({x:side<0?X-dx:X+5+dx,y:Y0,z,sx:2+r()*2,sy:6+r()*10,sz:2+r()*2,c:'#c8ccd8'})}
+  for(let i=0;i<40;i++){const z=r()<.7?r()*620:1330+r()*260,side=r()<.5?-1:1,dx=230+r()*55;it.push({x:side<0?X-dx:X+5+dx,y:Y0,z,sx:2+r()*2,sy:6+r()*10,sz:2+r()*2,c:'#c8ccd8'})}
   const g=sGeo(10,10,10);pool(g,bMat(TX.tower,'#ffffff',{vc:1}),it);const l=pool(g,bMat(TX.towerLit,'#ffffff',{tr:true,glow:1,extra:{blending:T.AdditiveBlending}}),it);l.lit=1}
  // warehouses and yards past the city
  {const it=[];for(let i=0;i<26;i++){const z=1400+r()*200,side=r()<.5?-1:1,dx=26+r()*80;it.push({x:side<0?X-dx:X+5+dx,y:Y0,z,sx:2+r()*2.5,sy:.8+r()*.5,sz:1.5+r()*2})}pool(sGeo(12,8,12),bMat(TX.ware,'#ffffff',{vc:1}),it)}
- // walls along the cutting through the city, here and there with graffiti
- {const a=[],b=[];let i=0;for(let z=0;z<500;z+=16){for(const x of[X-7.2,X+11.4]){(i++%5===2?b:a).push({x,y:Y0,z:z+(x>X?8:0)})}}
-  pool(sGeo(.4,2.6,16,[8,2.6]),bMat(TX.wallPlain,'#ffffff',{vc:1}),a);pool(sGeo(.4,2.6,16,[16,2.6]),bMat(TX.wall,'#ffffff',{vc:1}),b)}
+ // concrete retaining walls along the cutting through the city
+ {const a=[];for(let z=0;z<500;z+=16){for(const x of[X-7.2,X+11.4])a.push({x,y:Y0,z:z+(x>X?8:0)})}
+  pool(sGeo(.4,2.6,16,[8,2.6]),bMat(TX.wallPlain,'#ffffff',{vc:1}),a)}
  // the coach windows: almost clear, a faint cool tint, a little more reflective in the dark
  {const gm=new T.MeshBasicMaterial({color:new T.Color('#c8d8e4'),transparent:true,opacity:.06,depthWrite:false,side:T.DoubleSide,fog:false});TRV.glass=gm;
   for(const w of TRN.glaze){const g=new T.PlaneGeometry(w.z1-w.z0,w.y1-w.y0);g.rotateY(Math.PI/2);const m=new T.Mesh(g,gm);m.position.set(w.x,(w.y0+w.y1)/2,(w.z0+w.z1)/2);m.renderOrder=2;root.add(m)}}
@@ -16676,12 +16781,14 @@ function trainSceneryBuild(){if(TRV.root||!G.ok)return;const T=G.T,X=TRN.x,TX=tr
   for(const s of[-1,1]){const p=new T.Mesh(new T.PlaneGeometry(len,1.6),bMat(TX.trainSide,'#ffffff'));p.rotation.y=s*Math.PI/2;p.position.set(s*1.41,1.6,0);g.add(p);const lp=new T.Mesh(new T.PlaneGeometry(len,1.6),bMat(TX.trainLit,'#ffffff',{tr:true,glow:1,extra:{blending:T.AdditiveBlending}}));lp.rotation.y=s*Math.PI/2;lp.position.set(s*1.42,1.6,0);g.add(lp)}
   g.position.set(X+4.2,Y0+.3,-9999);g.visible=false;root.add(g);TRV.pass={g,len,z:null}}
  // people in the seats: the top of a passer-by, cut off at the waist, sitting
- {const pick=TRN.seats.filter((s,i)=>((i*2654435761)>>>0)%100<11);for(const[i,s]of pick.entries()){const v=i%8,t=spriteTex('anon'+v,anonSVG(v));const g=new T.PlaneGeometry(.94,2.3*.56);const uv=g.attributes.uv;for(let j=0;j<uv.count;j++)uv.setY(j,.44+uv.getY(j)*.56);g.translate(0,2.3*.56/2,0);
+ {const tb=trainTable(),pick=TRN.seats.filter((s,i)=>((i*2654435761)>>>0)%100<11&&!(tb&&Math.hypot(s.x-tb.x,s.z-tb.z)<1.6));for(const[i,s]of pick.entries()){const v=i%8,t=spriteTex('anon'+v,anonSVG(v));const g=new T.PlaneGeometry(.94,2.3*.56);const uv=g.attributes.uv;for(let j=0;j<uv.count;j++)uv.setY(j,.44+uv.getY(j)*.56);g.translate(0,2.3*.56/2,0);
    const m=new T.Mesh(g,new T.MeshBasicMaterial({map:t,alphaTest:.5,color:new T.Color(.9,.9,.92)}));m.position.set(s.x,.36,s.z);root.add(m);TRV.sit.push(m)}}
  // the passenger information screens over each saloon doorway
  for(const[z0,z1]of TRN.cars)for(const[pz,dir]of[[z0+2.7,1],[z1-2.7,-1]]){const c=document.createElement('canvas');c.width=512;c.height=96;const t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;
   const m=new T.Mesh(new T.PlaneGeometry(.84,.16),new T.MeshBasicMaterial({map:t}));m.position.set(X,2.1,pz+dir*.024);if(dir<0)m.rotation.y=Math.PI;root.add(m);
   const bz=new T.Mesh(sGeo(.9,.2,.02),bMat(null,'#16161c',{vc:1}));bz.position.set(X,2.0,pz+dir*.012);root.add(bz);TRV.pis.push({c,t,o:Math.random()*300})}
+ // see-through cut-outs (trees, bushes, pylons, fences, people, glass) would stamp solid rectangles into ambient occlusion
+ root.traverse(o=>{const m=o.material;if(m&&(m.alphaTest>0||m.transparent))o.userData.noAO=1});
  root.visible=false}
 function mergeG(gs){const T=G.T,v=[],c=[],u=[];for(const g of gs){const n=g.index?g.toNonIndexed():g;v.push(...n.attributes.position.array);u.push(...(n.attributes.uv?n.attributes.uv.array:new Float32Array(n.attributes.position.count*2)));c.push(...(n.attributes.color?n.attributes.color.array:new Float32Array(n.attributes.position.count*3).fill(1)))}
  const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(v,3));g.setAttribute('uv',new T.Float32BufferAttribute(u,2));g.setAttribute('color',new T.Float32BufferAttribute(c,3));return g}
@@ -16748,6 +16855,12 @@ function tripStart(dest,o){o=o||{};closeOv();const ov_=$('ov');ov_.classList.rem
  if(!G.ok||window.__test||!AREAS.platform){go();return}
  const D=DEPART[(S.day+S.slot)%2];run([{bg:'platform'},{hide:1},{cut:'depart'},N(D[0]),N(D[1])],go);
 }
+/* story rides: whoever the story is with takes the table seat by the window in the middle of Coach B; you walk to
+   them yourself. Passengers never sit round that table. */
+function trainTable(){const c=TRN.cars[1];let b=null;for(const t of TRN.tables)if(t.z>c[0]&&t.z<c[1]&&(!b||Math.abs(t.z-36)<Math.abs(b.z-36)))b=t;return b}
+function trainSeat(who){S.hold=S.hold||{};const t=trainTable();
+ const s=t&&TRN.seats.filter(s=>Math.hypot(s.x-t.x,s.z-t.z)<1.3).sort((a,b)=>Math.abs(b.x-TRN.x)-Math.abs(a.x-TRN.x)||a.z-b.z)[0];
+ S.hold[who]=s?['train',+s.x.toFixed(2),+s.z.toFixed(2),0,'sit']:['train',TRN.x,36,0];if(typeof placeChars==='function')placeChars()}
 function tripReady(){return !!(S&&S.trip&&!S.trip.story&&WD.reg==='train'&&S.trip.el>=10)}
 function tripArrive(){const t=S.trip;if(!t)return;const D=TDEST[t.dest]||TDEST.con;S.trip=null;tripHud();fadeTp(()=>{teleportArea(D.area);run([{bg:D.area},{hide:1},N(D.arrive)],hub)})}
 function tripTick(dt){
@@ -16913,7 +17026,7 @@ const APPS={
  /* ---- Achievements: across every run ---- */
  achieve(){const cat=k=>k.startsWith('end_')?'end':k.startsWith('love_')?'love':k.startsWith('solve_')||k.includes('clue')||k.includes('solve')||k==='first_lead'?'myst':k.startsWith('skill_')||k.startsWith('clout_')?'rank':'other';
   const all=achVis();if(PH.atab==='end'&&!pgOpen())PH.atab='all';const ks=all.filter(k=>PH.atab==='all'||cat(k)===PH.atab),got=all.filter(k=>META.ach[k]).length;
-  return tabsH(PH.atab,[['all','All'],...(pgOpen()?[['end','Endings']]:[]),['love','Love'],['myst','Mysteries'],['rank','Ranks'],['other','Everything else']],'at')+`<div class="abody"><p class="small">${got}/${all.length} unlocked across every run</p>${bar(got/all.length*100,'var(--butter)')}<div class="agrid">${ks.map(k=>{const a=ACH[k],on=!!META.ach[k],hid=a[2]&&!on;return`<div class="atile ${on?'on':''}"><span class="aic">${on?'★':hid?'?':'☆'}</span><b>${hid?'???':esc(a[0])}</b><small>${hid?'Hidden':esc(a[1])}</small>${on?`<em>${new Date(META.ach[k]).toLocaleDateString()}</em>`:''}</div>`}).join('')}</div></div>`},
+  return tabsH(PH.atab,[['all','All'],...(pgOpen()?[['end','Endings']]:[]),['love','Love'],['myst','Mysteries'],['rank','Ranks'],['other','Everything else']],'at')+`<div class="abody"><p class="small">${got}/${all.length} unlocked across every run</p>${bar(got/all.length*100,'var(--butter)')}<div class="agrid">${ks.map(k=>{const on=!!META.ach[k],[an,ad,hid]=achShow(k);return`<div class="atile ${on?'on':''}"><span class="aic">${on?'★':hid?'?':'☆'}</span><b>${esc(an)}</b><small>${esc(ad)}</small>${on?`<em>${new Date(META.ach[k]).toLocaleDateString()}</em>`:''}</div>`}).join('')}</div></div>`},
  /* ---- Echo: the loop. What's left, and the day you can take back ---- */
  echo(){const P=echoPlan(),left=P.people.filter(p=>p[1]!=='Done');
   return`<div class="abody"><p class="small">Loop ${META.loop||1}. Each part of the day holds ${LOOPOC+1} things. People can take three times as much of you each day, and stories can run up to two days early. Routes you've finished before aren't held to their day.</p><div class="row"><button class="btn pri" id="erw" ${S.snap&&S.day>=1?'':'disabled'}>Rewind to this morning</button></div><p class="small" style="margin-top:12px"><b>People · ${ROM.length-left.length}/${ROM.length} in love</b></p>${left.map(p=>`<div class="kv"><span>${esc(p[0])}</span><b class="small">${esc(p[1])}</b></div>`).join('')||'<p class="small">Everyone. You did it.</p>'}<p class="small" style="margin-top:12px"><b>Mysteries · ${allMyst().filter(m=>S.solved[m]).length}/${allMyst().length}</b></p>${P.mys.map(m=>`<div class="kv"><span>${esc(m[0])}</span><b class="small">${esc(m[1])}</b></div>`).join('')||'<p class="small">All of it.</p>'}<p class="small" style="margin-top:12px">${haremReady()?'Ready. Go to the keynote on Sunday.':'When everyone is in love with you and every mystery is solved, Sunday becomes something else.'}</p></div>`},
@@ -17203,16 +17316,18 @@ function worldSVG(){const here=wHere(),sel=WV.sel,mode=WV.mode,trip=S&&S.trip;
  ${Object.entries(WLOC).map(([k,L])=>{const on=active(k),isHere=here===k,isSel=sel===k;return`<g class="wnode ${on?'':'off'} ${isSel?'sel':''} ${isHere?'here':''}" data-w="${k}" transform="translate(${L.x} ${L.y})" tabindex="0" role="button" aria-label="${esc(L.n)}">
   ${isHere?'<circle r="34" class="wpulse"/>':''}<circle r="27" class="wring"/><circle r="21" class="wdot"/><g class="wic" style="color:${isHere?'#1b1026':'#f6eefc'}">${ic[L.ic]}</g>
   <text y="${L.y>400?50:-38}" text-anchor="middle" class="wlbl">${esc(L.n)}</text><text y="${L.y>400?68:-20}" text-anchor="middle" class="wsub">${esc(L.sub)}</text>
-  ${isHere?`<g transform="translate(0 ${L.y>400?-44:44})"><rect x="-46" y="-12" width="92" height="22" rx="11" fill="#ffd166"/><text y="4" text-anchor="middle" font-family="VT323,monospace" font-size="17" fill="#1b1026" letter-spacing="2">YOU ARE HERE</text></g>`:''}</g>`}).join('')}
+  ${isHere?`<g transform="translate(0 ${L.y>400?-52:52})"><rect x="-72" y="-13" width="144" height="26" rx="13" fill="#ffd166"/><text y="5" text-anchor="middle" font-family="VT323,monospace" font-size="17" fill="#1b1026" letter-spacing="2">YOU ARE HERE</text></g>`:''}</g>`}).join('')}
  <g transform="translate(940 560)" font-family="VT323,monospace" font-size="16" fill="#bba8cf"><circle r="22" fill="none" stroke="#ffffff22"/><path d="M0-18 5 0 0-4-5 0z" fill="#ff5d73"/><text y="-26" text-anchor="middle">N</text></g>
  <rect width="1000" height="620" fill="url(#wvig)" pointer-events="none"/></svg>`}
 /* where the train goes from here, and whether it will take you */
 function WDEP(){const story=typeof stepIs==='function'&&stepIs('train'),off=f=>typeof f==='function'?f():f;
+ // a story ride names its train (the step's dest); every other train waits for another day
+ const sd=story?(beatStep(curBeat()).dest||'con'):null,mine='Your train\'s the '+(sd&&WLOC[sd]?WLOC[sd].n:'')+'.';
  const T=SLOTT[clamp(S.slot||0,0,5)].split(':').map(Number),tm=add=>{let m=T[0]*60+T[1]+add;m=(m+1440)%1440;return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')};
  const officeOK=f('office_open')||(typeof leadOpen==='function'&&leadOpen('office'));
- return[{k:'con',t:tm(6),pf:4,ok:S.day>=1,why:S.day<1?'Not this week. Not yet.':'',st:'ON TIME'},
-  {k:'home',t:tm(13),pf:2,ok:!story,why:story?'Your train\'s the Conference Quarter.':'',st:'ON TIME'},
-  {k:'office',t:tm(19),pf:6,ok:!story&&officeOK,why:story?'Your train\'s the Conference Quarter.':officeOK?'':'Linda made you promise not to come in this week.',st:officeOK?'ON TIME':'NOT TODAY'}]}
+ return[{k:'con',t:tm(6),pf:4,ok:story?sd==='con':S.day>=1,why:story&&sd!=='con'?mine:S.day<1?'Not this week. Not yet.':'',st:'ON TIME'},
+  {k:'home',t:tm(13),pf:2,ok:story?sd==='home':true,why:story&&sd!=='home'?mine:'',st:'ON TIME'},
+  {k:'office',t:tm(19),pf:6,ok:story?sd==='office':officeOK,why:story&&sd!=='office'?mine:officeOK?'':'Linda made you promise not to come in this week.',st:officeOK||sd==='office'?'ON TIME':'NOT TODAY'}]}
 /* ---- opening ---- */
 function worldOpen(mode,from){if(!S)return;WV.mode=mode||'phone';WV.from=from||(mode==='phone'?'phone':'world');
  WV.sel=WV.mode==='station'?null:WV.mode==='taxi'?'station':(WV.sel||wHere()||'con');
@@ -17327,7 +17442,8 @@ addEventListener('keydown',e=>{
   if(isPhone){e.preventDefault();closePhone();return}
   if(!ovOn){e.preventDefault();phone();return}
  }
- if(k==='Escape'&&isPhone){e.preventDefault();if($('ov').dataset.app)phoneBack();else closePhone();return}
+ // Esc on a map (a building's or the city's) closes it outright; the on-screen ‹ City button is the way back out
+ if(k==='Escape'&&isPhone){e.preventDefault();const ap=$('ov').dataset.app;if(ap==='world'&&WV.mode!=='phone')worldClose();else if(ap==='map'||ap==='world')closePhone();else if(ap)phoneBack();else closePhone();return}
  // Esc opens the phone (in the world the browser also uses Esc to release the mouse, which opens it too)
  if(k==='Escape'&&!ovOn&&!$('title').classList.contains('on')&&!$('card').classList.contains('on')){e.preventDefault();phone();return}
  if($('card').classList.contains('on')&&(k===' '||k==='Enter')){e.preventDefault();$('card').click();return}

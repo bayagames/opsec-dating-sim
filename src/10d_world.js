@@ -51,16 +51,18 @@ function worldSVG(){const here=wHere(),sel=WV.sel,mode=WV.mode,trip=S&&S.trip;
  ${Object.entries(WLOC).map(([k,L])=>{const on=active(k),isHere=here===k,isSel=sel===k;return`<g class="wnode ${on?'':'off'} ${isSel?'sel':''} ${isHere?'here':''}" data-w="${k}" transform="translate(${L.x} ${L.y})" tabindex="0" role="button" aria-label="${esc(L.n)}">
   ${isHere?'<circle r="34" class="wpulse"/>':''}<circle r="27" class="wring"/><circle r="21" class="wdot"/><g class="wic" style="color:${isHere?'#1b1026':'#f6eefc'}">${ic[L.ic]}</g>
   <text y="${L.y>400?50:-38}" text-anchor="middle" class="wlbl">${esc(L.n)}</text><text y="${L.y>400?68:-20}" text-anchor="middle" class="wsub">${esc(L.sub)}</text>
-  ${isHere?`<g transform="translate(0 ${L.y>400?-44:44})"><rect x="-46" y="-12" width="92" height="22" rx="11" fill="#ffd166"/><text y="4" text-anchor="middle" font-family="VT323,monospace" font-size="17" fill="#1b1026" letter-spacing="2">YOU ARE HERE</text></g>`:''}</g>`}).join('')}
+  ${isHere?`<g transform="translate(0 ${L.y>400?-52:52})"><rect x="-72" y="-13" width="144" height="26" rx="13" fill="#ffd166"/><text y="5" text-anchor="middle" font-family="VT323,monospace" font-size="17" fill="#1b1026" letter-spacing="2">YOU ARE HERE</text></g>`:''}</g>`}).join('')}
  <g transform="translate(940 560)" font-family="VT323,monospace" font-size="16" fill="#bba8cf"><circle r="22" fill="none" stroke="#ffffff22"/><path d="M0-18 5 0 0-4-5 0z" fill="#ff5d73"/><text y="-26" text-anchor="middle">N</text></g>
  <rect width="1000" height="620" fill="url(#wvig)" pointer-events="none"/></svg>`}
 /* where the train goes from here, and whether it will take you */
 function WDEP(){const story=typeof stepIs==='function'&&stepIs('train'),off=f=>typeof f==='function'?f():f;
+ // a story ride names its train (the step's dest); every other train waits for another day
+ const sd=story?(beatStep(curBeat()).dest||'con'):null,mine='Your train\'s the '+(sd&&WLOC[sd]?WLOC[sd].n:'')+'.';
  const T=SLOTT[clamp(S.slot||0,0,5)].split(':').map(Number),tm=add=>{let m=T[0]*60+T[1]+add;m=(m+1440)%1440;return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')};
  const officeOK=f('office_open')||(typeof leadOpen==='function'&&leadOpen('office'));
- return[{k:'con',t:tm(6),pf:4,ok:S.day>=1,why:S.day<1?'Not this week. Not yet.':'',st:'ON TIME'},
-  {k:'home',t:tm(13),pf:2,ok:!story,why:story?'Your train\'s the Conference Quarter.':'',st:'ON TIME'},
-  {k:'office',t:tm(19),pf:6,ok:!story&&officeOK,why:story?'Your train\'s the Conference Quarter.':officeOK?'':'Linda made you promise not to come in this week.',st:officeOK?'ON TIME':'NOT TODAY'}]}
+ return[{k:'con',t:tm(6),pf:4,ok:story?sd==='con':S.day>=1,why:story&&sd!=='con'?mine:S.day<1?'Not this week. Not yet.':'',st:'ON TIME'},
+  {k:'home',t:tm(13),pf:2,ok:story?sd==='home':true,why:story&&sd!=='home'?mine:'',st:'ON TIME'},
+  {k:'office',t:tm(19),pf:6,ok:story?sd==='office':officeOK,why:story&&sd!=='office'?mine:officeOK?'':'Linda made you promise not to come in this week.',st:officeOK||sd==='office'?'ON TIME':'NOT TODAY'}]}
 /* ---- opening ---- */
 function worldOpen(mode,from){if(!S)return;WV.mode=mode||'phone';WV.from=from||(mode==='phone'?'phone':'world');
  WV.sel=WV.mode==='station'?null:WV.mode==='taxi'?'station':(WV.sel||wHere()||'con');
