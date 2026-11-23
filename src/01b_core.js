@@ -82,7 +82,7 @@ function fx(e){
  }
  hud();
 }
-function meet(g){if(!S||S.met[g])return;S.met[g]=1;S.f['met_'+g]=1;
+function meet(g){if(!S||S.met[g])return;S.met[g]=1;S.f['met_'+g]=1;if(!S.replay&&!(META.met&&META.met[g])){META.met=META.met||{};META.met[g]=1;saveMeta()}
  const n=ROM.filter(x=>S.met[x]).length;if(n>=5)ach('met5');if(n>=12)ach('met12');if(n>=ROM.length)ach('met_all');
  if(S.unl.aff)toast('New contact: '+CH[g].name,CH[g].col)}
 /* the morning snapshot a failed day goes back to */

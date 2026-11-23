@@ -211,7 +211,12 @@ const ACH={
  newgame:['Again','Start a second run.']
 };
 for(const k of ENDORDER)ACH['end_'+k]=['Ending: '+ENDINFO[k][0],ENDINFO[k][1],1];
-/* who you fell for and which mysteries you solved aren't achievements: their names alone would give the story away.
-   Endings, and anything that counts runs or endings, stay out of sight until the postgame opens */
+for(const g of ROM)ACH['love_'+g]=['In Love: '+CH[g].name,'Finish '+CH[g].name+'\'s story.'];
+for(const m in MYST)ACH['solve_'+m]=['Solved: '+MYST[m].n,MYST[m].q];
+/* nothing on the list gives the story away: an "In Love" achievement appears once you've met that person (in any run),
+   a "Solved" one once that mystery has turned up on your case board. Endings, and anything that counts runs or
+   endings, stay out of sight until the postgame opens */
 const ACHPG=k=>k.startsWith('end_')||k==='tree10'||k==='newgame';
-function achVis(){const pg=typeof pgOpen==='function'&&pgOpen();return Object.keys(ACH).filter(k=>pg||!ACHPG(k))}
+function metEver(g){if(META.met&&META.met[g]||META.routes&&META.routes[g])return true;const sc=META.seenSc||{};for(const k in sc)if(k.startsWith(g)&&/^\D+\d$/.test(k)&&k.replace(/\d$/,'')===g)return true;return false}
+function achSpoil(k){if(META.ach[k])return false;if(k.startsWith('love_'))return!metEver(k.slice(5));if(k.startsWith('solve_')){const m=k.slice(6);return!(META.mseen&&META.mseen[m]||META.solved&&META.solved[m])}return false}
+function achVis(){const pg=typeof pgOpen==='function'&&pgOpen();return Object.keys(ACH).filter(k=>(pg||!ACHPG(k))&&!achSpoil(k))}

@@ -1,6 +1,6 @@
 /* ============ LEVEL HELPERS ============ */
 const DOORS={},MAPR={},AREAS={},INTS=[],WCH=[],DYN=[];
-const LEVELS={home:[[0,'Bakery'],[3.9,'Flat 1A'],[7.1,'Second floor'],[10.3,'Third floor'],[13.5,'Roof']],office:[[0,'3rd floor']],station:[[0,'Concourse']],con:[[-5,'Basement'],[0,'Ground floor'],[5.5,'Level 1'],[11,'Level 2'],[16.5,'Con roof']],f13:[[0,'13th floor'],[3.6,'Hotel roof']]};
+const LEVELS={home:[[0,'Bakery'],[3.9,'Flat 1A'],[7.1,'Second floor'],[10.3,'Third floor'],[13.5,'Roof']],office:[[0,'3rd floor']],station:[[0,'Concourse']],con:[[-5,'Basement'],[0,'Ground floor'],[5.5,'Level 1'],[11,'Level 2'],[16.5,'Con roof']],train:[[0,'Coaches']],f13:[[0,'13th floor'],[3.6,'Hotel roof']]};
 function door(o,at,c,w,h,y,nf){(DOORS[BR]=DOORS[BR]||[]).push({o,at,c,w,h:h||2.7,y:y||0,nf})}
 /* a wide opening between two spaces: a door with no frame */
 const gap=(o,at,c,w,h,y)=>door(o,at,c,w,h,y,1);
@@ -75,5 +75,5 @@ function skyline(cx,cz,r0,r1,n,yb,ex){for(let i=0;i<n;i++){const a=i/n*Math.PI*2
 function buildLevels(){
  mats();
  buildHome();
-  buildOffice();buildStation();buildSite();buildTower();
+  buildOffice();buildStation();buildSite();buildTower();buildTrain();
 }

@@ -59,11 +59,14 @@ The first plays twelve whole runs with no 3D (`?test`) and reports endings, how 
 - `08a_kit.js`     shared props (desks, chairs, monitors, plants, lamps, beams) sized in metres
 - `08g_office.js`  Brindle & Co: the third floor of an office tower, with the street below
 - `08h_station.js` Central Station: a Victorian train shed, concourse and the tracks out to the city
+- `08p_train.js`   the Quarterline train from the inside: three coaches, seats, tables, racks, vestibules, gangways, toilet, bikes
+- `09d_train.js`   the train moving: scenery sliding past the windows (fields, terraces, the city, bridges, tunnels, a train the other way), the 16:12 pulling out of Platform 4, the ride itself and arriving
 - `08f_home.js`    Proof: a five-level corner building (bakery, Flat 1A, two locked floors, roof terrace) on Linden Street, with the street, square, rear terraces, viaduct and city around it; morning sun baked through real windows
 - `09_world.js`    movement, collision, interaction, sprites, minimap, main loop
 - `09a_place.js`   who stands where, interactions, crowd, story gates, lifts, train and taxi
 - `10_phone.js`    phone UI and apps (Messages, Calendar, Hearts, Case board, Stats, Story, Achievements, Bag, Saves, Log, Settings)
 - `10b_map.js`     the full-screen map: pan and zoom, level tabs, fast travel grouped by building, search and recents
+- `10d_world.js`   the city map: Linden Street, Central Station, Brindle & Co and the Conference Quarter, in three versions (phone, the departures board, the taxi rank)
 - `11_saves.js`    save slots, export/import
 - `12_input.js`    keyboard + device detection
 - `12b_cursor.js`  virtual cursor, so the mouse stays captured through conversations

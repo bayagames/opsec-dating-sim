@@ -120,7 +120,8 @@ function buildPlaza(){
  // the giant neon sign, the taxi rank, the bus stop, the coffee cart
  {const cx=-37,cz=80;box(cx-10,0,cz-.4,cx+10,7.2,cz+.4,MT.plain('#1b1026'));kSign(cx,2.4,cz+.41,19,3.6,'s','CTRL+ALT+CON','#ff5d73','#1b1026');kSign(cx,2.4,cz-.41,19,3.6,'n','CTRL+ALT+CON','#ff5d73','#1b1026');
   box(cx-9.6,6.4,cz-.5,cx+9.6,6.7,cz+.5,MT.glow('#ff5d73',2.6),{col:false});addLight(cx,4,cz+3,[1,.35,.45],16,1.3);addLight(cx,4,cz-3,[1,.35,.45],14,1.1)}
- for(let i=0;i<3;i++){car(-2+i*6,97.1,'x','#ffd166',{taxi:1})}box(-8,0,95,-7.8,3,95.2,MT.plain('#2a2a30'));panel(-7.9,3,95.2,2,.6,'e',sign('TAXI','#1b1026','#ffd166',128,48));
+ // the taxi rank: on the boulevard between the hotel and the con's doors, where the guests actually come out
+ for(let i=0;i<3;i++){car(-146+i*6,101.6,'x','#ffd166',{taxi:1})}box(-136.1,0,98.9,-135.9,3,99.1,MT.plain('#2a2a30'));panel(-136,3,99.11,2,.6,'s',sign('TAXI','#1b1026','#ffd166',128,48));panel(-136,3,98.89,2,.6,'n',sign('TAXI','#1b1026','#ffd166',128,48));
  {const x=24,z=96.8;box(x-4,0,z-1.5,x+4,.12,z+1.5,MT.plain('#5a5a64'),{col:false});box(x-4,0,z-1.5,x+4,2.8,z-1.3,MT.glass);box(x-4.1,2.8,z-1.7,x+4.1,3,z+1.7,MT.plain('#2a2026'),{col:false,b:1});box(x-3.9,0,z-1.3,x-3.7,2.8,z+1.5,MT.chrome,{col:false});
   panel(x,.6,z-1.29,3,1.8,'s',MT.lumen);box(x-3,0,z-1.2,x+3,.45,z-.5,MT.woodDark);panel(x+3.8,2.9,z,1,.4,'e',sign('BUS 42','#1b1026','#ffd166',128,48))}
  {const x=-20,z=72;box(x-1.5,0,z-.75,x+1.5,1,z+.75,MT.plain('#3a2418'));box(x-1.3,1,z-.55,x+1.3,1.4,z+.3,MT.chrome,{col:false});box(x-.05,1,z-.05,x+.05,2.8,z+.05,MT.plain('#888'),{col:false});

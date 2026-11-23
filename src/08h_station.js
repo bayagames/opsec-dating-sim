@@ -133,7 +133,7 @@ function buildStation(){
    if(k===0){box(x0+.05,-.9,za,x1-.05,3.1,za+.6,MT.gloss(liv.nose),{col:false});box(x0+.25,1.6,za+.6,x1-.25,2.6,za+.62,MT.gloss('#1a2028'),{col:false});
     for(const x of[x0+.4,x1-.4])box(x-.16,.3,za+.6,x+.16,.5,za+.63,MT.glow('#fff4d8',2.2),{col:false,b:1})}
    if(k<cars-1)box(x0+.35,-.4,zb-.25,x1-.35,3,zb,M.black,{col:false})}};
- train(736,10.4,3,{body:'#eef0ee',band:'#1f8a8a',nose:'#ffd166'},4.4);
+ // the 09:12 on Platform 4 is a model of its own (09d_train.js), so it can pull out of the station
  train(755,6,3,{body:'#3a4a8a',band:'#f4efe6',nose:'#ffd166'});
  vfx('smoke',{b0:[755,3.7,-30],n:12,size:.25,col:[.75,.75,.78],op:.08,sp:.5});
  /* ================= THE CONCOURSE ================= */
