@@ -13,7 +13,9 @@ addEventListener('keydown',e=>{
   if(isPhone){e.preventDefault();closePhone();return}
   if(!ovOn){e.preventDefault();phone();return}
  }
- if(k==='Escape'&&isPhone){e.preventDefault();if($('ov').dataset.app)phoneBack();else closePhone();return}
+ // Esc steps back inside the phone but never puts it away: the browser spends Esc on releasing the mouse, and a
+ // phone closed by Esc would drop you in the world with a loose cursor. P, Tab or the button put it away.
+ if(k==='Escape'&&isPhone){e.preventDefault();if($('ov').dataset.app)phoneBack();else{const t=$('phtip');if(t){t.textContent='P, Tab or the button below to put it away';t.classList.remove('flash');void t.offsetWidth;t.classList.add('flash')}}return}
  // Esc opens the phone (in the world the browser also uses Esc to release the mouse, which opens it too)
  if(k==='Escape'&&!ovOn&&!$('title').classList.contains('on')&&!$('card').classList.contains('on')){e.preventDefault();phone();return}
  if($('card').classList.contains('on')&&(k===' '||k==='Enter')){e.preventDefault();$('card').click();return}

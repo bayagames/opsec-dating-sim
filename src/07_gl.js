@@ -333,6 +333,8 @@ function finishRegions(){
   Z.forEach((q,i)=>{q.vs.add(i);for(const n of q.see){const j=ix[n];if(j===undefined){console.warn('zone '+q.n+' sees unknown '+n);continue}q.vs.add(j);Z[j].vs.add(i)}});
   // looking through a door into a hub (a corridor, the Ring, the lobby) you see whatever that hub opens onto too
   const one=Z.map(q=>new Set(q.vs));Z.forEach((q,i)=>{for(const j of one[i])if(Z[j].hub)for(const k of one[j])q.vs.add(k)});
+  // the outdoors is one space: seeing any of it means seeing all of it
+  const sky=Z.map((q,i)=>q.sky?i:-1).filter(i=>i>=0);Z.forEach(q=>{if(sky.some(j=>q.vs.has(j)))for(const j of sky)q.vs.add(j)});
   R.zkey=null;
   const H={},SH={};
   const put=(Tb,b,x0,z0,x1,z1)=>{for(let x=Math.floor(x0/4);x<=Math.floor(x1/4);x++)for(let z=Math.floor(z0/4);z<=Math.floor(z1/4);z++)(Tb[x+','+z]=Tb[x+','+z]||[]).push(b)};

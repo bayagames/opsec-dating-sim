@@ -95,6 +95,7 @@ function setupInput(){
    locking during an Esc press hands the browser an Esc to cancel the lock with, and the phone pops straight back */
 function relock(){if(WD.touch||WD.noLock||locked())return;if(WD.escDown){WD.lockAfterEsc=true;return}tryLock()}
 function tryLock(){if(WD.touch||WD.noLock||!S||!S.inWorld||S.ending||$('title').classList.contains('on'))return;const el=lockEl();if(document.pointerLockElement===el)return;try{const p=el.requestPointerLock&&el.requestPointerLock();if(p&&p.catch)p.catch(()=>{})}catch(e){}}
+if(SETTINGS.nolock)WD.noLock=true;
 function setTouch(on){WD.touch=on;document.body.classList.toggle('touchui',on);document.body.classList.toggle('desk',!on)}
 /* dx>0 (mouse/finger moves right) turns right; dy<0 (moves up) looks up. Never inverted. */
 function look(dx,dy,k){const s=lookSens();WD.yaw-=dx*k*s;WD.pit=clamp(WD.pit-dy*k*s,-1.25,1.25)}

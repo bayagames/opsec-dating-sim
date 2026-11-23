@@ -182,6 +182,9 @@ function buildSite(){
  // hubs: open concourses and corridors; a room that sees one also sees what it opens onto
  for(const n of['lobby','promenade','foyer','courtyard','ringN','ringW','ringE','ringS','ringN2','ringW2','ringE2','ringS2','neConc','neConc2','seConc','seConc1','vcorr','vcorr1','hotelL1','hotelL2','plaza','service','staffW','staffE','liftH','garden','lane','link','skybridge','terrace'])G.zones.con.find(q=>q.n===n).hub=true;
  G.zones.con.find(q=>q.n==='outside').bg=true;
+ // under the open sky everything outdoors is in view of everything else outdoors: a room with a window onto any of it
+ // draws all of it (otherwise you see straight through the far side of the street into the sky)
+ for(const n of['outside','plaza','plazaE','garden','lane','terrace','courtyard','skygarden','roof'])G.zones.con.find(q=>q.n===n).sky=true;
  G.wallNT=true;placed(HX,buildHotel);buildCore();buildHalls();buildEast();buildSouth();buildUnder();G.wallNT=false;siteAreas();
 }
 /* the underside and the two side stringers of a stair that floats above the floor (seen from below or the side) */
