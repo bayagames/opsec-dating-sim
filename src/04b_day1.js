@@ -31,19 +31,19 @@ SC.d1_ellie=`
 ellie.h: There he is! The hacker. Off to the hacker party.
 > Convention.
 ellie.s: Convention. Sorry. Off to the hacker convention, where I assume everyone wears sunglasses indoors and says "I'm in".
-ellie.n: Usual? Cinnamon knot and a coffee strong enough to debug with? Did I say that right? I've been practising your language.
-? "You said it perfectly."
+ellie.n: Usual. I've already bagged it. I bagged it at half six, in case you tried to sneak off without saying goodbye.
+? "I would never sneak off."
  [fx ellie:4]
- ellie.h: I've been practising all week. I also know "have you tried turning it off and on again" and "that's not a bug, it's a feature".
- ellie.b: Mrs Okafor taught me that one. She says it about her husband.
-? "Technically you debug with a debugger, not coffee."
- [fx ellie:2]
- ellie.s: Wow. Okay. Your coffee is now decaf.
- ellie.h: Kidding. Mostly. I'd never do that to you, you'd die on the train.
-? "I don't need coffee. I run on pure code."
- [fx ellie:3 clout:1]
- ellie.b: You run on cinnamon knots. I have the receipts. Literally. I print them. You've had four hundred and twelve.
- * You don't ask how she knows the number. She knows the number.
+ ellie.h: You would. You'd do a little wave through the window and mouth "text you". I've seen you do it to the barber.
+ ellie.b: Mr Demir was devastated. He told me. We have a group chat now.
+? "You've been practising the computer words again, haven't you."
+ [fx ellie:3]
+ ellie.s: Two new ones. "Phishing", which is not a typo, and "zero day", which sounds like a perfume.
+ ellie.h: I'm saving them. I'm going to use them on you when you get back and you'll have to be impressed.
+? "Is that the knot with extra icing?"
+ [fx ellie:2 clout:1]
+ ellie.b: It's a going-away knot. Going-away knots get extra icing. That's not favouritism, it's policy.
+ * It is favouritism. The woman in front of you got a normal knot and noticed.
 ~ She hands you the knot in a paper bag with a tiny croissant drawn on it in biro. She draws one on every bag. You have kept every single one in a drawer upstairs, and you will never tell anyone this.
 ~ Then she hands you a second bag. A big one. Heavy.
 ellie.n: For the train. And for the hackers. Hackers eat, right? Twelve cinnamon knots, six sausage rolls, and a loaf of the good one for your hotel room. Don't eat the loaf on the train. Hotel room loaf.
@@ -130,11 +130,11 @@ pia.h: If you're ever back through here, request something. Anything. Except tha
 [sum At Central Station you met Pia, a violinist who busks by the old piano. Her brother used to go to the con. He's "away".]
 `;
 SC.d1_train=`
-[bg train]
+[bg carriage]
 [hide]
 ~ The 16:12. You get a table seat facing backwards, which you hate, and put Ellie's bag of baking on the seat beside you like a guard dog.
 ~ Opposite: a woman with a long platinum-blond braid, round gold glasses and a cardigan the colour of the night sky with tiny embroidered stars on it. She has a radio on the table. Not a phone. A radio, with a whip antenna, and a pair of headphones, and she's smiling at something only she can hear.
-~ The train pulls out. The city slides past. Cranes, back gardens, a billboard: "SafeSphere. Your shield on the internet. Free forever." Someone has graffitied "FOREVER IS A LONG TIME" underneath.
+~ The city slides past. Cranes, back gardens, a billboard: "SafeSphere. Your shield on the internet. Free forever." Someone has graffitied "FOREVER IS A LONG TIME" underneath.
 ~ The woman opposite lifts one side of her headphones and looks at you.
 astrid.n: Sorry. Am I being loud? It hisses. The radio. Some people find it upsetting.
 ? "Not at all. What are you listening to?"

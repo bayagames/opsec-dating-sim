@@ -32,9 +32,13 @@ function phone(app){
  phApp=null;drawPhone();
  if(opening){const ph=o.querySelector('.phone');if(ph)ph.classList.add('opening');if(typeof sfx==='function')sfx('phoneOpen')}
 }
-function closePhone(){if($('ov').classList.contains('phoneov')&&typeof sfx==='function')sfx('phoneClose');const o=$('ov');delete o.dataset.app;delete o.dataset.from;closeOv();o.classList.remove('phoneov','mapov','appov');phApp=null;if(G.ok&&S&&S.inWorld)relock();if($('vn').classList.contains('on'))return;if(G.ok&&S.inWorld)hub();else if($('hub').classList.contains('on'))hub()}
+function closePhone(){if($('ov').classList.contains('phoneov')&&typeof sfx==='function')sfx('phoneClose');const o=$('ov');delete o.dataset.app;delete o.dataset.from;closeOv();o.classList.remove('phoneov','mapov','appov','wmapov');phApp=null;if(G.ok&&S&&S.inWorld)relock();if($('vn').classList.contains('on'))return;if(G.ok&&S.inWorld)hub();else if($('hub').classList.contains('on'))hub()}
 /* Esc / back: from an app you opened on the phone, back to the phone; otherwise close */
-function phoneBack(){const o=$('ov');if(o.dataset.app&&o.dataset.from==='phone'){phApp=null;phThread=null;drawPhone()}else closePhone()}
+function phoneBack(){const o=$('ov');
+ // a building's map backs out to the city; the city backs out to wherever you came from
+ if(o.dataset.app==='map'){worldOpen('phone',MAPV.from==='phone'?'phone':'direct');return}
+ if(o.dataset.app==='world'){if(WV.mode!=='phone'){worldClose();return}if(WV.from==='phone'){o.classList.remove('wmapov','mapov');phApp=null;phThread=null;drawPhone()}else closePhone();return}
+ if(o.dataset.app&&o.dataset.from==='phone'){phApp=null;phThread=null;drawPhone()}else closePhone()}
 function drawPhone(){
  const apps=Object.keys(APPN).filter(a=>a==='postgame'?pgOpen():!APPU[a]||S.unl[APPU[a]]);
  const unread=S.msgs.filter(m=>!m.r).length,nn=S.day>0?ROM.filter(sceneReady).length:0,nc=S.day>0?Object.keys(MYST).filter(m=>S.unl.clues&&canSolve(m)).length:0;
@@ -112,6 +116,7 @@ const APPS={
  /* ---- Case board: a corkboard of mysteries, clues on strings, leads as sticky notes ---- */
  cases(){
   const ms=Object.keys(MYST).filter(m=>mystClues(m).length||Object.keys(LEADS).some(k=>LEADS[k].m===m&&leadOpen(k))||S.solved[m]||(S.loop&&META.solved[m]));
+  {let ch=0;META.mseen=META.mseen||{};for(const m of ms)if(!META.mseen[m]&&!S.replay){META.mseen[m]=1;ch=1}if(ch)saveMeta()}
   const tabs=tabsH(PH.ctab,[['board','Board'],['locker','Evidence locker'],['leads','All leads']],'ct');
   if(PH.ctab==='locker'){const by={};S.clues.forEach(c=>{(by[CLUE[c].m[0]]=by[CLUE[c].m[0]]||[]).push(c)});
    return tabs+`<div class="abody"><p class="small">${S.clues.length}/${Object.keys(CLUE).length} clues</p>${Object.keys(MYST).filter(m=>by[m]).map(m=>`<div class="dbh">${esc(MYST[m].n)}</div><div class="cork small-cork">${by[m].map(c=>`<div class="pin"><b>${esc(CLUE[c].s)}</b><span>${esc(CLUE[c].t)}</span></div>`).join('')}</div>`).join('')||'<p class="small">Nothing yet.</p>'}</div>`}
@@ -142,9 +147,9 @@ const APPS={
   const d=PH.sday!==null&&by[PH.sday]?PH.sday:ks[ks.length-1];
   return ks.length?`<div class="atabs">${ks.map(k=>`<button class="${k===d?'on':''}" data-sd="${k}">${k===0?'Prologue':'Day '+k}</button>`).join('')}</div><div class="abody sview"><h3>${d===0?'Two weeks before':'Day '+d+' · '+DAYN[d]}</h3>${by[d].map(e=>`<div class="sent">${d?`<small>${SLOTN[e.s]}</small>`:''}<p>${esc(e.t)}</p></div>`).join('')}</div>`:'<div class="abody"><p class="small">Your story so far will be written here.</p></div>'},
  /* ---- Achievements: across every run ---- */
- achieve(){const cat=k=>k.startsWith('end_')?'end':k.includes('clue')||k.includes('solve')||k==='first_lead'?'myst':k.startsWith('skill_')||k.startsWith('clout_')?'rank':'other';
-  const all=achVis();if(PH.atab==='end'&&!pgOpen()||PH.atab==='love')PH.atab='all';const ks=all.filter(k=>PH.atab==='all'||cat(k)===PH.atab),got=all.filter(k=>META.ach[k]).length;
-  return tabsH(PH.atab,[['all','All'],...(pgOpen()?[['end','Endings']]:[]),['myst','Mysteries'],['rank','Ranks'],['other','Everything else']],'at')+`<div class="abody"><p class="small">${got}/${all.length} unlocked across every run</p>${bar(got/all.length*100,'var(--butter)')}<div class="agrid">${ks.map(k=>{const a=ACH[k],on=!!META.ach[k],hid=a[2]&&!on;return`<div class="atile ${on?'on':''}"><span class="aic">${on?'★':hid?'?':'☆'}</span><b>${hid?'???':esc(a[0])}</b><small>${hid?'Hidden':esc(a[1])}</small>${on?`<em>${new Date(META.ach[k]).toLocaleDateString()}</em>`:''}</div>`}).join('')}</div></div>`},
+ achieve(){const cat=k=>k.startsWith('end_')?'end':k.startsWith('love_')?'love':k.startsWith('solve_')||k.includes('clue')||k.includes('solve')||k==='first_lead'?'myst':k.startsWith('skill_')||k.startsWith('clout_')?'rank':'other';
+  const all=achVis();if(PH.atab==='end'&&!pgOpen())PH.atab='all';const ks=all.filter(k=>PH.atab==='all'||cat(k)===PH.atab),got=all.filter(k=>META.ach[k]).length;
+  return tabsH(PH.atab,[['all','All'],...(pgOpen()?[['end','Endings']]:[]),['love','Love'],['myst','Mysteries'],['rank','Ranks'],['other','Everything else']],'at')+`<div class="abody"><p class="small">${got}/${all.length} unlocked across every run</p>${bar(got/all.length*100,'var(--butter)')}<div class="agrid">${ks.map(k=>{const a=ACH[k],on=!!META.ach[k],hid=a[2]&&!on;return`<div class="atile ${on?'on':''}"><span class="aic">${on?'★':hid?'?':'☆'}</span><b>${hid?'???':esc(a[0])}</b><small>${hid?'Hidden':esc(a[1])}</small>${on?`<em>${new Date(META.ach[k]).toLocaleDateString()}</em>`:''}</div>`}).join('')}</div></div>`},
  /* ---- Echo: the loop. What's left, and the day you can take back ---- */
  echo(){const P=echoPlan(),left=P.people.filter(p=>p[1]!=='Done');
   return`<div class="abody"><p class="small">Loop ${META.loop||1}. Each part of the day holds ${LOOPOC+1} things. People can take three times as much of you each day, and stories can run up to two days early. Routes you've finished before aren't held to their day.</p><div class="row"><button class="btn pri" id="erw" ${S.snap&&S.day>=1?'':'disabled'}>Rewind to this morning</button></div><p class="small" style="margin-top:12px"><b>People · ${ROM.length-left.length}/${ROM.length} in love</b></p>${left.map(p=>`<div class="kv"><span>${esc(p[0])}</span><b class="small">${esc(p[1])}</b></div>`).join('')||'<p class="small">Everyone. You did it.</p>'}<p class="small" style="margin-top:12px"><b>Mysteries · ${allMyst().filter(m=>S.solved[m]).length}/${allMyst().length}</b></p>${P.mys.map(m=>`<div class="kv"><span>${esc(m[0])}</span><b class="small">${esc(m[1])}</b></div>`).join('')||'<p class="small">All of it.</p>'}<p class="small" style="margin-top:12px">${haremReady()?'Ready. Go to the keynote on Sunday.':'When everyone is in love with you and every mystery is solved, Sunday becomes something else.'}</p></div>`},

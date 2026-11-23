@@ -20,7 +20,7 @@ function audioOn(){
 function applyVolumes(){if(!AU)return;const v=SETTINGS.vol,c=x=>x*x,t=AC.currentTime;
  AU.master.gain.setTargetAtTime(c(v.master),t,.05);AU.music.gain.setTargetAtTime(c(v.music)*.55,t,.05);AU.amb.gain.setTargetAtTime(c(v.amb)*.8,t,.05);AU.sfx.gain.setTargetAtTime(c(v.sfx),t,.05)}
 /* ---------- scene → loops ---------- */
-const AREA_AUD={flat:['home','home'],stairs:['home','home'],bakery:['home','bakery'],bakehouse:['home','bakery'],livingroom:['home','home'],kitchen:['home','home'],bathroom:['home','home'],boxroom:['home','home'],bedroom:['home','home'],hometerrace:['home','street'],office:['hotel','office'],lindaoffice:['hotel','office'],station:['home','station'],platform:['home','station'],
+const AREA_AUD={coachA:['home','train'],coachB:['home','train'],coachC:['home','train'],flat:['home','home'],stairs:['home','home'],bakery:['home','bakery'],bakehouse:['home','bakery'],livingroom:['home','home'],kitchen:['home','home'],bathroom:['home','home'],boxroom:['home','home'],bedroom:['home','home'],hometerrace:['home','street'],office:['hotel','office'],lindaoffice:['hotel','office'],station:['home','station'],platform:['home','station'],
  plaza:['night','street'],vestibule:['con','hum'],foyer:['con','hum'],lobby:['hotel','lobby'],cafe:['hotel','lobby'],luggage:['hotel','hotel'],backstairs:['hotel','hotel'],bar:['bar','bar'],terrace:['bar','garden'],
  walkway:['con','hum'],ringN:['con','hum'],ringE:['con','hum'],ringS:['con','hum'],courtyard:['night','garden'],hallA:['hall','hall'],backstage:['hall','room'],hallB:['hall','room'],vendor:['con','hum'],villagerow:['con','hum'],
  lockpick:['con','room'],ctf:['con','room'],soc:['con','room'],carhack:['con','room'],ics:['con','room'],soceng:['con','room'],food:['con','hum'],cosplay:['con','hum'],lounge:['night','room'],naps:['night','hotel'],
@@ -33,7 +33,7 @@ const AREA_AUD={flat:['home','home'],stairs:['home','home'],bakery:['home','bake
  kitchenC:['tense','hotel'],breakroom:['tense','room'],neconc:['con','hum'],neconc2:['con','hum'],constore:['con','hum'],demostage:['con','hum'],seconc:['con','hum'],seconc1:['con','hum'],aero:['con','room'],
  tabletop:['con','room'],film:['night','room'],skygarden:['night','garden'],tunnelN:['tense','hotel'],
  corridor:['hotel','hotel'],room1337:['hotel','hotel'],room1336:['party','bar'],housekeeping:['hotel','hotel'],stairwell:['hotel','hotel'],roof:['night','wind'],plantdeck:['night','wind']};
-const BG_AUD={con:['con','hum'],lock:['con','room'],ctf:['con','room'],soc:['con','room'],stream:['con','hum'],hotel:['hotel','hotel'],roof:['night','wind'],dawn:['night','wind'],stage:['hall','hall'],keynote:['hall','hall'],vendor:['con','hum'],party:['party','bar'],void:['tense',null],flat:['home','home'],bakery:['home','bakery'],office:['hotel','office'],train:['home','station'],cos:['con','hum'],chill:['night','room'],bar:['bar','bar'],lobby:['hotel','lobby']};
+const BG_AUD={carriage:['home','train'],con:['con','hum'],lock:['con','room'],ctf:['con','room'],soc:['con','room'],stream:['con','hum'],hotel:['hotel','hotel'],roof:['night','wind'],dawn:['night','wind'],stage:['hall','hall'],keynote:['hall','hall'],vendor:['con','hum'],party:['party','bar'],void:['tense',null],flat:['home','home'],bakery:['home','bakery'],office:['hotel','office'],train:['home','station'],cos:['con','hum'],chill:['night','room'],bar:['bar','bar'],lobby:['hotel','lobby']};
 function audioScene(){
  if(!S||$('title').classList.contains('on'))return['night',null];
  if(S.ending)return BG_AUD[CURBG]||['night',null];
@@ -183,6 +183,12 @@ const AMBS={
  wind:{len:20,seed:12,build(ctx,out,dur,R){windNoise(ctx,out,dur,R,.4,180,1100);hum(ctx,out,dur,.2,120)}},
  home:{lvl:.45,len:16,seed:13,build(ctx,out,dur,R){hum(ctx,out,dur,.12,110);for(let t=1;t<dur-1;t+=1.5+R()*3){const p=pan(ctx,R()*1.4-.7);p.connect(out);const f=2600+R()*1400;for(let k=0;k<2+R()*3;k++)tone(ctx,p,t+k*.11,f*(1+R()*.08),.08,{v:.008,a:.01,r:.07})}}},
  office:{lvl:.6,len:16,seed:18,build(ctx,out,dur,R){hum(ctx,out,dur,.25,160);const lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=1600;lp.connect(out);babble(ctx,lp,dur,R,{n:3,v:.02});for(let i=0;i<14;i++){let t=R()*dur;const k=6+R()*14;for(let j=0;j<k;j++){snare(ctx,out,t,.01,.02,4200+R()*2000);t+=.07+R()*.12}}}},
+ // on the train: the rumble of the bogies, the wheels over the rail joints (da-dum... da-dum), the odd squeal and creak
+ train:{lvl:.85,len:16,seed:23,build(ctx,out,dur,R){hum(ctx,out,dur,.75,140);windNoise(ctx,out,dur,R,.12,300,900);
+  const lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=420;lp.connect(out);
+  for(let t=.2;t<dur-.4;t+=1.02+R()*.06){for(const[o,v]of[[0,.5],[.11,.4],[.52,.45],[.63,.38]]){snare(ctx,lp,t+o,v*.55,.12,160+R()*60)}}
+  for(let i=0;i<2;i++){const t=2+R()*(dur-5);tone(ctx,out,t,1900+R()*500,.9+R(),{v:.004,a:.3,r:.6,type:'triangle'})}
+  for(let i=0;i<3;i++){const t=R()*(dur-1);snare(ctx,out,t,.03,.25,600+R()*300)}}},
  station:{len:20,seed:19,build(ctx,out,dur,R){const rv=verb(ctx,3.5,1.8,.8);rv.o.connect(out);const lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=1500;lp.connect(out);lp.connect(rv.i);babble(ctx,lp,dur,R,{n:10,v:.03});hum(ctx,out,dur,.3,90);
   for(const[t,m]of[[dur*.3,76],[dur*.3+.45,72],[dur*.3+.9,79]])tone(ctx,rv.i,t,mtof(m),1.4,{v:.05,a:.004,r:1.3})}},
  bakery:{len:16,seed:14,build(ctx,out,dur,R){hum(ctx,out,dur,.4,220);const rv=verb(ctx,1,3,.3);rv.o.connect(out);const lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=2000;lp.connect(out);lp.connect(rv.i);babble(ctx,lp,dur,R,{n:3,v:.03});clinks(ctx,out,dur,R,4)}},

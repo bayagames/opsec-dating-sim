@@ -43,6 +43,7 @@ button:focus-visible{outline:3px solid var(--butter);outline-offset:2px}
 .bg-flat{background:radial-gradient(40% 30% at 80% 25%,#7cc4ff33,transparent),linear-gradient(90deg,#231a2b 0 60%,#2b2034 60%);color:#7cc4ff}
 .bg-bakery{background:radial-gradient(60% 40% at 30% 20%,#ffd9a077,transparent),repeating-linear-gradient(90deg,#5a3a2a 0 40px,#61402e 40px 80px),#4a2e22;color:#ffd9a0}
 .bg-office{background:linear-gradient(#cfd6dd22,#0000),repeating-linear-gradient(0deg,#23262e 0 60px,#272b34 60px 62px),#1f222a;color:#cfd6dd}
+.bg-carriage{background:linear-gradient(#0000 18%,#d4d8de 18% 24%,#0000 24% 62%,#d4d8de 62%),repeating-linear-gradient(90deg,#3a4e6a 0 70%,#c8ccd2 70% 100%),linear-gradient(#9ab4cc,#6a8a5a);background-size:auto,220px 100%,auto;color:#fff}
 .bg-train{background:linear-gradient(transparent 55%,#1a1420 55%),repeating-linear-gradient(90deg,#4a6a8a 0 6px,#6a8aaa 6px 140px),linear-gradient(#7a9aba,#c0a0c0);color:#fff}
 .bg-cos{background:radial-gradient(40% 50% at 70% 20%,#2bf0ff44,transparent),radial-gradient(40% 50% at 20% 60%,#ff5fb044,transparent),linear-gradient(#1a1430,#100a1c);color:#2bf0ff}
 .bg-chill{background:radial-gradient(18% 30% at 15% 70%,#ff8fc866,transparent),radial-gradient(18% 30% at 85% 60%,#8affc155,transparent),radial-gradient(18% 30% at 50% 80%,#c9b6ff55,transparent),#140c1e;color:#c9b6ff}
@@ -679,6 +680,64 @@ body.pgon #hud,body.pgon #vcur{display:none!important}
 @media(max-width:820px){.pgmain{flex-direction:column}.pgrail{width:auto;flex-direction:row;overflow-x:auto;padding:8px;border-right:0;border-bottom:1px solid #ffffff10;order:2;border-top:1px solid #ffffff10}
  .pgnav{padding:8px 12px;flex:none}.pgnav::before{display:none}.pgnav small{display:none}.pgmeta span:nth-child(n+2){display:none}.pgcols{grid-template-columns:1fr}
  .pgsplit{display:block}.pgside{position:fixed;inset:auto 8px 76px 8px;max-height:62vh;width:auto}.pgmapwrap .pghead p{display:none}.pgmapwrap .pghead{padding:12px 16px 8px}.pgpad{padding:14px 14px 30px}.pghead h2{font-size:32px}.pglegend{display:none}}
+
+/* ---- the world map: the city, three ways ---- */
+#ov.wmapov{padding:0;display:block;overflow:hidden}
+.wmap{--wa:var(--coral);position:relative;width:100%;height:100dvh;display:flex;flex-direction:column;background:radial-gradient(80% 60% at 30% 20%,#1d1230,#0a0610 70%);color:#f6eefc}
+.wtop{display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid #ffffff14;flex:none}
+.wtitle{flex:1;display:flex;flex-direction:column;line-height:1.05}.wtitle b{font:700 clamp(22px,2.2vw,32px) 'Chakra Petch',sans-serif;letter-spacing:.02em}
+.wk{font:16px 'VT323',monospace;letter-spacing:.28em;color:var(--wa);text-transform:uppercase}
+.wclock{font:26px 'VT323',monospace;color:var(--butter);letter-spacing:.1em}
+.wbody{flex:1;display:flex;min-height:0}
+.wstage{flex:1;min-width:0;position:relative;display:flex;align-items:center;justify-content:center;padding:10px}
+.wsvg{width:100%;height:100%;max-height:100%;filter:drop-shadow(0 20px 40px #0008);border-radius:10px}
+.wnode{cursor:pointer;outline:none}.wnode .wring{fill:none;stroke:#ffffff30;stroke-width:2;transition:stroke .2s,r .25s}
+.wnode .wdot{fill:#2a1a3a;stroke:#f6eefc;stroke-width:2.5;transition:fill .2s}
+.wnode:hover .wring,.wnode:focus .wring{stroke:#ffd166}.wnode.sel .wring{stroke:var(--wa);stroke-width:4;r:31}.wnode.sel .wdot{fill:#3a2050}
+.wnode.here .wdot{fill:#ffd166;stroke:#1b1026}
+.wnode.off{opacity:.38}.wnode.off .wdot{stroke:#8f7da3}
+.wlbl{font:700 22px 'Chakra Petch',sans-serif;fill:#f6eefc;paint-order:stroke;stroke:#0c0912;stroke-width:6px;letter-spacing:.02em}
+.wsub{font:16px 'VT323',monospace;fill:#bba8cf;paint-order:stroke;stroke:#0c0912;stroke-width:5px;letter-spacing:.08em}
+.wpulse{fill:none;stroke:#ffd166;stroke-width:2;animation:wpulse 2s ease-out infinite;transform-origin:center;transform-box:fill-box}
+@keyframes wpulse{from{opacity:.9;transform:scale(.8)}to{opacity:0;transform:scale(1.8)}}
+.wflow{animation:wflow 1.2s linear infinite}@keyframes wflow{to{stroke-dashoffset:-22}}
+.wside{width:min(400px,38%);border-left:1px solid #ffffff14;padding:18px;overflow:auto;display:flex;flex-direction:column;gap:14px;background:#0a061099}
+.wcard{padding:16px 18px;border-radius:10px;background:#ffffff08;border:1px solid #ffffff12;animation:tpin .4s cubic-bezier(.2,.8,.2,1)}
+.wcard b{display:block;font:700 24px 'Chakra Petch',sans-serif;margin:2px 0 6px}.wcard p{margin:0 0 10px;color:#cdbfdc;font-size:15px;line-height:1.45}
+.wkv{display:flex;flex-direction:column;gap:2px;padding:8px 0;border-top:1px solid #ffffff10}.wkv span{font:15px 'VT323',monospace;letter-spacing:.14em;color:#bba8cf;text-transform:uppercase}.wkv b{font:500 14px 'Chakra Petch',sans-serif;margin:0;color:#f6eefc}
+.wgo{width:100%;margin-top:8px;font-size:17px;padding:12px}
+.wwhy{color:var(--coral)!important;font-weight:600}.wpick{text-align:center;padding:20px}
+.wfoot{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;padding:10px 18px;border-top:1px solid #ffffff14;font-size:13px;color:#bba8cf;flex:none}
+.wfoot .wnote{flex:1;text-align:right;min-width:240px}.wl{display:inline-block;width:22px;height:0;vertical-align:middle;margin-right:6px;border-top:4px solid var(--coral)}.wl.taxi{border-top:3px dotted var(--butter)}.wl.walk{border-top:3px dotted var(--mint)}
+/* departures: an amber dot-matrix board */
+.wm-station{--wa:#ffb020}
+.wboard{background:#0a0806;border:2px solid #2a2418;border-radius:8px;padding:10px 6px 6px;box-shadow:inset 0 0 30px #000}
+.wbh,.wrow{display:grid;grid-template-columns:62px 1fr 42px 86px;gap:6px;align-items:center;padding:6px 8px}
+.wbh{font:15px 'VT323',monospace;color:#ffb02099;letter-spacing:.12em;border-bottom:1px dashed #ffb02033}
+.wrow{width:100%;background:none;border:0;border-radius:4px;color:#ffb020;font:22px 'VT323',monospace;text-align:left;cursor:pointer;letter-spacing:.04em;transition:background .15s}
+.wrow:hover,.wrow.sel{background:#ffb0201a}.wrow.sel{box-shadow:inset 3px 0 0 #ffb020}
+.wrow .wd{display:flex;flex-direction:column;line-height:1}.wrow .wd small{font-size:15px;color:#ffb02099;margin-top:3px}
+.wrow .ws{font-size:17px;text-align:right}.wrow .ws.bad{color:#ff5d73}.wrow.no{opacity:.55}
+.wm-station .wcard{border-color:#ffb02033}
+/* the taxi: yellow and black, a meter */
+.wm-taxi{--wa:#ffd166;background:radial-gradient(80% 60% at 70% 20%,#2a2410,#0a0806 70%)}
+.wmeter{border-radius:10px;overflow:hidden;border:2px solid #ffd166;background:#0a0806}
+.wmh{display:flex;flex-direction:column;align-items:flex-end;padding:12px 14px;background:repeating-linear-gradient(90deg,#ffd166 0 16px,#1b1026 16px 32px);color:#1b1026}
+.wmh span,.wmh small{background:#ffd166;padding:0 6px;font:16px 'VT323',monospace;letter-spacing:.15em}.wmh b{background:#0a0806;color:#ff5d73;font:40px 'VT323',monospace;padding:0 10px;margin:4px 0;letter-spacing:.08em}
+.wm-taxi .wrow{grid-template-columns:1fr;color:#f6eefc;font:600 17px 'Chakra Petch',sans-serif;border-bottom:1px solid #ffffff10;border-radius:0}.wm-taxi .wrow .wd small{font:13px 'Chakra Petch',sans-serif;color:#bba8cf}.wm-taxi .wrow.sel{box-shadow:inset 4px 0 0 #ffd166;background:#ffd16614}
+.wm-taxi .wgo{background:#ffd166;color:#1b1026;border-color:#ffd166}
+.mworld small{font:600 12px 'Chakra Petch',sans-serif;letter-spacing:.06em}
+@media(max-width:760px){.wbody{flex-direction:column}.wside{width:auto;border-left:0;border-top:1px solid #ffffff14;max-height:46%}.wstage{padding:4px}.wfoot .wnote{text-align:left}.wfoot span:not(.wnote){display:none}}
+/* on the train: the next stop, the ride, and when you can get off */
+#tripHud{position:absolute;left:50%;top:58px;transform:translate(-50%,-10px);display:flex;flex-direction:column;align-items:center;gap:10px;opacity:0;pointer-events:none;transition:opacity .5s,transform .5s;z-index:6}
+#tripHud.on{opacity:1;transform:translate(-50%,0)}
+#tripHud .thl{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 22px 10px;background:#0a0806d8;border:1px solid #ffb02044;border-radius:6px;min-width:280px}
+.thk{font:14px 'VT323',monospace;letter-spacing:.3em;color:#ffb020aa}#thN{font:24px 'VT323',monospace;color:#ffb020;letter-spacing:.06em}
+#tripHud i{display:block;width:100%;height:3px;background:#ffb02022;border-radius:2px;overflow:hidden}#thP{display:block;height:100%;width:0;background:#ffb020;box-shadow:0 0 8px #ffb020}
+#thGo{opacity:0;transform:translateY(-6px);pointer-events:none;background:linear-gradient(135deg,var(--mint),#5ad0ff);color:#1b1026;border:0;border-radius:999px;padding:10px 20px;font:700 16px 'Chakra Petch',sans-serif;cursor:pointer;transition:opacity .4s,transform .4s;box-shadow:0 8px 26px #0008}
+#thGo.on{opacity:1;transform:none;pointer-events:auto;animation:thpulse 2.2s ease-in-out infinite}
+#thGo .kn{margin-left:8px;background:#1b102633;border-radius:4px;padding:1px 6px;font-size:12px}
+@keyframes thpulse{50%{box-shadow:0 8px 26px #0008,0 0 0 6px #8affc133}}
 </style>
 </head>
 <body>
@@ -975,7 +1034,7 @@ function show(id){document.body.classList.toggle('inworld',id==='world');if(id!=
 
 /* ============ VN ENGINE ============ */
 let Q=[],onDone=null,typing=null,full='',waiting=false;
-const BG={con:'CTRL+ALT+CON',lock:'LOCKPICK VILLAGE',ctf:'CTF ROOM · SCOREBOARD LIVE',soc:'BLUE TEAM VILLAGE',stream:'● LIVE · CYBERJUNO',hotel:'ROOM 1337',roof:'ROOFTOP',dawn:'ROOFTOP · 5:52 AM',stage:'MAIN STAGE',keynote:'CLOSING KEYNOTE',vendor:'VENDOR HALL',party:'0xFF AFTERPARTY',void:'█████',flat:'YOUR FLAT',bakery:'PROOF · BAKERY',office:'BRINDLE & CO · IT HELPDESK',train:'TRAIN · PLATFORM 4',cos:'COSPLAY HALL',chill:'CHILL-OUT LOUNGE',bar:'THE HOTEL BAR',lobby:'HOTEL LOBBY'};
+const BG={carriage:'QUARTERLINE · COACH B',con:'CTRL+ALT+CON',lock:'LOCKPICK VILLAGE',ctf:'CTF ROOM · SCOREBOARD LIVE',soc:'BLUE TEAM VILLAGE',stream:'● LIVE · CYBERJUNO',hotel:'ROOM 1337',roof:'ROOFTOP',dawn:'ROOFTOP · 5:52 AM',stage:'MAIN STAGE',keynote:'CLOSING KEYNOTE',vendor:'VENDOR HALL',party:'0xFF AFTERPARTY',void:'█████',flat:'YOUR FLAT',bakery:'PROOF · BAKERY',office:'BRINDLE & CO · IT HELPDESK',train:'TRAIN · PLATFORM 4',cos:'COSPLAY HALL',chill:'CHILL-OUT LOUNGE',bar:'THE HOTEL BAR',lobby:'HOTEL LOBBY'};
 function setBG(k){const w=typeof worldBG==='function'&&worldBG(k);const cls='bg '+(w?'bg-dim':'bg-'+(BG[k]?k:'con'));if($('bg').className!==cls){$('bg').className=cls;$('bg').classList.add('bgin')}CURBG=k;if(typeof cutClass==='function')cutClass();const sg=BG[k]||(typeof AREAS!=='undefined'&&AREAS[k]?AREAS[k].n.toUpperCase():'');$('sign').textContent=sg;$('sign').style.display=sg?'block':'none';if(w&&G.ok)G.forceFrame=true}
 /* does switching to this background move us somewhere else? (then fade through black) */
 function bgChanges(k){if(k===CURBG||!$('vn').classList.contains('on'))return false;
@@ -1180,7 +1239,7 @@ function fx(e){
  }
  hud();
 }
-function meet(g){if(!S||S.met[g])return;S.met[g]=1;S.f['met_'+g]=1;
+function meet(g){if(!S||S.met[g])return;S.met[g]=1;S.f['met_'+g]=1;if(!S.replay&&!(META.met&&META.met[g])){META.met=META.met||{};META.met[g]=1;saveMeta()}
  const n=ROM.filter(x=>S.met[x]).length;if(n>=5)ach('met5');if(n>=12)ach('met12');if(n>=ROM.length)ach('met_all');
  if(S.unl.aff)toast('New contact: '+CH[g].name,CH[g].col)}
 /* the morning snapshot a failed day goes back to */
@@ -1691,10 +1750,15 @@ const ACH={
  newgame:['Again','Start a second run.']
 };
 for(const k of ENDORDER)ACH['end_'+k]=['Ending: '+ENDINFO[k][0],ENDINFO[k][1],1];
-/* who you fell for and which mysteries you solved aren't achievements: their names alone would give the story away.
-   Endings, and anything that counts runs or endings, stay out of sight until the postgame opens */
+for(const g of ROM)ACH['love_'+g]=['In Love: '+CH[g].name,'Finish '+CH[g].name+'\'s story.'];
+for(const m in MYST)ACH['solve_'+m]=['Solved: '+MYST[m].n,MYST[m].q];
+/* nothing on the list gives the story away: an "In Love" achievement appears once you've met that person (in any run),
+   a "Solved" one once that mystery has turned up on your case board. Endings, and anything that counts runs or
+   endings, stay out of sight until the postgame opens */
 const ACHPG=k=>k.startsWith('end_')||k==='tree10'||k==='newgame';
-function achVis(){const pg=typeof pgOpen==='function'&&pgOpen();return Object.keys(ACH).filter(k=>pg||!ACHPG(k))}
+function metEver(g){if(META.met&&META.met[g]||META.routes&&META.routes[g])return true;const sc=META.seenSc||{};for(const k in sc)if(k.startsWith(g)&&/^\D+\d$/.test(k)&&k.replace(/\d$/,'')===g)return true;return false}
+function achSpoil(k){if(META.ach[k])return false;if(k.startsWith('love_'))return!metEver(k.slice(5));if(k.startsWith('solve_')){const m=k.slice(6);return!(META.mseen&&META.mseen[m]||META.solved&&META.solved[m])}return false}
+function achVis(){const pg=typeof pgOpen==='function'&&pgOpen();return Object.keys(ACH).filter(k=>(pg||!ACHPG(k))&&!achSpoil(k))}
 
 /* ============ FLOW: the week, its story beats, free time, hangouts, leads, the case board, the final act ============ */
 /* ---- routes: six scenes each. Scene 0 is meeting them (free); 1-5 take part of a day; 5 is the last, just the two of you.
@@ -2416,19 +2480,19 @@ SC.d1_ellie=`
 ellie.h: There he is! The hacker. Off to the hacker party.
 > Convention.
 ellie.s: Convention. Sorry. Off to the hacker convention, where I assume everyone wears sunglasses indoors and says "I'm in".
-ellie.n: Usual? Cinnamon knot and a coffee strong enough to debug with? Did I say that right? I've been practising your language.
-? "You said it perfectly."
+ellie.n: Usual. I've already bagged it. I bagged it at half six, in case you tried to sneak off without saying goodbye.
+? "I would never sneak off."
  [fx ellie:4]
- ellie.h: I've been practising all week. I also know "have you tried turning it off and on again" and "that's not a bug, it's a feature".
- ellie.b: Mrs Okafor taught me that one. She says it about her husband.
-? "Technically you debug with a debugger, not coffee."
- [fx ellie:2]
- ellie.s: Wow. Okay. Your coffee is now decaf.
- ellie.h: Kidding. Mostly. I'd never do that to you, you'd die on the train.
-? "I don't need coffee. I run on pure code."
- [fx ellie:3 clout:1]
- ellie.b: You run on cinnamon knots. I have the receipts. Literally. I print them. You've had four hundred and twelve.
- * You don't ask how she knows the number. She knows the number.
+ ellie.h: You would. You'd do a little wave through the window and mouth "text you". I've seen you do it to the barber.
+ ellie.b: Mr Demir was devastated. He told me. We have a group chat now.
+? "You've been practising the computer words again, haven't you."
+ [fx ellie:3]
+ ellie.s: Two new ones. "Phishing", which is not a typo, and "zero day", which sounds like a perfume.
+ ellie.h: I'm saving them. I'm going to use them on you when you get back and you'll have to be impressed.
+? "Is that the knot with extra icing?"
+ [fx ellie:2 clout:1]
+ ellie.b: It's a going-away knot. Going-away knots get extra icing. That's not favouritism, it's policy.
+ * It is favouritism. The woman in front of you got a normal knot and noticed.
 ~ She hands you the knot in a paper bag with a tiny croissant drawn on it in biro. She draws one on every bag. You have kept every single one in a drawer upstairs, and you will never tell anyone this.
 ~ Then she hands you a second bag. A big one. Heavy.
 ellie.n: For the train. And for the hackers. Hackers eat, right? Twelve cinnamon knots, six sausage rolls, and a loaf of the good one for your hotel room. Don't eat the loaf on the train. Hotel room loaf.
@@ -2515,11 +2579,11 @@ pia.h: If you're ever back through here, request something. Anything. Except tha
 [sum At Central Station you met Pia, a violinist who busks by the old piano. Her brother used to go to the con. He's "away".]
 `;
 SC.d1_train=`
-[bg train]
+[bg carriage]
 [hide]
 ~ The 16:12. You get a table seat facing backwards, which you hate, and put Ellie's bag of baking on the seat beside you like a guard dog.
 ~ Opposite: a woman with a long platinum-blond braid, round gold glasses and a cardigan the colour of the night sky with tiny embroidered stars on it. She has a radio on the table. Not a phone. A radio, with a whip antenna, and a pair of headphones, and she's smiling at something only she can hear.
-~ The train pulls out. The city slides past. Cranes, back gardens, a billboard: "SafeSphere. Your shield on the internet. Free forever." Someone has graffitied "FOREVER IS A LONG TIME" underneath.
+~ The city slides past. Cranes, back gardens, a billboard: "SafeSphere. Your shield on the internet. Free forever." Someone has graffitied "FOREVER IS A LONG TIME" underneath.
 ~ The woman opposite lifts one side of her headphones and looks at you.
 astrid.n: Sorry. Am I being loud? It hisses. The radio. Some people find it upsetting.
 ? "Not at all. What are you listening to?"
@@ -3511,7 +3575,9 @@ if met('pia')
  ~ By the old piano, Pia is unpacking her violin. She sees you, sees Ellie's face, and doesn't play anything bright. She plays something slow and steady instead, like a hand on a shoulder.
  ellie.n: That's lovely. Who's that?
  > A friend. I think.
-[bg train]
+[cut depart]
+~ The 08:22 slides out from under the iron roof. Ellie watches the station go, like she's never seen one before.
+[bg carriage]
 ~ Ellie doesn't talk on the train. She holds a paper cup of station coffee and doesn't drink it, and watches the backs of houses go past.
 ~ Halfway, without looking away from the window, she reaches over and holds your hand. Just holds it. As if it's a railing.
 [bg bakery]
@@ -3589,7 +3655,7 @@ ellie.b: You don't owe anyone this. You're not a superhero. You're a man who fix
  ellie.n: I'm coming. Don't argue. You'll lose. I've been arguing with ovens since I was nine.
  [flag ellie_fights]
 ~ Mr Demir lends you a hat and a scarf "for disguise purposes" and walks you both to the station himself, like a bodyguard in a barber's apron.
-[bg train]
+[bg carriage]
 ~ On the train back, Ellie puts her badge in her coat pocket, wrapped in a crisp packet. The blue light still glows faintly through the foil.
 ellie.n: Did I do that right? Foil?
 > You did that exactly right.
@@ -11859,7 +11925,7 @@ const QUALITY={
 };
 /* the look, in one place: emissive gain is compressed above 1 so signs and fixtures read as lit without
    blooming into fog; bloom only catches what is genuinely bright */
-const LOOK={exposure:1.05,hemi:3.2,fill:.5,env:{home:.6,con:.5,f13:.55,office:.7,station:.7},bloomStr:.17,bloomRad:.42,bloomThr:1.3,ao:.85,sat:1.1,con:1.08,vig:.12,light:7.6,reach:1.3,bake:1.7,bakeFill:.2,bakeEnv:.4};
+const LOOK={exposure:1.05,hemi:3.2,fill:.5,env:{home:.6,con:.5,f13:.55,office:.7,station:.7,train:.75},bloomStr:.17,bloomRad:.42,bloomThr:1.3,ao:.85,sat:1.1,con:1.08,vig:.12,light:7.6,reach:1.3,bake:1.7,bakeFill:.2,bakeEnv:.4};
 /* ---- textures: every texture gets its own canvas; small non-repeating ones are packed into atlases later ---- */
 function tex(key,w,h,paint){
  if(G.tx[key])return key;
@@ -12343,7 +12409,7 @@ function anonSVG(v){
    Characters and other moving things sample the same lights on the CPU (probeAt). */
 const BAKE={cube:320,fill:.11,soft:.22,rgbm:8};
 const PD12='const vec2 PD[12]=vec2[](vec2(-.326,-.406),vec2(-.840,-.074),vec2(-.696,.457),vec2(-.203,.621),vec2(.962,-.195),vec2(.473,-.480),vec2(.519,.767),vec2(.185,-.893),vec2(.507,.064),vec2(.896,.412),vec2(-.322,-.933),vec2(-.792,-.598));';
-function bakeOK(){const r=G.r;return !!(r&&r.capabilities.isWebGL2&&(r.extensions.has('EXT_color_buffer_half_float')||r.extensions.has('EXT_color_buffer_float')))}
+function bakeOK(){const r=G.r;if(/[?&]nobake\b/.test(location.search))return false;return !!(r&&r.capabilities.isWebGL2&&(r.extensions.has('EXT_color_buffer_half_float')||r.extensions.has('EXT_color_buffer_float')))}
 function bakeMats(){
  if(G.bk)return G.bk;const T=G.T;
  const vs='attribute vec2 lmuv;varying vec3 wp;varying vec3 wn;void main(){wp=position;wn=normal;gl_Position=vec4(lmuv*2.-1.,0.,1.);}';
@@ -12709,7 +12775,7 @@ function kSpire(cx,cz,y,r,h,m,n){n=n||8;for(let i=0;i<n;i++){const s=r*(1-i/n),y
 
 /* ============ LEVEL HELPERS ============ */
 const DOORS={},MAPR={},AREAS={},INTS=[],WCH=[],DYN=[];
-const LEVELS={home:[[0,'Bakery'],[3.9,'Flat 1A'],[7.1,'Second floor'],[10.3,'Third floor'],[13.5,'Roof']],office:[[0,'3rd floor']],station:[[0,'Concourse']],con:[[-5,'Basement'],[0,'Ground floor'],[5.5,'Level 1'],[11,'Level 2'],[16.5,'Con roof']],f13:[[0,'13th floor'],[3.6,'Hotel roof']]};
+const LEVELS={home:[[0,'Bakery'],[3.9,'Flat 1A'],[7.1,'Second floor'],[10.3,'Third floor'],[13.5,'Roof']],office:[[0,'3rd floor']],station:[[0,'Concourse']],con:[[-5,'Basement'],[0,'Ground floor'],[5.5,'Level 1'],[11,'Level 2'],[16.5,'Con roof']],train:[[0,'Coaches']],f13:[[0,'13th floor'],[3.6,'Hotel roof']]};
 function door(o,at,c,w,h,y,nf){(DOORS[BR]=DOORS[BR]||[]).push({o,at,c,w,h:h||2.7,y:y||0,nf})}
 /* a wide opening between two spaces: a door with no frame */
 const gap=(o,at,c,w,h,y)=>door(o,at,c,w,h,y,1);
@@ -12784,7 +12850,7 @@ function skyline(cx,cz,r0,r1,n,yb,ex){for(let i=0;i<n;i++){const a=i/n*Math.PI*2
 function buildLevels(){
  mats();
  buildHome();
-  buildOffice();buildStation();buildSite();buildTower();
+  buildOffice();buildStation();buildSite();buildTower();buildTrain();
 }
 
 /* ============ HALCYON TOWER: 13th floor + hotel roof ============ */
@@ -13716,7 +13782,7 @@ function buildStation(){
    if(k===0){box(x0+.05,-.9,za,x1-.05,3.1,za+.6,MT.gloss(liv.nose),{col:false});box(x0+.25,1.6,za+.6,x1-.25,2.6,za+.62,MT.gloss('#1a2028'),{col:false});
     for(const x of[x0+.4,x1-.4])box(x-.16,.3,za+.6,x+.16,.5,za+.63,MT.glow('#fff4d8',2.2),{col:false,b:1})}
    if(k<cars-1)box(x0+.35,-.4,zb-.25,x1-.35,3,zb,M.black,{col:false})}};
- train(736,10.4,3,{body:'#eef0ee',band:'#1f8a8a',nose:'#ffd166'},4.4);
+ // the 09:12 on Platform 4 is a model of its own (09d_train.js), so it can pull out of the station
  train(755,6,3,{body:'#3a4a8a',band:'#f4efe6',nose:'#ffd166'});
  vfx('smoke',{b0:[755,3.7,-30],n:12,size:.25,col:[.75,.75,.78],op:.08,sp:.5});
  /* ================= THE CONCOURSE ================= */
@@ -15004,7 +15070,8 @@ function buildPlaza(){
  // the giant neon sign, the taxi rank, the bus stop, the coffee cart
  {const cx=-37,cz=80;box(cx-10,0,cz-.4,cx+10,7.2,cz+.4,MT.plain('#1b1026'));kSign(cx,2.4,cz+.41,19,3.6,'s','CTRL+ALT+CON','#ff5d73','#1b1026');kSign(cx,2.4,cz-.41,19,3.6,'n','CTRL+ALT+CON','#ff5d73','#1b1026');
   box(cx-9.6,6.4,cz-.5,cx+9.6,6.7,cz+.5,MT.glow('#ff5d73',2.6),{col:false});addLight(cx,4,cz+3,[1,.35,.45],16,1.3);addLight(cx,4,cz-3,[1,.35,.45],14,1.1)}
- for(let i=0;i<3;i++){car(-2+i*6,97.1,'x','#ffd166',{taxi:1})}box(-8,0,95,-7.8,3,95.2,MT.plain('#2a2a30'));panel(-7.9,3,95.2,2,.6,'e',sign('TAXI','#1b1026','#ffd166',128,48));
+ // the taxi rank: on the boulevard between the hotel and the con's doors, where the guests actually come out
+ for(let i=0;i<3;i++){car(-146+i*6,101.6,'x','#ffd166',{taxi:1})}box(-136.1,0,98.9,-135.9,3,99.1,MT.plain('#2a2a30'));panel(-136,3,99.11,2,.6,'s',sign('TAXI','#1b1026','#ffd166',128,48));panel(-136,3,98.89,2,.6,'n',sign('TAXI','#1b1026','#ffd166',128,48));
  {const x=24,z=96.8;box(x-4,0,z-1.5,x+4,.12,z+1.5,MT.plain('#5a5a64'),{col:false});box(x-4,0,z-1.5,x+4,2.8,z-1.3,MT.glass);box(x-4.1,2.8,z-1.7,x+4.1,3,z+1.7,MT.plain('#2a2026'),{col:false,b:1});box(x-3.9,0,z-1.3,x-3.7,2.8,z+1.5,MT.chrome,{col:false});
   panel(x,.6,z-1.29,3,1.8,'s',MT.lumen);box(x-3,0,z-1.2,x+3,.45,z-.5,MT.woodDark);panel(x+3.8,2.9,z,1,.4,'e',sign('BUS 42','#1b1026','#ffd166',128,48))}
  {const x=-20,z=72;box(x-1.5,0,z-.75,x+1.5,1,z+.75,MT.plain('#3a2418'));box(x-1.3,1,z-.55,x+1.3,1.4,z+.3,MT.chrome,{col:false});box(x-.05,1,z-.05,x+.05,2.8,z+.05,MT.plain('#888'),{col:false});
@@ -15175,12 +15242,171 @@ function siteAreas(){
  A('conroof','Convention Centre roof',[56,-54,134,20],[124,-49,PI/2,RFY],'roof',{y0:15,y1:24,out:1,fog:[.1,.08,.18],fr:[60,320]});
 }
 
+/* ============ THE TRAIN: a three-coach Quarterline unit, from the inside ============ */
+/* A region of its own (x ~1100). The train never moves: the world outside does (09d_train.js scrolls fields, houses,
+   masts, bridges, tunnels and the odd passing train past the windows, and rocks the camera a little).
+   Plan (x across, z along the train; the front is at z = 0, the train runs towards -z):
+     each coach   23.4 m inside, 2.72 m wide: a vestibule at each end (sliding doors both sides, grab pole, door
+                  buttons, extinguisher, CCTV), a glazed partition with an open doorway and a passenger information
+                  screen, and a 18 m saloon of nine 2 m bays down each side of the aisle: airline pairs, table bays of
+                  four, a floor-to-ceiling luggage stack, a wheelchair space, a bike bay, the toilet
+     gangways     1.2 m concertina connections between coaches
+     cabs         a locked cab door at the very front and the very back
+   Coach A is the quiet coach. Coach B has the toilet and the wheelchair space. Coach C has the bikes. */
+const TRN={x:1100,len:23.4,gw:1.2,hw:1.36,cars:[],seats:[],wins:[],tables:[],glaze:[]};
+for(let k=0;k<3;k++){const z0=k*(TRN.len+TRN.gw);TRN.cars.push([z0,z0+TRN.len])}
+function trainTextures(){
+ tex('trCarpet',128,128,(c,w,h)=>{c.fillStyle='#1d2440';c.fillRect(0,0,w,h);for(let y=0;y<h;y+=16)for(let x=0;x<w;x+=16){const o=(y/16)%2?8:0;c.fillStyle='#2a3560';c.fillRect(x+o+5,y+5,6,6);c.fillStyle=(x+y)%48?'#3fa8a8':'#d0507a';c.fillRect(x+o+7,y+7,2,2)}noise(c,w,h,1600,'#0a0e20',.35);grain(c,w,h,8)});
+ tex('trRubber',128,128,(c,w,h)=>{c.fillStyle='#5a5e66';c.fillRect(0,0,w,h);for(let y=4;y<h;y+=10)for(let x=4;x<w;x+=10){c.fillStyle='#6a6e76';c.beginPath();c.arc(x+((y/10)%2?5:0),y,2.6,0,7);c.fill()}noise(c,w,h,900,'#2a2e36',.3);grain(c,w,h,6)});
+ tex('trMoq',128,128,(c,w,h)=>{c.fillStyle='#232a52';c.fillRect(0,0,w,h);for(let y=0;y<h;y+=32)for(let x=0;x<w;x+=32){c.strokeStyle='#3fb0b0';c.lineWidth=2;c.beginPath();c.moveTo(x+4,y+16);c.lineTo(x+16,y+4);c.lineTo(x+28,y+16);c.lineTo(x+16,y+28);c.closePath();c.stroke();c.fillStyle='#e0507e';c.fillRect(x+14,y+14,4,4);c.fillStyle='#ffd166';c.fillRect(x+1,y+1,3,3)}
+  for(let i=0;i<h;i+=2){c.fillStyle='#00000010';c.fillRect(0,i,w,1)}grain(c,w,h,14)});
+ tex('trHead',128,64,(c,w,h)=>{c.fillStyle='#f2f2ee';c.fillRect(0,0,w,h);c.fillStyle='#1f8a8a';c.fillRect(0,h-14,w,14);c.fillStyle='#f2f2ee';c.font='bold 10px sans-serif';c.textAlign='center';c.fillText('QUARTERLINE',w/2,h-4);grain(c,w,h,6)});
+ tex('trCeil',256,128,(c,w,h)=>{c.fillStyle='#eef0f2';c.fillRect(0,0,w,h);c.fillStyle='#c8ccd2';c.fillRect(0,0,w,2);c.fillRect(0,64,w,2);for(const x of[60,190]){c.fillStyle='#d6dade';c.beginPath();c.arc(x,32,12,0,7);c.fill();c.fillStyle='#b8bcc4';for(let i=-9;i<=9;i+=3)c.fillRect(x+i,24,1,16)}c.fillStyle='#dfe3e6';c.fillRect(120,90,16,16);grain(c,w,h,4)});
+ tex('trBellows',64,128,(c,w,h)=>{for(let y=0;y<h;y+=8){const g=c.createLinearGradient(0,y,0,y+8);g.addColorStop(0,'#2a2c32');g.addColorStop(.5,'#45484f');g.addColorStop(1,'#1a1c20');c.fillStyle=g;c.fillRect(0,y,w,8)}grain(c,w,h,6)});
+ tex('trChequer',64,64,(c,w,h)=>{c.fillStyle='#9a9ea6';c.fillRect(0,0,w,h);for(let y=0;y<h;y+=8)for(let x=0;x<w;x+=8){c.fillStyle='#b8bcc4';c.save();c.translate(x+4,y+4);c.rotate(((x+y)/8)%2?.8:-.8);c.fillRect(-3,-1,6,2);c.restore()}grain(c,w,h,8)});
+ tex('trLam',128,64,(c,w,h)=>{c.fillStyle='#cfd3d8';c.fillRect(0,0,w,h);noise(c,w,h,500,'#b8bcc4',.3);c.fillStyle='#1f8a8a';c.fillRect(0,h-5,w,5);grain(c,w,h,4)});
+ tex('trDoorIn',128,256,(c,w,h)=>{c.fillStyle='#b9bec6';c.fillRect(0,0,w,h);c.fillStyle='#ffd166';c.fillRect(w-10,0,10,h);c.fillStyle='#8a8e96';c.fillRect(0,0,w,3);c.fillRect(0,h-3,w,3);grain(c,w,h,6)});
+ tex('trRoute',512,192,(c,w,h)=>{c.fillStyle='#f4f2ec';c.fillRect(0,0,w,h);c.fillStyle='#1f8a8a';c.fillRect(0,0,w,34);c.fillStyle='#fff';c.font='bold 20px Chakra Petch, sans-serif';c.fillText('QUARTERLINE · ROUTE MAP',14,24);
+  c.strokeStyle='#c0304a';c.lineWidth=8;c.beginPath();c.moveTo(40,120);c.lineTo(470,120);c.stroke();c.strokeStyle='#1f8a8a';c.lineWidth=6;c.beginPath();c.moveTo(250,120);c.lineTo(250,70);c.stroke();
+  const st=[[40,120,'Linden St'],[250,120,'Central'],[250,70,'Brindle & Co'],[470,120,'Conference Qtr']];for(const[x,y,n]of st){c.fillStyle='#fff';c.strokeStyle='#1b1026';c.lineWidth=3;c.beginPath();c.arc(x,y,9,0,7);c.fill();c.stroke();c.fillStyle='#1b1026';c.font='bold 15px sans-serif';c.textAlign='center';c.fillText(n,x,y+(y>100?32:-16))}
+  c.textAlign='left';c.font='12px sans-serif';c.fillStyle='#5b4870';c.fillText('Trains every 20 minutes. Please mind the gap.',14,h-12)});
+ tex('trWifi',256,128,(c,w,h)=>{c.fillStyle='#1b1026';c.fillRect(0,0,w,h);c.strokeStyle='#8affc1';c.lineWidth=5;for(let i=1;i<4;i++){c.beginPath();c.arc(48,86,i*14,-2.4,-.74);c.stroke()}c.fillStyle='#8affc1';c.beginPath();c.arc(48,86,5,0,7);c.fill();
+  c.fillStyle='#fff';c.font='bold 22px sans-serif';c.fillText('FREE WI-FI',96,52);c.font='14px sans-serif';c.fillStyle='#bba8cf';c.fillText('powered by Lumen SafeSphere',96,76);c.fillText('just log in with your socials!',96,96)});
+ tex('trAd0',256,192,(c,w,h)=>{const g=c.createLinearGradient(0,0,w,h);g.addColorStop(0,'#1a3a7a');g.addColorStop(1,'#2a7ac0');c.fillStyle=g;c.fillRect(0,0,w,h);c.fillStyle='#fff';c.beginPath();c.moveTo(128,30);c.lineTo(170,46);c.lineTo(166,96);c.lineTo(128,122);c.lineTo(90,96);c.lineTo(86,46);c.closePath();c.fill();
+  c.fillStyle='#2a7ac0';c.font='bold 30px sans-serif';c.textAlign='center';c.fillText('L',128,90);c.fillStyle='#fff';c.font='bold 22px sans-serif';c.fillText('SafeSphere',128,150);c.font='13px sans-serif';c.fillText('Your shield on the internet. Free forever.',128,174)});
+ tex('trAd1',256,192,(c,w,h)=>{c.fillStyle='#1b1026';c.fillRect(0,0,w,h);c.fillStyle='#ff5d73';c.font='bold 34px Chakra Petch, sans-serif';c.textAlign='center';c.fillText('CTRL+ALT+CON',128,70);c.fillStyle='#8affc1';c.font='20px VT323, monospace';c.fillText('#20 · THIS WEEK',128,100);c.fillStyle='#ffd166';c.font='15px sans-serif';c.fillText('Conference Quarter · alight here',128,150);c.fillStyle='#bba8cf';c.fillText('be excellent to each other',128,172)});
+ tex('trAd2',256,192,(c,w,h)=>{c.fillStyle='#ffd166';c.fillRect(0,0,w,h);c.fillStyle='#1b1026';c.font='bold 24px sans-serif';c.textAlign='center';c.fillText('Seen something',128,62);c.fillText('that isn\'t right?',128,92);c.font='15px sans-serif';c.fillText('Tell a member of staff.',128,134);c.fillText('Don\'t tag it on SafeSphere.',128,156)});
+ tex('trAd3',256,192,(c,w,h)=>{c.fillStyle='#f4efe6';c.fillRect(0,0,w,h);c.fillStyle='#7a3a1a';c.font='bold 28px Georgia, serif';c.textAlign='center';c.fillText('PROOF',128,64);c.font='italic 16px Georgia, serif';c.fillText('bakery · Linden Street',128,90);c.fillStyle='#c0304a';c.font='bold 15px sans-serif';c.fillText('Cinnamon knots from 7am',128,140);c.fillStyle='#5b4870';c.font='12px sans-serif';c.fillText('(they\'re not really knots)',128,162)});
+ tex('trPrio',128,128,(c,w,h)=>{c.fillStyle='#7a2a8a';c.fillRect(0,0,w,h);c.fillStyle='#fff';c.font='bold 14px sans-serif';c.textAlign='center';c.fillText('PRIORITY SEAT',64,26);c.beginPath();c.arc(64,62,14,0,7);c.fill();c.fillRect(56,78,16,30);c.font='11px sans-serif';c.fillText('please offer this seat',64,120)});
+ tex('trWheel',128,128,(c,w,h)=>{c.fillStyle='#1a4a9a';c.fillRect(0,0,w,h);c.strokeStyle='#fff';c.lineWidth=7;c.beginPath();c.arc(58,80,24,0,7);c.stroke();c.fillStyle='#fff';c.beginPath();c.arc(58,26,9,0,7);c.fill();c.fillRect(52,38,10,34);c.fillRect(52,64,34,9);c.fillRect(80,64,9,30)});
+ tex('trNews',128,160,(c,w,h)=>{c.fillStyle='#ece8e0';c.fillRect(0,0,w,h);c.fillStyle='#1b1026';c.font='bold 16px Georgia, serif';c.fillText('THE DAILY BYTE',8,20);c.fillRect(8,26,112,2);c.font='bold 13px sans-serif';c.fillText('LUMEN VALUED AT',8,46);c.fillText('£40 BILLION',8,62);c.fillStyle='#9a968e';c.fillRect(8,70,112,46);for(let y=124;y<h-4;y+=6)c.fillRect(8,y,(y%12?112:80),2)});
+}
+function buildTrain(){
+ trainTextures();
+ region('train',{fog:[.6,.66,.74],fr:[90,780],day:1});const RG=G.regions.train;RG.amb=[.55,.56,.6];RG.lmCap=8;RG.lmPages={high:3,medium:2,low:2};
+ const X=TRN.x,HW=TRN.hw,SILL=.84,HEAD=1.8,UPW=2.02,CEIL=2.32,CX=.82;
+ const M={carpet:mt('trCarpet',0,1/1.2,0,{r:.95}),rubber:mt('trRubber',0,1/1.1,0,{r:.8}),low:MT.gloss('#d4d8de'),up:MT.gloss('#eceef0'),ceil:mt('trCeil',0,1/2,0,{r:.7}),
+  moq:mt('trMoq',0,1/.4,0,{r:.95}),head:MT.fabric('#ddd8cc'),shell:MT.gloss('#3a3e48'),frame:MT.plain('#22242a'),chrome:MT.chrome,yellow:MT.gloss('#ffd166'),lam:mt('trLam',0,1,0,{r:.35}),
+  door:mt('trDoorIn',0,1,0,{r:.4}),bell:mt('trBellows',0,1/.5,0,{r:.9}),cheq:mt('trChequer',0,1/.5,0,{r:.4,m:.5}),teal:MT.gloss('#1f8a8a'),dark:MT.plain('#16161c'),red:MT.gloss('#c0242e'),
+  strip:MT.glow('#f2f6ff',1.6),blind:MT.fabric('#4a5a7a')};
+ const mapR=(x0,z0,x1,z1,n,c)=>(MAPR.train=MAPR.train||[]).push({x0,z0,x1,z1,y:0,n,c:c||'#3a4a5a'});
+ // a seat: cushion, back (moquette in front, a grey shell behind), headrest cover, a grab handle on the aisle side
+ const seat=(sx0,sx1,z,f,aisle)=>{const pz0=f<0?z:z+.12,pz1=pz0+.5,bz0=f<0?z+.5:z,bz1=bz0+.12;
+  box(sx0+.06,.14,pz0+.08,sx1-.06,.4,pz1-.08,M.shell,{col:false});box(sx0,.4,pz0,sx1,.5,pz1,M.moq,{col:false});
+  if(f<0){box(sx0,.5,bz0,sx1,1.2,bz0+.08,M.moq,{col:false});box(sx0,.5,bz0+.08,sx1,1.22,bz1,M.shell,{col:false});box(sx0+.07,1.07,bz0-.012,sx1-.07,1.19,bz0,M.head,{col:false})}
+  else{box(sx0,.5,bz1-.08,sx1,1.2,bz1,M.moq,{col:false});box(sx0,.5,bz0,sx1,1.22,bz1-.08,M.shell,{col:false});box(sx0+.07,1.07,bz1,sx1-.07,1.19,bz1+.012,M.head,{col:false})}
+  if(aisle){const ax=aisle<0?sx0:sx1-.05;box(ax,.5,pz0+.06,ax+.05,.66,pz1-.04,M.shell,{col:false});const gx=aisle<0?sx0+.02:sx1-.1;box(gx,1.22,bz0+.02,gx+.08,1.3,bz1-.02,M.chrome,{col:false})}
+  TRN.seats.push({x:(sx0+sx1)/2,z:(pz0+pz1)/2,f})};
+ const row=(xa,xb,z,f,aisle)=>{const w2=(xb-xa)/2;seat(xa+.01,xa+w2-.01,z,f,aisle<0?0:0);seat(xa+w2+.01,xb-.01,z,f,0);
+  const ax=aisle<0?xa:xb-.05;box(ax,.5,z+(f<0?.06:.18),ax+.05,.66,z+(f<0?.5:.62),M.shell,{col:false});const gx=aisle<0?xa+.02:xb-.1,bz=f<0?z+.5:z;box(gx,1.22,bz+.02,gx+.08,1.3,bz+.1,M.chrome,{col:false});
+  colBox(xa,z,xb,z+.62,0,1.22)};
+ // what people leave on tables
+ const PROPS=[(x,z)=>kMug(x,.745,z,['#e9e3da','#c0304a','#1f8a8a'][(x*7|0)%3&3]),(x,z)=>kPaper(x,.745,z,2),(x,z)=>{box(x-.17,.745,z-.12,x+.17,.765,z+.12,MT.plain('#2a2a30'),{col:false});box(x-.17,.765,z+.1,x+.17,.99,z+.12,MT.plain('#2a2a30'),{col:false});box(x-.15,.79,z+.098,x+.15,.97,z+.1,MT.glow('#7cc4ff',.7),{col:false})},
+  (x,z)=>box(x-.04,.745,z-.08,x+.04,.755,z+.08,MT.plain('#16161c'),{col:false}),(x,z)=>box(x-.05,.745,z-.05,x+.05,.98,z+.05,MT.gloss('#7cc4ff'),{col:false}),
+  (x,z)=>box(x-.1,.745,z-.14,x+.1,.785,z+.14,MT.gloss(['#c0304a','#2a4a8a','#ffd166','#3a6a3a'][(z*5|0)&3]),{col:false}),(x,z)=>quad([x-.1,.747,z+.13],[x+.1,.747,z+.13],[x+.1,.747,z-.13],[x-.1,.747,z-.13],mt('trNews',0,1,0,{r:.8}),1,1),
+  (x,z)=>{box(x-.09,.745,z-.06,x+.09,.79,z+.06,MT.plain('#f4efe6'),{col:false});box(x-.08,.79,z-.05,x+.08,.792,z+.05,MT.plain('#7a3a1a'),{col:false})}];
+ const tableAt=(xa,xb,z0,z1,wall)=>{box(xa,.70,z0,xb,.745,z1,M.lam,{col:false});box(xa,.69,z0,xb,.70,z1,M.frame,{col:false});const px=wall<0?xa:xb-.12;box(px,0,(z0+z1)/2-.08,px+.12,.69,(z0+z1)/2+.08,M.shell,{col:false});
+  colBox(xa,z0,xb,z1,0,.75);TRN.tables.push({x:(xa+xb)/2,z:(z0+z1)/2});const n=1+((rnd()*3)|0);for(let i=0;i<n;i++){const p=PROPS[(rnd()*PROPS.length)|0];p(xa+.15+rnd()*(xb-xa-.3),z0+.15+rnd()*(z1-z0-.3))}};
+ const bag=(x0,x1,y,z0,z1)=>{const c=['#3a3a44','#c0304a','#1f4a8a','#2a2a30','#8a5a3a','#ffd166','#3a6a5a'][(rnd()*7)|0];box(x0,y,z0,x1,y+.18+rnd()*.12,z1,MT.fabric(c),{col:false})};
+ const LAYOUT=[['AATTLTTAA','PATTTTLAA'],['WWTTLTTAA','CCTTTTLAA'],['AATTTTLBB','PATTLTTAA']];
+ G.lmK=.9;
+ TRN.cars.forEach(([z0,z1],k)=>{
+  const vA=z0+2.7,vB=z1-2.7,dz=[z0+1.35,z1-1.35];
+  // floors: rubber in the vestibules (yellow nosing at the doors), carpet in the saloon
+  floorQ(X-HW,z0,X+HW,vA,0,M.rubber);floorQ(X-HW,vB,X+HW,z1,0,M.rubber);floorQ(X-HW,vA,X+HW,vB,0,M.carpet);surf(X-HW,z0,X+HW,z1,0);
+  for(const d of dz)for(const s of[-1,1])box(X+s*HW-(s>0?.12:0),0,d-.66,X+s*HW+(s<0?.12:0),.012,d+.66,M.yellow,{col:false});
+  // ceiling: a flat centre and sloped coves, LED strips along the cove line, lights along the middle
+  ceilQ(X-CX,z0,X+CX,z1,CEIL,M.ceil);
+  for(const s of[-1,1]){const a=[X+s*HW,UPW],b=[X+s*CX,CEIL];if(s<0)quad([a[0],a[1],z1],[a[0],a[1],z0],[b[0],b[1],z0],[b[0],b[1],z1],M.up,(z1-z0)/2,.5);else quad([a[0],a[1],z0],[a[0],a[1],z1],[b[0],b[1],z1],[b[0],b[1],z0],M.up,(z1-z0)/2,.5);
+   box(X+s*CX-(s>0?.06:0),CEIL-.05,vA,X+s*CX+(s<0?.06:0),CEIL-.01,vB,M.strip,{col:false,b:1})}
+  for(let z=vA+1.5;z<vB;z+=3)addLight(X,2.15,z,[.95,.97,1],4.6,.5);for(const z of[z0+1.35,z1-1.35]){addLight(X,2.15,z,[1,.96,.9],3.6,.45);box(X-.25,CEIL-.03,z-.25,X+.25,CEIL-.005,z+.25,MT.glow('#fff8ee',1.4),{col:false,b:1})}
+  // the sides: lower panels, window pillars, an upper band; glass, rubber frames, sills; doors in the vestibules
+  for(const s of[-1,1]){const wx0=s<0?X-HW-.12:X+HW,wx1=s<0?X-HW:X+HW+.12;
+   const solid=(za,zb,y0,y1,m)=>box(wx0,y0,za,wx1,y1,zb,m||M.low,{col:false});
+   colBox(Math.min(wx0,wx1)-(s<0?.05:0),z0,Math.max(wx0,wx1)+(s>0?.05:0),z1,0,2.4);
+   // vestibule walls round the door openings
+   for(const d of dz){const a=d-.65,b=d+.65,end=d<(z0+z1)/2?z0:z1;solid(Math.min(end,d<(z0+z1)/2?a:b),Math.max(end,d<(z0+z1)/2?a:b),0,UPW,M.up);
+    const ptn=d<(z0+z1)/2?vA:vB;solid(Math.min(ptn,d<(z0+z1)/2?b:a),Math.max(ptn,d<(z0+z1)/2?b:a),0,UPW,M.up);solid(a,b,1.98,UPW,M.up);
+    // the door: two closed leaves with windows (you can see out), yellow edges, a step of light at the threshold
+    const fx=s<0?X-HW-.07:X+HW+.07;for(const[l0,l1]of[[a,d],[d,b]]){box(fx-.02,0,l0,fx+.02,1.05,l1,M.door,{col:false});box(fx-.02,1.78,l0,fx+.02,1.98,l1,M.door,{col:false});TRN.glaze.push({x:fx,z0:l0+.06,z1:l1-.06,y0:1.05,y1:1.78});box(fx-.025,1.05,l0,fx+.025,1.78,l0+.06,M.door,{col:false});box(fx-.025,1.05,l1-.06,fx+.025,1.78,l1,M.door,{col:false})}
+    box(fx-.03,0,d-.015,fx+.03,1.98,d+.015,M.dark,{col:false});
+    // buttons beside the door: open (a green ring), close
+    const bx=s<0?X-HW+.004:X+HW-.004;    box(Math.min(bx,bx+s*-.03),1.05,b+.08,Math.max(bx,bx+s*-.03),1.25,b+.22,MT.plain('#2a2a30'),{col:false});box(Math.min(bx,bx+s*-.035),1.16,b+.11,Math.max(bx,bx+s*-.035),1.22,b+.19,MT.glow('#8affc1',1.6),{col:false});box(Math.min(bx,bx+s*-.035),1.08,b+.11,Math.max(bx,bx+s*-.035),1.13,b+.19,MT.glow('#ffd166',.8),{col:false});
+    // a handrail either side of the doorway
+    for(const zz of[a-.06,b+.06])box(Math.min(bx,bx-s*.07),.9,zz-.02,Math.max(bx,bx-s*.07),1.75,zz+.02,M.chrome,{col:false})}
+   // the saloon side: windows every 2 m, pillars between
+   solid(vA,vB,0,SILL);solid(vA,vB,HEAD,UPW,M.up);
+   for(let i=0;i<9;i++){const zc=vA+1+i*2,w0=zc-.8,w1=zc+.8;solid(zc-1,w0,SILL,HEAD,M.up);solid(w1,zc+1,SILL,HEAD,M.up);
+    const gx=s<0?X-HW-.09:X+HW+.09;TRN.glaze.push({x:gx,z0:w0,z1:w1,y0:SILL,y1:HEAD});
+    // rubber frame and a sill you could put a coffee on
+    const fi=s<0?X-HW+.005:X-HW,fo=s<0?X-HW-.02:X+HW+.02;const f0=Math.min(s<0?X-HW-.09:X+HW,s<0?X-HW+.01:X+HW+.09),f1=Math.max(s<0?X-HW-.09:X+HW,s<0?X-HW+.01:X+HW+.09);
+    box(f0,SILL-.02,w0,f1+(s<0?.06:0)-(s>0?0:0),SILL+.02,w1,M.frame,{col:false});box(f0,HEAD-.03,w0,f1,HEAD+.01,w1,M.frame,{col:false});box(f0,SILL,w0,f1,HEAD,w0+.03,M.frame,{col:false});box(f0,SILL,w1-.03,f1,HEAD,w1,M.frame,{col:false});
+    box(s<0?X-HW:X+HW-.07,SILL-.03,w0+.03,s<0?X-HW+.07:X+HW,SILL+.005,w1-.03,M.low,{col:false});
+    TRN.wins.push({x:s<0?X-HW:X+HW,z:zc,s});
+    // some blinds half down
+    if(rnd()<.28){const bx=s<0?X-HW-.03:X+HW+.03,h=.25+rnd()*.45;box(bx-.006,HEAD-h,w0+.02,bx+.006,HEAD,w1-.02,M.blind,{col:false});box(bx-.02,HEAD-h-.02,w0+.02,bx+.02,HEAD-h,w1-.02,M.frame,{col:false})}}
+   // luggage racks over the seats, a lip of chrome, brackets every bay; seat-reservation strips under them
+   const rx0=s<0?X-HW:X+HW-.36,rx1=s<0?X-HW+.36:X+HW;box(rx0,1.93,vA,rx1,1.955,vB,MT.glass,{col:false});const lip=s<0?X-HW+.34:X+HW-.36;box(lip,1.92,vA,lip+.02,1.99,vB,M.chrome,{col:false});
+   for(let z=vA;z<=vB+.01;z+=2)box(rx0,1.86,z-.02,rx1,1.93,z+.02,M.chrome,{col:false});
+   for(let z=vA+.5;z<vB;z+=1)box(lip-.01,1.86,z-.09,lip+.01,1.9,z+.09,MT.glow(rnd()<.3?'#ffb020':'#8affc1',.9),{col:false});
+   for(let z=vA+.3;z<vB-.6;z+=.7)if(rnd()<.32)bag(Math.min(rx0,rx1)+.04,Math.max(rx0,rx1)-.04,1.955,z,z+.4+rnd()*.25)}
+  // the partitions between vestibule and saloon: glazed screens either side of an open doorway, posters, a CCTV dome
+  for(const[pz,side]of[[vA,1],[vB,-1]]){const t0=side>0?pz-.06:pz,t1=side>0?pz:pz+.06;
+   for(const s of[-1,1]){const a=s<0?X-HW:X+.45,b=s<0?X-.45:X+HW;box(a,0,t0,b,1.0,t1,M.low);box(a,1.9,t0,b,CEIL,t1,M.up,{col:false});box(a,1.0,(t0+t1)/2-.008,b,1.9,(t0+t1)/2+.008,MT.glass,{col:false});colBox(a,t0,b,t1,0,2.4);
+    for(const xx of[a,b-.04])box(xx,1,t0-.005,xx+.04,1.9,t1+.005,M.frame,{col:false});box(a,.98,t0-.005,b,1.02,t1+.005,M.frame,{col:false});box(a,1.88,t0-.005,b,1.92,t1+.005,M.frame,{col:false})}
+   box(X-.45,1.98,t0,X+.45,CEIL,t1,M.up,{col:false});for(const xx of[X-.47,X+.43])box(xx,0,t0-.01,xx+.04,1.98,t1+.01,M.chrome,{col:false});
+   // posters on the saloon face: adverts, the wifi, priority seating
+   const fz=side>0?t1+.004:t0-.004,fd=side>0?'s':'n';
+   kTq(X-.95,1.1,fz,.62,.46,fd,mt('trAd'+((k*2+(side>0?0:1))%4),0,1,0,{r:.6}));kTq(X+.95,1.1,fz,.62,.46,fd,mt(side>0?'trWifi':'trRoute',0,1,0,{r:.6}));
+   const vz=side>0?t0-.004:t1+.004,vd=side>0?'n':'s';kTq(X+.95,1.15,vz,.9,.34,vd,mt('trRoute',0,1,0,{r:.6}));kTq(X-.95,1.2,vz,.5,.38,vd,mt(['trAd2','trAd1','trAd3'][k],0,1,0,{r:.6}));
+   box(X-.06,CEIL-.08,pz-.06,X+.06,CEIL,pz+.06,M.dark,{col:false})}
+  // vestibule kit: grab poles, an extinguisher, the alarm, a bin, a CCTV dome
+  for(const d of dz){box(X-.025,0,d-.025,X+.025,CEIL,d+.025,M.chrome,{col:false});colBox(X-.05,d-.05,X+.05,d+.05,0,2.3);box(X-.16,CEIL-.07,d+.4,X-.04,CEIL,d+.52,M.dark,{col:false})}
+  {const e=k===0?z0:z1;const ez=k===0?z0+.6:z1-.6;box(X+HW-.25,0,ez-.1,X+HW-.05,.55,ez+.1,M.red,{col:false});box(X+HW-.2,.55,ez-.04,X+HW-.1,.66,ez+.04,M.dark,{col:false});
+   kSign(X-HW+.005,1.5,ez,.36,.2,'e','ALARM','#fff','#c0242e');box(X-HW,1.25,ez-.1,X-HW+.06,1.45,ez+.1,M.red,{col:false});box(X+HW-.35,0,ez-.18,X+HW-.05,.7,ez+.18,MT.gloss('#5a5e66'))}
+  // the ends of the coach: a cab door at the front and the back of the train, a gangway in between
+  for(const[e,inw]of[[z0,1],[z1,-1]]){const cab=(k===0&&inw>0)||(k===2&&inw<0);
+   if(cab){door('h',e,X,.72,1.98,0);wallLine('h',e,X-HW,X+HW,0,CEIL,M.up,inw);const dzf=inw>0?e+.205:e-.205;kTq(X,0,dzf,.7,1.96,inw>0?'s':'n',M.door);kTq(X,1.3,inw>0?dzf+.002:dzf-.002,.4,.3,inw>0?'s':'n',MT.plain('#0a0c10'));colBox(X-.4,Math.min(e,dzf),X+.4,Math.max(e,dzf)+.02,0,2.2);
+    kSign(X,1.7,inw>0?dzf+.004:dzf-.004,.6,.12,inw>0?'s':'n','DRIVER ONLY','#fff','#c0242e');kSign(X-.9,1.5,inw>0?e+.205:e-.205,.7,.26,inw>0?'s':'n',k===0?'COACH A · QUIET':'COACH C','#1b1026','#ffd166')}
+   else{door('h',e,X,1.0,2.0,0);wallLine('h',e,X-HW,X+HW,0,CEIL,M.up,inw);kSign(X+.9,1.85,inw>0?e+.205:e-.205,.6,.24,inw>0?'s':'n',['COACH A · QUIET','COACH B','COACH C'][k],'#1b1026','#ffd166')}}
+  // the saloon: nine bays down each side
+  for(const s of[-1,1]){const xa=s<0?X-HW+.04:X+.42,xb=s<0?X-.42:X+HW-.04,aisle=s<0?1:-1,L=LAYOUT[k][s<0?0:1];
+   for(let b=0;b<9;b++){const zb=vA+b*2,ch=L[b];
+    if(ch==='A'||ch==='P'){const f=b<4?-1:1;for(const r of[0,1])row(xa,xb,zb+.18+r*.92,f,s<0?1:-1);if(ch==='P')kTq(s<0?X-HW+.005:X+HW-.005,1.3,zb+1,.3,.3,s<0?'e':'w',mt('trPrio',0,1,0,{r:.6}))}
+    else if(ch==='T'){row(xa,xb,zb,1,aisle);row(xa,xb,zb+1.38,-1,aisle);tableAt(xa,xb-.02,zb+.66,zb+1.34,s)}
+    else if(ch==='L'){// floor-to-ceiling luggage stack: three shelves, suitcases
+     const x0=xa+.02,x1=xb-.06;for(const xx of[x0,x1-.04])for(const zz of[zb+.2,zb+1.76])box(xx,0,zz,xx+.04,1.9,zz+.04,M.chrome,{col:false});
+     for(const y of[.06,.72,1.38])box(x0,y,zb+.2,x1,y+.03,zb+1.8,MT.plain('#8a8e96'),{col:false});colBox(x0,zb+.2,x1,zb+1.8,0,1.9);
+     for(const y of[.09,.75,1.41]){let z=zb+.26;while(z<zb+1.6){const w=.22+rnd()*.25,h=.35+rnd()*.25;if(rnd()<.8)box(x0+.06,y,z,x1-.06,Math.min(y+h,y+.62),z+w,MT.gloss(['#1a1a20','#c0304a','#2a4a8a','#5a5e66','#ffd166','#3a6a5a','#8a5a3a'][(rnd()*7)|0]),{col:false});z+=w+.04}}
+     kSign(s<0?X-HW+.005:X+HW-.005,1.95,zb+1,.5,.12,s<0?'e':'w','LUGGAGE','#fff','#1f8a8a')}
+    else if(ch==='W'){// the wheelchair space: open floor, tip-up seats folded against the wall, the call-for-aid button
+     if(L[b-1]!=='W'){kTq(s<0?X-HW+.006:X+HW-.006,.9,zb+2,.5,.5,s<0?'e':'w',mt('trWheel',0,1,0,{r:.6}));floorQ(xa+.1,zb+.4,xb-.2,zb+3.6,.004,MT.plain('#2a4a8a'));
+      for(const z of[zb+.6,zb+1.4])box(s<0?X-HW:X+HW-.14,.45,z,s<0?X-HW+.14:X+HW,.95,z+.6,M.moq,{col:false});box(s<0?X-HW:X+HW-.04,1.05,zb+2.6,s<0?X-HW+.04:X+HW,1.25,zb+2.8,MT.glow('#ffd166',1.2),{col:false});
+      box(s<0?X-HW+.04:X+HW-.12,.8,zb+.2,s<0?X-HW+.12:X+HW-.04,.84,zb+3.8,M.chrome,{col:false})}}
+    else if(ch==='B'){// bike bay: hooks and a bike hanging from one
+     if(L[b-1]!=='B'){for(const z of[zb+1,zb+2.6]){const hx=s<0?X-HW+.05:X+HW-.05;box(hx-.03,1.7,z-.03,hx+.03,1.9,z+.03,M.chrome,{col:false})}
+      const bx=s<0?X-HW+.35:X+HW-.35,z=zb+1;for(const zz of[z-.55,z+.55]){box(bx-.02,.05,zz-.33,bx+.02,.75,zz+.33,MT.plain('#16161c'),{col:false})}box(bx-.02,.6,z-.55,bx+.02,.66,z+.55,MT.gloss('#c0304a'),{col:false});box(bx-.03,.66,z+.35,bx+.03,1.75,z+.42,MT.gloss('#c0304a'),{col:false});colBox(bx-.3,z-.9,bx+.3,z+.9,0,1.9);
+      kSign(s<0?X-HW+.005:X+HW-.005,1.4,zb+2.6,.5,.14,s<0?'e':'w','BIKES','#fff','#1f8a8a')}}
+    else if(ch==='C'){// the toilet: a curved module, its door, the light that says whether it's free
+     if(L[b-1]!=='C'){const x0=xa-.02,x1=xb+.04,za=zb+.1,zc=zb+3.9;box(x0,0,za,x1,2.15,zc,MT.gloss('#e4e6ea'));box(x0,2.15,za,x1,CEIL,zc,M.up,{col:false});
+      const fx=s<0?x1+.004:x0-.004;kTq(fx,0,zb+2,.9,1.95,s<0?'e':'w',M.door);kSign(fx,2.0,zb+2,.6,.12,s<0?'e':'w','TOILET','#fff','#1f8a8a');box(Math.min(fx,fx+(s<0?.02:-.02)),1.6,zb+2.5,Math.max(fx,fx+(s<0?.02:-.02)),1.7,zb+2.75,MT.glow('#8affc1',1.6),{col:false})}}}}
+  // a few things on the floor and seats: a rucksack, a forgotten lanyard, a crisp packet
+  for(let i=0;i<3;i++){const z=vA+1+rnd()*15,s=rnd()<.5?-1:1;box(X+s*.25-.12,0,z-.1,X+s*.25+.12,.36,z+.12,MT.fabric(['#2a2a30','#c0304a','#3a6a5a'][i]),{col:false})}
+  mapR(X-HW,z0,X+HW,z1,['Coach A','Coach B','Coach C'][k],'#3a4a5a');
+  area(['coachA','coachB','coachC'][k],['Coach A · Quiet coach','Coach B','Coach C'][k],'train',[X-HW,z0,X+HW,z1],[X,z0+(k===1?11.5:12),0,0],'carriage',{y0:-1,y1:3})});
+ // the gangways: chequer plate, concertina bellows, a low ceiling
+ for(let k=0;k<2;k++){const a=TRN.cars[k][1],b=TRN.cars[k+1][0];floorQ(X-.6,a,X+.6,b,0,M.cheq);surf(X-.6,a,X+.6,b,0);
+  for(const s of[-1,1]){box(s<0?X-.72:X+.6,0,a,s<0?X-.6:X+.72,2.1,b,M.bell,{col:false});colBox(s<0?X-.9:X+.6,a,s<0?X-.6:X+.9,b,0,2.3)}
+  ceilQ(X-.6,a,X+.6,b,2.05,M.bell);addLight(X,1.9,(a+b)/2,[1,.95,.88],2.4,.35);mapR(X-.6,a,X+.6,b,'','#2a3440')}
+ G.lmK=1;
+}
+
 /* ============ WORLD ============ */
 const WD={x:0,y:0,z:0,yaw:0,pit:0,vx:0,vz:0,vy:0,eye:1.62,ground:true,reg:'home',area:null,active:false,keys:{},joy:null,look:null,near:null,t:0,lastSave:0,npcs:[],touch:false,bob:0,stepPh:0,fovk:0,land:0,bobAmp:0};
 /* ---------- areas ---------- */
 /* the most specific area wins: 'sub' areas first, then the smallest rectangle (a café inside a lobby, a food court inside the courtyard) */
 function areaAt(reg,x,z,y){let best=null,bs=1e18;for(const k in AREAS){const a=AREAS[k];if(a.reg!==reg)continue;const r=a.r;if(x>=r[0]&&x<=r[2]&&z>=r[1]&&z<=r[3]&&y>=a.y0&&y<=a.y1){const sz=(r[2]-r[0])*(r[3]-r[1])/(a.sub?1e6:1);if(sz<bs){bs=sz;best=k}}}return best}
-function teleport(reg,x,z,yaw,y){WD.tpAt=performance.now();G.poolReg=null;G.atmoInit=false;WD.reg=reg;WD.x=x;WD.z=z;WD.yaw=yaw;WD.pit=0;WD.y=y||0;WD.vy=0;WD.vx=WD.vz=0;WD.eye=WD.y+1.62}
+function teleport(reg,x,z,yaw,y){WD.tpAt=performance.now();if(WD.cut){WD.cut=null;if(typeof cutClass==='function')setTimeout(cutClass,0)}if(reg!=='train'&&typeof S!=='undefined'&&S&&S.trip)S.trip=null;G.poolReg=null;G.atmoInit=false;WD.reg=reg;WD.x=x;WD.z=z;WD.yaw=yaw;WD.pit=0;WD.y=y||0;WD.vy=0;WD.vx=WD.vz=0;WD.eye=WD.y+1.62}
 function teleportArea(k){const a=AREAS[k];if(!a)return;teleport(a.reg,a.sp[0],a.sp[1],a.sp[2],a.sp[3]||0)}
 const bgArea=k=>BG2AREA[k]||(typeof AREAS!=='undefined'&&AREAS[k]?k:null);
 /* are you in (or right at the edge of) this area? talking over a counter or through a doorway counts */
@@ -15341,7 +15567,7 @@ function candidates(){
  for(const c of visibleChars()){const nm=CH[c.id].name;const st=beatStep(curBeat());
   let lbl=stepIs(c.id)?(st.lbl||'Talk to '+nm):(ROM.includes(c.id)&&!met(c.id)?'Talk to '+(UNMET[c.id]||'the stranger'):'Talk to '+nm);
   L.push({x:c.x,z:c.z,y:c.y||0,label:lbl,act:()=>charAct(c),r:2.4,col:CH[c.id].col,kind:'talk'})}
- for(const n of WD.npcs)if(n.reg===WD.reg)L.push({x:n.x,z:n.z,y:n.y,label:n.role?({Doorman:'Chat with the doorman',Volunteer:'Talk to a volunteer',Info:'Ask at the info desk',Receptionist:'Talk to the receptionist',Barista:'Talk to the barista',Security:'Talk to the guard',Engineer:'Talk to an engineer',Commuter:'Chat with a commuter',Coworker:'Chat with a coworker',Partygoer:'Talk to a partygoer'})[n.role]||'Talk':(n.reg==='office'?'Chat with a coworker':n.reg==='station'?'Chat with a commuter':'Chat with an attendee'),act:()=>npcTalk(n),r:2,kind:'talk',col:'#9a98a6'});
+ for(const n of WD.npcs)if(n.reg===WD.reg)L.push({x:n.x,z:n.z,y:n.y,label:n.role?({Doorman:'Chat with the doorman',Volunteer:'Talk to a volunteer',Info:'Ask at the info desk',Receptionist:'Talk to the receptionist',Barista:'Talk to the barista',Security:'Talk to the guard',Engineer:'Talk to an engineer',Commuter:'Chat with a commuter',Passenger:'Talk to a passenger',Coworker:'Chat with a coworker',Partygoer:'Talk to a partygoer'})[n.role]||'Talk':(n.reg==='office'?'Chat with a coworker':n.reg==='station'?'Chat with a commuter':'Chat with an attendee'),act:()=>npcTalk(n),r:2,kind:'talk',col:'#9a98a6'});
  for(const i of INTS)if(i.reg===WD.reg){const lb=i.label();if(lb)L.push({x:i.x,z:i.z,y:i.y,h:i.h,label:lb,act:i.act,r:i.r})}
  // leads and activities that belong to the room you're standing in: offered just ahead of you, below anything nearer
  if(S.day>=1){const ar=areaAt(WD.reg,WD.x,WD.z,WD.y),fx=-Math.sin(WD.yaw),fz=-Math.cos(WD.yaw),px=WD.x+fx*1.9,pz=WD.z+fz*1.9;
@@ -15379,8 +15605,8 @@ function objective(){
  if(b){const st=beatStep(b),tg=beatTarget(b);o=Object.assign({t:st.t||b.t},tg||{})}
  else if(isFree()){const n=ROM.filter(sceneReady).length;o={t:`Free time: the ${SLOTN[S.slot].toLowerCase()} is yours. ${n?n+' '+(n>1?'people have':'person has')+' a scene for you (yellow on the minimap). ':''}Spend it with someone, on a lead, or at a talk. Or call it ${S.slot===5?'a night':'a '+SLOTN[S.slot].toLowerCase()} from your phone.`}}
  if(o&&o.reg&&o.reg!==WD.reg){
-  const H={f13:{reg:'f13',x:243,z:-9.4,y:0},conlift:{reg:'con',x:-212,z:-27,y:WD.y>8?L2:WD.y>3?L1:0},taxi:{reg:'con',x:-6,z:95.2,y:0},train:{reg:'station',x:734,z:4.4,y:0},stationexit:{reg:'station',x:736,z:46.6,y:0},homedoor:{reg:'home',x:-302.6,z:10.9,y:0},officelift:{reg:'office',x:497.7,z:12,y:0}};
-  const via={con:{f13:'conlift',station:'taxi',home:'taxi',office:'taxi'},f13:{con:'f13',station:'f13',home:'f13',office:'f13'},station:{con:'train',home:'train',office:'train',f13:'train'},home:{station:'homedoor',con:'homedoor',f13:'homedoor',office:'homedoor'},office:{station:'officelift',con:'officelift',home:'officelift',f13:'officelift'}}[WD.reg];
+  const H={f13:{reg:'f13',x:243,z:-9.4,y:0},conlift:{reg:'con',x:-212,z:-27,y:WD.y>8?L2:WD.y>3?L1:0},taxi:{reg:'con',x:-136,z:98.6,y:0},train:{reg:'station',x:734,z:4.4,y:0},stationexit:{reg:'station',x:736,z:46.6,y:0},homedoor:{reg:'home',x:-302.6,z:10.9,y:0},officelift:{reg:'office',x:497.7,z:12,y:0}};
+  const via={con:{f13:'conlift',station:'taxi',home:'taxi',office:'taxi'},f13:{con:'f13',station:'f13',home:'f13',office:'f13'},station:{con:'train',home:'stationexit',office:'stationexit',f13:'train'},train:{},home:{station:'homedoor',con:'homedoor',f13:'homedoor',office:'homedoor'},office:{station:'officelift',con:'officelift',home:'officelift',f13:'officelift'}}[WD.reg];
   const k=via&&via[o.reg];if(k)o=Object.assign({},o,H[k],{far:1})}
  return o;
 }
@@ -15401,7 +15627,7 @@ const TODP=[
  {hz:[.96,.5,.36],zn:[.2,.14,.38],st:.25,fog:[.42,.26,.3],amb:[.46,.32,.34],sun:1.8,inside:1.1},
  {hz:[.1,.06,.16],zn:[.012,.012,.05],st:1,fog:[.1,.06,.16],amb:[.3,.3,.35],sun:1,inside:1},
  {hz:[.06,.04,.1],zn:[.008,.008,.03],st:1,fog:[.06,.04,.1],amb:[.24,.24,.3],sun:.85,inside:.95}];
-function todNow(){if(TT.on)return TODP[TITLESHOTS[TT.i].slot];if(!S||S.day<1||!['con','f13','station'].includes(WD.reg))return null;return TODP[clamp(S.slot,0,5)]}
+function todNow(){if(TT.on)return TODP[TITLESHOTS[TT.i].slot];if(!S||S.day<1||!['con','f13','station','train'].includes(WD.reg))return null;return TODP[clamp(S.slot,0,5)]}
 function render(dt){
  const T=G.T,r=G.r,cv=G.cv,cam=G.cam;
  // resolution (adaptive)
@@ -15410,7 +15636,7 @@ function render(dt){
  if(key!==G.sizeKey){G.sizeKey=key;r.setPixelRatio(dpr);r.setSize(w,h,false);if(G.composer){G.composer.setPixelRatio(dpr);G.composer.setSize(w,h)}if(G.fxaa)G.fxaa.material.uniforms.resolution.value.set(1/(w*dpr),1/(h*dpr));cam.aspect=w/h}
  for(const k in G.regions){const o=G.regions[k].obj;if(o)o.visible=k===WD.reg}
  // atmosphere: fog + hemisphere ease towards the current area's values
- const aK=TT.on?TITLESHOTS[TT.i].area:WD.cut&&WD.cut.C.area&&cutOn()?WD.cut.C.area:WD.area,R=G.regions[WD.reg],A=aK&&AREAS[aK],TOD=todNow();const fog=(TOD&&A&&A.out)?TOD.fog:(A&&A.fog)||R.fog,fr=(A&&A.fr)||R.fr,amb=(TOD&&A&&A.out)?TOD.amb:(A&&A.amb)||R.amb||[.3,.3,.35];
+ const aK=TT.on?TITLESHOTS[TT.i].area:WD.cut&&WD.cut.C.area&&cutOn()?WD.cut.C.area:WD.area,R=G.regions[WD.reg],A=aK&&AREAS[aK],TOD=todNow();const fog=(TOD&&A&&(A.out||WD.reg==='train'))?TOD.fog:(A&&A.fog)||R.fog,fr=(A&&A.fr)||R.fr,amb=(TOD&&A&&A.out)?TOD.amb:(A&&A.amb)||R.amb||[.3,.3,.35];
  const ease=G.atmoInit?Math.min(1,dt*2.5):1;G.atmoInit=true;
  G.fogT=G.fogT||new T.Color();G.fogT.setRGB(fog[0],fog[1],fog[2],T.SRGBColorSpace);G.fog.color.lerp(G.fogT,ease);
  G.fog.near+=(fr[0]-G.fog.near)*ease;G.fog.far+=(fr[1]-G.fog.far)*ease;
@@ -15431,11 +15657,12 @@ function render(dt){
  cam.fov=vf*180/Math.PI;cam.far=(FAR[WD.reg]||180)+40;cam.updateProjectionMatrix();
  if(TT.on&&$('title').classList.contains('on')){const p=titleCam(cam);zoneCull(WD.reg,p[0],p[1],p[2])}
  else if(WD.cut&&cutOn()){const p=cutCam(cam);zoneCull(WD.reg,p[0],p[1],p[2])}
- else{cam.position.set(WD.x,WD.eye+bob,WD.z);cam.rotation.set(WD.pit,WD.yaw,0);zoneCull(WD.reg,WD.x,WD.eye,WD.z)}
+ else{cam.position.set(WD.x,WD.eye+bob,WD.z);cam.rotation.set(WD.pit,WD.yaw,0);if(typeof trainSway==='function')trainSway(cam);zoneCull(WD.reg,WD.x,WD.eye,WD.z)}
  G.sky.position.copy(cam.position);const su=G.sky.material.uniforms;su.t.value=performance.now()/1000;
  const tod=todNow();if(tod){su.hz.value.setRGB(...tod.hz);su.zn.value.setRGB(...tod.zn);su.st.value=tod.st}
  else{su.hz.value.copy(G.fog.color);if(R.day){su.zn.value.setRGB(.12,.3,.75);su.st.value=0}else{su.zn.value.setRGB(.012,.012,.05);su.st.value=1}}
  updLights(dt);
+ if(typeof trainTick==='function'&&!TT.on)trainTick(dt);
  updSprites(dt);if(!TT.on)updBeacon();else{for(const id of['wpG','wpP'])if($(id))$(id).style.display='none';if(G.beacon){G.beacon.visible=false;G.pinB.visible=false}}vfxTick();
  G.revZOn=G.revZ;try{if(G.composer)G.composer.render(dt);else r.render(G.scene,cam)}finally{G.revZOn=false}
 }
@@ -15631,7 +15858,7 @@ function initWorld(cb){
  // lighting is baked per place, the first time you go there (and cached after): warm up the place the latest save is in
  G.baked=bakeOK();setQuality(G.q);finishInit();
  let pre=$('title').classList.contains('on')&&!window.__test?'con':'home';if(pre==='home')try{const a=readSlot('auto');if(a&&a.pos&&G.regions[a.pos[0]]&&(a.mapv||0)>=3)pre=a.pos[0];else if(a&&a.ch>=1)pre='con'}catch(e){}
- setTimeout(()=>{if(!G.lmBusy&&!(S&&S.inWorld))regionNeed(pre,false)},50);
+ if(!/[?&]nopre\b/.test(location.search))setTimeout(()=>{if(!G.lmBusy&&!(S&&S.inWorld))regionNeed(pre,false)},50);
  return G.ok;
 }
 function finishInit(){G.ready=true;loadUI(false);const w=G.waiters||[];G.waiters=[];for(const f of w)f()}
@@ -15639,8 +15866,8 @@ function loadUI(on){const e=$('loading');if(e)e.classList.toggle('on',!!on&&!G.r
 try{document.fonts&&document.fonts.load('20px VT323')}catch(e){}
 
 /* ============ WORLD CONTENT: who stands where, what you can use, what's locked ============ */
-const BG2AREA={train:'platform',con:'foyer',lock:'lockpick',ctf:'ctf',soc:'soc',stream:'creator',hotel:'room1337',roof:'plantdeck',stage:'hallA',keynote:'hallA',vendor:'vendor',flat:'flat',bakery:'bakery',cos:'cosplay',chill:'lounge',bar:'bar',lobby:'lobby',office:'office'};
-const FAR={home:330,con:1400,f13:900,office:440,station:600};
+const BG2AREA={carriage:'coachB',train:'platform',con:'foyer',lock:'lockpick',ctf:'ctf',soc:'soc',stream:'creator',hotel:'room1337',roof:'plantdeck',stage:'hallA',keynote:'hallA',vendor:'vendor',flat:'flat',bakery:'bakery',cos:'cosplay',chill:'lounge',bar:'bar',lobby:'lobby',office:'office'};
+const FAR={home:330,con:1400,f13:900,office:440,station:600,train:820};
 /* Day 1 onboarding steps: badge → opening ceremony → hotel check-in → drop your bag → (the whole con) */
 const d1=k=>S&&(S.ch>1||(S.ch===1&&!!S.f['d1_'+k]));
 const onboarding=()=>S&&(S.ch===0||(S.ch===1&&!S.f.d1_room));
@@ -15704,6 +15931,7 @@ const ROLELINES={
  Doorman:['Welcome to the hotel. Please don\'t hack the revolving door. Somebody tried yesterday.','Taxis to the left, hackers to the right. Mostly hackers.'],
  Security:['Badge?','We\'ve had the Lumen people in here twice asking for camera footage. Twice. Without a warrant. Weird, that.'],
  Engineer:['We\'re watching every packet on the con network. Not reading them. Watching. There\'s a difference.','Someone\'s been running a rogue AP since Friday. We see it. We can\'t find it. It\'s killing me.'],
+ Passenger:['Sorry, is this seat taken? It is. By my bag. My bag has a ticket.','I come this way every day. The tunnel bit is my favourite. Don\'t tell anyone.','The Wi-Fi on here asks for your date of birth. For Wi-Fi. I said I was born in 1066.','Next stop\'s mine. Or the one after. I\'ll know it when I see the SafeSphere billboard.','Did you see the graffiti on the cutting wall? "whisper was here". It\'s everywhere this week.'],
  Commuter:['Platform 4. Conference quarter. Half this train is in hoodies.','Is everyone on this train going to that hacker thing? I just want to get to work.'],
  Coworker:['Is it Friday yet? It\'s Monday. Oh no.','Gary bought eleven gift cards. Eleven.','Linda says you\'re "the IT one". I said we know.'],
  Partygoer:['WELCOME TO 1336. We ordered fries six hours ago. We have since ordered more fries.','Somebody brought a soldering iron to a party. That somebody is me.','Don\'t mind us. We\'re reverse-engineering the TV. The TV is winning.']
@@ -15737,7 +15965,7 @@ function genCrowd(){
  R('Receptionist','con',-222.6,18,0,'lobby',4);R('Receptionist','con',-222.6,27,0,'lobby',6);R('Barista','con',-186,43.6,0,'cafe',1);R('Security','con',-96,-92.4,0,'security');
  R('Engineer','con',-55,6.6,BY,'noc',0);R('Engineer','con',-37,6.6,BY,'noc',2);
  for(const[x,z]of[[260,17],[262.6,17.4],[260.2,17.2],[263,14.6]])R('Partygoer','f13',x,z,0,'room1336',(x*7|0)%7);
- R('Commuter','station',727,9,0,'platform',2);R('Commuter','station',744,13,0,'platform',5);R('Coworker','office',502.6,1.7,0,'office',4);
+ R('Commuter','station',727,9,0,'platform',2);{const X=TRN.x,[a0,a1]=TRN.cars[0],[b0,b1]=TRN.cars[1],[c0,c1]=TRN.cars[2];R('Passenger','train',X+.75,b0+1.1,0,'coachB',3);R('Passenger','train',X-.7,b1-1.6,0,'coachB',6);R('Passenger','train',X+.7,c0+1.6,0,'coachC',1);R('Passenger','train',X-.75,a1-1.2,0,'coachA',4)}R('Commuter','station',744,13,0,'platform',5);R('Coworker','office',502.6,1.7,0,'office',4);
 }
 /* ---------------- what's open: the con and the hotel open up as the story needs them, so the first days stay small ----------------
    Each entry: areas, when they open, what you're told if you try earlier. Areas not listed are always open. */
@@ -15861,14 +16089,29 @@ function placeWorld(){
  int('office',508,-3.25,()=>'Look out of the window',N1('The city, grey and busy. Somewhere out there, four thousand hackers are packing hoodies. In two weeks you\'ll be one of them.'));
  /* ---- station ---- */
  int('station',734,4.4,()=>'Board the train',()=>trainMenu(),{r:2.6});
- int('station',736,46.6,()=>'Exit · taxi rank',()=>{if(curBeat()&&curBeat().id==='d1_station')return run([N('Your train\'s on Platform 4. You\'ve checked three times. You check a fourth time.')],hub);run([N('The taxi rank. Where to?'),C({t:'The Halcyon and the con',if:()=>S.day>=1&&f('d1_badge'),then:()=>{fadeTp(()=>{teleportArea('plaza');run([N('Twenty minutes later the taxi pulls up outside the Halcyon. The neon sign is still shouting.')],hub)});return[]}},{t:'Linden Street: home',then:()=>{fadeTp(()=>{teleportArea('bakery');run([N('Home. Linden Street smells of bread and diesel, the way it always has.')],hub)});return[]}},{t:'Not yet',then:[]})],hub)});
+ int('station',736,46.6,()=>'Way out · on foot',()=>{if(curBeat()&&curBeat().id==='d1_station')return run([N('Your train\'s on Platform 4. You\'ve checked three times. You check a fourth time.')],hub);run([N('Out through the portals. The taxis here are all booked for the con. Your feet aren\'t.'),C({t:'Walk home to Linden Street',hint:'Ten minutes',then:()=>{fadeTp(()=>{teleportArea('bakery');run([N('Past the barber, past the bus stop that never has a bus, and Linden Street smells of bread and diesel, the way it always has.')],hub)});return[]}},{t:'Walk to Brindle & Co',hint:f('office_open')||leadOpen('office')?'Five minutes':'Linda made you promise',if:()=>f('office_open')||leadOpen('office'),then:()=>{ach('office');fadeTp(()=>{teleportArea('office');run([N('Five minutes and a revolving door. The printer senses you immediately.')],hub)});return[]}},{t:'Stay in the station',then:[]})],hub)});
  int('station',736,23.4,()=>'Read the departures board',N1('09:12 CONFERENCE QUARTER · HALCYON — PLATFORM 4 — ON TIME. A man next to you photographs the board, then his ticket, then his face. Then he posts all three.'));
  int('station',764.8,26,()=>'Pasty Palace',N1('"Cheese and onion, or cheese and onion?" You pick cheese and onion. It\'s the right choice.'));
  int('station',701.5,35.7,()=>'Ticket machine',N1('It offers to email you a receipt, text you a receipt, and "remember your card for next time". You pay with cash. The machine seems hurt.'));
  int('station',764.8,35.2,()=>'Platform Coffee',N1('"Flat white?" You nod. The barista draws a heart in the foam, then, after a long look at you, turns it into a padlock.'));
  int('station',708,43.6,()=>'Play the station piano',N1('You play the four notes of the only song you know. A man in a suit stops, listens, and puts a pound in a cup that isn\'t there. Then he catches the 09:20.'));
+ /* ---- on the train ---- */
+ {const X=TRN.x,CR=TRN.cars;
+  const VIEW={tun:['Black. Brick going by too fast to see, and your own face in the glass, lit from above, looking tired. Then, all at once, daylight.','The tunnel. The lights in the coach seem brighter. Somebody\'s phone loses signal and they say "no" out loud, to nobody.'],
+   city:['The backs of the city: fire escapes, a rooftop garden, a man on a balcony in his dressing gown, a wall that says "whisper was here" in letters a metre high.','Towers sliding past. In one window a whole office is in a meeting. In the one above, someone is asleep on a sofa. You wonder which floor you\'d pick.','A SafeSphere billboard. Someone has added "FOREVER IS A LONG TIME" under the slogan. It\'s the third one you\'ve seen today.'],
+   sub:['Back gardens, one after another: a trampoline, a shed, a washing line, a cat watching the train with total contempt.','Terraces in a long row, every kitchen window a little different. A kid on a wall waves. You wave back before you can stop yourself.'],
+   field:['Fields. Actual fields. A horse looks up, decides you\'re not interesting, and looks down again.','Green, then more green, then a pylon, then green. Your phone has one bar. It feels like a holiday.'],
+   ind:['Warehouses, yards, a stack of shipping containers painted like a rainbow somebody gave up on. A forklift goes round in a slow circle.','The edge of the city: scrapyards, a depot full of buses, a billboard for a law firm you would never hire.']};
+  const look=()=>{const p=(((TRV.s||0)%TRV.L)+TRV.L)%TRV.L,seg=TRV.inTun?'tun':p<500?'city':p<1000?'sub':p<1400?'field':'ind';run([N(pick(VIEW[seg]))],hub)};
+  for(const[k,[z0,z1]]of CR.entries()){for(const[x,z]of[[X-.95,z0+6.7],[X+.95,z0+12.7],[X-.95,z1-6.3]])int('train',x,z,()=>'Look out of the window',look,{r:1.3})}
+  int('train',X+.3,CR[1][0]+4.7,()=>'Toilet',()=>run([N(pick(['VACANT, says the light. You open the door. You close the door. You can hold on until the Conference Quarter.','The toilet. The button to lock the door is the size of a dinner plate and you still don\'t trust it.']))],hub),{r:1.2});
+  for(const[z0]of CR)int('train',X+.9,z0+3.1,()=>'Free Wi-Fi',()=>run([N('FREE WI-FI · powered by Lumen SafeSphere. Just log in with your socials!'),C({t:'Connect',hint:'Exposure +6',then:()=>[FX({exp:6}),N('It wants your name, your email, your date of birth and access to your contacts "to personalise your journey". You give it a fake birthday. It asks again. You disconnect, but you\'ve already given it your phone\'s name. Which is your name.')]},{t:'Use your phone\'s data like a normal paranoid person',then:[N('One bar. It\'ll do.')]})],hub),{r:1.3});
+  int('train',X,CR[0][0]+.6,()=>'Driver\'s cab',N1('DRIVER ONLY. You knock, just to see. Nothing. Somewhere behind the door a radio crackles and a voice says something about signals and Linden Street.'),{r:1.3});
+  int('train',X,CR[2][1]-.6,()=>'Rear cab',N1('The back cab, locked and dark. Through the little window: the track unspooling behind you, silver, getting smaller and smaller.'),{r:1.3});
+  int('train',X-1.1,CR[0][0]+.6,()=>'Emergency alarm',N1('PULL IN AN EMERGENCY. PENALTY FOR IMPROPER USE £1000. You put your hands in your pockets, where they can\'t get any ideas.'),{r:1.1});
+  int('train',X-.9,CR[2][1]-9.3,()=>'Read the newspaper someone left',N1('THE DAILY BYTE. "LUMEN VALUED AT £40 BILLION". Page 3: a profile of Victor Hale, photographed in front of a bookshelf he has definitely never read. Page 9: the crossword, half done in pen, all wrong.'),{r:1.4})}
  /* ---- plaza ---- */
- int('con',-6,95.2,()=>'Taxi rank',()=>run([N('A taxi driver looks up from his phone. "Station?"'),C({t:'"Central Station, please."',then:()=>{fadeTp(()=>{teleportArea('station');run([N('The station. Commuters, pigeons, and a departures board that still has the 09:12 to the con on it.')],hub)});return[]}},{t:'"Not yet."',then:[]})],hub));
+ int('con',-136,98.6,()=>'Taxi rank',()=>{if(!G.ok||window.__test)return run([N('A taxi driver looks up from his phone. "Station?"'),C({t:'"Central Station, please."',then:()=>{taxiGo();return[]}},{t:'"Not yet."',then:[]})],hub);taxiRank()});
  int('con',-37,81.6,()=>'Look at the big sign',N1('CTRL+ALT+CON, in letters taller than you. Somebody has stuck a tiny sticker over the Lumen logo at the bottom. It says "no".'));
  int('con',-20,73.8,()=>'Coffee cart',N1('"Bean There". The barista has a badge, a beard and a QR code tattoo. "It goes to my mum\'s bakery," he says. You don\'t scan it. He respects that.'));
  int('con',24,97.6,()=>'Bus stop',N1('Bus 42. The timetable is a Lumen ad. "SafeSphere: Privacy On The Move." Someone has added, in marker: "on the move to where?"'));
@@ -16020,13 +16263,10 @@ function serviceLift(){
   {t:'Stay here',then:[]})],hub);
 }
 function trainMenu(){
- if(stepIs('train'))return stepGo();
  if(curBeat()&&curBeat().id==='d1_station')return run([N('Not that train. Yours is the 16:12 to the Conference Quarter, and something tells you to look around the concourse first.')],hub);
- run([{hide:1},N('The train hums at Platform 4. The doors chime. A screen above them lists the stops.'),C(
-  {t:'Conference Quarter · the Halcyon and the con',if:()=>S.day>=1,then:()=>{ach('train');fadeTp(()=>{teleportArea('plaza');run([N('Twenty minutes, and the doors open onto the Conference Quarter. The Halcyon\'s neon is still shouting.')],hub)});return[]}},
-  {t:'Linden Street · home',then:()=>{ach('train');fadeTp(()=>{teleportArea('bakery');run([N('Two stops. Linden Street smells of bread and diesel, the way it always has.')],hub)});return[]}},
-  {t:'Brindle & Co · work',then:()=>{if(!(f('office_open')||leadOpen('office')))return[N('Linda made you promise not to come in this week. Linda would be thrilled to see you, which is exactly the problem.')];ach('train');ach('office');fadeTp(()=>{teleportArea('office');run([N('The office, on a weekday you\'re supposed to be off. The printer senses you immediately.')],hub)});return[]}},
-  {t:'Not yet',then:[]})],hub);
+ // the departures board: pick where to go, board, and ride (the story's train journeys happen on board)
+ if(!G.ok||window.__test){if(stepIs('train'))return stepGo();return run([N('The train hums at Platform 4.'),C({t:'Conference Quarter',if:()=>S.day>=1,then:()=>{tripStart('con');return[]}},{t:'Linden Street',then:()=>{tripStart('home');return[]}},{t:'Not yet',then:[]})],hub)}
+ stationBoard();
 }
 function fadeTp(fn){if(window.__test){fn();WD.area=null;return}const f=$('fade');sfx('whoosh');f.classList.add('on');setTimeout(()=>{fn();WD.area=null;G.forceFrame=true;setTimeout(()=>f.classList.remove('on'),160)},300)}
 /* ---------- characters ---------- */
@@ -16304,7 +16544,7 @@ function cutCam(cam){const c=WD.cut,now=performance.now(),src=c.sub||c,t=(now-sr
  c.pose=p;camApply(cam,p);return p.eye}
 /* ---------- the title screen's camera ---------- */
 const TT={on:false,i:0,t0:0,cast:{}};
-function titleCamOn(on){TT.on=!!on&&G.ok;if(TT.on&&!TT.t0){TT.i=Math.floor(Math.random()*TITLESHOTS.length);TT.t0=performance.now();titleShotIn()}if(!TT.on)TT.t0=0}
+function titleCamOn(on){TT.on=!!on&&G.ok&&!/[?&]nopre\b/.test(location.search);if(TT.on&&!TT.t0){TT.i=Math.floor(Math.random()*TITLESHOTS.length);TT.t0=performance.now();titleShotIn()}if(!TT.on)TT.t0=0}
 function titleNeed(){if(typeof regionNeed==='function')regionNeed('con',false)}
 function titleShotIn(){const s=TITLESHOTS[TT.i];if(typeof titlePlace==='function')titlePlace(s.area,s.slot);TT.cast={};for(const c of s.cast||[])TT.cast[c[0]]=c.slice(1);WD.reg='con';WD.area=s.area;G.atmoInit=false;const f=$('tfade');if(f){f.classList.remove('on')}}
 function titleCam(cam){const s=TITLESHOTS[TT.i],now=performance.now(),t=(now-TT.t0)/1000,D=movesDur(s.moves);
@@ -16312,6 +16552,215 @@ function titleCam(cam){const s=TITLESHOTS[TT.i],now=performance.now(),t=(now-TT.
  const f=$('tfade');if(f)f.classList.toggle('on',t>D-1.1);
  if(t>D){TT.i=(TT.i+1)%TITLESHOTS.length;TT.t0=now;titleShotIn();return titleCam(cam)}
  const p=camBreath(movesPose(s.moves,t),now/1000,.8);camApply(cam,p);WD.x=p.eye[0];WD.z=p.eye[2];return p.eye}
+
+/* ============ THE TRAIN, MOVING ============
+   The coaches stand still (08p_train.js); everything outside slides past at ~90 km/h: the ground, the next track,
+   catenary masts and wires, fences, trees, back gardens and terraces, a city of towers, warehouses, billboards,
+   signals, road bridges. Every so often a tunnel swallows the train, or another train roars past the other way.
+   All of it is built here at runtime, unlit (shading painted in), tinted by the time of day, and lit windows come on
+   at dusk. The camera sways and dips over the rail joints.
+   Also here: the 16:12 at Platform 4 (a model that can pull out of the station for the departure cutscene), the
+   passengers in the seats, the information screens, and the trip itself: board, ride, arrive. */
+const TRV={v:24,s:0,L:1600,zc:36,root:null,inst:[],mats:[],tun:null,pass:null,pis:[],sit:[],next:{tun:25,pass:12},stn:null};
+/* ---- little builders ---- */
+function cTex(w,h,paint,rx,ry){const T=G.T,c=document.createElement('canvas');c.width=w;c.height=h;paint(c.getContext('2d'),w,h);const t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;
+ if(rx||ry){t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.set(rx||1,ry||1)}t.anisotropy=G.aniso||4;return t}
+function bMat(map,col,o){const T=G.T;o=o||{};const m=new T.MeshBasicMaterial(Object.assign({map:map||null,color:new T.Color(col||'#ffffff'),vertexColors:!!o.vc,transparent:!!o.tr,alphaTest:o.at||0,side:o.ds?T.DoubleSide:T.FrontSide,depthWrite:o.tr?false:true,fog:true},o.extra||{}));
+ m.userData.base=m.color.clone();m.userData.glow=!!o.glow;TRV.mats.push(m);return m}
+/* a box sitting on y=0, shaded by face (sun from the upper left), UVs scaled to metres/tile */
+function sGeo(w,h,d,tile){const T=G.T,g=new T.BoxGeometry(w,h,d);g.translate(0,h/2,0);const n=g.attributes.normal,uv=g.attributes.uv,col=[];
+ for(let i=0;i<n.count;i++){const nx=n.getX(i),ny=n.getY(i),nz=n.getZ(i);const k=ny>.5?1:ny<-.5?.35:nx>.5?.86:nx<-.5?.66:nz>.5?.78:.72;col.push(k,k,k);
+  if(tile){const fu=Math.abs(nx)>.5?d:w,fv=Math.abs(ny)>.5?d:h;uv.setXY(i,uv.getX(i)*fu/tile[0],uv.getY(i)*fv/tile[1])}}
+ g.setAttribute('color',new T.Float32BufferAttribute(col,3));return g}
+function roofGeo(w,h,d){const T=G.T,g=new T.BufferGeometry(),hw=w/2,hd=d/2;
+ const P=[[-hw,0,-hd],[hw,0,-hd],[0,h,-hd],[-hw,0,hd],[hw,0,hd],[0,h,hd]];const v=[],c=[],u=[];
+ const tri=(a,b,cc,k,uv)=>{for(const i of[a,b,cc])v.push(...P[i]);for(let j=0;j<3;j++)c.push(k,k,k);u.push(...uv)};
+ tri(0,2,1,.7,[0,0,.5,1,1,0]);tri(3,4,5,.7,[0,0,1,0,.5,1]);
+ for(const[a,b,cc,dd,k]of[[0,3,5,2,.95],[1,2,5,4,.62]]){tri(a,b,cc,k,[0,0,d/3,0,d/3,1]);tri(a,cc,dd,k,[0,0,d/3,1,0,1])}
+ g.setAttribute('position',new T.Float32BufferAttribute(v,3));g.setAttribute('color',new T.Float32BufferAttribute(c,3));g.setAttribute('uv',new T.Float32BufferAttribute(u,2));return g}
+function treeGeo(){const T=G.T,g=new T.BufferGeometry(),v=[],u=[],c=[];
+ for(const a of[0,Math.PI/2]){const cx=Math.cos(a)*1.6,cz=Math.sin(a)*1.6;const q=[[-cx,0,-cz],[cx,0,cz],[cx,5,cz],[-cx,5,-cz]];for(const i of[0,1,2,0,2,3])v.push(...q[i]);u.push(0,0,1,0,1,1,0,0,1,1,0,1);for(let j=0;j<6;j++)c.push(1,1,1)}
+ g.setAttribute('position',new T.Float32BufferAttribute(v,3));g.setAttribute('uv',new T.Float32BufferAttribute(u,2));g.setAttribute('color',new T.Float32BufferAttribute(c,3));return g}
+/* a pool of the same thing, scattered along the loop; each frame they slide on by the distance travelled */
+function pool(geo,mat,items,parent){const T=G.T,m=new T.InstancedMesh(geo,mat,items.length);m.instanceMatrix.setUsage(T.DynamicDrawUsage);m.frustumCulled=false;
+ if(items.some(i=>i.c)){for(let i=0;i<items.length;i++)m.setColorAt(i,new T.Color(items[i].c||'#ffffff'))}
+ (parent||TRV.root).add(m);const P={m,items};TRV.inst.push(P);return P}
+const _o3={};
+function poolTick(P,s){const T=G.T,o=_o3.o||(_o3.o=new T.Object3D()),L=TRV.L;
+ for(let i=0;i<P.items.length;i++){const it=P.items[i];const z=TRV.zc-L/2+(((it.z+s)%L)+L)%L;o.position.set(it.x,it.y||0,z);o.rotation.set(0,it.r||0,0);o.scale.set(it.sx||1,it.sy||1,it.sz||1);o.updateMatrix();P.m.setMatrixAt(i,o.matrix)}
+ P.m.instanceMatrix.needsUpdate=true}
+/* ---- textures ---- */
+function trvTextures(){const R=Math.random;
+ const T={};
+ T.grass=cTex(256,256,(c,w,h)=>{c.fillStyle='#5a7a3a';c.fillRect(0,0,w,h);for(let i=0;i<5;i++){c.fillStyle=['#6a8a42','#4e6e34','#7a8a48','#5e7e3e','#8a9a5a'][i];c.fillRect(0,i*51,w,51)}for(let i=0;i<3000;i++){c.fillStyle=R()<.5?'#3e5a2a':'#7a9a4a';c.fillRect(R()*w,R()*h,2,2)}c.fillStyle='#4a3a2a55';for(let x=0;x<w;x+=64)c.fillRect(x,0,2,h)},12,12);
+ T.ballast=cTex(128,128,(c,w,h)=>{c.fillStyle='#6a645c';c.fillRect(0,0,w,h);for(let i=0;i<2600;i++){const v=60+R()*80|0;c.fillStyle=`rgb(${v},${v-4},${v-10})`;c.fillRect(R()*w,R()*h,2+R()*2,2+R()*2)}},4,200);
+ T.sleep=cTex(64,128,(c,w,h)=>{c.fillStyle='#6a645c';c.fillRect(0,0,w,h);for(let i=0;i<900;i++){const v=70+R()*70|0;c.fillStyle=`rgb(${v},${v-4},${v-10})`;c.fillRect(R()*w,R()*h,2,2)}for(let y=0;y<h;y+=32){c.fillStyle='#4a3e32';c.fillRect(4,y+6,w-8,14)}},1,1);
+ T.house=cTex(256,256,(c,w,h)=>{c.fillStyle='#a8644a';c.fillRect(0,0,w,h);for(let y=0;y<h;y+=8)for(let x=(y/8)%2*8;x<w;x+=16){c.fillStyle=R()<.5?'#b06c50':'#984e3a';c.fillRect(x,y,15,7)}
+  for(const[x,y]of[[30,40],[150,40],[30,150],[150,150]]){c.fillStyle='#e8e4dc';c.fillRect(x-4,y-4,76,72);c.fillStyle='#2a3440';c.fillRect(x,y,68,64);c.fillStyle='#3a4a5a';c.fillRect(x,y,68,20);c.fillStyle='#e8e4dc';c.fillRect(x+32,y,4,64)}});
+ T.houseLit=cTex(256,256,(c,w,h)=>{for(const[x,y]of[[30,40],[150,40],[30,150],[150,150]])if(R()<.6){c.fillStyle=R()<.5?'#ffcf80':'#ffe2b0';c.fillRect(x,y,68,64)}});
+ T.roof=cTex(128,128,(c,w,h)=>{c.fillStyle='#4a4a52';c.fillRect(0,0,w,h);for(let y=0;y<h;y+=10){c.fillStyle='#3a3a42';c.fillRect(0,y,w,2)}for(let i=0;i<600;i++){c.fillStyle='#5a5a62';c.fillRect(R()*w,R()*h,3,2)}},1,1);
+ T.tower=cTex(256,512,(c,w,h)=>{c.fillStyle='#8a8e98';c.fillRect(0,0,w,h);for(let y=8;y<h;y+=24)for(let x=8;x<w;x+=24){c.fillStyle=R()<.12?'#c8d4e0':'#3a4656';c.fillRect(x,y,16,14)}},1,1);
+ T.towerLit=cTex(256,512,(c,w,h)=>{for(let y=8;y<h;y+=24)for(let x=8;x<w;x+=24)if(R()<.35){c.fillStyle=R()<.5?'#ffd89a':'#cfe6ff';c.fillRect(x,y,16,14)}},1,1);
+ T.ware=cTex(256,128,(c,w,h)=>{c.fillStyle='#8a9098';c.fillRect(0,0,w,h);for(let x=0;x<w;x+=6){c.fillStyle='#727880';c.fillRect(x,0,2,h)}c.fillStyle='#c0304a';c.fillRect(0,0,w,10);c.fillStyle='#3a3e46';c.fillRect(100,60,56,68)},1,1);
+ T.tree=cTex(128,128,(c,w,h)=>{c.fillStyle='#4a3020';c.fillRect(60,70,8,58);for(let i=0;i<260;i++){const a=R()*Math.PI*2,r=R()*50;c.fillStyle=['#3e6a2e','#4e7e36','#2e5a26','#6a8e3e'][(R()*4)|0];c.beginPath();c.arc(64+Math.cos(a)*r,56+Math.sin(a)*r*.85,5+R()*6,0,7);c.fill()}});
+ T.fence=cTex(256,64,(c,w,h)=>{c.strokeStyle='#5a5e66';c.lineWidth=2;for(let y=14;y<h;y+=14){c.beginPath();c.moveTo(0,y);c.lineTo(w,y);c.stroke()}c.fillStyle='#3a3e46';for(let x=0;x<w;x+=64)c.fillRect(x,0,5,h)},1,1);
+ T.brick=cTex(128,128,(c,w,h)=>{c.fillStyle='#7a4a3a';c.fillRect(0,0,w,h);for(let y=0;y<h;y+=8)for(let x=(y/8)%2*8;x<w;x+=16){c.fillStyle=R()<.5?'#8a5442':'#6a3e30';c.fillRect(x,y,15,7)}},1,1);
+ T.tunnel=cTex(128,128,(c,w,h)=>{c.fillStyle='#2a2422';c.fillRect(0,0,w,h);for(let y=0;y<h;y+=8)for(let x=(y/8)%2*8;x<w;x+=16){c.fillStyle=R()<.5?'#332a26':'#221c1a';c.fillRect(x,y,15,7)}for(let i=0;i<40;i++){c.fillStyle='#ffffff10';c.fillRect(R()*w,R()*h,1,20)}},1,1);
+ T.board=cTex(512,256,(c,w,h)=>{const g=c.createLinearGradient(0,0,w,h);g.addColorStop(0,'#1a3a7a');g.addColorStop(1,'#2a7ac0');c.fillStyle=g;c.fillRect(0,0,w,h);c.fillStyle='#fff';c.font='bold 64px sans-serif';c.fillText('SafeSphere',40,110);c.font='28px sans-serif';c.fillText('Your shield on the internet. Free forever.',40,160);
+  c.save();c.translate(300,214);c.rotate(-.04);c.fillStyle='#ff5d73';c.font='bold 30px sans-serif';c.fillText('FOREVER IS A LONG TIME',-120,0);c.restore()});
+ T.board2=cTex(512,256,(c,w,h)=>{c.fillStyle='#1b1026';c.fillRect(0,0,w,h);c.fillStyle='#ff5d73';c.font='bold 72px Chakra Petch, sans-serif';c.fillText('CTRL+ALT+CON',30,120);c.fillStyle='#8affc1';c.font='32px VT323, monospace';c.fillText('#20 · THIS WEEK · CONFERENCE QUARTER',32,180)});
+ T.board3=cTex(512,256,(c,w,h)=>{c.fillStyle='#f4efe6';c.fillRect(0,0,w,h);c.fillStyle='#1b1026';c.font='bold 58px Georgia, serif';c.fillText('Brindle & Co',40,110);c.font='italic 28px Georgia, serif';c.fillText('Insurance you\'ll never need to think about.',40,170)});
+ T.trainSide=cTex(1024,128,(c,w,h)=>{c.fillStyle='#e9ece8';c.fillRect(0,0,w,h);c.fillStyle='#1f8a8a';c.fillRect(0,h-34,w,14);for(let x=24;x<w-40;x+=62){c.fillStyle='#2a3440';c.fillRect(x,26,48,42)}c.fillStyle='#ffd166';for(const x of[240,760])c.fillRect(x,14,56,h-14)},1,1);
+ T.trainLit=cTex(1024,128,(c,w,h)=>{for(let x=24;x<w-40;x+=62){c.fillStyle='#fff1d6';c.fillRect(x,26,48,42)}},1,1);
+ T.wallPlain=cTex(256,128,(c,w,h)=>{c.fillStyle='#8a8a84';c.fillRect(0,0,w,h);for(let i=0;i<1500;i++){c.fillStyle=R()<.5?'#7a7a74':'#9a9a94';c.fillRect(R()*w,R()*h,3,2)}c.fillStyle='#6a6a64';for(let x=0;x<w;x+=64)c.fillRect(x,0,3,h)},1,1);
+ T.wall=cTex(512,128,(c,w,h)=>{c.fillStyle='#8a8a84';c.fillRect(0,0,w,h);for(let i=0;i<1500;i++){c.fillStyle=R()<.5?'#7a7a74':'#9a9a94';c.fillRect(R()*w,R()*h,3,2)}c.fillStyle='#ff5d73';c.font='bold 40px sans-serif';c.fillText('whisper was here',90,84);c.fillStyle='#8affc1';c.font='bold 20px sans-serif';c.fillText('FOREVER IS A LONG TIME',300,40)},1,1);
+ return T}
+/* ---------- the world outside ---------- */
+function trainSceneryBuild(){if(TRV.root||!G.ok)return;const T=G.T,X=TRN.x,TX=trvTextures(),L=TRV.L;TRV.tx=TX;const root=new T.Group();TRV.root=root;G.scene.add(root);
+ const r=(()=>{let s=4242;return()=>(s=(s*16807)%2147483647)/2147483647})();
+ const Y0=-1.25;
+ // ground: fields and verges, ballast under both tracks, the next track's sleepers, rails and wires that never end
+ const plane=(w,d,map,col,y,x)=>{const g=new T.PlaneGeometry(w,d);g.rotateX(-Math.PI/2);const m=new T.Mesh(g,bMat(map,col));m.position.set(x,y,TRV.zc);m.frustumCulled=false;root.add(m);return m};
+ TRV.scroll=[];const sc=(mesh,tile,axis)=>{TRV.scroll.push({t:mesh.material.map,tile,axis:axis||'y'});return mesh};
+ sc(plane(1800,1800,TX.grass,'#ffffff',Y0-.08,X),1800/12);
+ TX.ballast.repeat.set(4,1800/9);sc(plane(12,1800,TX.ballast,'#ffffff',Y0,X+2),9);
+ TX.sleep.repeat.set(1,1800/2.6);sc(plane(2.6,1800,TX.sleep,'#ffffff',Y0+.02,X+4.2),2.6);
+ const rail=bMat(null,'#8a8a90');for(const x of[X+4.2-.72,X+4.2+.72]){const m=new T.Mesh(sGeo(.07,.16,1800),rail);m.position.set(x,Y0+.03,TRV.zc);m.frustumCulled=false;root.add(m)}
+ const wire=bMat(null,'#2a2a30');for(const[x,y]of[[X,4.9],[X+4.2,4.9],[X,5.6],[X+4.2,5.6]]){const m=new T.Mesh(sGeo(.025,.025,1800),wire);m.position.set(x,y,TRV.zc);m.frustumCulled=false;root.add(m)}
+ // lineside fences (scrolling)
+ for(const x of[X-8,X+12]){const g=new T.PlaneGeometry(1800,1.4);g.rotateY(Math.PI/2);TX.fence.wrapS=T.RepeatWrapping;const f=TX.fence.clone();f.needsUpdate=true;f.wrapS=T.RepeatWrapping;f.repeat.set(1800/6,1);
+  const m=new T.Mesh(g,bMat(f,'#ffffff',{tr:true,at:.4,ds:true}));m.position.set(x,Y0+.7,TRV.zc);m.frustumCulled=false;root.add(m);TRV.scroll.push({t:f,tile:6,axis:'x'})}
+ // catenary masts every 60 m, both sides
+ {const g=sGeo(.25,6.2,.25),arm=sGeo(5.6,.14,.14);arm.translate(2.6,5.4,0);const mg=mergeG([g,arm]);const it=[];for(let z=0;z<L;z+=60){it.push({x:X-3.2,y:Y0,z});it.push({x:X+7.4,y:Y0,z:z+30,r:Math.PI})}pool(mg,bMat(null,'#7a8088',{vc:1}),it)}
+ // trees: thin along the line, thick in the fields
+ {const it=[];for(let i=0;i<420;i++){const side=r()<.5?-1:1,z=r()*L,field=z>1000&&z<1400,dx=field?14+r()*140:14+r()*40;const s=.8+r()*1.3;it.push({x:side<0?X-dx:X+5+dx,y:Y0,z,sx:s,sy:s*(.8+r()*.5),sz:s,r:r()*3})}pool(treeGeo(),bMat(TX.tree,'#ffffff',{at:.5,ds:true,vc:1}),it)}
+ // terraces: the backs of houses in the suburbs, with their roofs
+ {const it=[];for(let z=520;z<990;z+=7.2){for(const side of[-1,1]){if(r()<.12)continue;const dx=24+(side>0?6:0)+r()*2;it.push({x:side<0?X-dx:X+5+dx,y:Y0,z,c:['#ffffff','#e8d8c8','#d8c8c8','#f0e8d8','#c8b8a8'][(r()*5)|0]})}}
+  const hg=sGeo(9,6,7),rg=roofGeo(9.2,2.6,7.4);rg.translate(0,6,0);const H=pool(hg,bMat(TX.house,'#ffffff',{vc:1}),it);pool(rg,bMat(TX.roof,'#ffffff',{vc:1}),it);
+  const lit=pool(hg,bMat(TX.houseLit,'#ffffff',{tr:true,glow:1,extra:{blending:T.AdditiveBlending}}),it);lit.lit=1;
+  // sheds at the ends of the gardens
+  const sh=[];for(const h of it)if(r()<.4)sh.push({x:h.x+(h.x<X?8:-8),y:Y0,z:h.z+r()*2,c:['#6a8a5a','#8a6a4a','#5a6a8a'][(r()*3)|0]});pool(sGeo(2,2.1,2.4),bMat(null,'#ffffff',{vc:1}),sh)}
+ // the city: towers and blocks, near and far; a few big ones on the skyline
+ {const it=[];for(let i=0;i<120;i++){const z=r()*500,side=r()<.5?-1:1,dx=34+r()*200,w=14+r()*20,h=18+r()*(dx>120?90:50);it.push({x:side<0?X-dx:X+5+dx,y:Y0,z,sx:w/10,sy:h/10,sz:(10+r()*14)/10,c:['#ffffff','#d8dce8','#e8e0d8','#c8d0d8'][(r()*4)|0]})}
+  for(let i=0;i<40;i++){const z=r()*L,side=r()<.5?-1:1,dx=230+r()*55;it.push({x:side<0?X-dx:X+5+dx,y:Y0,z,sx:2+r()*2,sy:6+r()*10,sz:2+r()*2,c:'#c8ccd8'})}
+  const g=sGeo(10,10,10);pool(g,bMat(TX.tower,'#ffffff',{vc:1}),it);const l=pool(g,bMat(TX.towerLit,'#ffffff',{tr:true,glow:1,extra:{blending:T.AdditiveBlending}}),it);l.lit=1}
+ // warehouses and yards past the city
+ {const it=[];for(let i=0;i<26;i++){const z=1400+r()*200,side=r()<.5?-1:1,dx=26+r()*80;it.push({x:side<0?X-dx:X+5+dx,y:Y0,z,sx:2+r()*2.5,sy:.8+r()*.5,sz:1.5+r()*2})}pool(sGeo(12,8,12),bMat(TX.ware,'#ffffff',{vc:1}),it)}
+ // walls along the cutting through the city, here and there with graffiti
+ {const a=[],b=[];let i=0;for(let z=0;z<500;z+=16){for(const x of[X-7.2,X+11.4]){(i++%5===2?b:a).push({x,y:Y0,z:z+(x>X?8:0)})}}
+  pool(sGeo(.4,2.6,16,[8,2.6]),bMat(TX.wallPlain,'#ffffff',{vc:1}),a);pool(sGeo(.4,2.6,16,[16,2.6]),bMat(TX.wall,'#ffffff',{vc:1}),b)}
+ // the coach windows: almost clear, a faint cool tint, a little more reflective in the dark
+ {const gm=new T.MeshBasicMaterial({color:new T.Color('#c8d8e4'),transparent:true,opacity:.06,depthWrite:false,side:T.DoubleSide,fog:false});TRV.glass=gm;
+  for(const w of TRN.glaze){const g=new T.PlaneGeometry(w.z1-w.z0,w.y1-w.y0);g.rotateY(Math.PI/2);const m=new T.Mesh(g,gm);m.position.set(w.x,(w.y0+w.y1)/2,(w.z0+w.z1)/2);m.renderOrder=2;root.add(m)}}
+ // billboards facing the line
+ TRV.boards=[];for(const[z,side,t]of[[120,-1,TX.board],[700,1,TX.board2],[1250,-1,TX.board],[1480,1,TX.board3]]){const g=new T.Group();const fr=new T.Mesh(sGeo(9,4.6,.3),bMat(null,'#3a3a44',{vc:1}));fr.position.y=3.4;g.add(fr);
+  for(const px of[-3,3]){const p=new T.Mesh(sGeo(.3,3.4,.3),bMat(null,'#3a3a44',{vc:1}));p.position.x=px;g.add(p)}const face=new T.Mesh(new T.PlaneGeometry(8.6,4.2),bMat(t,'#ffffff'));face.position.set(0,5.7,.16);g.add(face);
+  g.rotation.y=side<0?Math.PI/2:-Math.PI/2;g.userData={x:side<0?X-18:X+22,z};g.position.y=Y0;root.add(g);TRV.boards.push(g)}
+ // signals by the line
+ {const it=[];for(let z=40;z<L;z+=200)it.push({x:X-2.2,y:Y0,z});const g=mergeG([sGeo(.18,4.2,.18),(()=>{const h=sGeo(.5,1,.4);h.translate(0,4.2,0);return h})()]);pool(g,bMat(null,'#2a2a30',{vc:1}),it);
+  const lg=sGeo(.22,.22,.05);lg.translate(0,4.85,-.22);const li=pool(lg,bMat(null,'#8affc1',{glow:1}),it);li.glow=1}
+ // road bridges over the line
+ TRV.bridges=[];for(const z of[300,1100]){const g=new T.Group(),bm=bMat(TX.brick,'#ffffff',{vc:1});const deck=new T.Mesh(sGeo(70,1.4,9),bm);deck.position.set(0,6.4,0);g.add(deck);
+  for(const px of[-34,34]){const a=new T.Mesh(sGeo(2,7.8,10),bm);a.position.set(px,0,0);g.add(a)}for(const pz of[-4.3,4.3]){const pa=new T.Mesh(sGeo(70,1,.4),bm);pa.position.set(0,7.8,pz);g.add(pa)}
+  for(const px of[-6,10]){const p=new T.Mesh(sGeo(1.4,6.4,8),bm);p.position.set(px,0,0);g.add(p)}
+  const car1=new T.Mesh(sGeo(4.2,1.5,1.9),bMat(null,'#c0304a',{vc:1}));car1.position.set(-12,7.8,-2);g.add(car1);
+  g.userData={x:X+2,z};g.position.y=Y0;root.add(g);TRV.bridges.push(g)}
+ // the tunnel (one, reused): brick walls round both tracks and a lamp every 25 m
+ {const g=new T.Group(),m=bMat(TX.tunnel,'#ffffff',{vc:1}),len=260;for(const[px,w]of[[-2.9,.6],[7.6,.6]]){const wm=new T.Mesh(sGeo(w,7,len,[4,4]),m);wm.position.set(px,0,0);g.add(wm)}
+  const rf=new T.Mesh(sGeo(11.2,.6,len,[4,4]),m);rf.position.set(2.35,6.2,0);g.add(rf);const lm=bMat(null,'#ffd9a0',{glow:1});for(let z=-len/2+10;z<len/2;z+=25){const l=new T.Mesh(sGeo(.3,.2,.6),lm);l.position.set(-2.55,3.4,z);g.add(l)}
+  // the portal: a brick face with an arch shape round the mouth
+  for(const e of[-len/2,len/2]){for(const[px,w]of[[-8,10],[13,10]]){const p=new T.Mesh(sGeo(w,9,1),m);p.position.set(px,0,e);g.add(p)}const top=new T.Mesh(sGeo(31,3,1),m);top.position.set(2.5,6.8,e);g.add(top)}
+  g.position.set(X,Y0,-9999);g.visible=false;root.add(g);TRV.tun={g,len,z:null}}
+ // a train the other way, on the next track
+ {const g=new T.Group(),len=72;const body=new T.Mesh(sGeo(2.8,3.6,len),bMat(null,'#e9ece8',{vc:1}));g.add(body);
+  for(const s of[-1,1]){const p=new T.Mesh(new T.PlaneGeometry(len,1.6),bMat(TX.trainSide,'#ffffff'));p.rotation.y=s*Math.PI/2;p.position.set(s*1.41,1.6,0);g.add(p);const lp=new T.Mesh(new T.PlaneGeometry(len,1.6),bMat(TX.trainLit,'#ffffff',{tr:true,glow:1,extra:{blending:T.AdditiveBlending}}));lp.rotation.y=s*Math.PI/2;lp.position.set(s*1.42,1.6,0);g.add(lp)}
+  g.position.set(X+4.2,Y0+.3,-9999);g.visible=false;root.add(g);TRV.pass={g,len,z:null}}
+ // people in the seats: the top of a passer-by, cut off at the waist, sitting
+ {const pick=TRN.seats.filter((s,i)=>((i*2654435761)>>>0)%100<11);for(const[i,s]of pick.entries()){const v=i%8,t=spriteTex('anon'+v,anonSVG(v));const g=new T.PlaneGeometry(.94,2.3*.56);const uv=g.attributes.uv;for(let j=0;j<uv.count;j++)uv.setY(j,.44+uv.getY(j)*.56);g.translate(0,2.3*.56/2,0);
+   const m=new T.Mesh(g,new T.MeshBasicMaterial({map:t,alphaTest:.5,color:new T.Color(.9,.9,.92)}));m.position.set(s.x,.36,s.z);root.add(m);TRV.sit.push(m)}}
+ // the passenger information screens over each saloon doorway
+ for(const[z0,z1]of TRN.cars)for(const[pz,dir]of[[z0+2.7,1],[z1-2.7,-1]]){const c=document.createElement('canvas');c.width=512;c.height=96;const t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;
+  const m=new T.Mesh(new T.PlaneGeometry(.84,.16),new T.MeshBasicMaterial({map:t}));m.position.set(X,2.1,pz+dir*.024);if(dir<0)m.rotation.y=Math.PI;root.add(m);
+  const bz=new T.Mesh(sGeo(.9,.2,.02),bMat(null,'#16161c',{vc:1}));bz.position.set(X,2.0,pz+dir*.012);root.add(bz);TRV.pis.push({c,t,o:Math.random()*300})}
+ root.visible=false}
+function mergeG(gs){const T=G.T,v=[],c=[],u=[];for(const g of gs){const n=g.index?g.toNonIndexed():g;v.push(...n.attributes.position.array);u.push(...(n.attributes.uv?n.attributes.uv.array:new Float32Array(n.attributes.position.count*2)));c.push(...(n.attributes.color?n.attributes.color.array:new Float32Array(n.attributes.position.count*3).fill(1)))}
+ const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(v,3));g.setAttribute('uv',new T.Float32BufferAttribute(u,2));g.setAttribute('color',new T.Float32BufferAttribute(c,3));return g}
+/* how the outside looks at this time of day: a tint, and how much the windows glow */
+const TRTINT=[[1,.96,.9,0],[1,1,1,0],[1,.95,.86,0],[.95,.7,.58,.35],[.3,.27,.38,1],[.18,.18,.28,1]];
+function trvTint(){const k=S&&S.day>=1?TRTINT[clamp(S.slot,0,5)]:TRTINT[1],tun=TRV.inTun?.2:1;
+ for(const m of TRV.mats){if(m.userData.glow){m.opacity=m.transparent?k[3]*(TRV.inTun?.4:1):1;continue}m.color.copy(m.userData.base).multiply(new G.T.Color(k[0]*tun,k[1]*tun,k[2]*tun))}}
+function trainTick(dt){
+ if(!G.ok)return;
+ stationTrainTick();
+ const on=WD.reg==='train';if(!on){if(TRV.root)TRV.root.visible=false;return}
+ if(!TRV.root)trainSceneryBuild();TRV.root.visible=true;
+ const T=G.T,X=TRN.x;TRV.s+=TRV.v*dt;const s=TRV.s;
+ for(const sc of TRV.scroll){const o=(s/sc.tile)%1;if(sc.axis==='x')sc.t.offset.x=o;else sc.t.offset.y=o}
+ for(const P of TRV.inst)poolTick(P,s);
+ const wz=it=>TRV.zc-TRV.L/2+(((it.z+s)%TRV.L)+TRV.L)%TRV.L;
+ for(const g of TRV.boards){g.position.x=g.userData.x;g.position.z=wz(g.userData)}
+ for(const g of TRV.bridges){g.position.x=g.userData.x;g.position.z=wz(g.userData)}
+ // the tunnel: now and then, from far ahead; inside it the windows go dark
+ const tn=TRV.tun;TRV.next.tun-=dt;if(tn.z===null&&TRV.next.tun<=0){tn.z=TRV.zc-650;tn.g.visible=true}
+ if(tn.z!==null){tn.z+=TRV.v*dt;tn.g.position.z=tn.z;TRV.inTun=Math.abs(tn.z-TRV.zc)<tn.len/2-8;if(tn.z-tn.len/2>TRV.zc+220){tn.z=null;tn.g.visible=false;TRV.inTun=false;TRV.next.tun=45+Math.random()*50}}
+ // a train the other way
+ const ps=TRV.pass;TRV.next.pass-=dt;if(ps.z===null&&TRV.next.pass<=0&&!TRV.inTun){ps.z=TRV.zc-700;ps.g.visible=true;ps.wh=false}
+ if(ps.z!==null){ps.z+=TRV.v*2.3*dt;ps.g.position.z=ps.z;if(!ps.wh&&ps.z>TRV.zc-70){ps.wh=true;if(typeof sfx==='function')sfx('whoosh')}if(ps.z-ps.len/2>TRV.zc+300){ps.z=null;ps.g.visible=false;TRV.next.pass=25+Math.random()*40}}
+ trvTint();if(TRV.glass){const k=S&&S.day>=1?TRTINT[clamp(S.slot,0,5)][3]:0;TRV.glass.opacity=TRV.inTun?.22:.06+k*.1}
+ for(const m of TRV.sit)m.rotation.y=WD.cut&&cutOn()?WD.cutYaw:WD.yaw;
+ // the information screens: amber dot-matrix, the next stop scrolling past
+ TRV.pisT=(TRV.pisT||0)-dt;if(TRV.pisT<=0){TRV.pisT=.08;const dn=TDEST[(S&&S.trip&&S.trip.dest)||'con'].n;
+  for(const p of TRV.pis){p.o+=4;const x=p.c.getContext('2d');x.fillStyle='#0a0806';x.fillRect(0,0,512,96);x.font='bold 40px monospace';x.fillStyle='#ffb020';const msg=`This is a Quarterline service.   Next stop: ${dn}.   Please take all your belongings with you.   `;const w=x.measureText(msg).width;const off=-(p.o%w);x.fillText(msg,off,62);x.fillText(msg,off+w,62);
+   x.fillStyle='#00000055';for(let y=0;y<96;y+=4)x.fillRect(0,y,512,1);p.t.needsUpdate=true}}
+ tripTick(dt);
+}
+/* the camera on a moving train: a slow sway, a little dip over every rail joint */
+function trainSway(cam){if(WD.reg!=='train')return;const t=performance.now()/1000,j=(t%1.02);cam.position.y+=Math.sin(t*2.3)*.006+Math.sin(t*7.7)*.002-.007*Math.exp(-j*14)-.005*Math.exp(-Math.abs(j-.52)*14);cam.rotation.z+=Math.sin(t*.8)*.004+Math.sin(t*2.9)*.0015}
+/* ---------- the 16:12 at Platform 4 ---------- */
+function stationTrainBuild(){if(TRV.stn||!G.ok)return;const T=G.T,TX=TRV.tx||trvTextures();TRV.tx=TX;const g=new T.Group();
+ const c=736,zf=10.4,L=24,body=bMat(null,'#e9ece8',{vc:1}),roof=bMat(null,'#8a8e96',{vc:1}),dark=bMat(null,'#16161c',{vc:1}),nose=bMat(null,'#ffd166',{vc:1});
+ for(let k=0;k<3;k++){const za=zf-k*(L+.25),zm=za-L/2;const b=new T.Mesh(sGeo(2.9,4.2,L),body);b.position.set(c,-.9,zm);g.add(b);const rf=new T.Mesh(sGeo(2.5,.25,L-.6),roof);rf.position.set(c,3.3,zm);g.add(rf);
+  for(const s of[-1,1]){const p=new T.Mesh(new T.PlaneGeometry(L,1.75),bMat(TX.trainSide,'#ffffff'));p.rotation.y=s*Math.PI/2;p.position.set(c+s*1.456,.2+.875,zm);g.add(p)}
+  for(const bz of[za-3.5,za-L+3.5]){const bg=new T.Mesh(sGeo(2.5,.55,3),dark);bg.position.set(c,-1.1,bz);g.add(bg)}
+  if(k<2){const gw=new T.Mesh(sGeo(2.2,3.1,.3),dark);gw.position.set(c,-.4,za-L-.12);g.add(gw)}}
+ for(const[e,s]of[[zf,1],[zf-3*L-.5,-1]]){const n=new T.Mesh(sGeo(2.8,4,.6),nose);n.position.set(c,-.9,e+s*.3);g.add(n);const w=new T.Mesh(sGeo(2.3,1,.05),dark);w.position.set(c,1.6,e+s*.62);g.add(w);
+  for(const x of[c-1,c+1]){const l=new T.Mesh(sGeo(.3,.2,.05),bMat(null,s>0?'#ff2a3a':'#fff4d8',{glow:1}));l.position.set(x,.35,e+s*.63);g.add(l)}}
+ // the open door on Platform 4, lit warm inside
+ const od=new T.Mesh(new T.PlaneGeometry(1.4,2.15),bMat(null,'#ffe2b0',{glow:1}));od.rotation.y=-Math.PI/2;od.position.set(c-1.47,1.1,4.4);g.add(od);g.userData.door=od;
+ G.scene.add(g);g.visible=false;TRV.stn=g}
+function stationTrainTick(){const on=WD.reg==='station'&&G.ok;if(!on){if(TRV.stn)TRV.stn.visible=false;return}
+ if(!TRV.stn)stationTrainBuild();const g=TRV.stn;g.visible=true;
+ const dep=WD.cut&&WD.cut.k==='depart'&&cutOn();let dz=0;if(dep){const t=(performance.now()-WD.cut.t0)/1000-1.6;if(t>0)dz=-.5*1.1*t*t}
+ g.position.z=dz;g.userData.door.visible=!dep;
+ // the evening: the body darkens with the light
+ const k=S&&S.day>=1?TRTINT[clamp(S.slot,0,5)]:TRTINT[1];for(const o of g.children){const m=o.material;if(m&&m.userData.base&&!m.userData.glow)m.color.copy(m.userData.base).multiplyScalar(Math.max(.45,(k[0]+k[1]+k[2])/3))}}
+CUTS.depart={reg:'station',moves:[{eye:[733.3,1.85,15.8],at:[736.4,1.7,-14],to:{eye:[732.9,1.7,13.6],at:[736.3,1.5,-60]},dur:12,fov:44,fov1:40}],marks:[]};
+/* ---------- the trip ---------- */
+const TDEST={con:{n:'Conference Quarter',area:'plaza',arrive:'Twenty minutes, and the doors open onto the Conference Quarter. The Halcyon\'s neon is still shouting.'},
+ home:{n:'Linden Street',area:'bakery',arrive:'Two stops. Linden Street smells of bread and diesel, the way it always has.'},
+ office:{n:'Brindle & Co',area:'office',arrive:'The office, on a weekday you\'re supposed to be off. The printer senses you immediately.'}};
+const DEPART=[['The doors beep twice and slide shut. Through the glass, the platform clock ticks over.','A whistle. A jolt. The train eases out of Platform 4, out from under the iron and glass and into the light.'],
+ ['The doors close with a sigh. Somebody runs for it and doesn\'t make it, and pretends they weren\'t running.','The train slides out of the station, slow, then not slow at all.']];
+function tripStart(dest,o){o=o||{};closeOv();const ov_=$('ov');ov_.classList.remove('phoneov','mapov','wmapov');delete ov_.dataset.app;delete ov_.dataset.from;
+ ach('train');if(dest==='office')ach('office');
+ const trip={dest,story:!!o.story,el:0};
+ const go=()=>fadeTp(()=>{teleportArea('coachB');S.trip=trip;WD.yaw=0;WD.pit=0;hub();if(o.story)setTimeout(o.story,450)});
+ if(!G.ok||window.__test||!AREAS.platform){go();return}
+ const D=DEPART[(S.day+S.slot)%2];run([{bg:'platform'},{hide:1},{cut:'depart'},N(D[0]),N(D[1])],go);
+}
+function tripReady(){return !!(S&&S.trip&&!S.trip.story&&WD.reg==='train'&&S.trip.el>=10)}
+function tripArrive(){const t=S.trip;if(!t)return;const D=TDEST[t.dest]||TDEST.con;S.trip=null;tripHud();fadeTp(()=>{teleportArea(D.area);run([{bg:D.area},{hide:1},N(D.arrive)],hub)})}
+function tripTick(dt){
+ if(S&&WD.reg==='train'&&!S.trip&&!$('vn').classList.contains('on')&&!S.epilogue)S.trip={dest:'con',el:0};
+ if(S&&S.trip&&!S.trip.story&&worldLive())S.trip.el+=dt;
+ tripHud()}
+function tripHud(){let el=$('tripHud');const on=!!(S&&S.trip&&!S.trip.story&&WD.reg==='train'&&WD.active);
+ if(!el){if(!on)return;el=document.createElement('div');el.id='tripHud';el.innerHTML='<div class="thl"><span class="thk">QUARTERLINE</span><b id="thN"></b><i><em id="thP"></em></i></div><button id="thGo"></button>';$('world').appendChild(el);
+  $('thGo').addEventListener('click',e=>{e.stopPropagation();if(tripReady())tripArrive()});$('thGo').addEventListener('mousedown',e=>e.stopPropagation(),true)}
+ el.classList.toggle('on',on);if(!on)return;const D=TDEST[S.trip.dest]||TDEST.con,p=Math.min(1,S.trip.el/10);
+ const n='Next stop: '+D.n;if($('thN').textContent!==n)$('thN').textContent=n;$('thP').style.width=(p*100).toFixed(1)+'%';
+ const b=$('thGo'),r=p>=1;b.classList.toggle('on',r);const bt=`Travel to ${D.n} <span class="kn">Enter</span>`;if(r&&b.dataset.t!==bt){b.innerHTML=bt;b.dataset.t=bt}}
+addEventListener('keydown',e=>{if(e.key==='Enter'&&tripReady()&&typeof worldLive==='function'&&worldLive()){e.preventDefault();tripArrive()}});
 
 /* ============ PHONE ============ */
 const ICON={
@@ -16347,9 +16796,13 @@ function phone(app){
  phApp=null;drawPhone();
  if(opening){const ph=o.querySelector('.phone');if(ph)ph.classList.add('opening');if(typeof sfx==='function')sfx('phoneOpen')}
 }
-function closePhone(){if($('ov').classList.contains('phoneov')&&typeof sfx==='function')sfx('phoneClose');const o=$('ov');delete o.dataset.app;delete o.dataset.from;closeOv();o.classList.remove('phoneov','mapov','appov');phApp=null;if(G.ok&&S&&S.inWorld)relock();if($('vn').classList.contains('on'))return;if(G.ok&&S.inWorld)hub();else if($('hub').classList.contains('on'))hub()}
+function closePhone(){if($('ov').classList.contains('phoneov')&&typeof sfx==='function')sfx('phoneClose');const o=$('ov');delete o.dataset.app;delete o.dataset.from;closeOv();o.classList.remove('phoneov','mapov','appov','wmapov');phApp=null;if(G.ok&&S&&S.inWorld)relock();if($('vn').classList.contains('on'))return;if(G.ok&&S.inWorld)hub();else if($('hub').classList.contains('on'))hub()}
 /* Esc / back: from an app you opened on the phone, back to the phone; otherwise close */
-function phoneBack(){const o=$('ov');if(o.dataset.app&&o.dataset.from==='phone'){phApp=null;phThread=null;drawPhone()}else closePhone()}
+function phoneBack(){const o=$('ov');
+ // a building's map backs out to the city; the city backs out to wherever you came from
+ if(o.dataset.app==='map'){worldOpen('phone',MAPV.from==='phone'?'phone':'direct');return}
+ if(o.dataset.app==='world'){if(WV.mode!=='phone'){worldClose();return}if(WV.from==='phone'){o.classList.remove('wmapov','mapov');phApp=null;phThread=null;drawPhone()}else closePhone();return}
+ if(o.dataset.app&&o.dataset.from==='phone'){phApp=null;phThread=null;drawPhone()}else closePhone()}
 function drawPhone(){
  const apps=Object.keys(APPN).filter(a=>a==='postgame'?pgOpen():!APPU[a]||S.unl[APPU[a]]);
  const unread=S.msgs.filter(m=>!m.r).length,nn=S.day>0?ROM.filter(sceneReady).length:0,nc=S.day>0?Object.keys(MYST).filter(m=>S.unl.clues&&canSolve(m)).length:0;
@@ -16427,6 +16880,7 @@ const APPS={
  /* ---- Case board: a corkboard of mysteries, clues on strings, leads as sticky notes ---- */
  cases(){
   const ms=Object.keys(MYST).filter(m=>mystClues(m).length||Object.keys(LEADS).some(k=>LEADS[k].m===m&&leadOpen(k))||S.solved[m]||(S.loop&&META.solved[m]));
+  {let ch=0;META.mseen=META.mseen||{};for(const m of ms)if(!META.mseen[m]&&!S.replay){META.mseen[m]=1;ch=1}if(ch)saveMeta()}
   const tabs=tabsH(PH.ctab,[['board','Board'],['locker','Evidence locker'],['leads','All leads']],'ct');
   if(PH.ctab==='locker'){const by={};S.clues.forEach(c=>{(by[CLUE[c].m[0]]=by[CLUE[c].m[0]]||[]).push(c)});
    return tabs+`<div class="abody"><p class="small">${S.clues.length}/${Object.keys(CLUE).length} clues</p>${Object.keys(MYST).filter(m=>by[m]).map(m=>`<div class="dbh">${esc(MYST[m].n)}</div><div class="cork small-cork">${by[m].map(c=>`<div class="pin"><b>${esc(CLUE[c].s)}</b><span>${esc(CLUE[c].t)}</span></div>`).join('')}</div>`).join('')||'<p class="small">Nothing yet.</p>'}</div>`}
@@ -16457,9 +16911,9 @@ const APPS={
   const d=PH.sday!==null&&by[PH.sday]?PH.sday:ks[ks.length-1];
   return ks.length?`<div class="atabs">${ks.map(k=>`<button class="${k===d?'on':''}" data-sd="${k}">${k===0?'Prologue':'Day '+k}</button>`).join('')}</div><div class="abody sview"><h3>${d===0?'Two weeks before':'Day '+d+' · '+DAYN[d]}</h3>${by[d].map(e=>`<div class="sent">${d?`<small>${SLOTN[e.s]}</small>`:''}<p>${esc(e.t)}</p></div>`).join('')}</div>`:'<div class="abody"><p class="small">Your story so far will be written here.</p></div>'},
  /* ---- Achievements: across every run ---- */
- achieve(){const cat=k=>k.startsWith('end_')?'end':k.includes('clue')||k.includes('solve')||k==='first_lead'?'myst':k.startsWith('skill_')||k.startsWith('clout_')?'rank':'other';
-  const all=achVis();if(PH.atab==='end'&&!pgOpen()||PH.atab==='love')PH.atab='all';const ks=all.filter(k=>PH.atab==='all'||cat(k)===PH.atab),got=all.filter(k=>META.ach[k]).length;
-  return tabsH(PH.atab,[['all','All'],...(pgOpen()?[['end','Endings']]:[]),['myst','Mysteries'],['rank','Ranks'],['other','Everything else']],'at')+`<div class="abody"><p class="small">${got}/${all.length} unlocked across every run</p>${bar(got/all.length*100,'var(--butter)')}<div class="agrid">${ks.map(k=>{const a=ACH[k],on=!!META.ach[k],hid=a[2]&&!on;return`<div class="atile ${on?'on':''}"><span class="aic">${on?'★':hid?'?':'☆'}</span><b>${hid?'???':esc(a[0])}</b><small>${hid?'Hidden':esc(a[1])}</small>${on?`<em>${new Date(META.ach[k]).toLocaleDateString()}</em>`:''}</div>`}).join('')}</div></div>`},
+ achieve(){const cat=k=>k.startsWith('end_')?'end':k.startsWith('love_')?'love':k.startsWith('solve_')||k.includes('clue')||k.includes('solve')||k==='first_lead'?'myst':k.startsWith('skill_')||k.startsWith('clout_')?'rank':'other';
+  const all=achVis();if(PH.atab==='end'&&!pgOpen())PH.atab='all';const ks=all.filter(k=>PH.atab==='all'||cat(k)===PH.atab),got=all.filter(k=>META.ach[k]).length;
+  return tabsH(PH.atab,[['all','All'],...(pgOpen()?[['end','Endings']]:[]),['love','Love'],['myst','Mysteries'],['rank','Ranks'],['other','Everything else']],'at')+`<div class="abody"><p class="small">${got}/${all.length} unlocked across every run</p>${bar(got/all.length*100,'var(--butter)')}<div class="agrid">${ks.map(k=>{const a=ACH[k],on=!!META.ach[k],hid=a[2]&&!on;return`<div class="atile ${on?'on':''}"><span class="aic">${on?'★':hid?'?':'☆'}</span><b>${hid?'???':esc(a[0])}</b><small>${hid?'Hidden':esc(a[1])}</small>${on?`<em>${new Date(META.ach[k]).toLocaleDateString()}</em>`:''}</div>`}).join('')}</div></div>`},
  /* ---- Echo: the loop. What's left, and the day you can take back ---- */
  echo(){const P=echoPlan(),left=P.people.filter(p=>p[1]!=='Done');
   return`<div class="abody"><p class="small">Loop ${META.loop||1}. Each part of the day holds ${LOOPOC+1} things. People can take three times as much of you each day, and stories can run up to two days early. Routes you've finished before aren't held to their day.</p><div class="row"><button class="btn pri" id="erw" ${S.snap&&S.day>=1?'':'disabled'}>Rewind to this morning</button></div><p class="small" style="margin-top:12px"><b>People · ${ROM.length-left.length}/${ROM.length} in love</b></p>${left.map(p=>`<div class="kv"><span>${esc(p[0])}</span><b class="small">${esc(p[1])}</b></div>`).join('')||'<p class="small">Everyone. You did it.</p>'}<p class="small" style="margin-top:12px"><b>Mysteries · ${allMyst().filter(m=>S.solved[m]).length}/${allMyst().length}</b></p>${P.mys.map(m=>`<div class="kv"><span>${esc(m[0])}</span><b class="small">${esc(m[1])}</b></div>`).join('')||'<p class="small">All of it.</p>'}<p class="small" style="margin-top:12px">${haremReady()?'Ready. Go to the keynote on Sunday.':'When everyone is in love with you and every mystery is solved, Sunday becomes something else.'}</p></div>`},
@@ -16523,8 +16977,8 @@ const APPS_AFTER={
    Anywhere else: walk, or pick a room on the map and travel to the hub nearest it. */
 const FTHUBS=['plaza','foyer','ringN','vendor','villagerow','food','lobby','corridor','roof','flat','office','station'];
 const MAPV={net:null,reg:null,lv:0,ox:0,oz:0,sc:1,q:'',open:{},sel:null,drag:null};
-const MAPNET={con:['con','f13'],f13:['con','f13'],home:['home'],office:['office'],station:['station']};
-const MAPREG={con:'The site',f13:'Hotel tower',home:'Linden Street',office:'Brindle & Co',station:'Central Station'};
+const MAPNET={con:['con','f13'],f13:['con','f13'],home:['home'],office:['office'],station:['station'],train:['train']};
+const MAPREG={con:'Conference Quarter',f13:'Hotel tower',home:'Linden Street',office:'Brindle & Co',station:'Central Station',train:'The Quarterline'};
 function areaGroup(A){
  if(A.reg==='f13')return (A.sp[3]||0)>2?'Hotel roof':'Hotel · 13th floor';
  if(A.reg!=='con')return MAPREG[A.reg]||A.reg;
@@ -16540,16 +16994,20 @@ function ftList(){const net=MAPNET[WD.reg]||[WD.reg];return Object.values(AREAS)
 function nearHub(A){const L=ftList();let best=null,bd=1e18;for(const h of L){const d=(h.reg===A.reg?0:400)+Math.hypot(h.sp[0]-A.sp[0],h.sp[1]-A.sp[1])+Math.abs((h.sp[3]||0)-(A.sp[3]||0))*6;if(d<bd){bd=d;best=h}}return best}
 function canTravel(){return !$('vn').classList.contains('on')&&!(typeof ftBlocked==='function'&&ftBlocked())}
 function fastTravel(k){if(!AREAS[k])return;S.ftRecent=[k].concat((S.ftRecent||[]).filter(x=>x!==k)).slice(0,6);closePhone();fadeTp(()=>teleportArea(k))}
-function mapOpen(fromPhone){
- if(!S)return;MAPV.from=fromPhone?'phone':'direct';const o=$('ov');if((o.classList.contains('on')&&!o.classList.contains('phoneov'))||$('card').classList.contains('on'))return;
+/* the map of the place you're in (or, from the world map, of somewhere else: look, but you can't travel there) */
+function mapOpen(fromPhone,view){
+ if(!S)return;const o=$('ov');if(!(o.classList.contains('wmapov'))){MAPV.from=fromPhone?'phone':'direct';MAPV.fromWorld=false}if((o.classList.contains('on')&&!o.classList.contains('phoneov'))||$('card').classList.contains('on'))return;
  if(document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}
- WD.active=false;
- const reg=WD.reg;MAPV.reg=reg;MAPV.lv=levelOf(reg,WD.y);MAPV.sel=null;MAPV.q='';mapFit(true);
+ WD.active=false;o.classList.remove('wmapov');
+ const mine=!view||(MAPNET[WD.reg]||[WD.reg]).includes(view);const reg=mine&&!view?WD.reg:view;MAPV.base=mine?WD.reg:view;MAPV.reg=mine&&!view?WD.reg:view;
+ if(MAPV.reg===WD.reg)MAPV.lv=levelOf(WD.reg,WD.y);else{const L=LEVELS[MAPV.reg]||[[0]];MAPV.lv=(L.find(l=>l[0]===0)||L[0])[0]}
+ MAPV.sel=null;MAPV.q='';mapFit(MAPV.reg===WD.reg);
  if(typeof sfx==='function')sfx('phoneOpen');drawMap();
 }
 /* the levels you can look at: every level of the current network you've set foot on */
-function mapTabs(){const net=MAPNET[WD.reg]||[WD.reg],V=S.visited||{},vis=Object.values(AREAS).filter(a=>V[a.k]),t=[];
+function mapTabs(){const net=MAPNET[MAPV.base||WD.reg]||[WD.reg],V=S.visited||{},vis=Object.values(AREAS).filter(a=>V[a.k]),t=[];
  for(const r of net)for(const l of LEVELS[r]||[]){const seen=vis.some(a=>a.reg===r&&levelOf(r,a.sp[3]||0)===l[0])||(r===WD.reg&&levelOf(r,WD.y)===l[0]);if(seen)t.push([r,l[0],(net.length>1?(r==='f13'?'Tower · ':''):'')+l[1]])}
+ if(!t.length){const r=MAPV.reg,L=(LEVELS[r]||[[0,'']]).find(l=>l[0]===MAPV.lv)||[MAPV.lv,''];t.push([r,L[0],L[1]||MAPREG[r]||''])}
  return t}
 function mapBounds(reg,lv){const rs=(MAPR[reg]||[]).filter(r=>Math.abs(r.y-lv)<.6);let a=1e9,b=1e9,c=-1e9,d=-1e9;for(const r of rs){a=Math.min(a,r.x0);b=Math.min(b,r.z0);c=Math.max(c,r.x1);d=Math.max(d,r.z1)}
  if(a>c){a=WD.x-40;c=WD.x+40;b=WD.z-40;d=WD.z+40}return[a,b,c,d]}
@@ -16557,25 +17015,26 @@ function mapFit(onMe){const cv=$('bmap'),W=cv?cv.width:900,H=cv?cv.height:600;co
  MAPV.sc=Math.min((W-30)/(c-a),(H-30)/(d-b));MAPV.ox=(a+c)/2;MAPV.oz=(b+d)/2;
  if(onMe&&MAPV.reg===WD.reg){MAPV.sc=Math.max(MAPV.sc,W/220);MAPV.ox=WD.x;MAPV.oz=WD.z}}
 function drawMap(){
- const tabs=mapTabs(),can=canTravel(),list=ftList();const q=MAPV.q.trim().toLowerCase();
+ const mine=(MAPNET[WD.reg]||[WD.reg]).includes(MAPV.base||WD.reg);
+ const tabs=mapTabs(),can=canTravel()&&mine,list=mine?ftList():[];const q=MAPV.q.trim().toLowerCase();
  const rec=(S.ftRecent||[]).filter(k=>list.some(a=>a.k===k));
  const groups={};for(const a of list){if(q&&!a.n.toLowerCase().includes(q))continue;const g=areaGroup(a);(groups[g]=groups[g]||[]).push(a)}
  const here=areaAt(WD.reg,WD.x,WD.z,WD.y);
  const sec=AGROUPS.filter(g=>groups[g]).map(g=>{const op=q||MAPV.open[g]!==false;return`<div class="mgrp"><button class="mgh" data-g="${esc(g)}"><span>${op?'▾':'▸'} ${esc(g)}</span><small>${groups[g].length}</small></button>${op?`<div class="mgl">${groups[g].sort((x,y)=>(x.sp[3]||0)-(y.sp[3]||0)||x.n.localeCompare(y.n)).map(a=>`<button class="mft${a.k===here?' here':''}" data-k="${a.k}" ${can?'':'disabled'}><b>${esc(a.n)}</b><small>${esc(levelName(a.reg,a.sp[3]||0))}${a.k===here?' · you are here':''}</small></button>`).join('')}</div>`:''}</div>`}).join('');
- ov(`<div class="bigmap"><div class="mtop">${MAPV.from==='phone'?'<button class="pback" id="mback2" aria-label="Back">‹</button>':''}<b>Map</b><span class="small">${esc(MAPREG[WD.reg]||'')}${typeof clockLabel==='function'?' · '+esc(clockLabel()):''}</span><button class="pback" id="mclose" aria-label="Close">✕</button></div>
+ ov(`<div class="bigmap"><div class="mtop"><button class="pback mworld" id="mback2" aria-label="World map">‹ <small>City</small></button><b>${esc(MAPREG[MAPV.base||WD.reg]||'Map')}</b><span class="small">${mine?'':'You\'re not here · just looking'}${mine&&typeof clockLabel==='function'?esc(clockLabel()):''}</span><button class="pback" id="mclose" aria-label="Close">✕</button></div>
  <div class="mbody"><div class="mview"><div class="tabs mtabs">${tabs.map(t=>`<button class="${t[0]===MAPV.reg&&t[1]===MAPV.lv?'on':''}" data-r="${t[0]}" data-l="${t[1]}">${esc(t[2])}</button>`).join('')}</div>
  <div class="mcv"><canvas id="bmap" width="900" height="620"></canvas>
  <div class="mzoom"><button id="mzi" aria-label="Zoom in">+</button><button id="mzo" aria-label="Zoom out">−</button><button id="mzme" aria-label="Centre on me">◎</button><button id="mzfit" aria-label="Whole level">▢</button></div>
 
  <div id="msel"></div></div>
  <div class="mleg small"><span style="color:#ff5d73">▲</span> you · <span style="color:#8affc1">★</span> story goal · <span style="color:#ffd166">●</span> someone with a scene · tap the map to select a spot, then travel or drop a pin</div></div>
- <div class="mside"><b>Fast travel</b><p class="small">${can?'The main hubs you\'ve been to. Pick any room on the map to travel to the hub nearest it.':'Not available right now.'}</p>
+ <div class="mside">${!mine?`<b>Getting there</b><p class="small">${esc((Object.values(WLOC).find(L=>L.reg.includes(MAPV.base))||{how:''}).how)}</p><p class="small">You can only travel around inside the place you're in. Go back to the city map to see everywhere else.</p><button class="btn" id="mtoworld">Back to the city map</button>`:''}<b ${mine?'':'style="display:none"'}>Fast travel</b><p class="small" ${mine?'':'style="display:none"'}>${can?'The main hubs you\'ve been to. Pick any room on the map to travel to the hub nearest it.':'Not available right now.'}</p>
  <input class="inp" id="mq" placeholder="Search places" value="${esc(MAPV.q)}" autocomplete="off">
  ${rec.length&&!q?`<div class="mrec"><small>Recent</small>${rec.map(k=>`<button class="chip mft" data-k="${k}" ${can?'':'disabled'}>${esc(AREAS[k].n)}</button>`).join('')}</div>`:''}
  <div class="mlist">${sec||'<p class="small">Nowhere yet. Explore.</p>'}</div></div></div></div>`);
  const o=$('ov');o.dataset.app='map';o.dataset.from=MAPV.from;o.classList.add('phoneov','mapov');updBlur();
  o.onclick=e=>{if(e.target===o)closePhone()};
- $('mclose').onclick=closePhone;if($('mback2'))$('mback2').onclick=phoneBack;
+ $('mclose').onclick=closePhone;if($('mback2'))$('mback2').onclick=phoneBack;if($('mtoworld'))$('mtoworld').onclick=phoneBack;if(!mine&&$('mzme'))$('mzme').style.display='none';
  o.querySelectorAll('.mtabs button').forEach(b=>b.onclick=()=>{MAPV.reg=b.dataset.r;MAPV.lv=+b.dataset.l;MAPV.sel=null;mapFit(MAPV.reg===WD.reg&&MAPV.lv===levelOf(WD.reg,WD.y));drawMap()});
  o.querySelectorAll('.mgh').forEach(b=>b.onclick=()=>{const g=b.dataset.g;MAPV.open[g]=MAPV.open[g]===false;drawMap()});
  o.querySelectorAll('.mft').forEach(b=>b.onclick=()=>fastTravel(b.dataset.k));
@@ -16690,6 +17149,106 @@ async function dbgJump(id){
  const b=curBeat(),tg=b&&beatTarget(b);if(G.ok&&tg){const A=b.w&&AREAS[b.w];if(A)teleportArea(b.w);else teleport(tg.reg,tg.x,tg.z+2,0,tg.y)}
  save();hub();toast('Jumped: '+(b?b.t:'done'),'var(--mint)')}
 addEventListener('keydown',e=>{if((e.key==='F9'||e.key==='`')&&S&&!$('title').classList.contains('on')){e.preventDefault();if($('ov').classList.contains('on')&&$('dbx'))closePhone();else{closeOv();dbgOpen()}}});
+
+/* ============ THE WORLD MAP ============
+   The city, drawn: Linden Street (home and Proof), Central Station, Brindle & Co, and the Conference Quarter (the con
+   and the Halcyon), with the river, the parks, the railway and the roads between them. Three versions:
+     phone    look around: pick a place to see what's there and open its map. No travelling from here: you get there
+              yourself (walk to the station, take the train, a taxi from the con).
+     station  the departures board at Platform 4: pick a destination and board. The train is a playable ride.
+     taxi     the rank outside the con: the driver only does the station this week ("event traffic").
+   You never fast-travel between places on this map; only inside the place you're in (the building map). */
+const WLOC={
+ home:{n:'Linden Street',sub:'Your flat · Proof bakery',x:205,y:455,reg:['home'],area:'bakery',ic:'home',
+  d:'Two rooms over a bakery. Ellie downstairs, Mr Demir\'s barber next door, the viaduct at the end of the road.',how:'Walk from Central Station (ten minutes), or two stops on the Quarterline.'},
+ station:{n:'Central Station',sub:'Quarterline · every 20 minutes',x:500,y:345,reg:['station'],area:'station',ic:'train',
+  d:'A Victorian train shed: iron ribs, glass, pigeons, a departures board that clatters. Platform 4 for the Conference Quarter.',how:'Walk from Linden Street or from Brindle & Co. A taxi from the Conference Quarter.'},
+ office:{n:'Brindle & Co',sub:'Work · the printer',x:575,y:150,reg:['office'],area:'office',ic:'work',
+  d:'Insurance, third floor, the IT helpdesk you run. Linda made you promise not to come in this week.',how:'A short walk from Central Station, or one stop on the Quarterline.'},
+ con:{n:'Conference Quarter',sub:'CTRL+ALT+CON · the Halcyon',x:835,y:250,reg:['con','f13'],area:'plaza',ic:'con',
+  d:'The convention centre, the Halcyon Hotel and its tower, the plaza and the boulevard. Four thousand hackers for seven days.',how:'The Quarterline from Central Station, twenty minutes. A taxi back to the station from the rank on the plaza.'}};
+const WRAIL=[['station','home','M500 345 C 420 360 330 420 205 455'],['station','office','M500 345 C 520 270 560 210 575 150'],['station','con','M500 345 C 600 330 700 280 835 250']];
+const WV={mode:'phone',sel:null,from:'phone'};
+function wHere(){if(WD.reg==='train')return'train';for(const k in WLOC)if(WLOC[k].reg.includes(WD.reg))return k;return null}
+/* the drawing */
+function worldSVG(){const here=wHere(),sel=WV.sel,mode=WV.mode,trip=S&&S.trip;
+ const ic={home:'<path d="M-9 2 0-7 9 2v8H-9z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path d="M-3 10V4h6v6" stroke="currentColor" stroke-width="2.2" fill="none"/>',
+  train:'<rect x="-8" y="-9" width="16" height="15" rx="4" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M-8-1h16M-4 10l-3 3M4 10l3 3" stroke="currentColor" stroke-width="2.2"/><circle cx="-4" cy="3" r="1.6" fill="currentColor"/><circle cx="4" cy="3" r="1.6" fill="currentColor"/>',
+  work:'<rect x="-8" y="-6" width="16" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M-4-6v-3h8v3M-8 0h16" stroke="currentColor" stroke-width="2.2" fill="none"/>',
+  con:'<path d="M-9 8V-2l9-7 9 7V8z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path d="M-4 8V1h8v7" stroke="currentColor" stroke-width="2.2" fill="none"/><circle cy="-3" r="1.6" fill="currentColor"/>'};
+ const active=k=>mode==='station'?WDEP().some(d=>d.k===k&&d.ok):mode==='taxi'?k==='station':true;
+ const railOn=r=>mode==='station'&&(sel===r[1]||!sel)||mode==='phone'&&(sel===r[0]||sel===r[1])||trip&&(trip.dest===r[1]);
+ const tp=trip&&WRAIL.find(r=>r[1]===trip.dest);
+ return`<svg class="wsvg" viewBox="0 0 1000 620" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Map of the city">
+ <defs><pattern id="wgrid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#ffffff08" stroke-width="1"/></pattern>
+  <radialGradient id="wvig" cx="50%" cy="45%" r="70%"><stop offset="60%" stop-color="#000" stop-opacity="0"/><stop offset="100%" stop-color="#000" stop-opacity=".55"/></radialGradient>
+  <filter id="wglow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <linearGradient id="wriver" x1="0" x2="1"><stop offset="0" stop-color="#103a4c"/><stop offset="1" stop-color="#164a5e"/></linearGradient></defs>
+ <rect width="1000" height="620" fill="#0c0912"/><rect width="1000" height="620" fill="url(#wgrid)"/>
+ <g class="wdist" font-family="VT323,monospace" font-size="20" fill="#ffffff22" letter-spacing="6">
+  <path d="M60 380 L330 360 L360 560 L40 590Z" fill="#ffffff05"/><text x="70" y="575">LINDEN</text>
+  <path d="M380 240 L640 230 L660 420 L400 440Z" fill="#ffffff06"/><text x="420" y="430">OLD TOWN</text>
+  <path d="M470 60 L700 50 L700 200 L480 210Z" fill="#ffffff05"/><text x="560" y="80">THE CITY</text>
+  <path d="M700 140 L980 120 L990 360 L720 380Z" fill="#ff5d7308"/><text x="760" y="370">CONFERENCE QUARTER</text></g>
+ <g fill="#2a4a2e" opacity=".55"><ellipse cx="320" cy="250" rx="70" ry="38"/><ellipse cx="760" cy="440" rx="90" ry="40"/><ellipse cx="130" cy="300" rx="40" ry="26"/></g>
+ <text x="300" y="255" font-family="VT323,monospace" font-size="16" fill="#8affc155" letter-spacing="3">THE COMMON</text>
+ <path d="M-10 520 C 160 500 260 560 420 530 C 580 500 640 420 760 400 C 860 384 920 330 1010 300" stroke="url(#wriver)" stroke-width="34" fill="none" stroke-linecap="round"/>
+ <path d="M-10 520 C 160 500 260 560 420 530 C 580 500 640 420 760 400 C 860 384 920 330 1010 300" stroke="#2a7a9a44" stroke-width="2" fill="none"/>
+ <text x="470" y="548" font-family="Georgia,serif" font-style="italic" font-size="17" fill="#5ab4d488">the River Wend</text>
+ <g stroke="#ffffff16" stroke-width="7" fill="none" stroke-linecap="round"><path d="M0 330 H1000"/><path d="M500 0 V620"/><path d="M205 455 L360 330 L500 345"/><path d="M500 345 L660 300 L835 250"/><path d="M575 150 L500 345"/><path d="M835 250 L980 200"/></g>
+ <path d="M835 250 C 760 300 640 300 500 345" stroke="#ffd166" stroke-width="3" stroke-dasharray="2 9" stroke-linecap="round" fill="none" opacity="${mode==='taxi'?1:.45}" class="${mode==='taxi'?'wflow':''}"/>
+ <g fill="none" stroke-linecap="round">${WRAIL.map(r=>`<path d="${r[2]}" stroke="#ff5d73" stroke-width="${railOn(r)?7:4}" opacity="${railOn(r)?1:.4}" ${railOn(r)?'filter="url(#wglow)"':''}/><path d="${r[2]}" stroke="#0c0912" stroke-width="${railOn(r)?3:1.6}" stroke-dasharray="3 7" opacity=".9"/>`).join('')}</g>
+ <g stroke="#8affc1" stroke-width="2.4" stroke-dasharray="1 7" stroke-linecap="round" fill="none" opacity=".5"><path d="M205 455 L360 330 L500 345"/><path d="M575 150 L500 345"/></g>
+ ${tp?`<circle r="9" fill="#ffd166" stroke="#0c0912" stroke-width="3" filter="url(#wglow)"><animateMotion dur="5s" repeatCount="indefinite" path="${tp[2]}"/></circle>`:''}
+ ${Object.entries(WLOC).map(([k,L])=>{const on=active(k),isHere=here===k,isSel=sel===k;return`<g class="wnode ${on?'':'off'} ${isSel?'sel':''} ${isHere?'here':''}" data-w="${k}" transform="translate(${L.x} ${L.y})" tabindex="0" role="button" aria-label="${esc(L.n)}">
+  ${isHere?'<circle r="34" class="wpulse"/>':''}<circle r="27" class="wring"/><circle r="21" class="wdot"/><g class="wic" style="color:${isHere?'#1b1026':'#f6eefc'}">${ic[L.ic]}</g>
+  <text y="${L.y>400?50:-38}" text-anchor="middle" class="wlbl">${esc(L.n)}</text><text y="${L.y>400?68:-20}" text-anchor="middle" class="wsub">${esc(L.sub)}</text>
+  ${isHere?`<g transform="translate(0 ${L.y>400?-44:44})"><rect x="-46" y="-12" width="92" height="22" rx="11" fill="#ffd166"/><text y="4" text-anchor="middle" font-family="VT323,monospace" font-size="17" fill="#1b1026" letter-spacing="2">YOU ARE HERE</text></g>`:''}</g>`}).join('')}
+ <g transform="translate(940 560)" font-family="VT323,monospace" font-size="16" fill="#bba8cf"><circle r="22" fill="none" stroke="#ffffff22"/><path d="M0-18 5 0 0-4-5 0z" fill="#ff5d73"/><text y="-26" text-anchor="middle">N</text></g>
+ <rect width="1000" height="620" fill="url(#wvig)" pointer-events="none"/></svg>`}
+/* where the train goes from here, and whether it will take you */
+function WDEP(){const story=typeof stepIs==='function'&&stepIs('train'),off=f=>typeof f==='function'?f():f;
+ const T=SLOTT[clamp(S.slot||0,0,5)].split(':').map(Number),tm=add=>{let m=T[0]*60+T[1]+add;m=(m+1440)%1440;return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')};
+ const officeOK=f('office_open')||(typeof leadOpen==='function'&&leadOpen('office'));
+ return[{k:'con',t:tm(6),pf:4,ok:S.day>=1,why:S.day<1?'Not this week. Not yet.':'',st:'ON TIME'},
+  {k:'home',t:tm(13),pf:2,ok:!story,why:story?'Your train\'s the Conference Quarter.':'',st:'ON TIME'},
+  {k:'office',t:tm(19),pf:6,ok:!story&&officeOK,why:story?'Your train\'s the Conference Quarter.':officeOK?'':'Linda made you promise not to come in this week.',st:officeOK?'ON TIME':'NOT TODAY'}]}
+/* ---- opening ---- */
+function worldOpen(mode,from){if(!S)return;WV.mode=mode||'phone';WV.from=from||(mode==='phone'?'phone':'world');
+ WV.sel=WV.mode==='station'?null:WV.mode==='taxi'?'station':(WV.sel||wHere()||'con');
+ if(document.pointerLockElement&&WV.mode==='phone'){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}
+ WD.active=false;if(typeof sfx==='function')sfx('phoneOpen');worldDraw()}
+function worldClose(){const o=$('ov');o.classList.remove('wmapov');if(WV.mode==='phone'){closePhone();return}delete o.dataset.app;delete o.dataset.from;closeOv();o.classList.remove('phoneov','mapov','appov');hub()}
+function worldDraw(){const m=WV.mode,o=ov(`<div class="wmap wm-${m}"><div class="wtop">${m==='phone'?'<button class="pback" id="wback" aria-label="Back">‹</button>':''}
+  <div class="wtitle">${m==='station'?'<span class="wk">PLATFORM 4 · QUARTERLINE</span><b>Departures</b>':m==='taxi'?'<span class="wk">TAXI RANK · CONFERENCE QUARTER</span><b>Where to?</b>':'<span class="wk">MAP</span><b>The city</b>'}</div>
+  <span class="wclock">${esc(SLOTT[clamp(S.slot||0,0,5)])}</span><button class="pback" id="wclose" aria-label="Close">✕</button></div>
+ <div class="wbody"><div class="wstage">${worldSVG()}</div><aside class="wside" id="wside">${worldSide()}</aside></div>
+ <div class="wfoot">${m==='phone'?'<span><i class="wl rail"></i>Quarterline</span><span><i class="wl taxi"></i>Taxi</span><span><i class="wl walk"></i>On foot</span><span class="wnote">Pick a place to see it. You can\'t jump between places from here: take the train, a taxi, or walk.</span>':m==='taxi'?'<span class="wnote">Event traffic: the rank only runs to Central Station this week.</span>':'<span class="wnote">Trains every 20 minutes. Please mind the gap.</span>'}</div></div>`);
+ o.classList.add('phoneov','wmapov');o.classList.toggle('mapov',true);o.dataset.app='world';o.dataset.from=WV.from==='phone'?'phone':'';updBlur();
+ o.onclick=e=>{if(e.target===o)worldClose()};
+ $('wclose').onclick=worldClose;if($('wback'))$('wback').onclick=()=>{if(WV.from==='phone'&&MAPV&&MAPV.fromWorld===false){phoneBack()}else phoneBack()};
+ o.querySelectorAll('.wnode').forEach(n=>{n.onclick=()=>{WV.sel=n.dataset.w;if(typeof sfx==='function')sfx('hover');worldDraw()};n.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();n.onclick()}}});
+ worldWire()}
+function worldSide(){const m=WV.mode,here=wHere();
+ if(m==='station'){const D=WDEP();return`<div class="wboard"><div class="wbh"><span>TIME</span><span>DESTINATION</span><span>PLAT</span><span></span></div>
+  ${D.map(d=>`<button class="wrow ${WV.sel===d.k?'sel':''} ${d.ok?'':'no'}" data-k="${d.k}"><span class="wt">${d.t}</span><span class="wd">${esc(WLOC[d.k].n)}<small>${d.ok?(d.k==='con'?'Calling at Conference Quarter only':d.k==='home'?'Calling at Linden Street':'Calling at Brindle & Co'):esc(d.why)}</small></span><span class="wp">${d.pf}</span><span class="ws ${d.ok?'':'bad'}">${d.ok?d.st:d.st==='NOT TODAY'?'NOT TODAY':'—'}</span></button>`).join('')}</div>
+  ${(()=>{const d=D.find(x=>x.k===WV.sel);return d?`<div class="wcard"><b>${esc(WLOC[d.k].n)}</b><p>${esc(WLOC[d.k].d)}</p>${d.ok?`<button class="btn pri wgo" id="wgo">Board the ${d.t} <span class="kn">Enter</span></button>`:`<p class="wwhy">${esc(d.why)}</p>`}</div>`:'<p class="small wpick">Pick a train.</p>'})()}`}
+ if(m==='taxi'){return`<div class="wmeter"><div class="wmh"><span>FARE</span><b>£0.00</b><small>event shuttle · free with a con badge</small></div>
+  ${Object.keys(WLOC).filter(k=>k!=='con').map(k=>`<button class="wrow ${k==='station'?'sel':'no'}" data-k="${k}" ${k==='station'?'':'disabled'}><span class="wd">${esc(WLOC[k].n)}<small>${k==='station'?'About fifteen minutes':'"Station only, mate. Event traffic."'}</small></span></button>`).join('')}</div>
+  <div class="wcard"><b>Central Station</b><p>The driver looks at you in the mirror. "Station? Lovely. Belt on."</p><button class="btn pri wgo" id="wgo">Go <span class="kn">Enter</span></button></div>`}
+ const k=WV.sel,L=WLOC[k];if(!L)return'';const isHere=here===k,seen=Object.values(AREAS).filter(a=>L.reg.includes(a.reg)&&S.visited&&S.visited[a.k]).length;
+ return`<div class="wcard big"><span class="wk">${isHere?'YOU ARE HERE':here==='train'?'ON THE TRAIN':'ELSEWHERE'}</span><b>${esc(L.n)}</b><p>${esc(L.d)}</p>
+  <div class="wkv"><span>Places you've been</span><b>${seen}</b></div><div class="wkv"><span>Getting there</span><b>${esc(L.how)}</b></div>
+  ${G.ok?`<button class="btn ${isHere?'pri':''} wgo" id="wview">${isHere?'Open the map here':'Look at its map'}</button>`:''}</div>`}
+function worldWire(){const o=$('ov');
+ o.querySelectorAll('.wrow').forEach(b=>b.onclick=()=>{if(b.disabled)return;WV.sel=b.dataset.k;if(typeof sfx==='function')sfx('hover');worldDraw()});
+ if($('wgo'))$('wgo').onclick=()=>{if(WV.mode==='station'){const d=WDEP().find(x=>x.k===WV.sel);if(!d||!d.ok)return;const story=stepIs('train');if(typeof sfx==='function')sfx('select');tripStart(d.k,story?{story:stepGo}:{})}
+  else if(WV.mode==='taxi'){taxiGo()}};
+ if($('wview'))$('wview').onclick=()=>{const L=WLOC[WV.sel];mapOpen(true,L.reg[0]);MAPV.fromWorld=true}}
+function taxiGo(){closeOv();const o=$('ov');o.classList.remove('phoneov','mapov','wmapov');delete o.dataset.app;delete o.dataset.from;fadeTp(()=>{teleportArea('station');run([{bg:'station'},{hide:1},N(pick(['Fifteen minutes of the driver explaining why he doesn\'t trust contactless. Then Central Station: commuters, pigeons, and the departures board clattering.','The taxi smells of pine air freshener and ambition. The driver drops you at Central Station and wishes you luck "with the hacking".']))],hub)})}
+/* the station and the taxi rank call these */
+function stationBoard(){worldOpen('station','world')}
+function taxiRank(){worldOpen('taxi','world')}
 
 /* ============ SAVE SLOTS ============ */
 const NSLOT=5;
@@ -16839,7 +17398,7 @@ function audioOn(){
 function applyVolumes(){if(!AU)return;const v=SETTINGS.vol,c=x=>x*x,t=AC.currentTime;
  AU.master.gain.setTargetAtTime(c(v.master),t,.05);AU.music.gain.setTargetAtTime(c(v.music)*.55,t,.05);AU.amb.gain.setTargetAtTime(c(v.amb)*.8,t,.05);AU.sfx.gain.setTargetAtTime(c(v.sfx),t,.05)}
 /* ---------- scene → loops ---------- */
-const AREA_AUD={flat:['home','home'],stairs:['home','home'],bakery:['home','bakery'],bakehouse:['home','bakery'],livingroom:['home','home'],kitchen:['home','home'],bathroom:['home','home'],boxroom:['home','home'],bedroom:['home','home'],hometerrace:['home','street'],office:['hotel','office'],lindaoffice:['hotel','office'],station:['home','station'],platform:['home','station'],
+const AREA_AUD={coachA:['home','train'],coachB:['home','train'],coachC:['home','train'],flat:['home','home'],stairs:['home','home'],bakery:['home','bakery'],bakehouse:['home','bakery'],livingroom:['home','home'],kitchen:['home','home'],bathroom:['home','home'],boxroom:['home','home'],bedroom:['home','home'],hometerrace:['home','street'],office:['hotel','office'],lindaoffice:['hotel','office'],station:['home','station'],platform:['home','station'],
  plaza:['night','street'],vestibule:['con','hum'],foyer:['con','hum'],lobby:['hotel','lobby'],cafe:['hotel','lobby'],luggage:['hotel','hotel'],backstairs:['hotel','hotel'],bar:['bar','bar'],terrace:['bar','garden'],
  walkway:['con','hum'],ringN:['con','hum'],ringE:['con','hum'],ringS:['con','hum'],courtyard:['night','garden'],hallA:['hall','hall'],backstage:['hall','room'],hallB:['hall','room'],vendor:['con','hum'],villagerow:['con','hum'],
  lockpick:['con','room'],ctf:['con','room'],soc:['con','room'],carhack:['con','room'],ics:['con','room'],soceng:['con','room'],food:['con','hum'],cosplay:['con','hum'],lounge:['night','room'],naps:['night','hotel'],
@@ -16852,7 +17411,7 @@ const AREA_AUD={flat:['home','home'],stairs:['home','home'],bakery:['home','bake
  kitchenC:['tense','hotel'],breakroom:['tense','room'],neconc:['con','hum'],neconc2:['con','hum'],constore:['con','hum'],demostage:['con','hum'],seconc:['con','hum'],seconc1:['con','hum'],aero:['con','room'],
  tabletop:['con','room'],film:['night','room'],skygarden:['night','garden'],tunnelN:['tense','hotel'],
  corridor:['hotel','hotel'],room1337:['hotel','hotel'],room1336:['party','bar'],housekeeping:['hotel','hotel'],stairwell:['hotel','hotel'],roof:['night','wind'],plantdeck:['night','wind']};
-const BG_AUD={con:['con','hum'],lock:['con','room'],ctf:['con','room'],soc:['con','room'],stream:['con','hum'],hotel:['hotel','hotel'],roof:['night','wind'],dawn:['night','wind'],stage:['hall','hall'],keynote:['hall','hall'],vendor:['con','hum'],party:['party','bar'],void:['tense',null],flat:['home','home'],bakery:['home','bakery'],office:['hotel','office'],train:['home','station'],cos:['con','hum'],chill:['night','room'],bar:['bar','bar'],lobby:['hotel','lobby']};
+const BG_AUD={carriage:['home','train'],con:['con','hum'],lock:['con','room'],ctf:['con','room'],soc:['con','room'],stream:['con','hum'],hotel:['hotel','hotel'],roof:['night','wind'],dawn:['night','wind'],stage:['hall','hall'],keynote:['hall','hall'],vendor:['con','hum'],party:['party','bar'],void:['tense',null],flat:['home','home'],bakery:['home','bakery'],office:['hotel','office'],train:['home','station'],cos:['con','hum'],chill:['night','room'],bar:['bar','bar'],lobby:['hotel','lobby']};
 function audioScene(){
  if(!S||$('title').classList.contains('on'))return['night',null];
  if(S.ending)return BG_AUD[CURBG]||['night',null];
@@ -17002,6 +17561,12 @@ const AMBS={
  wind:{len:20,seed:12,build(ctx,out,dur,R){windNoise(ctx,out,dur,R,.4,180,1100);hum(ctx,out,dur,.2,120)}},
  home:{lvl:.45,len:16,seed:13,build(ctx,out,dur,R){hum(ctx,out,dur,.12,110);for(let t=1;t<dur-1;t+=1.5+R()*3){const p=pan(ctx,R()*1.4-.7);p.connect(out);const f=2600+R()*1400;for(let k=0;k<2+R()*3;k++)tone(ctx,p,t+k*.11,f*(1+R()*.08),.08,{v:.008,a:.01,r:.07})}}},
  office:{lvl:.6,len:16,seed:18,build(ctx,out,dur,R){hum(ctx,out,dur,.25,160);const lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=1600;lp.connect(out);babble(ctx,lp,dur,R,{n:3,v:.02});for(let i=0;i<14;i++){let t=R()*dur;const k=6+R()*14;for(let j=0;j<k;j++){snare(ctx,out,t,.01,.02,4200+R()*2000);t+=.07+R()*.12}}}},
+ // on the train: the rumble of the bogies, the wheels over the rail joints (da-dum... da-dum), the odd squeal and creak
+ train:{lvl:.85,len:16,seed:23,build(ctx,out,dur,R){hum(ctx,out,dur,.75,140);windNoise(ctx,out,dur,R,.12,300,900);
+  const lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=420;lp.connect(out);
+  for(let t=.2;t<dur-.4;t+=1.02+R()*.06){for(const[o,v]of[[0,.5],[.11,.4],[.52,.45],[.63,.38]]){snare(ctx,lp,t+o,v*.55,.12,160+R()*60)}}
+  for(let i=0;i<2;i++){const t=2+R()*(dur-5);tone(ctx,out,t,1900+R()*500,.9+R(),{v:.004,a:.3,r:.6,type:'triangle'})}
+  for(let i=0;i<3;i++){const t=R()*(dur-1);snare(ctx,out,t,.03,.25,600+R()*300)}}},
  station:{len:20,seed:19,build(ctx,out,dur,R){const rv=verb(ctx,3.5,1.8,.8);rv.o.connect(out);const lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=1500;lp.connect(out);lp.connect(rv.i);babble(ctx,lp,dur,R,{n:10,v:.03});hum(ctx,out,dur,.3,90);
   for(const[t,m]of[[dur*.3,76],[dur*.3+.45,72],[dur*.3+.9,79]])tone(ctx,rv.i,t,mtof(m),1.4,{v:.05,a:.004,r:1.3})}},
  bakery:{len:16,seed:14,build(ctx,out,dur,R){hum(ctx,out,dur,.4,220);const rv=verb(ctx,1,3,.3);rv.o.connect(out);const lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=2000;lp.connect(out);lp.connect(rv.i);babble(ctx,lp,dur,R,{n:3,v:.03});clinks(ctx,out,dur,R,4)}},

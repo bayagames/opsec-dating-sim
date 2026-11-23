@@ -1,6 +1,6 @@
 /* ============ WORLD CONTENT: who stands where, what you can use, what's locked ============ */
-const BG2AREA={train:'platform',con:'foyer',lock:'lockpick',ctf:'ctf',soc:'soc',stream:'creator',hotel:'room1337',roof:'plantdeck',stage:'hallA',keynote:'hallA',vendor:'vendor',flat:'flat',bakery:'bakery',cos:'cosplay',chill:'lounge',bar:'bar',lobby:'lobby',office:'office'};
-const FAR={home:330,con:1400,f13:900,office:440,station:600};
+const BG2AREA={carriage:'coachB',train:'platform',con:'foyer',lock:'lockpick',ctf:'ctf',soc:'soc',stream:'creator',hotel:'room1337',roof:'plantdeck',stage:'hallA',keynote:'hallA',vendor:'vendor',flat:'flat',bakery:'bakery',cos:'cosplay',chill:'lounge',bar:'bar',lobby:'lobby',office:'office'};
+const FAR={home:330,con:1400,f13:900,office:440,station:600,train:820};
 /* Day 1 onboarding steps: badge → opening ceremony → hotel check-in → drop your bag → (the whole con) */
 const d1=k=>S&&(S.ch>1||(S.ch===1&&!!S.f['d1_'+k]));
 const onboarding=()=>S&&(S.ch===0||(S.ch===1&&!S.f.d1_room));
@@ -64,6 +64,7 @@ const ROLELINES={
  Doorman:['Welcome to the hotel. Please don\'t hack the revolving door. Somebody tried yesterday.','Taxis to the left, hackers to the right. Mostly hackers.'],
  Security:['Badge?','We\'ve had the Lumen people in here twice asking for camera footage. Twice. Without a warrant. Weird, that.'],
  Engineer:['We\'re watching every packet on the con network. Not reading them. Watching. There\'s a difference.','Someone\'s been running a rogue AP since Friday. We see it. We can\'t find it. It\'s killing me.'],
+ Passenger:['Sorry, is this seat taken? It is. By my bag. My bag has a ticket.','I come this way every day. The tunnel bit is my favourite. Don\'t tell anyone.','The Wi-Fi on here asks for your date of birth. For Wi-Fi. I said I was born in 1066.','Next stop\'s mine. Or the one after. I\'ll know it when I see the SafeSphere billboard.','Did you see the graffiti on the cutting wall? "whisper was here". It\'s everywhere this week.'],
  Commuter:['Platform 4. Conference quarter. Half this train is in hoodies.','Is everyone on this train going to that hacker thing? I just want to get to work.'],
  Coworker:['Is it Friday yet? It\'s Monday. Oh no.','Gary bought eleven gift cards. Eleven.','Linda says you\'re "the IT one". I said we know.'],
  Partygoer:['WELCOME TO 1336. We ordered fries six hours ago. We have since ordered more fries.','Somebody brought a soldering iron to a party. That somebody is me.','Don\'t mind us. We\'re reverse-engineering the TV. The TV is winning.']
@@ -97,7 +98,7 @@ function genCrowd(){
  R('Receptionist','con',-222.6,18,0,'lobby',4);R('Receptionist','con',-222.6,27,0,'lobby',6);R('Barista','con',-186,43.6,0,'cafe',1);R('Security','con',-96,-92.4,0,'security');
  R('Engineer','con',-55,6.6,BY,'noc',0);R('Engineer','con',-37,6.6,BY,'noc',2);
  for(const[x,z]of[[260,17],[262.6,17.4],[260.2,17.2],[263,14.6]])R('Partygoer','f13',x,z,0,'room1336',(x*7|0)%7);
- R('Commuter','station',727,9,0,'platform',2);R('Commuter','station',744,13,0,'platform',5);R('Coworker','office',502.6,1.7,0,'office',4);
+ R('Commuter','station',727,9,0,'platform',2);{const X=TRN.x,[a0,a1]=TRN.cars[0],[b0,b1]=TRN.cars[1],[c0,c1]=TRN.cars[2];R('Passenger','train',X+.75,b0+1.1,0,'coachB',3);R('Passenger','train',X-.7,b1-1.6,0,'coachB',6);R('Passenger','train',X+.7,c0+1.6,0,'coachC',1);R('Passenger','train',X-.75,a1-1.2,0,'coachA',4)}R('Commuter','station',744,13,0,'platform',5);R('Coworker','office',502.6,1.7,0,'office',4);
 }
 /* ---------------- what's open: the con and the hotel open up as the story needs them, so the first days stay small ----------------
    Each entry: areas, when they open, what you're told if you try earlier. Areas not listed are always open. */
@@ -221,14 +222,29 @@ function placeWorld(){
  int('office',508,-3.25,()=>'Look out of the window',N1('The city, grey and busy. Somewhere out there, four thousand hackers are packing hoodies. In two weeks you\'ll be one of them.'));
  /* ---- station ---- */
  int('station',734,4.4,()=>'Board the train',()=>trainMenu(),{r:2.6});
- int('station',736,46.6,()=>'Exit · taxi rank',()=>{if(curBeat()&&curBeat().id==='d1_station')return run([N('Your train\'s on Platform 4. You\'ve checked three times. You check a fourth time.')],hub);run([N('The taxi rank. Where to?'),C({t:'The Halcyon and the con',if:()=>S.day>=1&&f('d1_badge'),then:()=>{fadeTp(()=>{teleportArea('plaza');run([N('Twenty minutes later the taxi pulls up outside the Halcyon. The neon sign is still shouting.')],hub)});return[]}},{t:'Linden Street: home',then:()=>{fadeTp(()=>{teleportArea('bakery');run([N('Home. Linden Street smells of bread and diesel, the way it always has.')],hub)});return[]}},{t:'Not yet',then:[]})],hub)});
+ int('station',736,46.6,()=>'Way out · on foot',()=>{if(curBeat()&&curBeat().id==='d1_station')return run([N('Your train\'s on Platform 4. You\'ve checked three times. You check a fourth time.')],hub);run([N('Out through the portals. The taxis here are all booked for the con. Your feet aren\'t.'),C({t:'Walk home to Linden Street',hint:'Ten minutes',then:()=>{fadeTp(()=>{teleportArea('bakery');run([N('Past the barber, past the bus stop that never has a bus, and Linden Street smells of bread and diesel, the way it always has.')],hub)});return[]}},{t:'Walk to Brindle & Co',hint:f('office_open')||leadOpen('office')?'Five minutes':'Linda made you promise',if:()=>f('office_open')||leadOpen('office'),then:()=>{ach('office');fadeTp(()=>{teleportArea('office');run([N('Five minutes and a revolving door. The printer senses you immediately.')],hub)});return[]}},{t:'Stay in the station',then:[]})],hub)});
  int('station',736,23.4,()=>'Read the departures board',N1('09:12 CONFERENCE QUARTER · HALCYON — PLATFORM 4 — ON TIME. A man next to you photographs the board, then his ticket, then his face. Then he posts all three.'));
  int('station',764.8,26,()=>'Pasty Palace',N1('"Cheese and onion, or cheese and onion?" You pick cheese and onion. It\'s the right choice.'));
  int('station',701.5,35.7,()=>'Ticket machine',N1('It offers to email you a receipt, text you a receipt, and "remember your card for next time". You pay with cash. The machine seems hurt.'));
  int('station',764.8,35.2,()=>'Platform Coffee',N1('"Flat white?" You nod. The barista draws a heart in the foam, then, after a long look at you, turns it into a padlock.'));
  int('station',708,43.6,()=>'Play the station piano',N1('You play the four notes of the only song you know. A man in a suit stops, listens, and puts a pound in a cup that isn\'t there. Then he catches the 09:20.'));
+ /* ---- on the train ---- */
+ {const X=TRN.x,CR=TRN.cars;
+  const VIEW={tun:['Black. Brick going by too fast to see, and your own face in the glass, lit from above, looking tired. Then, all at once, daylight.','The tunnel. The lights in the coach seem brighter. Somebody\'s phone loses signal and they say "no" out loud, to nobody.'],
+   city:['The backs of the city: fire escapes, a rooftop garden, a man on a balcony in his dressing gown, a wall that says "whisper was here" in letters a metre high.','Towers sliding past. In one window a whole office is in a meeting. In the one above, someone is asleep on a sofa. You wonder which floor you\'d pick.','A SafeSphere billboard. Someone has added "FOREVER IS A LONG TIME" under the slogan. It\'s the third one you\'ve seen today.'],
+   sub:['Back gardens, one after another: a trampoline, a shed, a washing line, a cat watching the train with total contempt.','Terraces in a long row, every kitchen window a little different. A kid on a wall waves. You wave back before you can stop yourself.'],
+   field:['Fields. Actual fields. A horse looks up, decides you\'re not interesting, and looks down again.','Green, then more green, then a pylon, then green. Your phone has one bar. It feels like a holiday.'],
+   ind:['Warehouses, yards, a stack of shipping containers painted like a rainbow somebody gave up on. A forklift goes round in a slow circle.','The edge of the city: scrapyards, a depot full of buses, a billboard for a law firm you would never hire.']};
+  const look=()=>{const p=(((TRV.s||0)%TRV.L)+TRV.L)%TRV.L,seg=TRV.inTun?'tun':p<500?'city':p<1000?'sub':p<1400?'field':'ind';run([N(pick(VIEW[seg]))],hub)};
+  for(const[k,[z0,z1]]of CR.entries()){for(const[x,z]of[[X-.95,z0+6.7],[X+.95,z0+12.7],[X-.95,z1-6.3]])int('train',x,z,()=>'Look out of the window',look,{r:1.3})}
+  int('train',X+.3,CR[1][0]+4.7,()=>'Toilet',()=>run([N(pick(['VACANT, says the light. You open the door. You close the door. You can hold on until the Conference Quarter.','The toilet. The button to lock the door is the size of a dinner plate and you still don\'t trust it.']))],hub),{r:1.2});
+  for(const[z0]of CR)int('train',X+.9,z0+3.1,()=>'Free Wi-Fi',()=>run([N('FREE WI-FI · powered by Lumen SafeSphere. Just log in with your socials!'),C({t:'Connect',hint:'Exposure +6',then:()=>[FX({exp:6}),N('It wants your name, your email, your date of birth and access to your contacts "to personalise your journey". You give it a fake birthday. It asks again. You disconnect, but you\'ve already given it your phone\'s name. Which is your name.')]},{t:'Use your phone\'s data like a normal paranoid person',then:[N('One bar. It\'ll do.')]})],hub),{r:1.3});
+  int('train',X,CR[0][0]+.6,()=>'Driver\'s cab',N1('DRIVER ONLY. You knock, just to see. Nothing. Somewhere behind the door a radio crackles and a voice says something about signals and Linden Street.'),{r:1.3});
+  int('train',X,CR[2][1]-.6,()=>'Rear cab',N1('The back cab, locked and dark. Through the little window: the track unspooling behind you, silver, getting smaller and smaller.'),{r:1.3});
+  int('train',X-1.1,CR[0][0]+.6,()=>'Emergency alarm',N1('PULL IN AN EMERGENCY. PENALTY FOR IMPROPER USE £1000. You put your hands in your pockets, where they can\'t get any ideas.'),{r:1.1});
+  int('train',X-.9,CR[2][1]-9.3,()=>'Read the newspaper someone left',N1('THE DAILY BYTE. "LUMEN VALUED AT £40 BILLION". Page 3: a profile of Victor Hale, photographed in front of a bookshelf he has definitely never read. Page 9: the crossword, half done in pen, all wrong.'),{r:1.4})}
  /* ---- plaza ---- */
- int('con',-6,95.2,()=>'Taxi rank',()=>run([N('A taxi driver looks up from his phone. "Station?"'),C({t:'"Central Station, please."',then:()=>{fadeTp(()=>{teleportArea('station');run([N('The station. Commuters, pigeons, and a departures board that still has the 09:12 to the con on it.')],hub)});return[]}},{t:'"Not yet."',then:[]})],hub));
+ int('con',-136,98.6,()=>'Taxi rank',()=>{if(!G.ok||window.__test)return run([N('A taxi driver looks up from his phone. "Station?"'),C({t:'"Central Station, please."',then:()=>{taxiGo();return[]}},{t:'"Not yet."',then:[]})],hub);taxiRank()});
  int('con',-37,81.6,()=>'Look at the big sign',N1('CTRL+ALT+CON, in letters taller than you. Somebody has stuck a tiny sticker over the Lumen logo at the bottom. It says "no".'));
  int('con',-20,73.8,()=>'Coffee cart',N1('"Bean There". The barista has a badge, a beard and a QR code tattoo. "It goes to my mum\'s bakery," he says. You don\'t scan it. He respects that.'));
  int('con',24,97.6,()=>'Bus stop',N1('Bus 42. The timetable is a Lumen ad. "SafeSphere: Privacy On The Move." Someone has added, in marker: "on the move to where?"'));
@@ -380,13 +396,10 @@ function serviceLift(){
   {t:'Stay here',then:[]})],hub);
 }
 function trainMenu(){
- if(stepIs('train'))return stepGo();
  if(curBeat()&&curBeat().id==='d1_station')return run([N('Not that train. Yours is the 16:12 to the Conference Quarter, and something tells you to look around the concourse first.')],hub);
- run([{hide:1},N('The train hums at Platform 4. The doors chime. A screen above them lists the stops.'),C(
-  {t:'Conference Quarter · the Halcyon and the con',if:()=>S.day>=1,then:()=>{ach('train');fadeTp(()=>{teleportArea('plaza');run([N('Twenty minutes, and the doors open onto the Conference Quarter. The Halcyon\'s neon is still shouting.')],hub)});return[]}},
-  {t:'Linden Street · home',then:()=>{ach('train');fadeTp(()=>{teleportArea('bakery');run([N('Two stops. Linden Street smells of bread and diesel, the way it always has.')],hub)});return[]}},
-  {t:'Brindle & Co · work',then:()=>{if(!(f('office_open')||leadOpen('office')))return[N('Linda made you promise not to come in this week. Linda would be thrilled to see you, which is exactly the problem.')];ach('train');ach('office');fadeTp(()=>{teleportArea('office');run([N('The office, on a weekday you\'re supposed to be off. The printer senses you immediately.')],hub)});return[]}},
-  {t:'Not yet',then:[]})],hub);
+ // the departures board: pick where to go, board, and ride (the story's train journeys happen on board)
+ if(!G.ok||window.__test){if(stepIs('train'))return stepGo();return run([N('The train hums at Platform 4.'),C({t:'Conference Quarter',if:()=>S.day>=1,then:()=>{tripStart('con');return[]}},{t:'Linden Street',then:()=>{tripStart('home');return[]}},{t:'Not yet',then:[]})],hub)}
+ stationBoard();
 }
 function fadeTp(fn){if(window.__test){fn();WD.area=null;return}const f=$('fade');sfx('whoosh');f.classList.add('on');setTimeout(()=>{fn();WD.area=null;G.forceFrame=true;setTimeout(()=>f.classList.remove('on'),160)},300)}
 /* ---------- characters ---------- */

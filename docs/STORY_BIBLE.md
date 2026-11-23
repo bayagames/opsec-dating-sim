@@ -169,6 +169,18 @@ Afterwards the postgame opens The Week After: free roam, nothing to do, everyone
 **People stepping in** (`INJ`): at the copycat post, the burglary, the framing, the raid and Krall's arrest, people
 you're close to step in and change what happens (a clue, less Exposure, your laptop hidden, Rin saved).
 
+## Getting around
+The city has four places: Linden Street (home, Proof), Central Station, Brindle & Co and the Conference Quarter (the con,
+the Halcyon and its tower). Inside a place you can fast-travel between hubs from its map; between places you go
+yourself: walk from home or the office to the station, take the Quarterline from Platform 4, take a taxi from the rank
+on the plaza (it only goes to the station this week). The map on the phone opens on the building you're in; back
+out of it and you get the city (10d_world.js), where you can look at any place's map but not jump there. The board
+at Platform 4 and the taxi rank use their own versions of the city map.
+Boarding a train plays the departure (`[cut depart]`: the 16:12 pulling out under the iron roof) and puts you in Coach
+B. A story journey plays on board (`[bg carriage]`: Day 1's meeting with Astrid, Day 5's ride with Ellie) and arrives
+with the scene. Otherwise you can walk the train, look out of the windows, sit with the passengers, and after ten
+seconds a button (or Enter) takes you to your stop.
+
 ## Cutscenes
 `[cut shot cast...]` moves the camera to a shot (`CUTS`, 09c) with the cast on their marks; `[cut off]` ends it (it
 also ends with the conversation). A shot is a list of camera moves (dolly, orbit, push-in; eased, then a breathing
@@ -195,8 +207,8 @@ what people like (£15, Exposure +4). Gifts are everyday things; everyone loves 
 ## Save files and postgame
 Three files (profiles), each with its own meta (achievements, endings and their versions, hints, scenes seen, run
 history, stats, total playtime, the loop) and its own run saves. No Continue. The title's Achievements button shows
-only achievements (who you fell for and what you solved aren't achievements; endings and run counts stay hidden
-until the postgame opens); the Postgame button (and a Postgame app on the phone) appears once the file has an ending.
+only achievements (an "In Love" one appears once you've met that person, a "Solved" one once the mystery is on your
+case board; endings and run counts stay hidden until the postgame opens); the Postgame button (and a Postgame app on the phone) appears once the file has an ending.
 The postgame (06c data, 06d screen) is fullscreen with four rooms: The Week (a left-to-right map of every big choice
 and the endings at the end of each branch; drag, zoom, tap for details), Endings (a gallery by tier with your versions
 and why), Scenes (replay, sandboxed, from the title screen only) and Records (stats across every run, run history,

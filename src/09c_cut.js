@@ -122,7 +122,7 @@ function cutCam(cam){const c=WD.cut,now=performance.now(),src=c.sub||c,t=(now-sr
  c.pose=p;camApply(cam,p);return p.eye}
 /* ---------- the title screen's camera ---------- */
 const TT={on:false,i:0,t0:0,cast:{}};
-function titleCamOn(on){TT.on=!!on&&G.ok;if(TT.on&&!TT.t0){TT.i=Math.floor(Math.random()*TITLESHOTS.length);TT.t0=performance.now();titleShotIn()}if(!TT.on)TT.t0=0}
+function titleCamOn(on){TT.on=!!on&&G.ok&&!/[?&]nopre\b/.test(location.search);if(TT.on&&!TT.t0){TT.i=Math.floor(Math.random()*TITLESHOTS.length);TT.t0=performance.now();titleShotIn()}if(!TT.on)TT.t0=0}
 function titleNeed(){if(typeof regionNeed==='function')regionNeed('con',false)}
 function titleShotIn(){const s=TITLESHOTS[TT.i];if(typeof titlePlace==='function')titlePlace(s.area,s.slot);TT.cast={};for(const c of s.cast||[])TT.cast[c[0]]=c.slice(1);WD.reg='con';WD.area=s.area;G.atmoInit=false;const f=$('tfade');if(f){f.classList.remove('on')}}
 function titleCam(cam){const s=TITLESHOTS[TT.i],now=performance.now(),t=(now-TT.t0)/1000,D=movesDur(s.moves);

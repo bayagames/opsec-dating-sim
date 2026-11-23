@@ -9,7 +9,7 @@
    Characters and other moving things sample the same lights on the CPU (probeAt). */
 const BAKE={cube:320,fill:.11,soft:.22,rgbm:8};
 const PD12='const vec2 PD[12]=vec2[](vec2(-.326,-.406),vec2(-.840,-.074),vec2(-.696,.457),vec2(-.203,.621),vec2(.962,-.195),vec2(.473,-.480),vec2(.519,.767),vec2(.185,-.893),vec2(.507,.064),vec2(.896,.412),vec2(-.322,-.933),vec2(-.792,-.598));';
-function bakeOK(){const r=G.r;return !!(r&&r.capabilities.isWebGL2&&(r.extensions.has('EXT_color_buffer_half_float')||r.extensions.has('EXT_color_buffer_float')))}
+function bakeOK(){const r=G.r;if(/[?&]nobake\b/.test(location.search))return false;return !!(r&&r.capabilities.isWebGL2&&(r.extensions.has('EXT_color_buffer_half_float')||r.extensions.has('EXT_color_buffer_float')))}
 function bakeMats(){
  if(G.bk)return G.bk;const T=G.T;
  const vs='attribute vec2 lmuv;varying vec3 wp;varying vec3 wn;void main(){wp=position;wn=normal;gl_Position=vec4(lmuv*2.-1.,0.,1.);}';

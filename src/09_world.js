@@ -3,7 +3,7 @@ const WD={x:0,y:0,z:0,yaw:0,pit:0,vx:0,vz:0,vy:0,eye:1.62,ground:true,reg:'home'
 /* ---------- areas ---------- */
 /* the most specific area wins: 'sub' areas first, then the smallest rectangle (a café inside a lobby, a food court inside the courtyard) */
 function areaAt(reg,x,z,y){let best=null,bs=1e18;for(const k in AREAS){const a=AREAS[k];if(a.reg!==reg)continue;const r=a.r;if(x>=r[0]&&x<=r[2]&&z>=r[1]&&z<=r[3]&&y>=a.y0&&y<=a.y1){const sz=(r[2]-r[0])*(r[3]-r[1])/(a.sub?1e6:1);if(sz<bs){bs=sz;best=k}}}return best}
-function teleport(reg,x,z,yaw,y){WD.tpAt=performance.now();G.poolReg=null;G.atmoInit=false;WD.reg=reg;WD.x=x;WD.z=z;WD.yaw=yaw;WD.pit=0;WD.y=y||0;WD.vy=0;WD.vx=WD.vz=0;WD.eye=WD.y+1.62}
+function teleport(reg,x,z,yaw,y){WD.tpAt=performance.now();if(WD.cut){WD.cut=null;if(typeof cutClass==='function')setTimeout(cutClass,0)}if(reg!=='train'&&typeof S!=='undefined'&&S&&S.trip)S.trip=null;G.poolReg=null;G.atmoInit=false;WD.reg=reg;WD.x=x;WD.z=z;WD.yaw=yaw;WD.pit=0;WD.y=y||0;WD.vy=0;WD.vx=WD.vz=0;WD.eye=WD.y+1.62}
 function teleportArea(k){const a=AREAS[k];if(!a)return;teleport(a.reg,a.sp[0],a.sp[1],a.sp[2],a.sp[3]||0)}
 const bgArea=k=>BG2AREA[k]||(typeof AREAS!=='undefined'&&AREAS[k]?k:null);
 /* are you in (or right at the edge of) this area? talking over a counter or through a doorway counts */
@@ -164,7 +164,7 @@ function candidates(){
  for(const c of visibleChars()){const nm=CH[c.id].name;const st=beatStep(curBeat());
   let lbl=stepIs(c.id)?(st.lbl||'Talk to '+nm):(ROM.includes(c.id)&&!met(c.id)?'Talk to '+(UNMET[c.id]||'the stranger'):'Talk to '+nm);
   L.push({x:c.x,z:c.z,y:c.y||0,label:lbl,act:()=>charAct(c),r:2.4,col:CH[c.id].col,kind:'talk'})}
- for(const n of WD.npcs)if(n.reg===WD.reg)L.push({x:n.x,z:n.z,y:n.y,label:n.role?({Doorman:'Chat with the doorman',Volunteer:'Talk to a volunteer',Info:'Ask at the info desk',Receptionist:'Talk to the receptionist',Barista:'Talk to the barista',Security:'Talk to the guard',Engineer:'Talk to an engineer',Commuter:'Chat with a commuter',Coworker:'Chat with a coworker',Partygoer:'Talk to a partygoer'})[n.role]||'Talk':(n.reg==='office'?'Chat with a coworker':n.reg==='station'?'Chat with a commuter':'Chat with an attendee'),act:()=>npcTalk(n),r:2,kind:'talk',col:'#9a98a6'});
+ for(const n of WD.npcs)if(n.reg===WD.reg)L.push({x:n.x,z:n.z,y:n.y,label:n.role?({Doorman:'Chat with the doorman',Volunteer:'Talk to a volunteer',Info:'Ask at the info desk',Receptionist:'Talk to the receptionist',Barista:'Talk to the barista',Security:'Talk to the guard',Engineer:'Talk to an engineer',Commuter:'Chat with a commuter',Passenger:'Talk to a passenger',Coworker:'Chat with a coworker',Partygoer:'Talk to a partygoer'})[n.role]||'Talk':(n.reg==='office'?'Chat with a coworker':n.reg==='station'?'Chat with a commuter':'Chat with an attendee'),act:()=>npcTalk(n),r:2,kind:'talk',col:'#9a98a6'});
  for(const i of INTS)if(i.reg===WD.reg){const lb=i.label();if(lb)L.push({x:i.x,z:i.z,y:i.y,h:i.h,label:lb,act:i.act,r:i.r})}
  // leads and activities that belong to the room you're standing in: offered just ahead of you, below anything nearer
  if(S.day>=1){const ar=areaAt(WD.reg,WD.x,WD.z,WD.y),fx=-Math.sin(WD.yaw),fz=-Math.cos(WD.yaw),px=WD.x+fx*1.9,pz=WD.z+fz*1.9;
@@ -202,8 +202,8 @@ function objective(){
  if(b){const st=beatStep(b),tg=beatTarget(b);o=Object.assign({t:st.t||b.t},tg||{})}
  else if(isFree()){const n=ROM.filter(sceneReady).length;o={t:`Free time: the ${SLOTN[S.slot].toLowerCase()} is yours. ${n?n+' '+(n>1?'people have':'person has')+' a scene for you (yellow on the minimap). ':''}Spend it with someone, on a lead, or at a talk. Or call it ${S.slot===5?'a night':'a '+SLOTN[S.slot].toLowerCase()} from your phone.`}}
  if(o&&o.reg&&o.reg!==WD.reg){
-  const H={f13:{reg:'f13',x:243,z:-9.4,y:0},conlift:{reg:'con',x:-212,z:-27,y:WD.y>8?L2:WD.y>3?L1:0},taxi:{reg:'con',x:-6,z:95.2,y:0},train:{reg:'station',x:734,z:4.4,y:0},stationexit:{reg:'station',x:736,z:46.6,y:0},homedoor:{reg:'home',x:-302.6,z:10.9,y:0},officelift:{reg:'office',x:497.7,z:12,y:0}};
-  const via={con:{f13:'conlift',station:'taxi',home:'taxi',office:'taxi'},f13:{con:'f13',station:'f13',home:'f13',office:'f13'},station:{con:'train',home:'train',office:'train',f13:'train'},home:{station:'homedoor',con:'homedoor',f13:'homedoor',office:'homedoor'},office:{station:'officelift',con:'officelift',home:'officelift',f13:'officelift'}}[WD.reg];
+  const H={f13:{reg:'f13',x:243,z:-9.4,y:0},conlift:{reg:'con',x:-212,z:-27,y:WD.y>8?L2:WD.y>3?L1:0},taxi:{reg:'con',x:-136,z:98.6,y:0},train:{reg:'station',x:734,z:4.4,y:0},stationexit:{reg:'station',x:736,z:46.6,y:0},homedoor:{reg:'home',x:-302.6,z:10.9,y:0},officelift:{reg:'office',x:497.7,z:12,y:0}};
+  const via={con:{f13:'conlift',station:'taxi',home:'taxi',office:'taxi'},f13:{con:'f13',station:'f13',home:'f13',office:'f13'},station:{con:'train',home:'stationexit',office:'stationexit',f13:'train'},train:{},home:{station:'homedoor',con:'homedoor',f13:'homedoor',office:'homedoor'},office:{station:'officelift',con:'officelift',home:'officelift',f13:'officelift'}}[WD.reg];
   const k=via&&via[o.reg];if(k)o=Object.assign({},o,H[k],{far:1})}
  return o;
 }
@@ -224,7 +224,7 @@ const TODP=[
  {hz:[.96,.5,.36],zn:[.2,.14,.38],st:.25,fog:[.42,.26,.3],amb:[.46,.32,.34],sun:1.8,inside:1.1},
  {hz:[.1,.06,.16],zn:[.012,.012,.05],st:1,fog:[.1,.06,.16],amb:[.3,.3,.35],sun:1,inside:1},
  {hz:[.06,.04,.1],zn:[.008,.008,.03],st:1,fog:[.06,.04,.1],amb:[.24,.24,.3],sun:.85,inside:.95}];
-function todNow(){if(TT.on)return TODP[TITLESHOTS[TT.i].slot];if(!S||S.day<1||!['con','f13','station'].includes(WD.reg))return null;return TODP[clamp(S.slot,0,5)]}
+function todNow(){if(TT.on)return TODP[TITLESHOTS[TT.i].slot];if(!S||S.day<1||!['con','f13','station','train'].includes(WD.reg))return null;return TODP[clamp(S.slot,0,5)]}
 function render(dt){
  const T=G.T,r=G.r,cv=G.cv,cam=G.cam;
  // resolution (adaptive)
@@ -233,7 +233,7 @@ function render(dt){
  if(key!==G.sizeKey){G.sizeKey=key;r.setPixelRatio(dpr);r.setSize(w,h,false);if(G.composer){G.composer.setPixelRatio(dpr);G.composer.setSize(w,h)}if(G.fxaa)G.fxaa.material.uniforms.resolution.value.set(1/(w*dpr),1/(h*dpr));cam.aspect=w/h}
  for(const k in G.regions){const o=G.regions[k].obj;if(o)o.visible=k===WD.reg}
  // atmosphere: fog + hemisphere ease towards the current area's values
- const aK=TT.on?TITLESHOTS[TT.i].area:WD.cut&&WD.cut.C.area&&cutOn()?WD.cut.C.area:WD.area,R=G.regions[WD.reg],A=aK&&AREAS[aK],TOD=todNow();const fog=(TOD&&A&&A.out)?TOD.fog:(A&&A.fog)||R.fog,fr=(A&&A.fr)||R.fr,amb=(TOD&&A&&A.out)?TOD.amb:(A&&A.amb)||R.amb||[.3,.3,.35];
+ const aK=TT.on?TITLESHOTS[TT.i].area:WD.cut&&WD.cut.C.area&&cutOn()?WD.cut.C.area:WD.area,R=G.regions[WD.reg],A=aK&&AREAS[aK],TOD=todNow();const fog=(TOD&&A&&(A.out||WD.reg==='train'))?TOD.fog:(A&&A.fog)||R.fog,fr=(A&&A.fr)||R.fr,amb=(TOD&&A&&A.out)?TOD.amb:(A&&A.amb)||R.amb||[.3,.3,.35];
  const ease=G.atmoInit?Math.min(1,dt*2.5):1;G.atmoInit=true;
  G.fogT=G.fogT||new T.Color();G.fogT.setRGB(fog[0],fog[1],fog[2],T.SRGBColorSpace);G.fog.color.lerp(G.fogT,ease);
  G.fog.near+=(fr[0]-G.fog.near)*ease;G.fog.far+=(fr[1]-G.fog.far)*ease;
@@ -254,11 +254,12 @@ function render(dt){
  cam.fov=vf*180/Math.PI;cam.far=(FAR[WD.reg]||180)+40;cam.updateProjectionMatrix();
  if(TT.on&&$('title').classList.contains('on')){const p=titleCam(cam);zoneCull(WD.reg,p[0],p[1],p[2])}
  else if(WD.cut&&cutOn()){const p=cutCam(cam);zoneCull(WD.reg,p[0],p[1],p[2])}
- else{cam.position.set(WD.x,WD.eye+bob,WD.z);cam.rotation.set(WD.pit,WD.yaw,0);zoneCull(WD.reg,WD.x,WD.eye,WD.z)}
+ else{cam.position.set(WD.x,WD.eye+bob,WD.z);cam.rotation.set(WD.pit,WD.yaw,0);if(typeof trainSway==='function')trainSway(cam);zoneCull(WD.reg,WD.x,WD.eye,WD.z)}
  G.sky.position.copy(cam.position);const su=G.sky.material.uniforms;su.t.value=performance.now()/1000;
  const tod=todNow();if(tod){su.hz.value.setRGB(...tod.hz);su.zn.value.setRGB(...tod.zn);su.st.value=tod.st}
  else{su.hz.value.copy(G.fog.color);if(R.day){su.zn.value.setRGB(.12,.3,.75);su.st.value=0}else{su.zn.value.setRGB(.012,.012,.05);su.st.value=1}}
  updLights(dt);
+ if(typeof trainTick==='function'&&!TT.on)trainTick(dt);
  updSprites(dt);if(!TT.on)updBeacon();else{for(const id of['wpG','wpP'])if($(id))$(id).style.display='none';if(G.beacon){G.beacon.visible=false;G.pinB.visible=false}}vfxTick();
  G.revZOn=G.revZ;try{if(G.composer)G.composer.render(dt);else r.render(G.scene,cam)}finally{G.revZOn=false}
 }
@@ -454,7 +455,7 @@ function initWorld(cb){
  // lighting is baked per place, the first time you go there (and cached after): warm up the place the latest save is in
  G.baked=bakeOK();setQuality(G.q);finishInit();
  let pre=$('title').classList.contains('on')&&!window.__test?'con':'home';if(pre==='home')try{const a=readSlot('auto');if(a&&a.pos&&G.regions[a.pos[0]]&&(a.mapv||0)>=3)pre=a.pos[0];else if(a&&a.ch>=1)pre='con'}catch(e){}
- setTimeout(()=>{if(!G.lmBusy&&!(S&&S.inWorld))regionNeed(pre,false)},50);
+ if(!/[?&]nopre\b/.test(location.search))setTimeout(()=>{if(!G.lmBusy&&!(S&&S.inWorld))regionNeed(pre,false)},50);
  return G.ok;
 }
 function finishInit(){G.ready=true;loadUI(false);const w=G.waiters||[];G.waiters=[];for(const f of w)f()}

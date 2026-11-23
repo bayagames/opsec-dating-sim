@@ -10,7 +10,9 @@ if met('pia')
  ~ By the old piano, Pia is unpacking her violin. She sees you, sees Ellie's face, and doesn't play anything bright. She plays something slow and steady instead, like a hand on a shoulder.
  ellie.n: That's lovely. Who's that?
  > A friend. I think.
-[bg train]
+[cut depart]
+~ The 08:22 slides out from under the iron roof. Ellie watches the station go, like she's never seen one before.
+[bg carriage]
 ~ Ellie doesn't talk on the train. She holds a paper cup of station coffee and doesn't drink it, and watches the backs of houses go past.
 ~ Halfway, without looking away from the window, she reaches over and holds your hand. Just holds it. As if it's a railing.
 [bg bakery]
@@ -88,7 +90,7 @@ ellie.b: You don't owe anyone this. You're not a superhero. You're a man who fix
  ellie.n: I'm coming. Don't argue. You'll lose. I've been arguing with ovens since I was nine.
  [flag ellie_fights]
 ~ Mr Demir lends you a hat and a scarf "for disguise purposes" and walks you both to the station himself, like a bodyguard in a barber's apron.
-[bg train]
+[bg carriage]
 ~ On the train back, Ellie puts her badge in her coat pocket, wrapped in a crisp packet. The blue light still glows faintly through the foil.
 ellie.n: Did I do that right? Foil?
 > You did that exactly right.
