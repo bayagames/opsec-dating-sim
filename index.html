@@ -507,8 +507,6 @@ img,svg,canvas{-webkit-user-drag:none;user-drag:none}
 .pfile.empty{opacity:.75;border-style:dashed}
 @media(max-width:640px){.pfiles{grid-template-columns:1fr}.pfile{min-height:0}}
 
-.pgcard{width:min(980px,calc(100vw - 24px));max-height:calc(100vh - 40px);display:flex;flex-direction:column}
-.pgbody{overflow:auto;flex:1;min-height:0;padding-right:4px}
 .ttree .tnode{margin:4px 0 4px 0}.ttree .tkids{margin-left:18px;border-left:2px solid var(--line);padding-left:12px}
 .ttree .tl{font-size:15px;color:var(--dim)}.ttree .tnode.seen>.tl{color:var(--ink)}.ttree .ok{color:var(--mint)}
 .tends,.egrid{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
@@ -518,6 +516,90 @@ img,svg,canvas{-webkit-user-drag:none;user-drag:none}
 .hint{padding:8px 12px;margin:6px 0;border-left:3px solid var(--mint);background:#0002;border-radius:6px}.hint.riddle{border-color:#c9b6ff;font-style:italic}
 .ehints{text-align:left;margin:10px 0;padding:10px;border-radius:10px;background:#0003}
 .rrow{display:flex;gap:10px;align-items:center;margin:8px 0}.rhd{width:44px;height:50px;flex:none}.rbtns{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}.rbtns .btn{font-size:12px;padding:4px 8px}
+.phtip{position:absolute;left:0;right:0;bottom:max(6px,env(safe-area-inset-bottom));text-align:center;opacity:.55;pointer-events:none;margin:0}
+.phtip.flash{animation:phflash 1.6s ease}@keyframes phflash{0%,60%{opacity:1;color:var(--butter)}100%{opacity:.55}}
+
+/* ---- postgame: fullscreen everywhere ---- */
+#pgx{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;background:radial-gradient(70% 60% at 85% 0%,#c9b6ff1c,transparent 60%),radial-gradient(60% 50% at 0% 100%,#8affc112,transparent 60%),#120b1b;color:var(--ink);animation:pgin .35s cubic-bezier(.2,.8,.2,1)}
+@keyframes pgin{from{opacity:0;transform:scale(.985)}to{opacity:1;transform:none}}
+body.pgon #hud,body.pgon #vcur{display:none!important}
+.pgtop{display:flex;align-items:center;gap:18px;padding:12px max(18px,env(safe-area-inset-right)) 12px max(18px,env(safe-area-inset-left));border-bottom:1px solid #ffffff14;background:#0e0816cc;backdrop-filter:blur(8px)}
+.pgbrand{display:flex;align-items:center;gap:10px;font:24px/1 'VT323',monospace;letter-spacing:.12em}
+.pgdot{width:10px;height:10px;border-radius:50%;background:var(--mint);box-shadow:0 0 12px var(--mint)}
+.pgfile{font:15px 'Chakra Petch',sans-serif;letter-spacing:0;color:var(--butter);padding:2px 10px;border:1px solid #ffd16655;border-radius:999px}
+.pgmeta{display:flex;gap:18px;margin-left:auto;font-size:13px;color:var(--dim)}.pgmeta b{color:var(--ink);font:20px 'VT323',monospace}
+.pgclose{width:40px;height:40px;border-radius:12px;border:1px solid #ffffff22;background:#ffffff08;color:var(--ink);font-size:18px;cursor:pointer}
+.pgclose:hover,.pgclose.vhover{background:#ffffff18}
+.pgmain{flex:1;min-height:0;display:flex}
+.pgrail{width:210px;flex:none;padding:18px 12px;border-right:1px solid #ffffff10;display:flex;flex-direction:column;gap:6px;counter-reset:pg}
+.pgnav{counter-increment:pg;display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:2px;padding:12px 14px 12px 40px;position:relative;border-radius:12px;border:1px solid transparent;background:none;color:var(--dim);font:inherit;cursor:pointer}
+.pgnav::before{content:counter(pg,decimal-leading-zero);position:absolute;left:12px;top:13px;font:16px 'VT323',monospace;color:#ffffff44}
+.pgnav b{color:var(--ink);font-size:16px;font-weight:600}.pgnav small{font-size:12px}
+.pgnav:hover,.pgnav.vhover{background:#ffffff08}
+.pgnav.on{background:linear-gradient(90deg,#ffd16618,#ffd16605);border-color:#ffd16640}.pgnav.on::before{color:var(--butter)}
+.pgsec{flex:1;min-width:0;min-height:0;position:relative;overflow:hidden}
+.pgpad{height:100%;overflow:auto;padding:22px 26px 40px}
+.pghead h2{margin:0;font:40px/1 'VT323',monospace;letter-spacing:.04em}.pghead p{margin:6px 0 16px;color:var(--dim);max-width:720px}
+.pgk{margin:16px 0 8px;font:13px 'Chakra Petch',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+/* the map */
+.pgmapwrap{height:100%;display:flex;flex-direction:column}.pgmapwrap .pghead{padding:18px 24px 0}
+.pgcanvas{flex:1;min-height:0;position:relative;margin:0 14px 14px;border:1px solid #ffffff12;border-radius:16px;background:#0b0711;overflow:hidden;touch-action:none}
+#pgSvg{display:block;cursor:grab;touch-action:none;user-select:none}#pgSvg:active{cursor:grabbing}
+.te-l{fill:none;stroke:#ffffff1c;stroke-width:2}.te-l.lit{stroke:#8affc199;stroke-width:2.4}
+.tn{cursor:pointer}.tn text{font:13px 'Chakra Petch',sans-serif;fill:#bba8cf;pointer-events:none}
+.td rect{fill:#1d1229;stroke:#ffffff22;stroke-width:1.2}.td.seen rect{fill:#1f2a2a;stroke:#8affc1aa}.td.seen text{fill:#f6eefc}
+.td.hid rect{fill:#c9b6ff0d;stroke:#c9b6ff88;stroke-dasharray:5 4}.td.hid text{fill:#c9b6ff;font-style:italic}
+.td .tick{fill:var(--mint);font-weight:700}
+.te rect{fill:#14101a;stroke:var(--c);stroke-opacity:.35;stroke-dasharray:4 4}.te.got rect{fill:#1e1828;stroke-opacity:1;stroke-dasharray:none}.te.got text{fill:#f6eefc;font-weight:600}
+.tn.sel rect{stroke:var(--butter)!important;stroke-width:2.4;stroke-opacity:1}
+.tn:hover rect{filter:brightness(1.35)}
+.pgzoom{position:absolute;right:12px;top:12px;display:flex;flex-direction:column;gap:6px}.pgzoom button{width:38px;height:38px;border-radius:10px;border:1px solid #ffffff22;background:#1b1026e6;color:var(--ink);font-size:18px;cursor:pointer}
+.pglegend{position:absolute;left:12px;bottom:10px;display:flex;gap:14px;font-size:12px;color:var(--dim);background:#0b0711cc;padding:6px 10px;border-radius:10px}
+.lg{display:inline-block;width:14px;height:10px;border-radius:3px;border:1px solid #ffffff44;margin-right:6px;vertical-align:-1px}.lg.seen{border-color:var(--mint);background:#1f2a2a}.lg.hid{border:1px dashed #c9b6ff}.lg.end{border-radius:6px;border-color:var(--butter)}
+/* drawer */
+.pgdrawer{position:absolute;right:12px;top:12px;bottom:12px;width:min(360px,calc(100% - 24px));overflow:auto;padding:18px 18px 22px;border-radius:14px;background:#1a1124f2;border:1px solid #ffffff1c;box-shadow:-20px 0 40px #0008;animation:pgdr .3s cubic-bezier(.2,.8,.2,1);z-index:2}
+@keyframes pgdr{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+.pgdrawer h3{margin:2px 0 6px;font:32px/1.05 'VT323',monospace}.pgdrawer p{margin:6px 0;font-size:14px}.pglede{color:var(--ink);font-size:15px!important}
+.pgdx{position:absolute;right:10px;top:10px;width:32px;height:32px;border-radius:9px;border:1px solid #ffffff22;background:none;color:var(--ink);cursor:pointer}
+.pgver{padding:10px 0;border-top:1px solid #ffffff14}.pgvh{display:flex;justify-content:space-between;font-size:13px}.pgvh span{color:var(--dim)}.pgver p{font-size:13px!important;color:var(--dim)}
+.pgfaces{display:flex;gap:2px;margin:6px 0;align-items:center}.pgfaces .small{width:auto!important;height:auto!important}.pgfaces span{width:34px;height:38px;display:block}.pgfaces.sm span{width:26px;height:30px}.pgfaces em{font-size:12px;color:var(--dim);align-self:center}
+.pgchips{display:flex;flex-wrap:wrap;gap:6px}.pgchip{font:inherit;font-size:13px;padding:5px 11px;border-radius:999px;border:1px dashed var(--c);background:none;color:var(--dim);cursor:pointer}.pgchip.got{border-style:solid;color:var(--ink);background:#ffffff0a}
+/* endings */
+.pgsplit{display:flex;gap:18px;align-items:flex-start}.pggal{flex:1;min-width:0}
+.pgside{position:sticky;top:0;right:auto;bottom:auto;max-height:calc(100vh - 140px);flex:none}
+.pggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px}
+.pgcard{position:relative;text-align:left;font:inherit;display:flex;flex-direction:column;gap:4px;padding:14px 14px 14px;min-height:112px;border-radius:14px;border:1px dashed #ffffff22;background:#ffffff05;color:var(--dim);cursor:pointer;overflow:hidden}
+.pgcard.got{border:1px solid color-mix(in srgb,var(--c) 60%,transparent);background:linear-gradient(160deg,color-mix(in srgb,var(--c) 16%,transparent),#ffffff04 60%);color:var(--ink)}
+.pgcard.sel{outline:2px solid var(--butter);outline-offset:2px}.pgcard:hover,.pgcard.vhover{transform:translateY(-2px)}
+.pgcn{font:15px 'VT323',monospace;color:var(--c)}.pgcard b{font-size:16px;line-height:1.2}.pgcard small{font-size:12px;opacity:.8;line-height:1.35}.pgcard i{position:absolute;right:10px;top:10px;font-style:normal;font:15px 'VT323',monospace;color:var(--c)}
+/* scenes */
+.pgpeople{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.pgperson{display:flex;gap:12px;align-items:center;padding:10px 12px;border-radius:14px;background:#ffffff06;border:1px solid #ffffff12;border-left:3px solid var(--c)}.pgperson.none{opacity:.45;border-left-color:#ffffff22}
+.pgpb small{display:block}.pgph{width:52px;height:60px;flex:none;display:grid;place-items:center;font:30px 'VT323',monospace;color:var(--dim)}.pgpb b{font-size:15px}
+.pgdots{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}.pgsd{min-width:30px;height:30px;border-radius:9px;border:1px solid #ffffff1c;background:none;color:#ffffff40;font:15px 'VT323',monospace;cursor:default}
+.pgsd.on{border-color:var(--c);color:var(--ink);background:color-mix(in srgb,var(--c) 18%,transparent);cursor:pointer}.pgsd.on:disabled{cursor:default;opacity:.7}.pgsd.wide{padding:0 10px;font-size:14px}
+/* records */
+.pgtiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.pgtile{padding:12px 14px;border-radius:14px;background:#ffffff06;border:1px solid #ffffff12}.pgtile small{display:block;font-size:12px;color:var(--dim)}.pgtile b{font:28px/1.15 'VT323',monospace}
+.pgtop{display:flex;gap:10px;flex-wrap:wrap}.pgtopc{display:flex;flex-direction:column;align-items:center;padding:8px 14px;border-radius:14px;background:#ffffff06;border-bottom:3px solid var(--c)}.pgtopc span{width:54px;height:62px}.pgtopc small{color:var(--dim)}
+.pgcols{display:grid;grid-template-columns:1.2fr 1fr;gap:22px}
+.pgrun{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid #ffffff10}.pgrun>div:nth-child(2){flex:1;min-width:0}.pgrun b{display:block;font-size:14px}.pgrun small{color:var(--dim);font-size:12px}.pgrd{width:8px;height:34px;border-radius:4px;flex:none}
+.pghint{display:flex;gap:10px;padding:10px 12px;margin-bottom:8px;border-radius:12px;background:#8affc10c;border:1px solid #8affc130;font-size:14px}.pghint.riddle{background:#c9b6ff10;border-color:#c9b6ff44;font-style:italic}.pghint b{color:#c9b6ff;font:22px/1 'VT323',monospace}
+.pgachh{display:flex;align-items:center;gap:14px;margin-top:22px;flex-wrap:wrap}.pgachh .pgk{margin:0}
+.pgring{--p:0;width:58px;height:58px;border-radius:50%;background:conic-gradient(var(--butter) calc(var(--p)*1%),#ffffff14 0);display:grid;place-items:center;position:relative}.pgring::after{content:'';position:absolute;inset:6px;border-radius:50%;background:#120b1b}.pgring b{position:relative;z-index:1;font:18px 'VT323',monospace}
+.pgseg{display:flex;border:1px solid #ffffff22;border-radius:999px;overflow:hidden}.pgseg button{font:inherit;font-size:13px;padding:6px 14px;background:none;border:0;color:var(--dim);cursor:pointer}.pgseg button.on{background:var(--butter);color:#1b1026}
+.pgach{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px;margin-top:12px}
+.pga{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:12px;background:#ffffff05;border:1px solid #ffffff10;opacity:.6}.pga.on{opacity:1;border-color:#ffd16650;background:#ffd1660c}.pgai{font-size:18px;color:var(--butter);width:20px}.pga b{font-size:14px;display:block}.pga small{font-size:12px;color:var(--dim)}
+/* the week after */
+.pgafter{height:100%;overflow:auto;position:relative;display:grid;place-items:center;padding:30px}
+.pgaftbg{position:absolute;inset:0;background:radial-gradient(50% 40% at 50% 20%,#ffd16626,transparent),radial-gradient(60% 50% at 50% 100%,#c9b6ff22,transparent)}
+.pgaftin{position:relative;max-width:760px;text-align:center}.pgaftin h2{margin:4px 0;font:64px/1 'VT323',monospace}
+.pgheads{display:flex;flex-wrap:wrap;justify-content:center;gap:2px;margin:18px 0}.pgheads span{width:46px;height:52px}
+.pgafl{list-style:none;padding:0;margin:0 auto 22px;display:flex;flex-wrap:wrap;justify-content:center;gap:8px}.pgafl li{padding:6px 12px;border-radius:999px;background:#ffffff0a;font-size:14px}
+.pgbig{font-size:18px;padding:14px 30px;background:linear-gradient(135deg,var(--mint),#5ad0ff)!important;color:#1b1026!important;border:0!important}
+@media(max-width:820px){.pgmain{flex-direction:column}.pgrail{width:auto;flex-direction:row;overflow-x:auto;padding:8px;border-right:0;border-bottom:1px solid #ffffff10;order:2;border-top:1px solid #ffffff10}
+ .pgnav{padding:8px 12px;flex:none}.pgnav::before{display:none}.pgnav small{display:none}.pgmeta span:nth-child(n+2){display:none}.pgcols{grid-template-columns:1fr}
+ .pgsplit{display:block}.pgside{position:fixed;inset:auto 8px 76px 8px;max-height:62vh;width:auto}.pgmapwrap .pghead p{display:none}.pgmapwrap .pghead{padding:12px 16px 8px}.pgpad{padding:14px 14px 30px}.pghead h2{font-size:32px}.pglegend{display:none}}
 </style>
 </head>
 <body>
@@ -960,7 +1042,7 @@ const romCount=()=>ROM.filter(loved).length;
 /* Three save files (profiles). Each holds everything that lasts across runs: achievements, endings and how you got them,
    hints, scenes seen, finished routes and mysteries, the loop, and its own run saves. */
 let PROF=0;
-const META_DEF=()=>({ach:{},ends:{},endv:{},hints:[],seenSc:{},routes:{},solved:{},runs:0,restored:0,loop:0,secret:0,stats:{}});
+const META_DEF=()=>({ach:{},ends:{},endv:{},hints:[],seenSc:{},routes:{},solved:{},runs:0,restored:0,loop:0,secret:0,stats:{},play:0});
 const META=META_DEF();
 const profKey=n=>'opsec5_p'+n;
 function readProf(n){try{const t=localStorage.getItem(profKey(n));return t?JSON.parse(t):null}catch(e){return null}}
@@ -11295,22 +11377,23 @@ function titleScreen(){
 function filesScreen(){PROF=0;$('tmain').style.display='none';const el=$('tprof');el.style.display='flex';
  const card=n=>{const p=readProf(n);if(!p)return`<button class="pfile empty" data-n="${n}"><h4>File ${n}</h4><span class="small">Empty. Start here.</span></button>`;
   const m=p.meta||{},all=Object.keys(ACH).length,a=Object.keys(m.ach||{}).filter(k=>ACH[k]).length,e=Object.keys(m.ends||{}).length;
-  return`<button class="pfile" data-n="${n}"><h4>${esc(p.name||'File '+n)}</h4><span class="pct">${Math.round(a/all*100)}%</span><span class="small">${a}/${all} achievements · ${e}/${ENDORDER.length} endings · ${m.runs||0} runs${m.loop?' · ∞':''}</span><span class="small">${p.last?'Last played '+fmtTime(p.last):''}</span><span class="btn del" data-del="${n}">Delete file</span></button>`};
+  return`<button class="pfile" data-n="${n}"><h4>${esc(p.name||'File '+n)}</h4><span class="pct">${Math.round(a/all*100)}%</span><span class="small">${a}/${all} achievements · ${e}/${ENDORDER.length} endings · ${m.runs||0} runs${m.loop?' · ∞':''}</span><span class="small">${m.play?fmtDur(m.play)+' played':''}${p.last?(m.play?' · ':'')+'last '+fmtTime(p.last):''}</span><span class="btn del" data-del="${n}">Delete file</span></button>`};
  el.innerHTML=`<p class="small">Choose a file. Each one keeps its own runs, saves and achievements.</p><div class="pfiles">${[1,2,3].map(card).join('')}</div>`;
  el.querySelectorAll('.pfile').forEach(b=>b.onclick=e=>{const d=e.target.closest('[data-del]');if(d){e.stopPropagation();if(!d.dataset.c){d.dataset.c=1;d.textContent='Tap again to delete everything in this file';return}
    const n=d.dataset.del;try{for(const k of Object.keys(localStorage))if(k===profKey(n)||k.startsWith(profKey(n)+'_'))localStorage.removeItem(k)}catch(e){}filesScreen();return}
   const n=+b.dataset.n;if(!readProf(n)){loadProf(n);saveMeta()}else loadProf(n);fileMenu()})}
 function fileMenu(){$('tprof').style.display='none';$('tmain').style.display='flex';
  const e=Object.keys(META.ends).length;
- $('tfile').innerHTML=`<b style="color:var(--butter)">${esc(META.name||'File '+PROF)}</b> · ${achPct()}% · ${e}/${ENDORDER.length} endings`;
+ $('tfile').innerHTML=`<b style="color:var(--butter)">${esc(META.name||'File '+PROF)}</b> · ${achPct()}% · ${e}/${ENDORDER.length} endings${META.play?' · '+fmtDur(META.play):''}`;
  $('bLoad').disabled=!['auto',1,2,3,4,5].some(k=>readSlot(k));
  $('bPost').style.display=e?'':'none';
 }
 $('bNew').onclick=()=>{$('tmain').style.display='none';$('tname').style.display='flex';$('hIn').focus()};
 $('bBack').onclick=titleScreen;
 $('bFiles').onclick=filesScreen;
-$('bAch').onclick=()=>{if(typeof achScreen==='function')achScreen()};
-$('bPost').onclick=()=>{if(typeof postgame==='function')postgame()};
+$('bLoad').onclick=()=>savesScreen();
+$('bAch').onclick=()=>achScreen();
+$('bPost').onclick=()=>{PGV.fit=true;postgame('map','title')};
 $('bGo').onclick=()=>{
  const h=($('hIn').value||'').trim().replace(/[<>&"{}]/g,'')||'n00b';
  S=fresh(h);META.lastH=h;saveMeta();if(META.runs)ach('newgame');
@@ -11388,6 +11471,12 @@ function recordEnding(k){META.endv=META.endv||{};const L=META.endv[k]=META.endv[
  META.fl=META.fl||{};for(const x in S.f)if(S.f[x])META.fl[x]=1;if(S.plan)META.fl['plan_'+S.plan]=1;if(S.loop)META.fl.loop=1;
  // every ending teaches you something new
  META.hints=META.hints||[];const fresh=[];for(const h of HINTS){if(fresh.length>=2)break;if(!META.hints.includes(h.id)&&hintOK(h)){META.hints.push(h.id);fresh.push(h)}}
+ // the record of every run
+ const st=META.stats=META.stats||{};const add=(k,v)=>st[k]=(st[k]||0)+(v||0);
+ add('loved',lv.length);add('solved',Object.keys(S.solved).length);add('clues',S.clues.length);add('gifts',Object.values(S.gifted||{}).reduce((a,b)=>a+b,0));add('doxxed',S.fails||0);add('hangs',ROM.reduce((a,g)=>a+Math.max(0,scn(g)-1),0));add('days',S.day);
+ META.lovedN=META.lovedN||{};for(const g of lv)META.lovedN[g]=(META.lovedN[g]||0)+1;
+ META.hist=META.hist||[];META.hist.unshift({h:S.h,k,at:Date.now(),t:S.play||0,loved:lv,solved:Object.keys(S.solved).length,money:S.money||0,loop:!!S.loop});if(META.hist.length>40)META.hist.length=40;
+ if(S.play&&(!st.fastest||S.play<st.fastest))st.fastest=S.play;
  if(META.hints.length>=5)ach('hints5');if(HINTS.every(h=>META.hints.includes(h.id)))ach('hints_all');if(Object.keys(META.ends).length>=10)ach('tree10');
  saveMeta();return fresh}
 const PLANN={disc:'Disclosure',front:'Front Page',inj:'Injunction',kill:'Kill Switch',walk:'Walk Away',dump:'The Dump',trojan:'Trojan Horse',rollback:'Rollback',doublecross:'Double-Cross',informant:'Krall\'s way',soldout:'Sold out',bigscore:'The Big Score',oracle:'Pull the plug'};
@@ -11396,7 +11485,7 @@ function whyLines(v){const out=[];if(v.plan)out.push('Plan: '+(PLANN[v.plan]||v.
  out.push(v.loved.length?'In love: '+v.loved.map(g=>CH[g].name).join(', ')+'.':'Nobody in love with you.');
  if(v.f.length)out.push('You '+v.f.map(x=>FLN[x]).filter(Boolean).join('; ')+'.');out.push(v.solved+' mysteries solved.');return out}
 /* the map of the week: every big choice, what it leads to, and the endings at the end of each branch */
-const TREE=[
+const TREE_KIDS=[
  {t:'Prologue · the forum post',kids:[
   {t:'Day 1 · on the train, ask Astrid what else is up there',fl:'heard_echo',secret:1,kids:[{t:'Find the badge in the pool after midnight',fl:'badge0',secret:1,kids:[{t:'Saturday: pull the plug',fl:'plan_oracle',secret:1,ends:['zeroday']}]}]},
   {t:'Next run, at the very start: rewind',fl:'loop',secret:1,need:()=>META.secret,kids:[{t:'Everyone in love, all fifteen mysteries',fl:'loop_closed',ends:['harem']}]}]},
@@ -11414,44 +11503,149 @@ const TREE=[
   {t:'Rollback (Sunny and Tilly)',fl:'plan_rollback',ends:['rollback']},{t:'Kill Switch (Mira)',fl:'plan_kill',ends:['killswitch','ghost']},
   {t:'Walk away',fl:'plan_walk',ends:['lasttrain']}]}
 ];
-const PG={tab:'tree',end:null};
-function postgame(tab){if(tab)PG.tab=tab;const ne=Object.keys(META.ends).length;
- const tabs=[['tree','The week'],['ends','Endings'],['hints','Hints'],['replay','Scenes'],['ach','Achievements']].concat(META.loopClosed?[['epi','The week after']]:[]);
- const known=k=>!!META.ends[k],hinted=k=>ENDHOW[k]&&(known(k)||HINTS.some(h=>META.hints.includes(h.id)&&!h.riddle&&h.t.toLowerCase().includes((ENDINFO[k][0]||'').toLowerCase())));
- const chip=k=>`<button class="echip ${known(k)?'on':''} ${ENDINFO[k][2]}" data-e="${k}">${known(k)?esc(ENDINFO[k][0]):'???'}</button>`;
- const node=(n,d)=>{const seen=!n.fl||META.fl&&META.fl[n.fl],hide=n.secret&&!seen&&!(n.need&&n.need());
-  return`<div class="tnode ${seen?'seen':''}"><div class="tl">${hide?'<i>??? · a hidden branch</i>':esc(n.t)}${n.fl&&seen?' <span class="ok">✓</span>':''}</div>${n.ends?`<div class="tends">${n.ends.map(chip).join('')}</div>`:''}${n.kids?`<div class="tkids">${n.kids.map(c=>node(c,d+1)).join('')}</div>`:''}</div>`};
- let body='';
- if(PG.tab==='tree')body=`<p class="small">Every big choice in the week, and where it goes. Ticks are choices you've made in some run. Tap an ending.</p><div class="ttree">${TREE.map(n=>node(n,0)).join('')}</div>`;
- if(PG.tab==='ends'){const k=PG.end;
-  body=`<div class="egrid">${ENDORDER.map(chip).join('')}</div>`;
-  if(k){const E=ENDINFO[k],V=(META.endv&&META.endv[k])||[];
-   body+=`<div class="edetail"><p class="small">${{true:'TRUE ENDING',good:'ENDING',mixed:'ENDING',bad:'BAD ENDING',secret:'SECRET ENDING'}[E[2]]}</p><h3>${known(k)?esc(E[0]):'???'}</h3><p>${known(k)?esc(E[1]):'Not found yet.'}</p>
-   <p class="small"><b>How:</b> ${known(k)||hinted(k)?esc(ENDHOW[k]||''):'Find more endings to learn more.'}</p>
-   ${V.length?`<p class="small"><b>Your versions</b></p>${V.map(v=>`<div class="evar"><b>${esc(v.h)}</b> · ${fmtTime(v.at)}<br>${whyLines(v).map(esc).join(' ')}</div>`).join('')}`:''}</div>`}}
- if(PG.tab==='hints'){const H=HINTS.filter(h=>META.hints.includes(h.id));body=`<p class="small">${H.length}/${HINTS.length} hints. Every ending teaches you something. The strange ones are riddles.</p>${H.map(h=>`<div class="hint ${h.riddle?'riddle':''}">${h.riddle?'<b>?</b> ':''}${esc(h.t)}</div>`).join('')||'<p class="small">None yet.</p>'}`}
- if(PG.tab==='replay'){const sc=META.seenSc||{};body=`<p class="small">Scenes you've seen, in any run. Replaying changes nothing.</p>${ROM.map(g=>{const ids=[0,1,2,3,4,5].map(i=>g+i).filter(id=>sc[id]);return ids.length?`<div class="rrow"><span class="rhd">${head(lookOf(g),'h')}</span><div><b style="color:${CH[g].col}">${CH[g].name}</b><div class="rbtns">${ids.map(id=>{const i=+id.slice(g.length);return`<button class="btn" data-r="${id}">${i===5?'♥ Last':i===4?'With a friend':i===0?'Meeting':'Scene '+i}</button>`}).join('')}${sc['epi_'+g]?`<button class="btn" data-r="epi_${g}">Epilogue</button>`:''}</div></div></div>`:''}).join('')||'<p class="small">Nothing yet.</p>'}`}
- if(PG.tab==='ach'){const all=Object.keys(ACH),got=all.filter(k=>META.ach[k]).length;body=`<p class="small">${got}/${all.length} · ${achPct()}%</p>${bar(achPct(),'var(--butter)')}<div class="agrid">${all.map(k=>{const a=ACH[k],on=!!META.ach[k],hid=a[2]&&!on;return`<div class="atile ${on?'on':''}"><b>${hid?'???':esc(a[0])}</b><small>${hid?'Hidden':esc(a[1])}</small></div>`}).join('')}</div>`}
- if(PG.tab==='epi')body=`<p>Monday. The con's over. Everyone's still here. Walk around, talk to anyone, for as long as you like.</p><div class="row"><button class="btn pri" id="pgEpi">Go back</button></div>`;
- ov(`<div class="card pgcard"><div class="row" style="justify-content:space-between;align-items:center"><h3 style="margin:0">Postgame · ${esc(META.name||'')}</h3><button class="btn" id="pgx">Close</button></div><p class="small">${ne}/${ENDORDER.length} endings · ${achPct()}% achievements · ${META.runs||0} runs</p><div class="atabs">${tabs.map(t=>`<button class="${PG.tab===t[0]?'on':''}" data-pt="${t[0]}">${t[1]}</button>`).join('')}</div><div class="pgbody">${body}</div></div>`);
- const o=$('ov');$('pgx').onclick=closeOv;
- o.querySelectorAll('[data-pt]').forEach(b=>b.onclick=()=>postgame(b.dataset.pt));
- o.querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>{PG.end=b.dataset.e;postgame('ends')});
- o.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>replayScene(b.dataset.r));
- if($('pgEpi'))$('pgEpi').onclick=()=>{closeOv();epilogueMode()};
-}
-const achScreen=()=>postgame('ach');
+const TREE={t:'3:02 AM · the forum post',kids:TREE_KIDS};
 /* replaying a scene: a sandbox week where everyone's met and nothing you do is kept */
 function replayScene(id){const keep=S;S=fresh(META.lastH||'you');S.replay=1;S.unl={aff:1};for(const g of ROM){S.met[g]=1;S.f['met_'+g]=1;S.aff[g]=70}
  const m=id.match(/^([a-z]+)(\d)$/);if(m){S.sc[m[1]]=+m[2];S.aff[m[1]]=Math.max(20,ROUTES[m[1]].aff[+m[2]]||20)}
  Object.assign(S.f,META.fl||{});S.day=6;S.slot=2;S.inWorld=0;ach('replay');
- run([{bg:(sceneArea(id)&&AREAS[sceneArea(id)]&&AREAS[sceneArea(id)].bg)||'con'},...scr(id)],()=>{S=keep;show('title');titleScreen();postgame('replay')})}
+ run([{bg:(sceneArea(id)&&AREAS[sceneArea(id)]&&AREAS[sceneArea(id)].bg)||'con'},...scr(id)],()=>{S=keep;show('title');titleScreen();postgame('scenes','title')})}
 /* the week after: free roam, nothing to do but be there */
 DAYN[8]=DAYN[8]||'Monday';DAYS[8]=[null,null,null,null,null,null];
 function epilogueMode(){S=fresh(META.lastH||'you');S.epilogue=1;S.day=8;S.ch=4;S.slot=2;S.money=200;S.unl={aff:1,phone:1,map:1,move:1,clues:1,money:1,skill:1,clout:1};
  for(const g of ROM){S.met[g]=1;S.f['met_'+g]=1;S.aff[g]=100;S.sc[g]=ROUTES[g].n}Object.assign(S.f,{d1_badge:1,d1_open:1,d1_checkin:1,d1_room:1,loop_closed:1});
  ach('epilogue');beatBusy=false;if(!WD.touch&&window.THREE)tryLock();
  initWorld(()=>{if(G.ok){S.inWorld=1;teleportArea('foyer')}hub();toast('Monday. Nothing to do. Everyone to see.','var(--mint)')})}
+
+/* ============ POSTGAME: the screen ============
+   Fullscreen, everywhere (title screen and phone). Opens only once this file has seen an ending.
+   Four rooms down the side: The Week (a map of every big choice, left to right, that you can drag and zoom),
+   Endings (the gallery and what you know about each), Scenes (watch again), Records (every run, hints, achievements).
+   Once the loop is closed, a fifth: The Week After. */
+const PGV={sec:'map',end:null,node:null,tx:40,ty:0,k:1,fit:true,from:'title'};
+const pgOpen=()=>Object.keys(META.ends||{}).length>0;
+const fmtDur=ms=>{const m=Math.round((ms||0)/60000),h=Math.floor(m/60);return h?h+'h '+String(m%60).padStart(2,'0')+'m':m+'m'};
+const TIERC={good:'var(--mint)',mixed:'var(--butter)',bad:'var(--coral)',true:'#c9b6ff',secret:'#c9b6ff'};
+const TIERN={true:'True ending',good:'Ending',mixed:'Ending',bad:'Bad ending',secret:'Secret ending'};
+/* opening and closing: from the title, or from the phone (where it sits over the phone and returns to it) */
+function postgame(sec,from){if(!pgOpen()){toast('Finish a run to open the postgame','var(--dim)');return}
+ if(sec)PGV.sec=sec;PGV.from=from||(S&&S.inWorld&&$('ov').classList.contains('phoneov')?'phone':PGV.from||'title');
+ if(document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}
+ pgDraw()}
+function pgClose(){const el=$('pgx');if(el)el.remove();document.body.classList.remove('pgon');if(PGV.from==='phone'&&S&&S.inWorld){phone()}else if($('title').classList.contains('on'))fileMenu()}
+function pgShell(inner,rail){let el=$('pgx');if(!el){el=document.createElement('div');el.id='pgx';$('app').appendChild(el)}document.body.classList.add('pgon');
+ const ne=Object.keys(META.ends).length;
+ el.innerHTML=`<div class="pgtop"><div class="pgbrand"><span class="pgdot"></span><b>POSTGAME</b><span class="pgfile">${esc(META.name||'File '+PROF)}</span></div>
+  <div class="pgmeta"><span><b>${ne}</b>/${ENDORDER.length} endings</span><span><b>${achPct()}%</b> achievements</span><span><b>${fmtDur(META.play)}</b> played</span></div>
+  <button class="pgclose" id="pgClose" aria-label="Close">✕</button></div>
+  <div class="pgmain">${rail?`<nav class="pgrail">${rail}</nav>`:''}<section class="pgsec">${inner}</section></div>`;
+ $('pgClose').onclick=pgClose;
+ el.querySelectorAll('[data-sec]').forEach(b=>b.onclick=()=>{PGV.sec=b.dataset.sec;PGV.end=null;PGV.node=null;pgDraw()});
+ return el}
+function pgRail(){const S_=[['map','The Week','A map of every choice'],['ends','Endings',Object.keys(META.ends).length+' of '+ENDORDER.length],['scenes','Scenes','Watch again'],['records','Records','Every run, hints, trophies']];
+ if(META.loopClosed)S_.push(['after','The Week After','Monday, finally']);
+ return S_.map(s=>`<button class="pgnav ${PGV.sec===s[0]?'on':''}" data-sec="${s[0]}"><b>${s[1]}</b><small>${s[2]}</small></button>`).join('')}
+function pgDraw(){const f={map:pgMap,ends:pgEnds,scenes:pgScenes,records:pgRecords,after:pgAfter}[PGV.sec]||pgMap;f()}
+/* ---------- The Week: the tree, left to right ---------- */
+const PGL={cw:250,rh:54,nw:210,nh:42,ew:180};
+function pgLayout(){const nodes=[],edges=[];let leaf=0,maxD=0;
+ const walk=(n,d,par)=>{const me={n,d,kids:[],par,id:nodes.length};nodes.push(me);maxD=Math.max(maxD,d);if(par)edges.push([par,me]);
+  const kids=(n.kids||[]).slice();for(const k of n.ends||[])kids.push({end:k});
+  if(n.end){me.leaf=1;me.y=leaf++*PGL.rh;return me}
+  if(!kids.length){me.y=leaf++*PGL.rh;return me}
+  for(const c of kids)me.kids.push(walk(c,d+1,me));me.y=(me.kids[0].y+me.kids[me.kids.length-1].y)/2;return me};
+ walk(TREE,0,null);
+ for(const m of nodes)m.x=m.n.end?(maxD)*PGL.cw:m.d*PGL.cw;
+ return{nodes,edges,w:maxD*PGL.cw+PGL.ew+40,h:leaf*PGL.rh}}
+function wrap2(t,n){const w=t.split(' '),L=['',''];let i=0;for(const x of w){if((L[i]+' '+x).trim().length>n&&i===0&&L[0])i=1;L[i]=(L[i]+' '+x).trim()}if(L[1].length>n)L[1]=L[1].slice(0,n-1)+'…';return L.filter(Boolean)}
+function pgMap(){const T=pgLayout(),fl=META.fl||{};
+ const seenN=n=>!n.fl||!!fl[n.fl],hidden=n=>n.secret&&!seenN(n)&&!(n.need&&n.need());
+ const nodeSVG=m=>{const n=m.n;
+  if(n.end){const k=n.end,got=!!META.ends[k],E=ENDINFO[k],c=TIERC[E[2]];return`<g class="tn te ${got?'got':''} ${PGV.end===k?'sel':''}" data-e="${k}" transform="translate(${m.x},${m.y})"><rect x="0" y="${-PGL.nh/2}" width="${PGL.ew}" height="${PGL.nh}" rx="21" style="--c:${c}"/><circle cx="18" cy="0" r="6" style="fill:${got?c:'none'};stroke:${c}"/><text x="32" y="5">${esc(got?E[0]:'? ? ?')}</text></g>`}
+  const s=seenN(n),h=hidden(n),L=h?['A hidden branch']:wrap2(n.t,30);
+  return`<g class="tn td ${s?'seen':''} ${h?'hid':''} ${PGV.node===m.id?'sel':''}" data-n="${m.id}" transform="translate(${m.x},${m.y})"><rect x="0" y="${-PGL.nh/2}" width="${PGL.nw}" height="${PGL.nh}" rx="9"/>${n.fl&&s?`<text class="tick" x="${PGL.nw-16}" y="5">✓</text>`:''}${L.map((l,i)=>`<text x="12" y="${(L.length===1?5:-3)+i*15}">${esc(l)}</text>`).join('')}</g>`};
+ const edge=([a,b])=>{const x1=a.x+PGL.nw,y1=a.y,x2=b.x,y2=b.y,mx=(x1+x2)/2;const lit=(b.n.end?!!META.ends[b.n.end]:(!b.n.fl||fl[b.n.fl]));return`<path class="te-l ${lit?'lit':''}" d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}"/>`};
+ const cols=[];for(const m of T.nodes)if(!m.n.end)cols[m.d]=1;
+ const inner=`<div class="pgmapwrap"><div class="pghead"><h2>The Week</h2><p>Every big choice, left to right, and where it leads. Ticks are choices you've made in some run. Drag to move, scroll or pinch to zoom, tap anything.</p></div>
+  <div class="pgcanvas" id="pgCanvas"><svg id="pgSvg" width="100%" height="100%"><defs><pattern id="pgGrid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#ffffff08"/></pattern></defs><rect width="100%" height="100%" fill="url(#pgGrid)"/>
+   <g id="pgView">${T.edges.map(edge).join('')}${T.nodes.map(nodeSVG).join('')}</g></svg>
+   <div class="pgzoom"><button id="pgZi" aria-label="Zoom in">+</button><button id="pgZo" aria-label="Zoom out">−</button><button id="pgZf" aria-label="Fit">⤢</button></div>
+   <div class="pglegend"><span><i class="lg seen"></i>Chosen</span><span><i class="lg"></i>Not yet</span><span><i class="lg hid"></i>Hidden</span><span><i class="lg end"></i>Ending</span></div>
+   ${pgDetail()}</div></div>`;
+ const el=pgShell(inner,pgRail());const cv=$('pgCanvas'),svg=$('pgSvg'),G_=$('pgView');
+ const apply=()=>G_.setAttribute('transform',`translate(${PGV.tx},${PGV.ty}) scale(${PGV.k})`);
+ const fit=()=>{const r=cv.getBoundingClientRect();const k=Math.min(1.2,Math.max(.25,Math.min((r.width-40)/T.w,(r.height-60)/(T.h+PGL.nh))));PGV.k=k;PGV.tx=24;PGV.ty=(r.height-T.h*k)/2;apply()};
+ // open at a size you can read, on the start of the week; the fit button shows the whole thing
+ const home=()=>{const r=cv.getBoundingClientRect(),root=T.nodes[0];PGV.k=r.width<700?.7:.95;PGV.tx=24;PGV.ty=r.height/2-root.y*PGV.k;apply()};
+ if(PGV.fit){PGV.fit=false;requestAnimationFrame(home)}else apply();
+ const zoomAt=(f,cx,cy)=>{const k=Math.min(2.5,Math.max(.2,PGV.k*f));PGV.tx=cx-(cx-PGV.tx)*k/PGV.k;PGV.ty=cy-(cy-PGV.ty)*k/PGV.k;PGV.k=k;apply()};
+ $('pgZi').onclick=()=>{const r=cv.getBoundingClientRect();zoomAt(1.25,r.width/2,r.height/2)};$('pgZo').onclick=()=>{const r=cv.getBoundingClientRect();zoomAt(.8,r.width/2,r.height/2)};$('pgZf').onclick=fit;
+ cv.addEventListener('wheel',e=>{e.preventDefault();const r=cv.getBoundingClientRect();zoomAt(e.deltaY<0?1.12:.89,e.clientX-r.left,e.clientY-r.top)},{passive:false});
+ const P=new Map();let moved=0,pinch=null;
+ svg.addEventListener('pointerdown',e=>{svg.setPointerCapture(e.pointerId);P.set(e.pointerId,[e.clientX,e.clientY]);moved=0;if(P.size===2){const[a,b]=[...P.values()];pinch=Math.hypot(a[0]-b[0],a[1]-b[1])}});
+ svg.addEventListener('pointermove',e=>{if(!P.has(e.pointerId))return;const o=P.get(e.pointerId),dx=e.clientX-o[0],dy=e.clientY-o[1];P.set(e.pointerId,[e.clientX,e.clientY]);
+  if(P.size===2&&pinch){const[a,b]=[...P.values()],d=Math.hypot(a[0]-b[0],a[1]-b[1]),r=cv.getBoundingClientRect();zoomAt(d/pinch,(a[0]+b[0])/2-r.left,(a[1]+b[1])/2-r.top);pinch=d;moved=99;return}
+  moved+=Math.abs(dx)+Math.abs(dy);PGV.tx+=dx;PGV.ty+=dy;apply()});
+ const up=e=>{P.delete(e.pointerId);if(P.size<2)pinch=null;if(moved>6||P.size)return;
+  const t=document.elementFromPoint(e.clientX,e.clientY),g=t&&t.closest&&t.closest('.tn');if(!g){if(PGV.end||PGV.node!==null){PGV.end=null;PGV.node=null;pgMap()}return}
+  if(g.dataset.e){PGV.end=g.dataset.e;PGV.node=null}else{PGV.node=+g.dataset.n;PGV.end=null}pgMap()};
+ svg.addEventListener('pointerup',up);svg.addEventListener('pointercancel',e=>{P.delete(e.pointerId);pinch=null});
+ pgDetailWire(T)}
+/* the drawer on the right: an ending, or a choice */
+function pgDetail(){if(PGV.end)return`<aside class="pgdrawer">${pgEndCard(PGV.end)}</aside>`;
+ if(PGV.node!==null&&PGV.node!==undefined){const T=pgLayout(),m=T.nodes[PGV.node];if(!m)return'';const n=m.n,fl=META.fl||{},seen=!n.fl||fl[n.fl],hid=n.secret&&!seen&&!(n.need&&n.need());
+  const below=[];const col=x=>{for(const c of x.kids)if(c.n.end)below.push(c.n.end);else col(c)};col(m);
+  return`<aside class="pgdrawer"><button class="pgdx" id="pgDx">✕</button><p class="pgk">A choice</p><h3>${hid?'A hidden branch':esc(n.t)}</h3><p>${hid?'Something in the week you haven\'t found yet. The riddles in Records point the way.':seen?(n.fl?'You\'ve made this choice in at least one run.':'Where every week starts.'):'You haven\'t made this choice yet.'}</p>
+  ${below.length?`<p class="pgk">Leads to</p><div class="pgchips">${[...new Set(below)].map(k=>`<button class="pgchip ${META.ends[k]?'got':''}" data-e="${k}" style="--c:${TIERC[ENDINFO[k][2]]}">${META.ends[k]?esc(ENDINFO[k][0]):'? ? ?'}</button>`).join('')}</div>`:''}</aside>`}
+ return''}
+function pgDetailWire(){const x=$('pgDx');if(x)x.onclick=()=>{PGV.end=null;PGV.node=null;pgDraw()};document.querySelectorAll('#pgx .pgdrawer [data-e]').forEach(b=>b.onclick=()=>{PGV.end=b.dataset.e;PGV.node=null;pgDraw()})}
+function pgEndCard(k){const E=ENDINFO[k],got=!!META.ends[k],V=(META.endv&&META.endv[k])||[],hinted=HINTS.some(h=>META.hints.includes(h.id)&&!h.riddle&&h.t.toLowerCase().includes(E[0].toLowerCase()));
+ return`<button class="pgdx" id="pgDx">✕</button><p class="pgk" style="color:${TIERC[E[2]]}">${TIERN[E[2]]}</p><h3>${got?esc(E[0]):'? ? ?'}</h3><p class="pglede">${got?esc(E[1]):'You haven\'t found this one yet.'}</p>
+ <p class="pgk">How</p><p>${got||hinted?esc(ENDHOW[k]||''):'Unknown. Every ending you find teaches you a little more: look in Records for hints.'}</p>
+ ${V.length?`<p class="pgk">Your versions · ${V.length}</p>${V.map(v=>`<div class="pgver"><div class="pgvh"><b>${esc(v.h)}</b><span>${fmtTime(v.at)}</span></div><div class="pgfaces">${v.loved.map(g=>`<span title="${CH[g].name}">${head(lookOf(g),'h')}</span>`).join('')||'<span class="small">nobody in love</span>'}</div><p>${whyLines(v).map(esc).join(' ')}</p></div>`).join('')}`:''}`}
+/* ---------- Endings: the gallery ---------- */
+function pgEnds(){const tiers=[['true','The true ending'],['secret','Secret'],['good','Good'],['mixed','Mixed'],['bad','Bad']];
+ const inner=`<div class="pgpad"><div class="pghead"><h2>Endings</h2><p>${Object.keys(META.ends).length} of ${ENDORDER.length} found. Who you love is your own business, and shows up in all of them.</p></div>
+ <div class="pgsplit"><div class="pggal">${tiers.map(([t,n])=>{const ks=ENDORDER.filter(k=>ENDINFO[k][2]===t);if(!ks.length)return'';return`<div class="pgtier"><p class="pgk" style="color:${TIERC[t]}">${n} · ${ks.filter(k=>META.ends[k]).length}/${ks.length}</p><div class="pggrid">${ks.map(k=>{const got=META.ends[k],V=(META.endv&&META.endv[k])||[];return`<button class="pgcard ${got?'got':''} ${PGV.end===k?'sel':''}" data-e="${k}" style="--c:${TIERC[t]}"><span class="pgcn">${String(ENDORDER.indexOf(k)+1).padStart(2,'0')}</span><b>${got?esc(ENDINFO[k][0]):'? ? ?'}</b><small>${got?esc(ENDINFO[k][1]):'Not found'}</small>${V.length>1?`<i>×${V.length}</i>`:''}</button>`}).join('')}</div></div>`}).join('')}</div>
+ ${PGV.end?`<aside class="pgdrawer pgside">${pgEndCard(PGV.end)}</aside>`:''}</div></div>`;
+ pgShell(inner,pgRail());document.querySelectorAll('#pgx .pgcard').forEach(b=>b.onclick=()=>{PGV.end=b.dataset.e;pgEnds()});pgDetailWire()}
+/* ---------- Scenes: watch again ---------- */
+function pgScenes(){const sc=META.seenSc||{},inRun=S&&S.inWorld&&!S.ending&&!S.replay;const tot=ROM.length*6,seen=ROM.reduce((a,g)=>a+[0,1,2,3,4,5].filter(i=>sc[g+i]).length,0);
+ const inner=`<div class="pgpad"><div class="pghead"><h2>Scenes</h2><p>${seen} of ${tot} scenes seen, in any run.${inRun?' You can watch them again from the title screen.':' Watching again changes nothing.'}</p></div>
+ <div class="pgpeople">${ROM.filter(g=>[0,1,2,3,4,5].some(i=>sc[g+i])).map(g=>{const ids=[0,1,2,3,4,5].map(i=>g+i),n=ids.filter(id=>sc[id]).length;return`<div class="pgperson ${n?'':'none'}" style="--c:${CH[g].col}"><div class="pgph">${n?head(lookOf(g),n===6?'h':'n'):'<span>?</span>'}</div><div class="pgpb"><b>${n?CH[g].name:'Someone you haven\'t met'}</b><div class="pgdots">${ids.map((id,i)=>`<button class="pgsd ${sc[id]?'on':''}" ${sc[id]&&!inRun?`data-r="${id}"`:'disabled'} title="${i===5?'The last scene':i===4?'With a friend':i===0?'Meeting':'Scene '+i}">${i===5?'♥':i===0?'·':i}</button>`).join('')}${sc['epi_'+g]?`<button class="pgsd on wide" ${inRun?'disabled':`data-r="epi_${g}"`}>Epilogue</button>`:''}</div></div></div>`}).join('')}${ROM.some(g=>!sc[g+'0'])?`<div class="pgperson none"><div class="pgph"><span>?</span></div><div class="pgpb"><b>${ROM.filter(g=>!sc[g+'0']).length} people you haven't met yet</b><small class="small">Their scenes appear here once you've seen them.</small></div></div>`:''}</div></div>`;
+ pgShell(inner,pgRail());document.querySelectorAll('#pgx [data-r]').forEach(b=>b.onclick=()=>{$('pgx').remove();document.body.classList.remove('pgon');replayScene(b.dataset.r)})}
+/* ---------- Records: every run, hints, achievements ---------- */
+function pgRecords(){const st=META.stats||{},H=META.hist||[],hints=HINTS.filter(h=>META.hints.includes(h.id));
+ const top=Object.entries(META.lovedN||{}).sort((a,b)=>b[1]-a[1]).slice(0,5);
+ const fav=Object.entries((META.hist||[]).reduce((o,r)=>(o[r.k]=(o[r.k]||0)+1,o),{})).sort((a,b)=>b[1]-a[1])[0];
+ const tiles=[['Time played',fmtDur(META.play)],['Runs finished',META.runs||0],['Endings',Object.keys(META.ends).length+'/'+ENDORDER.length],['Achievements',achPct()+'%'],['Fastest run',st.fastest?fmtDur(st.fastest):'—'],['Loops',META.loop||0],['Fell in love',(st.loved||0)+' times'],['Mysteries solved',st.solved||0],['Clues found',st.clues||0],['Money earned','£'+(st.earned||0)],['Gifts given',st.gifts||0],['Times doxxed',st.doxxed||0],['Hints',hints.length+'/'+HINTS.length],['Most common ending',fav?ENDINFO[fav[0]][0]:'—']];
+ const all=Object.keys(ACH),got=all.filter(k=>META.ach[k]);
+ const inner=`<div class="pgpad"><div class="pghead"><h2>Records</h2><p>Everything this file remembers.</p></div>
+ <div class="pgtiles">${tiles.map(t=>`<div class="pgtile"><small>${t[0]}</small><b>${esc(String(t[1]))}</b></div>`).join('')}</div>
+ ${top.length?`<p class="pgk">Most loved</p><div class="pgtop">${top.map(([g,n])=>`<div class="pgtopc" style="--c:${CH[g].col}"><span>${head(lookOf(g),'h')}</span><b>${CH[g].name}</b><small>${n} ${n===1?'run':'runs'}</small></div>`).join('')}</div>`:''}
+ <div class="pgcols"><div><p class="pgk">Runs</p><div class="pghist">${H.slice(0,20).map(r=>`<div class="pgrun"><span class="pgrd" style="background:${TIERC[(ENDINFO[r.k]||[])[2]]||'var(--dim)'}"></span><div><b>${esc((ENDINFO[r.k]||['?'])[0])}</b><small>${esc(r.h)}${r.loop?' · in the loop':''} · ${fmtTime(r.at)}${r.t?' · '+fmtDur(r.t):''}</small></div><div class="pgfaces sm">${r.loved.slice(0,6).map(g=>`<span>${head(lookOf(g),'h')}</span>`).join('')}${r.loved.length>6?`<em>+${r.loved.length-6}</em>`:''}</div></div>`).join('')||'<p class="small">No finished runs on record yet.</p>'}</div></div>
+ <div><p class="pgk">Hints · ${hints.length}/${HINTS.length}</p>${hints.map(h=>`<div class="pghint ${h.riddle?'riddle':''}">${h.riddle?'<b>?</b>':''}<span>${esc(h.t)}</span></div>`).join('')||'<p class="small">Every ending teaches you something.</p>'}</div></div>
+ ${achBlock()}</div>`;
+ pgShell(inner,pgRail());achWire()}
+/* achievements, shared by Records and the title screen's own Achievements screen */
+let ACHF='all';
+function achBlock(){const all=Object.keys(ACH),got=all.filter(k=>META.ach[k]).length,ks=all.filter(k=>ACHF==='all'||(ACHF==='got'?META.ach[k]:!META.ach[k]));
+ return`<div class="pgachh"><p class="pgk">Achievements · ${got}/${all.length}</p><div class="pgring" style="--p:${achPct()}"><b>${achPct()}%</b></div><div class="pgseg">${[['all','All'],['got','Unlocked'],['no','Locked']].map(t=>`<button class="${ACHF===t[0]?'on':''}" data-af="${t[0]}">${t[1]}</button>`).join('')}</div></div>
+ <div class="pgach">${ks.map(k=>{const a=ACH[k],on=!!META.ach[k],hid=a[2]&&!on;return`<div class="pga ${on?'on':''}"><span class="pgai">${on?'★':hid?'?':'☆'}</span><div><b>${hid?'Hidden':esc(a[0])}</b><small>${hid?'Keep playing.':esc(a[1])}</small></div></div>`}).join('')}</div>`}
+function achWire(){document.querySelectorAll('#pgx [data-af]').forEach(b=>b.onclick=()=>{ACHF=b.dataset.af;pgDraw()})}
+/* the title screen's Achievements: just the trophies, open from the first run */
+function achScreen(){PGV.sec='ach';PGV.from='title';const prev=pgDraw;
+ pgShell(`<div class="pgpad"><div class="pghead"><h2>Achievements</h2><p>Across every run in this file. Finish a run to open the rest of the postgame.</p></div>${achBlock()}</div>`,'');
+ document.querySelectorAll('#pgx [data-af]').forEach(b=>b.onclick=()=>{ACHF=b.dataset.af;achScreen()})}
+/* ---------- The Week After ---------- */
+function pgAfter(){const inRun=S&&S.inWorld&&!S.ending&&!S.epilogue;
+ const inner=`<div class="pgafter"><div class="pgaftbg"></div><div class="pgaftin"><p class="pgk">Unlocked by closing the loop</p><h2>The Week After</h2><p class="pglede">Monday. The con's over. Nobody's watching anyone. All twenty-one of them are still in the Quarter, and they're all yours.</p>
+ <div class="pgheads">${ROM.map(g=>`<span>${head(lookOf(g),'h')}</span>`).join('')}</div>
+ <ul class="pgafl"><li>Walk anywhere: every door is open.</li><li>Talk to anyone, give gifts, just chat.</li><li>No story, no clock, no Exposure. Stay as long as you like.</li></ul>
+ ${inRun?'<p class="small">Finish or quit your current run to go back.</p>':`<button class="btn pri pgbig" id="pgGo">Go back to the Quarter</button>`}</div></div>`;
+ pgShell(inner,pgRail());const b=$('pgGo');if(b)b.onclick=()=>{$('pgx').remove();document.body.classList.remove('pgon');epilogueMode()}}
+/* ---------- playtime: counted while a run is open and the tab is visible ---------- */
+setInterval(()=>{if(!PROF||!S||S.replay||document.hidden||$('title').classList.contains('on'))return;META.play=(META.play||0)+5000;S.play=(S.play||0)+5000;if((META.play/5000)%12===0)saveMeta()},5000);
+addEventListener('visibilitychange',()=>{if(document.hidden&&PROF)saveMeta()});
 
 /* ============ THREE.JS ENGINE ============ */
 /* Levels are still described with the small builder API below (box, quad, room...). Quads are collected
@@ -11788,6 +11982,8 @@ function finishRegions(){
   Z.forEach((q,i)=>{q.vs.add(i);for(const n of q.see){const j=ix[n];if(j===undefined){console.warn('zone '+q.n+' sees unknown '+n);continue}q.vs.add(j);Z[j].vs.add(i)}});
   // looking through a door into a hub (a corridor, the Ring, the lobby) you see whatever that hub opens onto too
   const one=Z.map(q=>new Set(q.vs));Z.forEach((q,i)=>{for(const j of one[i])if(Z[j].hub)for(const k of one[j])q.vs.add(k)});
+  // the outdoors is one space: seeing any of it means seeing all of it
+  const sky=Z.map((q,i)=>q.sky?i:-1).filter(i=>i>=0);Z.forEach(q=>{if(sky.some(j=>q.vs.has(j)))for(const j of sky)q.vs.add(j)});
   R.zkey=null;
   const H={},SH={};
   const put=(Tb,b,x0,z0,x1,z1)=>{for(let x=Math.floor(x0/4);x<=Math.floor(x1/4);x++)for(let z=Math.floor(z0/4);z<=Math.floor(z1/4);z++)(Tb[x+','+z]=Tb[x+','+z]||[]).push(b)};
@@ -13574,7 +13770,7 @@ function buildSite(){
  // halls and back of house
  Z('hallA',-60,-136,50,-64,Y0,26,['ringN','ringN2','backstage','courtyard']);Z('backstage',-40,-150,30,-136,Y0,5,['hallA','service']);
  Z('staffW',-64,-150,-60,-64,Y0,4,['ringN','security','stores','service']);Z('security',-110,-100,-64,-64,Y0,4,[]);Z('stores',-110,-150,-64,-100,Y0,4,['service']);
- Z('staffE',50,-150,56,-64,Y0,4,['mdf','service','hallBback']);Z('mdf',56,-100,62,-86,Y0,3,[]);
+ Z('staffE',50,-150,56,-64,Y0,4,['mdf','service','hallBback','hallA']);Z('mdf',56,-100,62,-86,Y0,3,[]);
  Z('service',-110,-158,176,-150,Y0,4,['hallBback','kitchenC','breakroom','dock']);
  Z('hallB',62,-111,110,-64,Y0,11,['neConc','hallBback']);Z('hallBback',62,-150,110,-111,Y0,4.4,[]);
  Z('kitchenC',110,-111,134,-64,Y0,4.4,['neConc','breakroom','dock']);Z('breakroom',110,-150,134,-111,Y0,4,[]);
@@ -13603,6 +13799,9 @@ function buildSite(){
  // hubs: open concourses and corridors; a room that sees one also sees what it opens onto
  for(const n of['lobby','promenade','foyer','courtyard','ringN','ringW','ringE','ringS','ringN2','ringW2','ringE2','ringS2','neConc','neConc2','seConc','seConc1','vcorr','vcorr1','hotelL1','hotelL2','plaza','service','staffW','staffE','liftH','garden','lane','link','skybridge','terrace'])G.zones.con.find(q=>q.n===n).hub=true;
  G.zones.con.find(q=>q.n==='outside').bg=true;
+ // under the open sky everything outdoors is in view of everything else outdoors: a room with a window onto any of it
+ // draws all of it (otherwise you see straight through the far side of the street into the sky)
+ for(const n of['outside','plaza','plazaE','garden','lane','terrace','courtyard','skygarden','roof'])G.zones.con.find(q=>q.n===n).sky=true;
  G.wallNT=true;placed(HX,buildHotel);buildCore();buildHalls();buildEast();buildSouth();buildUnder();G.wallNT=false;siteAreas();
 }
 /* the underside and the two side stringers of a stair that floats above the floor (seen from below or the side) */
@@ -14875,6 +15074,7 @@ function setupInput(){
    locking during an Esc press hands the browser an Esc to cancel the lock with, and the phone pops straight back */
 function relock(){if(WD.touch||WD.noLock||locked())return;if(WD.escDown){WD.lockAfterEsc=true;return}tryLock()}
 function tryLock(){if(WD.touch||WD.noLock||!S||!S.inWorld||S.ending||$('title').classList.contains('on'))return;const el=lockEl();if(document.pointerLockElement===el)return;try{const p=el.requestPointerLock&&el.requestPointerLock();if(p&&p.catch)p.catch(()=>{})}catch(e){}}
+if(SETTINGS.nolock)WD.noLock=true;
 function setTouch(on){WD.touch=on;document.body.classList.toggle('touchui',on);document.body.classList.toggle('desk',!on)}
 /* dx>0 (mouse/finger moves right) turns right; dy<0 (moves up) looks up. Never inverted. */
 function look(dx,dy,k){const s=lookSens();WD.yaw-=dx*k*s;WD.pit=clamp(WD.pit-dy*k*s,-1.25,1.25)}
@@ -15808,6 +16008,7 @@ function cutCam(cam){const c=WD.cut.C,t=(performance.now()-WD.cut.t0)/1000,d=c.d
 
 /* ============ PHONE ============ */
 const ICON={
+ postgame:['#ffd166','<path d="M6 24h20M9 24V14M16 24V8M23 24V17" stroke="#1b1026" stroke-width="3" stroke-linecap="round"/><circle cx="9" cy="11" r="2.4" fill="#1b1026"/><circle cx="16" cy="5.5" r="2.4" fill="#1b1026"/><circle cx="23" cy="14" r="2.4" fill="#1b1026"/>'],
  echo:['#c9b6ff','<path d="M16 6a10 10 0 1 0 10 10" fill="none" stroke="#1b1026" stroke-width="2.6" stroke-linecap="round"/><path d="M26 7v9h-9" fill="none" stroke="#1b1026" stroke-width="2.6" stroke-linejoin="round"/><circle cx="16" cy="16" r="2.5" fill="#1b1026"/>'],
  messages:['#8affc1','<path d="M6 8h20v13H13l-5 4v-4H6z" fill="#1b1026"/>'],
  map:['#7cc4ff','<path d="M5 9l7-3 8 3 7-3v17l-7 3-8-3-7 3z" fill="none" stroke="#1b1026" stroke-width="2.4" stroke-linejoin="round"/><path d="M12 6v17M20 9v17" stroke="#1b1026" stroke-width="2"/>'],
@@ -15825,7 +16026,7 @@ const ICON={
  achieve:['#ffb347','<path d="M10 6h12v6a6 6 0 0 1-12 0z" fill="#1b1026"/><path d="M10 8H6a4 4 0 0 0 4 5M22 8h4a4 4 0 0 1-4 5" fill="none" stroke="#1b1026" stroke-width="2"/><path d="M16 18v4M11 26h10" stroke="#1b1026" stroke-width="2.6" stroke-linecap="round"/>'],
  settings:['#d9d4cc','<circle cx="16" cy="16" r="4.5" fill="none" stroke="#1b1026" stroke-width="2.6"/><path d="M16 5v4M16 23v4M5 16h4M23 16h4M8.2 8.2l2.8 2.8M21 21l2.8 2.8M8.2 23.8l2.8-2.8M21 11l2.8-2.8" stroke="#1b1026" stroke-width="2.6" stroke-linecap="round"/>']
 };
-const APPN={echo:'Echo',messages:'Messages',calendar:'Calendar',map:'Map',hearts:'Hearts',cases:'Case board',stats:'Stats',story:'Story',achieve:'Achievements',bag:'Bag',saves:'Saves',log:'Log',settings:'Settings',quit:'Quit'};
+const APPN={postgame:'Postgame',echo:'Echo',messages:'Messages',calendar:'Calendar',map:'Map',hearts:'Hearts',cases:'Case board',stats:'Stats',story:'Story',achieve:'Achievements',bag:'Bag',saves:'Saves',log:'Log',settings:'Settings',quit:'Quit'};
 const APPU={echo:'echo',messages:'phone',calendar:'phone',map:'map',hearts:'aff',cases:'clues',stats:'skill',story:'phone',achieve:'phone',bag:'phone'};
 /* the phone: a home screen of apps; every app opens full screen. Back (or Esc) goes back to the home screen. */
 let phApp=null,phThread=null,phReg=null;const PH={case:null,pick:[],ans:null,heart:null,day:null,stab:'week',atab:'all',ctab:'board',sday:null};
@@ -15833,7 +16034,7 @@ function phone(app){
  if(!S)return;
  const o=$('ov');if((o.classList.contains('on')&&!o.classList.contains('phoneov'))||$('card').classList.contains('on'))return;
  const opening=!o.classList.contains('phoneov');if(opening)PH.day=null;
- if(document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}
+ // the mouse stays captured: the drawn cursor works the phone, so closing it puts you straight back in the world
  WD.active=false;phThread=null;
  if(app){openApp(app,false);return}
  phApp=null;drawPhone();
@@ -15843,16 +16044,16 @@ function closePhone(){if($('ov').classList.contains('phoneov')&&typeof sfx==='fu
 /* Esc / back: from an app you opened on the phone, back to the phone; otherwise close */
 function phoneBack(){const o=$('ov');if(o.dataset.app&&o.dataset.from==='phone'){phApp=null;phThread=null;drawPhone()}else closePhone()}
 function drawPhone(){
- const apps=Object.keys(APPN).filter(a=>!APPU[a]||S.unl[APPU[a]]);
+ const apps=Object.keys(APPN).filter(a=>a==='postgame'?pgOpen():!APPU[a]||S.unl[APPU[a]]);
  const unread=S.msgs.filter(m=>!m.r).length,nn=S.day>0?ROM.filter(sceneReady).length:0,nc=S.day>0?Object.keys(MYST).filter(m=>S.unl.clues&&canSolve(m)).length:0;
  const body=`<div class="home"><div class="clock">${S.day?SLOTT[S.slot]:'07:12'}</div><div class="date">${esc(clockLabel())}</div><div class="grid">${apps.map(a=>`<button class="app" data-a="${a}"><span class="ic" style="background:${ICON[a][0]}"><svg viewBox="0 0 32 32">${ICON[a][1]}</svg>${a==='messages'&&unread?`<i>${unread}</i>`:''}${a==='hearts'&&nn?`<i>${nn}</i>`:''}${a==='cases'&&nc?`<i>${nc}</i>`:''}</span><span class="nm">${APPN[a]}</span></button>`).join('')}</div></div>`;
- ov(`<div class="phone"><div class="pbar"><span>${S.day>0&&WD.reg!=='home'&&WD.reg!=='office'?'CTRL+ALT+NET':'HOME-WIFI'}</span><span>${S.day?SLOTT[S.slot]:'07:12'}</span><span class="bat"><b style="width:${Math.max(8,96-S.slot*15)}%"></b></span></div><div class="pbody">${body}</div><button class="phome" id="phome" aria-label="Close phone"></button></div>`);
+ ov(`<div class="phone"><div class="pbar"><span>${S.day>0&&WD.reg!=='home'&&WD.reg!=='office'?'CTRL+ALT+NET':'HOME-WIFI'}</span><span>${S.day?SLOTT[S.slot]:'07:12'}</span><span class="bat"><b style="width:${Math.max(8,96-S.slot*15)}%"></b></span></div><div class="pbody">${body}</div><button class="phome" id="phome" aria-label="Close phone"></button></div><p class="small phtip" id="phtip">${WD.touch?'':'P or Tab to put it away'}</p>`);
  const o=$('ov');delete o.dataset.app;delete o.dataset.from;o.classList.remove('mapov','appov');o.classList.add('phoneov');updBlur();
  o.onclick=e=>{if(e.target===o)closePhone()};
  $('phome').onclick=closePhone;
  o.querySelectorAll('.app').forEach(b=>b.onclick=()=>openApp(b.dataset.a,true));
 }
-function openApp(k,fromPhone){phApp=k;if(k==='map'){mapOpen(fromPhone);return}drawApp(fromPhone===undefined?($('ov').dataset.from==='phone'):fromPhone)}
+function openApp(k,fromPhone){phApp=k;if(k==='map'){mapOpen(fromPhone);return}if(k==='postgame'){closeOv();$('ov').classList.remove('phoneov','mapov','appov');postgame('map','phone');return}drawApp(fromPhone===undefined?($('ov').dataset.from==='phone'):fromPhone)}
 function drawApp(fromPhone){const k=phApp;
  const html=APPS[k]();
  ov(`<div class="bigapp app-${k}"><div class="mtop"><button class="pback" id="apb" aria-label="Back">${fromPhone?'‹':'✕'}</button><b>${APPN[k]}</b><span class="small">${esc(clockLabel())}</span><button class="pback" id="apx" aria-label="Close">✕</button></div>${html}</div>`);
@@ -15966,6 +16167,7 @@ const APPS={
   <p class="small">${G.q==='low'?'Simpler lighting, no glow. Best for older phones.':G.q==='medium'?'Full lighting and glow, lower resolution.':'Everything on, with antialiasing. The resolution drops automatically if frames get slow.'}</p>
   <h4>Controls</h4><label class="sl"><span>Look speed</span><input type="range" min="30" max="250" step="5" value="${Math.round(SETTINGS.sens*100)}" id="sens" style="--p:${Math.round((SETTINGS.sens*100-30)/220*100)}%"><b>${SETTINGS.sens.toFixed(2)}×</b></label>
   <div class="row" style="margin-top:6px"><button class="btn" id="stf">Text: ${S.fast?'instant':'typewriter'}</button><button class="btn" id="stdbg">Debug menu (F9)</button></div>
+  <div class="row" style="margin-top:6px"><button class="btn" id="stlk">Capture the mouse: ${SETTINGS.nolock?'off (drag to look)':'on'}</button></div><p class="small">With capture off, the browser never shows its "press Esc to show your cursor" notice; you look around by dragging.</p>
   <p class="small" style="margin-top:12px">Keyboard: WASD or arrows to walk, Shift to run, mouse to look, E to interact with whatever you're pointing at, M for map. <b>Esc</b> or <b>P</b> opens this phone; Esc in an app goes back to the phone.<br>Touch: drag the left stick to walk, drag anywhere else to look, tap the prompt to interact.</p></div>
   <p class="small">The game autosaves while you explore. Use the Saves app for save slots and export.</p></div>`},
  quit(){return `<div class="abody"><div class="set"><h4>Quit to title?</h4><p class="small">Your game autosaves right now, where you're standing. You can pick it up again with Continue.</p><div class="row"><button class="btn pri" id="stq">Quit to title</button><button class="btn" id="stqn">Not yet</button></div></div></div>`}
@@ -16001,7 +16203,7 @@ const APPS_AFTER={
  echo(){const b=$('erw');if(b)b.onclick=()=>{if(!b.dataset.c){b.dataset.c=1;b.textContent='Tap again: lose everything since this morning';return}rewindDay()}},
  achieve(){$('ov').querySelectorAll('[data-at]').forEach(b=>b.onclick=()=>{PH.atab=b.dataset.at;redraw()})},
  saves(){savesPanel($('spanel'),'phone',redraw)},
- settings(){$('stf').onclick=()=>{S.fast=!S.fast;redraw()};$('stdbg').onclick=()=>{closeOv();dbgOpen()};
+ settings(){$('stf').onclick=()=>{S.fast=!S.fast;redraw()};$('stlk').onclick=()=>{SETTINGS.nolock=!SETTINGS.nolock;saveSettings();WD.noLock=!!SETTINGS.nolock;if(WD.noLock&&document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}redraw()};$('stdbg').onclick=()=>{closeOv();dbgOpen()};
   $('ov').querySelectorAll('input[data-v]').forEach(r=>{r.oninput=()=>{const k=r.dataset.v;SETTINGS.vol[k]=r.value/100;r.style.setProperty('--p',r.value+'%');r.nextElementSibling.textContent=r.value;if(typeof applyVolumes==='function')applyVolumes()};r.onchange=()=>{saveSettings();if(r.dataset.v==='sfx'||r.dataset.v==='master')sfx('notify')}});
   const sn=$('sens');sn.oninput=()=>{SETTINGS.sens=sn.value/100;sn.style.setProperty('--p',((sn.value-30)/220*100)+'%');sn.nextElementSibling.textContent=SETTINGS.sens.toFixed(2)+'×'};sn.onchange=saveSettings;
   $('gq').querySelectorAll('button').forEach(b=>b.onclick=()=>{SETTINGS.gfx=b.dataset.q;saveSettings();if(G.ok)setQuality(b.dataset.q);else G.q=b.dataset.q;redraw()})},
@@ -16257,7 +16459,9 @@ addEventListener('keydown',e=>{
   if(isPhone){e.preventDefault();closePhone();return}
   if(!ovOn){e.preventDefault();phone();return}
  }
- if(k==='Escape'&&isPhone){e.preventDefault();if($('ov').dataset.app)phoneBack();else closePhone();return}
+ // Esc steps back inside the phone but never puts it away: the browser spends Esc on releasing the mouse, and a
+ // phone closed by Esc would drop you in the world with a loose cursor. P, Tab or the button put it away.
+ if(k==='Escape'&&isPhone){e.preventDefault();if($('ov').dataset.app)phoneBack();else{const t=$('phtip');if(t){t.textContent='P, Tab or the button below to put it away';t.classList.remove('flash');void t.offsetWidth;t.classList.add('flash')}}return}
  // Esc opens the phone (in the world the browser also uses Esc to release the mouse, which opens it too)
  if(k==='Escape'&&!ovOn&&!$('title').classList.contains('on')&&!$('card').classList.contains('on')){e.preventDefault();phone();return}
  if($('card').classList.contains('on')&&(k===' '||k==='Enter')){e.preventDefault();$('card').click();return}

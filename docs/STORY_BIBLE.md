@@ -181,9 +181,13 @@ what people like (£15, Exposure +4). Gifts are everyday things; everyone loves 
 (`GPREF`). One gift a day each. Preferences are learned by giving, at scenes 2 and 4, or from PEOPLEFINDR.
 
 ## Save files and postgame
-Three files (profiles), each with its own meta (achievements, endings and their versions, hints, scenes seen, the
-loop) and its own run saves. No Continue. Postgame (06c): the week as a tree, endings with versions and why, hints,
-scene replay (sandboxed, nothing kept), achievements with a percentage, and The Week After once the loop is closed.
+Three files (profiles), each with its own meta (achievements, endings and their versions, hints, scenes seen, run
+history, stats, total playtime, the loop) and its own run saves. No Continue. The title's Achievements button shows
+only achievements; the Postgame button (and a Postgame app on the phone) appears once the file has an ending.
+The postgame (06c data, 06d screen) is fullscreen with four rooms: The Week (a left-to-right map of every big choice
+and the endings at the end of each branch; drag, zoom, tap for details), Endings (a gallery by tier with your versions
+and why), Scenes (replay, sandboxed, from the title screen only) and Records (stats across every run, run history,
+most loved, hints, achievements). The Week After appears once the loop is closed.
 
 ## Routes
 Six scenes each (0-5): meeting, four hangouts and the last scene. They were written as eight shorter scenes plus a

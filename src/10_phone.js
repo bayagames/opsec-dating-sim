@@ -1,5 +1,6 @@
 /* ============ PHONE ============ */
 const ICON={
+ postgame:['#ffd166','<path d="M6 24h20M9 24V14M16 24V8M23 24V17" stroke="#1b1026" stroke-width="3" stroke-linecap="round"/><circle cx="9" cy="11" r="2.4" fill="#1b1026"/><circle cx="16" cy="5.5" r="2.4" fill="#1b1026"/><circle cx="23" cy="14" r="2.4" fill="#1b1026"/>'],
  echo:['#c9b6ff','<path d="M16 6a10 10 0 1 0 10 10" fill="none" stroke="#1b1026" stroke-width="2.6" stroke-linecap="round"/><path d="M26 7v9h-9" fill="none" stroke="#1b1026" stroke-width="2.6" stroke-linejoin="round"/><circle cx="16" cy="16" r="2.5" fill="#1b1026"/>'],
  messages:['#8affc1','<path d="M6 8h20v13H13l-5 4v-4H6z" fill="#1b1026"/>'],
  map:['#7cc4ff','<path d="M5 9l7-3 8 3 7-3v17l-7 3-8-3-7 3z" fill="none" stroke="#1b1026" stroke-width="2.4" stroke-linejoin="round"/><path d="M12 6v17M20 9v17" stroke="#1b1026" stroke-width="2"/>'],
@@ -17,7 +18,7 @@ const ICON={
  achieve:['#ffb347','<path d="M10 6h12v6a6 6 0 0 1-12 0z" fill="#1b1026"/><path d="M10 8H6a4 4 0 0 0 4 5M22 8h4a4 4 0 0 1-4 5" fill="none" stroke="#1b1026" stroke-width="2"/><path d="M16 18v4M11 26h10" stroke="#1b1026" stroke-width="2.6" stroke-linecap="round"/>'],
  settings:['#d9d4cc','<circle cx="16" cy="16" r="4.5" fill="none" stroke="#1b1026" stroke-width="2.6"/><path d="M16 5v4M16 23v4M5 16h4M23 16h4M8.2 8.2l2.8 2.8M21 21l2.8 2.8M8.2 23.8l2.8-2.8M21 11l2.8-2.8" stroke="#1b1026" stroke-width="2.6" stroke-linecap="round"/>']
 };
-const APPN={echo:'Echo',messages:'Messages',calendar:'Calendar',map:'Map',hearts:'Hearts',cases:'Case board',stats:'Stats',story:'Story',achieve:'Achievements',bag:'Bag',saves:'Saves',log:'Log',settings:'Settings',quit:'Quit'};
+const APPN={postgame:'Postgame',echo:'Echo',messages:'Messages',calendar:'Calendar',map:'Map',hearts:'Hearts',cases:'Case board',stats:'Stats',story:'Story',achieve:'Achievements',bag:'Bag',saves:'Saves',log:'Log',settings:'Settings',quit:'Quit'};
 const APPU={echo:'echo',messages:'phone',calendar:'phone',map:'map',hearts:'aff',cases:'clues',stats:'skill',story:'phone',achieve:'phone',bag:'phone'};
 /* the phone: a home screen of apps; every app opens full screen. Back (or Esc) goes back to the home screen. */
 let phApp=null,phThread=null,phReg=null;const PH={case:null,pick:[],ans:null,heart:null,day:null,stab:'week',atab:'all',ctab:'board',sday:null};
@@ -25,7 +26,7 @@ function phone(app){
  if(!S)return;
  const o=$('ov');if((o.classList.contains('on')&&!o.classList.contains('phoneov'))||$('card').classList.contains('on'))return;
  const opening=!o.classList.contains('phoneov');if(opening)PH.day=null;
- if(document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}
+ // the mouse stays captured: the drawn cursor works the phone, so closing it puts you straight back in the world
  WD.active=false;phThread=null;
  if(app){openApp(app,false);return}
  phApp=null;drawPhone();
@@ -35,16 +36,16 @@ function closePhone(){if($('ov').classList.contains('phoneov')&&typeof sfx==='fu
 /* Esc / back: from an app you opened on the phone, back to the phone; otherwise close */
 function phoneBack(){const o=$('ov');if(o.dataset.app&&o.dataset.from==='phone'){phApp=null;phThread=null;drawPhone()}else closePhone()}
 function drawPhone(){
- const apps=Object.keys(APPN).filter(a=>!APPU[a]||S.unl[APPU[a]]);
+ const apps=Object.keys(APPN).filter(a=>a==='postgame'?pgOpen():!APPU[a]||S.unl[APPU[a]]);
  const unread=S.msgs.filter(m=>!m.r).length,nn=S.day>0?ROM.filter(sceneReady).length:0,nc=S.day>0?Object.keys(MYST).filter(m=>S.unl.clues&&canSolve(m)).length:0;
  const body=`<div class="home"><div class="clock">${S.day?SLOTT[S.slot]:'07:12'}</div><div class="date">${esc(clockLabel())}</div><div class="grid">${apps.map(a=>`<button class="app" data-a="${a}"><span class="ic" style="background:${ICON[a][0]}"><svg viewBox="0 0 32 32">${ICON[a][1]}</svg>${a==='messages'&&unread?`<i>${unread}</i>`:''}${a==='hearts'&&nn?`<i>${nn}</i>`:''}${a==='cases'&&nc?`<i>${nc}</i>`:''}</span><span class="nm">${APPN[a]}</span></button>`).join('')}</div></div>`;
- ov(`<div class="phone"><div class="pbar"><span>${S.day>0&&WD.reg!=='home'&&WD.reg!=='office'?'CTRL+ALT+NET':'HOME-WIFI'}</span><span>${S.day?SLOTT[S.slot]:'07:12'}</span><span class="bat"><b style="width:${Math.max(8,96-S.slot*15)}%"></b></span></div><div class="pbody">${body}</div><button class="phome" id="phome" aria-label="Close phone"></button></div>`);
+ ov(`<div class="phone"><div class="pbar"><span>${S.day>0&&WD.reg!=='home'&&WD.reg!=='office'?'CTRL+ALT+NET':'HOME-WIFI'}</span><span>${S.day?SLOTT[S.slot]:'07:12'}</span><span class="bat"><b style="width:${Math.max(8,96-S.slot*15)}%"></b></span></div><div class="pbody">${body}</div><button class="phome" id="phome" aria-label="Close phone"></button></div><p class="small phtip" id="phtip">${WD.touch?'':'P or Tab to put it away'}</p>`);
  const o=$('ov');delete o.dataset.app;delete o.dataset.from;o.classList.remove('mapov','appov');o.classList.add('phoneov');updBlur();
  o.onclick=e=>{if(e.target===o)closePhone()};
  $('phome').onclick=closePhone;
  o.querySelectorAll('.app').forEach(b=>b.onclick=()=>openApp(b.dataset.a,true));
 }
-function openApp(k,fromPhone){phApp=k;if(k==='map'){mapOpen(fromPhone);return}drawApp(fromPhone===undefined?($('ov').dataset.from==='phone'):fromPhone)}
+function openApp(k,fromPhone){phApp=k;if(k==='map'){mapOpen(fromPhone);return}if(k==='postgame'){closeOv();$('ov').classList.remove('phoneov','mapov','appov');postgame('map','phone');return}drawApp(fromPhone===undefined?($('ov').dataset.from==='phone'):fromPhone)}
 function drawApp(fromPhone){const k=phApp;
  const html=APPS[k]();
  ov(`<div class="bigapp app-${k}"><div class="mtop"><button class="pback" id="apb" aria-label="Back">${fromPhone?'‹':'✕'}</button><b>${APPN[k]}</b><span class="small">${esc(clockLabel())}</span><button class="pback" id="apx" aria-label="Close">✕</button></div>${html}</div>`);
@@ -158,6 +159,7 @@ const APPS={
   <p class="small">${G.q==='low'?'Simpler lighting, no glow. Best for older phones.':G.q==='medium'?'Full lighting and glow, lower resolution.':'Everything on, with antialiasing. The resolution drops automatically if frames get slow.'}</p>
   <h4>Controls</h4><label class="sl"><span>Look speed</span><input type="range" min="30" max="250" step="5" value="${Math.round(SETTINGS.sens*100)}" id="sens" style="--p:${Math.round((SETTINGS.sens*100-30)/220*100)}%"><b>${SETTINGS.sens.toFixed(2)}×</b></label>
   <div class="row" style="margin-top:6px"><button class="btn" id="stf">Text: ${S.fast?'instant':'typewriter'}</button><button class="btn" id="stdbg">Debug menu (F9)</button></div>
+  <div class="row" style="margin-top:6px"><button class="btn" id="stlk">Capture the mouse: ${SETTINGS.nolock?'off (drag to look)':'on'}</button></div><p class="small">With capture off, the browser never shows its "press Esc to show your cursor" notice; you look around by dragging.</p>
   <p class="small" style="margin-top:12px">Keyboard: WASD or arrows to walk, Shift to run, mouse to look, E to interact with whatever you're pointing at, M for map. <b>Esc</b> or <b>P</b> opens this phone; Esc in an app goes back to the phone.<br>Touch: drag the left stick to walk, drag anywhere else to look, tap the prompt to interact.</p></div>
   <p class="small">The game autosaves while you explore. Use the Saves app for save slots and export.</p></div>`},
  quit(){return `<div class="abody"><div class="set"><h4>Quit to title?</h4><p class="small">Your game autosaves right now, where you're standing. You can pick it up again with Continue.</p><div class="row"><button class="btn pri" id="stq">Quit to title</button><button class="btn" id="stqn">Not yet</button></div></div></div>`}
@@ -193,7 +195,7 @@ const APPS_AFTER={
  echo(){const b=$('erw');if(b)b.onclick=()=>{if(!b.dataset.c){b.dataset.c=1;b.textContent='Tap again: lose everything since this morning';return}rewindDay()}},
  achieve(){$('ov').querySelectorAll('[data-at]').forEach(b=>b.onclick=()=>{PH.atab=b.dataset.at;redraw()})},
  saves(){savesPanel($('spanel'),'phone',redraw)},
- settings(){$('stf').onclick=()=>{S.fast=!S.fast;redraw()};$('stdbg').onclick=()=>{closeOv();dbgOpen()};
+ settings(){$('stf').onclick=()=>{S.fast=!S.fast;redraw()};$('stlk').onclick=()=>{SETTINGS.nolock=!SETTINGS.nolock;saveSettings();WD.noLock=!!SETTINGS.nolock;if(WD.noLock&&document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}redraw()};$('stdbg').onclick=()=>{closeOv();dbgOpen()};
   $('ov').querySelectorAll('input[data-v]').forEach(r=>{r.oninput=()=>{const k=r.dataset.v;SETTINGS.vol[k]=r.value/100;r.style.setProperty('--p',r.value+'%');r.nextElementSibling.textContent=r.value;if(typeof applyVolumes==='function')applyVolumes()};r.onchange=()=>{saveSettings();if(r.dataset.v==='sfx'||r.dataset.v==='master')sfx('notify')}});
   const sn=$('sens');sn.oninput=()=>{SETTINGS.sens=sn.value/100;sn.style.setProperty('--p',((sn.value-30)/220*100)+'%');sn.nextElementSibling.textContent=SETTINGS.sens.toFixed(2)+'×'};sn.onchange=saveSettings;
   $('gq').querySelectorAll('button').forEach(b=>b.onclick=()=>{SETTINGS.gfx=b.dataset.q;saveSettings();if(G.ok)setQuality(b.dataset.q);else G.q=b.dataset.q;redraw()})},

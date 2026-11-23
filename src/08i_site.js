@@ -153,7 +153,7 @@ function buildSite(){
  // halls and back of house
  Z('hallA',-60,-136,50,-64,Y0,26,['ringN','ringN2','backstage','courtyard']);Z('backstage',-40,-150,30,-136,Y0,5,['hallA','service']);
  Z('staffW',-64,-150,-60,-64,Y0,4,['ringN','security','stores','service']);Z('security',-110,-100,-64,-64,Y0,4,[]);Z('stores',-110,-150,-64,-100,Y0,4,['service']);
- Z('staffE',50,-150,56,-64,Y0,4,['mdf','service','hallBback']);Z('mdf',56,-100,62,-86,Y0,3,[]);
+ Z('staffE',50,-150,56,-64,Y0,4,['mdf','service','hallBback','hallA']);Z('mdf',56,-100,62,-86,Y0,3,[]);
  Z('service',-110,-158,176,-150,Y0,4,['hallBback','kitchenC','breakroom','dock']);
  Z('hallB',62,-111,110,-64,Y0,11,['neConc','hallBback']);Z('hallBback',62,-150,110,-111,Y0,4.4,[]);
  Z('kitchenC',110,-111,134,-64,Y0,4.4,['neConc','breakroom','dock']);Z('breakroom',110,-150,134,-111,Y0,4,[]);
@@ -182,6 +182,9 @@ function buildSite(){
  // hubs: open concourses and corridors; a room that sees one also sees what it opens onto
  for(const n of['lobby','promenade','foyer','courtyard','ringN','ringW','ringE','ringS','ringN2','ringW2','ringE2','ringS2','neConc','neConc2','seConc','seConc1','vcorr','vcorr1','hotelL1','hotelL2','plaza','service','staffW','staffE','liftH','garden','lane','link','skybridge','terrace'])G.zones.con.find(q=>q.n===n).hub=true;
  G.zones.con.find(q=>q.n==='outside').bg=true;
+ // under the open sky everything outdoors is in view of everything else outdoors: a room with a window onto any of it
+ // draws all of it (otherwise you see straight through the far side of the street into the sky)
+ for(const n of['outside','plaza','plazaE','garden','lane','terrace','courtyard','skygarden','roof'])G.zones.con.find(q=>q.n===n).sky=true;
  G.wallNT=true;placed(HX,buildHotel);buildCore();buildHalls();buildEast();buildSouth();buildUnder();G.wallNT=false;siteAreas();
 }
 /* the underside and the two side stringers of a stair that floats above the floor (seen from below or the side) */

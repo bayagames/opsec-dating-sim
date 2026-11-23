@@ -29,7 +29,7 @@ const romCount=()=>ROM.filter(loved).length;
 /* Three save files (profiles). Each holds everything that lasts across runs: achievements, endings and how you got them,
    hints, scenes seen, finished routes and mysteries, the loop, and its own run saves. */
 let PROF=0;
-const META_DEF=()=>({ach:{},ends:{},endv:{},hints:[],seenSc:{},routes:{},solved:{},runs:0,restored:0,loop:0,secret:0,stats:{}});
+const META_DEF=()=>({ach:{},ends:{},endv:{},hints:[],seenSc:{},routes:{},solved:{},runs:0,restored:0,loop:0,secret:0,stats:{},play:0});
 const META=META_DEF();
 const profKey=n=>'opsec5_p'+n;
 function readProf(n){try{const t=localStorage.getItem(profKey(n));return t?JSON.parse(t):null}catch(e){return null}}
