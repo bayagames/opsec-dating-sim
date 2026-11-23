@@ -357,6 +357,7 @@ pia.h: Next Thursday you have to come and turn pages. That's the deal. That's th
 /* more than one person's story ended with you: they find out, at the party, all at once */
 SC.epi_many=`
 [bg ballroom]
+[cut pan ballroom]
 ~ It happens by the chocolate fountain, which is the worst possible place for it to happen.
 ~ {=ROM.filter(loved).map(g=>CH[g].name).join(', ').replace(/, ([^,]*)$/,' and $1')}. All of them. All at once. Looking at you, and then at each other, and then back at you.
 * You knew this was coming. You've known since about Thursday. You'd hoped it would come somewhere quieter.

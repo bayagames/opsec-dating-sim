@@ -13,11 +13,12 @@ function postgame(sec,from){if(!pgOpen()){toast('Finish a run to open the postga
  if(sec)PGV.sec=sec;PGV.from=from||(S&&S.inWorld&&$('ov').classList.contains('phoneov')?'phone':PGV.from||'title');
  if(document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}
  pgDraw()}
-function pgClose(){const el=$('pgx');if(el)el.remove();document.body.classList.remove('pgon');if(PGV.from==='phone'&&S&&S.inWorld){phone()}else if($('title').classList.contains('on'))fileMenu()}
+function pgEsc(){if(PGV.end||PGV.node!==null&&PGV.node!==undefined){PGV.end=null;PGV.node=null;pgDraw();return}pgClose()}
+function pgClose(){const el=$('pgx');if(el)el.remove();document.body.classList.remove('pgon');if(PGV.from==='phone'&&S&&S.inWorld){phone()}else if($('title').classList.contains('on'))titleView('main')}
 function pgShell(inner,rail){let el=$('pgx');if(!el){el=document.createElement('div');el.id='pgx';$('app').appendChild(el)}document.body.classList.add('pgon');
  const ne=Object.keys(META.ends).length;
- el.innerHTML=`<div class="pgtop"><div class="pgbrand"><span class="pgdot"></span><b>POSTGAME</b><span class="pgfile">${esc(META.name||'File '+PROF)}</span></div>
-  <div class="pgmeta"><span><b>${ne}</b>/${ENDORDER.length} endings</span><span><b>${achPct()}%</b> achievements</span><span><b>${fmtDur(META.play)}</b> played</span></div>
+ el.innerHTML=`<div class="pgtop"><div class="pgbrand"><span class="pgdot"></span><b>${pgOpen()?'POSTGAME':'ACHIEVEMENTS'}</b><span class="pgfile">${esc(META.name||'File '+PROF)}</span></div>
+  <div class="pgmeta">${pgOpen()?`<span><b>${ne}</b>/${ENDORDER.length} endings</span>`:''}<span><b>${achPct()}%</b> achievements</span><span><b>${fmtDur(META.play)}</b> played</span></div>
   <button class="pgclose" id="pgClose" aria-label="Close">✕</button></div>
   <div class="pgmain">${rail?`<nav class="pgrail">${rail}</nav>`:''}<section class="pgsec">${inner}</section></div>`;
  $('pgClose').onclick=pgClose;
@@ -63,14 +64,17 @@ function pgMap(){const T=pgLayout(),fl=META.fl||{};
  $('pgZi').onclick=()=>{const r=cv.getBoundingClientRect();zoomAt(1.25,r.width/2,r.height/2)};$('pgZo').onclick=()=>{const r=cv.getBoundingClientRect();zoomAt(.8,r.width/2,r.height/2)};$('pgZf').onclick=fit;
  cv.addEventListener('wheel',e=>{e.preventDefault();const r=cv.getBoundingClientRect();zoomAt(e.deltaY<0?1.12:.89,e.clientX-r.left,e.clientY-r.top)},{passive:false});
  const P=new Map();let moved=0,pinch=null;
- svg.addEventListener('pointerdown',e=>{svg.setPointerCapture(e.pointerId);P.set(e.pointerId,[e.clientX,e.clientY]);moved=0;if(P.size===2){const[a,b]=[...P.values()];pinch=Math.hypot(a[0]-b[0],a[1]-b[1])}});
- svg.addEventListener('pointermove',e=>{if(!P.has(e.pointerId))return;const o=P.get(e.pointerId),dx=e.clientX-o[0],dy=e.clientY-o[1];P.set(e.pointerId,[e.clientX,e.clientY]);
+ const drop=e=>{P.delete(e.pointerId);if(P.size<2)pinch=null;svg.classList.remove('grab')};
+ svg.addEventListener('dragstart',e=>e.preventDefault());
+ svg.addEventListener('lostpointercapture',drop);
+ svg.addEventListener('pointerdown',e=>{if(e.button>0)return;e.preventDefault();try{svg.setPointerCapture(e.pointerId)}catch(_){}svg.classList.add('grab');P.set(e.pointerId,[e.clientX,e.clientY]);moved=0;if(P.size===2){const[a,b]=[...P.values()];pinch=Math.hypot(a[0]-b[0],a[1]-b[1])}});
+ svg.addEventListener('pointermove',e=>{if(!P.has(e.pointerId))return;if(e.pointerType==='mouse'&&!(e.buttons&1)){drop(e);return}const o=P.get(e.pointerId),dx=e.clientX-o[0],dy=e.clientY-o[1];P.set(e.pointerId,[e.clientX,e.clientY]);
   if(P.size===2&&pinch){const[a,b]=[...P.values()],d=Math.hypot(a[0]-b[0],a[1]-b[1]),r=cv.getBoundingClientRect();zoomAt(d/pinch,(a[0]+b[0])/2-r.left,(a[1]+b[1])/2-r.top);pinch=d;moved=99;return}
   moved+=Math.abs(dx)+Math.abs(dy);PGV.tx+=dx;PGV.ty+=dy;apply()});
- const up=e=>{P.delete(e.pointerId);if(P.size<2)pinch=null;if(moved>6||P.size)return;
+ const up=e=>{if(!P.has(e.pointerId))return;drop(e);if(moved>6||P.size)return;
   const t=document.elementFromPoint(e.clientX,e.clientY),g=t&&t.closest&&t.closest('.tn');if(!g){if(PGV.end||PGV.node!==null){PGV.end=null;PGV.node=null;pgMap()}return}
   if(g.dataset.e){PGV.end=g.dataset.e;PGV.node=null}else{PGV.node=+g.dataset.n;PGV.end=null}pgMap()};
- svg.addEventListener('pointerup',up);svg.addEventListener('pointercancel',e=>{P.delete(e.pointerId);pinch=null});
+ svg.addEventListener('pointerup',up);svg.addEventListener('pointercancel',drop);
  pgDetailWire(T)}
 /* the drawer on the right: an ending, or a choice */
 function pgDetail(){if(PGV.end)return`<aside class="pgdrawer">${pgEndCard(PGV.end)}</aside>`;
@@ -110,13 +114,13 @@ function pgRecords(){const st=META.stats||{},H=META.hist||[],hints=HINTS.filter(
  pgShell(inner,pgRail());achWire()}
 /* achievements, shared by Records and the title screen's own Achievements screen */
 let ACHF='all';
-function achBlock(){const all=Object.keys(ACH),got=all.filter(k=>META.ach[k]).length,ks=all.filter(k=>ACHF==='all'||(ACHF==='got'?META.ach[k]:!META.ach[k]));
+function achBlock(){const all=achVis(),got=all.filter(k=>META.ach[k]).length,ks=all.filter(k=>ACHF==='all'||(ACHF==='got'?META.ach[k]:!META.ach[k]));
  return`<div class="pgachh"><p class="pgk">Achievements · ${got}/${all.length}</p><div class="pgring" style="--p:${achPct()}"><b>${achPct()}%</b></div><div class="pgseg">${[['all','All'],['got','Unlocked'],['no','Locked']].map(t=>`<button class="${ACHF===t[0]?'on':''}" data-af="${t[0]}">${t[1]}</button>`).join('')}</div></div>
  <div class="pgach">${ks.map(k=>{const a=ACH[k],on=!!META.ach[k],hid=a[2]&&!on;return`<div class="pga ${on?'on':''}"><span class="pgai">${on?'★':hid?'?':'☆'}</span><div><b>${hid?'Hidden':esc(a[0])}</b><small>${hid?'Keep playing.':esc(a[1])}</small></div></div>`}).join('')}</div>`}
 function achWire(){document.querySelectorAll('#pgx [data-af]').forEach(b=>b.onclick=()=>{ACHF=b.dataset.af;pgDraw()})}
 /* the title screen's Achievements: just the trophies, open from the first run */
 function achScreen(){PGV.sec='ach';PGV.from='title';const prev=pgDraw;
- pgShell(`<div class="pgpad"><div class="pghead"><h2>Achievements</h2><p>Across every run in this file. Finish a run to open the rest of the postgame.</p></div>${achBlock()}</div>`,'');
+ pgShell(`<div class="pgpad"><div class="pghead"><h2>Achievements</h2><p>Everything you've done in this file.</p></div>${achBlock()}</div>`,'');
  document.querySelectorAll('#pgx [data-af]').forEach(b=>b.onclick=()=>{ACHF=b.dataset.af;achScreen()})}
 /* ---------- The Week After ---------- */
 function pgAfter(){const inRun=S&&S.inWorld&&!S.ending&&!S.epilogue;

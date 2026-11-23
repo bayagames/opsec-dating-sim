@@ -107,6 +107,7 @@ SC.end_proof=`
 `;
 SC.d5_offer=`
 [bg grill]
+[cut pan grill]
 [hide]
 ~ The Grill, on the hotel's ground floor. Dark leather, low brass lamps, an open kitchen with flames in it. A booth at the back has been cleared for you.
 ~ The invitation came an hour after you got back: a card under your door, heavy paper, embossed shield. "Dinner. 7 PM. The Grill. Let's talk about your future. —V.H."

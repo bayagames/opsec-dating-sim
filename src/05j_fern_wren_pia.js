@@ -249,6 +249,7 @@ pia.d: I keep thinking: if he ever comes back through, he'll hear me. He'll know
 `;
 SC.pia2=`
 [bg station]
+[cut pan station]
 ~ Pia's packed up early. The station's quiet: the gap between the commuter rush and the evening. She sits on the piano stool with her violin in her lap.
 pia.n: I want to play you something. The song I never play for money. "That one."
 pia.n: When we were kids, Jonah and I had a code. We tapped it on the wall between our bedrooms. Long and short. A tune, really. He made it a song. Every number, every letter, a note.

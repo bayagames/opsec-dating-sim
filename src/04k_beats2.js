@@ -39,6 +39,7 @@ pam.h: And {h}? Answer the thread. Tell them where your source was. It'll be the
 `;
 SC.d4_booth=`
 [bg foyer]
+[cut pan foyer]
 [hide]
 ~ Thursday morning, and the Foyer is loud in a new way. A crowd round the Lumen booth under the giant turning logo. A queue for something. And a second crowd, facing the first, holding hand-made signs.
 ~ The booth: "SAFESPHERE 2 · BETA · BE THE FIRST TO CONNECT". Lumen staff in navy lanyards hand out cards with download codes and free T-shirts. The queue is long. People are scared. WH1SPER has spent two days teaching them to be.

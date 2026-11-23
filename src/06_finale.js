@@ -86,44 +86,9 @@ function finishEnding(k){
  if(k==='harem'){META.loopClosed=1;saveMeta()}
 }
 /* ---- title: choose a file, then play ---- */
-function achPct(){const all=Object.keys(ACH).length;return all?Math.round(Object.keys(META.ach).filter(k=>ACH[k]).length/all*100):0}
-function titleScreen(){
- show('title');$('tname').style.display='none';
- const fl=['ellie2','nyx','ada','priya','juno','kitc','rin','bea','mira','saoirse','sunny','tilly','petra','astrid','yuki','vesper','delphine','noor','fern','wren','pia'],ex=['h','s','h','n','h','s','b','s','n','s','h','b','h','n','s','s','n','n','h','h','n'];
- $('heads').innerHTML=fl.map((g,i)=>`<span>${head(g,ex[i])}</span>`).join('');
- if(!PROF){filesScreen();return}
- fileMenu();
-}
-function filesScreen(){PROF=0;$('tmain').style.display='none';const el=$('tprof');el.style.display='flex';
- const card=n=>{const p=readProf(n);if(!p)return`<button class="pfile empty" data-n="${n}"><h4>File ${n}</h4><span class="small">Empty. Start here.</span></button>`;
-  const m=p.meta||{},all=Object.keys(ACH).length,a=Object.keys(m.ach||{}).filter(k=>ACH[k]).length,e=Object.keys(m.ends||{}).length;
-  return`<button class="pfile" data-n="${n}"><h4>${esc(p.name||'File '+n)}</h4><span class="pct">${Math.round(a/all*100)}%</span><span class="small">${a}/${all} achievements · ${e}/${ENDORDER.length} endings · ${m.runs||0} runs${m.loop?' · ∞':''}</span><span class="small">${m.play?fmtDur(m.play)+' played':''}${p.last?(m.play?' · ':'')+'last '+fmtTime(p.last):''}</span><span class="btn del" data-del="${n}">Delete file</span></button>`};
- el.innerHTML=`<p class="small">Choose a file. Each one keeps its own runs, saves and achievements.</p><div class="pfiles">${[1,2,3].map(card).join('')}</div>`;
- el.querySelectorAll('.pfile').forEach(b=>b.onclick=e=>{const d=e.target.closest('[data-del]');if(d){e.stopPropagation();if(!d.dataset.c){d.dataset.c=1;d.textContent='Tap again to delete everything in this file';return}
-   const n=d.dataset.del;try{for(const k of Object.keys(localStorage))if(k===profKey(n)||k.startsWith(profKey(n)+'_'))localStorage.removeItem(k)}catch(e){}filesScreen();return}
-  const n=+b.dataset.n;if(!readProf(n)){loadProf(n);saveMeta()}else loadProf(n);fileMenu()})}
-function fileMenu(){$('tprof').style.display='none';$('tmain').style.display='flex';
- const e=Object.keys(META.ends).length;
- $('tfile').innerHTML=`<b style="color:var(--butter)">${esc(META.name||'File '+PROF)}</b> · ${achPct()}% · ${e}/${ENDORDER.length} endings${META.play?' · '+fmtDur(META.play):''}`;
- $('bLoad').disabled=!['auto',1,2,3,4,5].some(k=>readSlot(k));
- $('bPost').style.display=e?'':'none';
-}
-$('bNew').onclick=()=>{$('tmain').style.display='none';$('tname').style.display='flex';$('hIn').focus()};
-$('bBack').onclick=titleScreen;
-$('bFiles').onclick=filesScreen;
-$('bLoad').onclick=()=>savesScreen();
-$('bAch').onclick=()=>achScreen();
-$('bPost').onclick=()=>{PGV.fit=true;postgame('map','title')};
-$('bGo').onclick=()=>{
- const h=($('hIn').value||'').trim().replace(/[<>&"{}]/g,'')||'n00b';
- S=fresh(h);META.lastH=h;saveMeta();if(META.runs)ach('newgame');
- // the loop: once you know, you can say the word at the very start
- if(META.secret)S.f.canrewind=1;
- S.resume='pro';startPrologue();
-};
+function achPct(m){m=m||META;const all=Object.keys(ACH).length;return all?Math.round(Object.keys(m.ach||{}).filter(k=>ACH[k]).length/all*100):0}
 function startPrologue(){
  beatBusy=false;
  if(!WD.touch&&window.THREE)tryLock();
  initWorld(()=>{S.day=0;S.slot=0;S.wakeAt='flat';snapDay();if(G.ok){S.inWorld=1;teleportArea('flat')}hub()});
 }
-$('hIn').addEventListener('keydown',e=>{if(e.key==='Enter')$('bGo').click()});

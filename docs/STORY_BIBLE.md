@@ -170,9 +170,21 @@ Afterwards the postgame opens The Week After: free roam, nothing to do, everyone
 you're close to step in and change what happens (a clue, less Exposure, your laptop hidden, Rin saved).
 
 ## Cutscenes
-`[cut shot cast...]` moves the camera to a fixed shot (`CUTS`, 09c) with the cast on their marks; `[cut off]` ends
-it (it also ends with the conversation). The world stays sharp and the dialogue sits in the middle without a
-portrait. Used for the Hall A moments: the opening ceremony, WHISPER's broadcast, the finals, the keynotes.
+`[cut shot cast...]` moves the camera to a shot (`CUTS`, 09c) with the cast on their marks; `[cut off]` ends it (it
+also ends with the conversation). A shot is a list of camera moves (dolly, orbit, push-in; eased, then a breathing
+hold). While people talk the camera covers them: a new speaker gets a close-up from alternating sides, narration
+goes back to the wide. `[cut close id]` and `[cut wide]` force one. `[cut pan area]` is an establishing shot of a
+room (authored in `PANS`, or worked out from the room's shape) that holds for narration and gets out of the way when
+someone speaks. The world stays sharp, letterbox bars slide in, the HUD goes, and lines show as subtitles.
+Used for the Hall A moments (ceremony, WHISPER's broadcast, finals, keynotes) and as establishing shots in about
+twenty scenes (arrival, the bar, the reception, the badge lab, the station, the roof, the epilogue ballroom...).
+
+## Title screen
+Boot (the convention is built and lit; the progress bar is the lightmap bake, cached after the first time), then
+"press any key" over a slow camera tour of the empty con (`TITLESHOTS`, faded between, with the place in the top
+right), then the menu: the logo glides into the corner and the options come in down the left. Mouse, arrows and
+Enter all work; Esc goes back. Deleting a file asks for confirmation and lists what goes. Without WebGL it falls back
+to a drawn background.
 
 ## Money and gifts (03c_economy.js)
 Money instead of credits: a £20 per diem each morning, bug bounties, minigames, shifts (info desk, bar, Proof),
@@ -183,7 +195,8 @@ what people like (£15, Exposure +4). Gifts are everyday things; everyone loves 
 ## Save files and postgame
 Three files (profiles), each with its own meta (achievements, endings and their versions, hints, scenes seen, run
 history, stats, total playtime, the loop) and its own run saves. No Continue. The title's Achievements button shows
-only achievements; the Postgame button (and a Postgame app on the phone) appears once the file has an ending.
+only achievements (who you fell for and what you solved aren't achievements; endings and run counts stay hidden
+until the postgame opens); the Postgame button (and a Postgame app on the phone) appears once the file has an ending.
 The postgame (06c data, 06d screen) is fullscreen with four rooms: The Week (a left-to-right map of every big choice
 and the endings at the end of each branch; drag, zoom, tap for details), Endings (a gallery by tier with your versions
 and why), Scenes (replay, sandboxed, from the title screen only) and Records (stats across every run, run history,

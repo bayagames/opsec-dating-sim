@@ -38,6 +38,7 @@ sunny.n: Every device has a MAC address. A hardware ID. Find the one that's talk
 ~ Port 47. Closet MDF-1. The Main Distribution Frame: the con's central network closet, upstairs, off the staff corridor behind Hall A.
 sunny.n: MDF-1. That's my closet. I have the only key. Apart from Con Ops. Come on.
 [bg mdf]
+[cut pan mdf]
 ~ A narrow room behind a locked door, walls of patch panels, a thousand blue cables in neat looms, and the roar of fans. Sunny goes straight to the rack at the back.
 ~ Between two of her switches, screwed in neatly, as if it belongs: a slim black box with no lights, no logo, and a label-maker label on the front.
 ~ "LANTERN-01".

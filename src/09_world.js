@@ -224,7 +224,7 @@ const TODP=[
  {hz:[.96,.5,.36],zn:[.2,.14,.38],st:.25,fog:[.42,.26,.3],amb:[.46,.32,.34],sun:1.8,inside:1.1},
  {hz:[.1,.06,.16],zn:[.012,.012,.05],st:1,fog:[.1,.06,.16],amb:[.3,.3,.35],sun:1,inside:1},
  {hz:[.06,.04,.1],zn:[.008,.008,.03],st:1,fog:[.06,.04,.1],amb:[.24,.24,.3],sun:.85,inside:.95}];
-function todNow(){if(!S||S.day<1||!['con','f13','station'].includes(WD.reg))return null;return TODP[clamp(S.slot,0,5)]}
+function todNow(){if(TT.on)return TODP[TITLESHOTS[TT.i].slot];if(!S||S.day<1||!['con','f13','station'].includes(WD.reg))return null;return TODP[clamp(S.slot,0,5)]}
 function render(dt){
  const T=G.T,r=G.r,cv=G.cv,cam=G.cam;
  // resolution (adaptive)
@@ -233,7 +233,7 @@ function render(dt){
  if(key!==G.sizeKey){G.sizeKey=key;r.setPixelRatio(dpr);r.setSize(w,h,false);if(G.composer){G.composer.setPixelRatio(dpr);G.composer.setSize(w,h)}if(G.fxaa)G.fxaa.material.uniforms.resolution.value.set(1/(w*dpr),1/(h*dpr));cam.aspect=w/h}
  for(const k in G.regions){const o=G.regions[k].obj;if(o)o.visible=k===WD.reg}
  // atmosphere: fog + hemisphere ease towards the current area's values
- const R=G.regions[WD.reg],A=WD.area&&AREAS[WD.area],TOD=todNow();const fog=(TOD&&A&&A.out)?TOD.fog:(A&&A.fog)||R.fog,fr=(A&&A.fr)||R.fr,amb=(TOD&&A&&A.out)?TOD.amb:(A&&A.amb)||R.amb||[.3,.3,.35];
+ const aK=TT.on?TITLESHOTS[TT.i].area:WD.cut&&WD.cut.C.area&&cutOn()?WD.cut.C.area:WD.area,R=G.regions[WD.reg],A=aK&&AREAS[aK],TOD=todNow();const fog=(TOD&&A&&A.out)?TOD.fog:(A&&A.fog)||R.fog,fr=(A&&A.fr)||R.fr,amb=(TOD&&A&&A.out)?TOD.amb:(A&&A.amb)||R.amb||[.3,.3,.35];
  const ease=G.atmoInit?Math.min(1,dt*2.5):1;G.atmoInit=true;
  G.fogT=G.fogT||new T.Color();G.fogT.setRGB(fog[0],fog[1],fog[2],T.SRGBColorSpace);G.fog.color.lerp(G.fogT,ease);
  G.fog.near+=(fr[0]-G.fog.near)*ease;G.fog.far+=(fr[1]-G.fog.far)*ease;
@@ -252,13 +252,14 @@ function render(dt){
  const sp=Math.hypot(WD.vx,WD.vz),bamp=(WD.bobAmp||0)*(sp>6.5?.024:.016)*(SETTINGS.bob===false?0:1),bob=-bamp*(1-Math.cos(WD.bob*2))*.5-(WD.land||0);
  const asp=w/h,vf=clamp(2*Math.atan(Math.tan(.75+WD.fovk*.045)/asp),1.05,1.8);
  cam.fov=vf*180/Math.PI;cam.far=(FAR[WD.reg]||180)+40;cam.updateProjectionMatrix();
- if(WD.cut&&cutOn()){const p=cutCam(cam);zoneCull(WD.reg,p[0],p[1],p[2])}
+ if(TT.on&&$('title').classList.contains('on')){const p=titleCam(cam);zoneCull(WD.reg,p[0],p[1],p[2])}
+ else if(WD.cut&&cutOn()){const p=cutCam(cam);zoneCull(WD.reg,p[0],p[1],p[2])}
  else{cam.position.set(WD.x,WD.eye+bob,WD.z);cam.rotation.set(WD.pit,WD.yaw,0);zoneCull(WD.reg,WD.x,WD.eye,WD.z)}
  G.sky.position.copy(cam.position);const su=G.sky.material.uniforms;su.t.value=performance.now()/1000;
  const tod=todNow();if(tod){su.hz.value.setRGB(...tod.hz);su.zn.value.setRGB(...tod.zn);su.st.value=tod.st}
  else{su.hz.value.copy(G.fog.color);if(R.day){su.zn.value.setRGB(.12,.3,.75);su.st.value=0}else{su.zn.value.setRGB(.012,.012,.05);su.st.value=1}}
  updLights(dt);
- updSprites(dt);updBeacon();vfxTick();
+ updSprites(dt);if(!TT.on)updBeacon();else{for(const id of['wpG','wpP'])if($(id))$(id).style.display='none';if(G.beacon){G.beacon.visible=false;G.pinB.visible=false}}vfxTick();
  G.revZOn=G.revZ;try{if(G.composer)G.composer.render(dt);else r.render(G.scene,cam)}finally{G.revZOn=false}
 }
 /* the story goal, in the world: a faint column of light over a place, or a small turning marker over a person. It fades
@@ -301,14 +302,15 @@ function hudMark(id,o,col,h){let el=$(id);if(!el){el=document.createElement('div
  el.querySelector('span').textContent=(Math.abs(dy)>2.6?(dy>0?'▲ ':'▼ '):'')+Math.round(Math.hypot(d,dy))+' m';
 }
 function updSprites(dt){
- const T=G.T,tt=performance.now()/1000,yaw=WD.cut&&cutOn()?WD.cutYaw:WD.yaw;
- G.newsT=(G.newsT||0)-dt;if(G.newsT<=0){G.newsT=.25;G.news=S.ch>0?new Set(newScenes().map(n=>n.id)):new Set()}
+ const T=G.T,tt=performance.now()/1000,yaw=TT.on||WD.cut&&cutOn()?WD.cutYaw:WD.yaw;
+ G.newsT=(G.newsT||0)-dt;if(G.newsT<=0||!G.news){G.newsT=.25;G.news=!TT.on&&S&&S.ch>0?new Set(newScenes().map(n=>n.id)):new Set()}
  for(const c of WCH){
-  const vis=c.reg===WD.reg&&c.when();
+  const vis=TT.on?!!TT.cast[c.id]:c.reg===WD.reg&&c.when();
   if(!c.obj){if(!vis)continue;c.obj=cutout(null,.98,2.45);G.scene.add(c.obj);c.mark=markObj();G.scene.add(c.mark)}
   c.obj.visible=vis;c.mark.visible=false;if(!vis)continue;
   const sk=charSVGKey(c);if(c.objKey!==sk){c.objKey=sk;const t=spriteTex('c:'+sk,fullSVG(sk));const bd=c.obj.userData.body,b=bd.material;b.map=t;b.emissiveMap=t;b.needsUpdate=true;if(bd.customDistanceMaterial){bd.customDistanceMaterial.map=t;bd.customDistanceMaterial.needsUpdate=true}}
-  c.obj.position.set(c.x,c.y||0,c.z);c.obj.rotation.y=yaw;litSprite(c.obj,WD.reg,c.x,(c.y||0)+1.2,c.z,tt);
+  if(TT.on){const m=TT.cast[c.id];c.obj.position.set(m[0],m[2]||0,m[1]);c.obj.rotation.y=yaw;litSprite(c.obj,WD.reg,m[0],(m[2]||0)+1.2,m[1],tt,CHAR_MIN);continue}
+  c.obj.position.set(c.x,c.y||0,c.z);c.obj.rotation.y=yaw;litSprite(c.obj,WD.reg,c.x,(c.y||0)+1.2,c.z,tt,CHAR_MIN);
   const body=c.obj.userData.body;body.scale.y=1+Math.sin(tt*1.7+c.x)*.007;body.scale.x=1-Math.sin(tt*1.7+c.x)*.004;
   if(G.news.has(c.id)||storyMark(c)){c.mark.visible=true;c.mark.position.set(c.x,(c.y||0)+2.62+Math.sin(tt*3)*.07,c.z)}
  }
@@ -320,15 +322,24 @@ function updSprites(dt){
   n.obj.position.set(n.x,n.y,n.z);n.obj.rotation.y=yaw;litSprite(n.obj,WD.reg,n.x,n.y+1.2,n.z,tt);const b=n.obj.userData.body;
   b.position.y=moving?Math.abs(Math.sin(ph))*.035:0;b.rotation.z=moving?Math.sin(ph)*.025:Math.sin(tt*.8+n.hx)*.008;
  }
- for(const d of DYN){const vis=d.reg===WD.reg&&d.when()&&d.spr;
+ for(const d of DYN){const vis=!TT.on&&d.reg===WD.reg&&d.when()&&d.spr;
   if(!d.obj){if(!vis)continue;d.obj=cutout(tapeTex(),1.3,2.4,{noShadow:1,glow:.3});G.scene.add(d.obj)}
   d.obj.visible=!!vis;if(vis){d.obj.position.set(d.spr[0],d.spr[2],d.spr[1]);d.obj.rotation.y=yaw}}
- for(const g of GATES){const vis=g.reg===WD.reg&&!g.open();if(!g.obj){if(!vis)continue;g.obj=gateObj(g);G.scene.add(g.obj)}g.obj.visible=vis}
+ for(const g of GATES){const vis=!TT.on&&g.reg===WD.reg&&!g.open();if(!g.obj){if(!vis)continue;g.obj=gateObj(g);G.scene.add(g.obj)}g.obj.visible=vis}
 }
 /* with baked lighting there are no realtime lights: a cut-out's glow is set from the lights around it instead */
 const _pr={r:0,g:0,b:0};
-function litSprite(o,reg,x,y,z,tt){if(!G.baked)return;const u=o.userData;if(u.lt!==undefined&&tt-u.lt<.25&&Math.abs(u.lx-x)+Math.abs(u.lz-z)<.3)return;u.lt=tt;u.lx=x;u.lz=z;
- probeAt(reg,x,y,z,_pr);const m=u.body.material,k=1/Math.PI;m.emissive.setRGB(.05+_pr.r*k,.05+_pr.g*k,.06+_pr.b*k);m.emissiveIntensity=1}
+/* the cast (min>0) never drops below a floor of brightness: you should always be able to see who you're talking to,
+   even in the dark corner of a station platform. The tint of the place survives, it's only lifted */
+const CHAR_MIN=.34;
+function litSprite(o,reg,x,y,z,tt,min){const u=o.userData;const m=u.body.material;
+ if(!G.baked){if(min&&!u.minSet){u.minSet=1;m.emissive.setRGB(min*.55,min*.55,min*.6);m.emissiveIntensity=1}return}
+ if(u.lt!==undefined&&tt-u.lt<.25&&Math.abs(u.lx-x)+Math.abs(u.lz-z)<.3)return;u.lt=tt;u.lx=x;u.lz=z;
+ probeAt(reg,x,y,z,_pr);const k=1/Math.PI;let r=.05+_pr.r*k,g=.05+_pr.g*k,b=.06+_pr.b*k;
+ if(min){const l=.2126*r+.7152*g+.0722*b;if(l<min){const f=min/Math.max(l,.001),w=Math.min(1,(min-l)/min);
+  // scale the place's colour up, mixed towards neutral where it's nearly black (so it can't go deep blue or red)
+  r=r*f*(1-w*.6)+min*w*.6;g=g*f*(1-w*.6)+min*w*.6;b=b*f*(1-w*.6)+min*1.05*w*.6}}
+ m.emissive.setRGB(r,g,b);m.emissiveIntensity=1}
 /* gate visuals: velvet rope on chrome posts, or a closed door with a card reader */
 function gateObj(g){
  const T=G.T,grp=new T.Group();G.gm=G.gm||{post:new T.MeshStandardMaterial({color:0xc8ccd6,metalness:.9,roughness:.25}),rope:new T.MeshStandardMaterial({color:0x8a1e3a,roughness:.7}),door:new T.MeshStandardMaterial({map:soloTex('door'),roughness:.6}),red:new T.MeshBasicMaterial({color:new T.Color(3,.4,.5)})};
@@ -411,6 +422,9 @@ function loop(t){
  const dt=Math.min(.05,(t-(WD.t||t))/1000);WD.t=t;
  // the place you're in needs its lightmaps on the GPU (loaded from cache, or baked on a first visit)
  if(S&&S.inWorld&&G.ok&&G.baked){const R=G.regions[WD.reg];if(R&&!R.lmTex&&!R.lmSkip){if(!G.lmBusy)regionNeed(WD.reg,true);else lmUI(true,G.lmBusy,null,G.bakeP)}}
+ // the title screen: the convention, on its own, through a slow camera
+ if(TT.on&&G.ok&&$('title').classList.contains('on')){const R=G.regions.con;if(G.baking||$('pgx'))return;if(G.baked&&R&&!R.lmTex&&!R.lmSkip){$('tfade').classList.add('on');if(!G.lmBusy)titleNeed();return}
+  if($('gl').style.display==='none')$('gl').style.display='block';G.skip=(G.skip||0)+1;if(!window.__nr)render(dt);if(typeof adaptRes==='function')adaptRes(dt);return}
  if(!S||!S.inWorld||S.ending){vcShow(false);if(locked()){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}return}
  if(!G.ok||G.baking||$('gl').style.display==='none')return;
  const live=worldLive();
@@ -439,7 +453,7 @@ function initWorld(cb){
  }catch(e){console.error(e);G.ok=false;finishInit();return false}
  // lighting is baked per place, the first time you go there (and cached after): warm up the place the latest save is in
  G.baked=bakeOK();setQuality(G.q);finishInit();
- let pre='home';try{const a=readSlot('auto');if(a&&a.pos&&G.regions[a.pos[0]]&&(a.mapv||0)>=3)pre=a.pos[0];else if(a&&a.ch>=1)pre='con'}catch(e){}
+ let pre=$('title').classList.contains('on')&&!window.__test?'con':'home';if(pre==='home')try{const a=readSlot('auto');if(a&&a.pos&&G.regions[a.pos[0]]&&(a.mapv||0)>=3)pre=a.pos[0];else if(a&&a.ch>=1)pre='con'}catch(e){}
  setTimeout(()=>{if(!G.lmBusy&&!(S&&S.inWorld))regionNeed(pre,false)},50);
  return G.ok;
 }

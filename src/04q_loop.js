@@ -192,6 +192,7 @@ if met('mira')&&!f('mira_taken')
   mira.n: Good. You learn.
   ~ She's gone, up, into the smoke, two stairs at a time.
 [bg plantdeck]
+[cut pan plantdeck]
 [hide]
 ~ From the car park, five minutes later, half the con watches the top of the Halcyon. A silver-haired figure on the plant deck, by the antenna mast, in the smoke. A sound like a door slamming in the sky.
 ~ Four thousand badges go dark at once. Every single one.
