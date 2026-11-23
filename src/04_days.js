@@ -23,7 +23,7 @@ beat('d1_home',{adv:1,t:'Morning',steps:[
 beat('d1_station',{adv:1,t:'Central Station',steps:[
  {auto:1,sc:'d1_concourse',t:'Central Station'},
  {who:'pia',sc:'d1_pia',t:'Someone is playing the violin on the concourse',lbl:'Listen to the violinist'}]});
-beat('d1_train',{adv:1,t:'The train',steps:[{int:'train',sc:'d1_train',t:'Board the 16:12 at Platform 4'}]});
+beat('d1_train',{adv:1,t:'The train',steps:[{int:'train',dest:'con',sc:'d1_board',t:'Board the 16:12 at Platform 4'},{who:'astrid',sc:'d1_train',t:'Find a seat: there\'s one free at a table in Coach B',lbl:'Sit down opposite her'}]});
 beat('d1_arrival',{adv:1,t:'Arrival',steps:[
  {auto:1,sc:'d1_doors',t:'Into the convention centre'},
  {int:'reg',sc:'d1_badge',t:'Pick up your badge at Registration, on the Foyer\'s west wall'},
@@ -48,7 +48,12 @@ beat('d4_noc',{t:'The con network is down',steps:[{auto:1,sc:'d4_call',t:'Your p
 beat('d4_gathering',{t:'Everyone is meeting in Room 1337',w:'room1337',sc:'d4_gathering'});
 beat('d4_burglary',{adv:1,t:'Your phone',auto:1,sc:'d4_burglary'});
 /* Day 5: Friday */
-beat('d5_home',{adv:1,t:'Ellie needs to go home: meet her in the hotel lobby',w:'lobby',sc:'d5_home'});
+beat('d5_home',{adv:1,t:'Ellie needs to go home',steps:[
+ {w:'lobby',sc:'d5_home',t:'Ellie needs to go home: meet her in the hotel lobby'},
+ {int:'train',dest:'home',sc:'d5_board',t:'The 08:22 to Linden Street, Platform 4'},
+ {who:'ellie',sc:'d5_ride',t:'Ellie\'s found a table in Coach B',lbl:'Sit with Ellie'},
+ {int:'train',dest:'con',sc:'d5_board2',t:'Back to the Conference Quarter: Platform 4'},
+ {who:'ellie',sc:'d5_ride2',t:'Ellie\'s in Coach B again, at the same table',lbl:'Sit with Ellie'}]});
 beat('d5_framed',{adv:1,t:'Your phone',auto:1,sc:'d5_framed'});
 beat('d5_offer',{t:'Victor Hale has asked you to dinner: The Grill, in the hotel',w:'grill',sc:'d5_offer'});
 /* Day 6: Saturday */

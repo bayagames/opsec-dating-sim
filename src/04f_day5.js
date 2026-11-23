@@ -10,11 +10,20 @@ if met('pia')
  ~ By the old piano, Pia is unpacking her violin. She sees you, sees Ellie's face, and doesn't play anything bright. She plays something slow and steady instead, like a hand on a shoulder.
  ellie.n: That's lovely. Who's that?
  > A friend. I think.
-[cut depart]
-~ The 08:22 slides out from under the iron roof. Ellie watches the station go, like she's never seen one before.
+~ Ellie walks straight past the board to Platform 4 without looking at it. She's taken this train a thousand times.
+ellie.n: Come on. It's the 08:22. It's always the 08:22.
+`;
+SC.d5_board=`
+[hide]
+[call trainSeat('ellie')]
+~ Coach B. Ellie's already sitting down, at a table by the window, holding a paper cup of station coffee in both hands like it's the only warm thing left.
+`;
+SC.d5_ride=`
 [bg carriage]
-~ Ellie doesn't talk on the train. She holds a paper cup of station coffee and doesn't drink it, and watches the backs of houses go past.
+[hide]
+~ You sit down next to her. Ellie doesn't talk. She holds the coffee and doesn't drink it, and watches the backs of houses go past.
 ~ Halfway, without looking away from the window, she reaches over and holds your hand. Just holds it. As if it's a railing.
+[hold ellie off]
 [bg bakery]
 ~ Linden Street. Blue tape across the bakery's back door. A police car, half on the pavement. Mr Demir from the barber's, in his apron, arms folded, guarding the front like a bouncer.
 ~ Inside, Proof is wrong. Flour across the floor in a long white fan where a sack was slit. Every drawer pulled out. The shelf behind the counter, where Ellie kept her laptop and her grandmother's recipe tin, emptied onto the tiles.
@@ -90,10 +99,21 @@ ellie.b: You don't owe anyone this. You're not a superhero. You're a man who fix
  ellie.n: I'm coming. Don't argue. You'll lose. I've been arguing with ovens since I was nine.
  [flag ellie_fights]
 ~ Mr Demir lends you a hat and a scarf "for disguise purposes" and walks you both to the station himself, like a bodyguard in a barber's apron.
+[bg station]
+~ Central Station again. Mr Demir shakes your hand like you're going to war, then goes back to his shop. Platform 4: the Conference Quarter.
+`;
+SC.d5_board2=`
+[hide]
+[call trainSeat('ellie')]
+~ Ellie's at the same table as this morning. She's taken her badge off and she's looking at it like it might bite.
+`;
+SC.d5_ride2=`
 [bg carriage]
-~ On the train back, Ellie puts her badge in her coat pocket, wrapped in a crisp packet. The blue light still glows faintly through the foil.
+[hide]
+~ You sit down opposite her. Ellie puts her badge in her coat pocket, wrapped in a crisp packet. The blue light still glows faintly through the foil.
 ellie.n: Did I do that right? Foil?
 > You did that exactly right.
+[hold ellie off]
 [bg plaza]
 [call inject('d5_framed')]
 [sum Afternoon: WH1SPER named you as WHISPER, with a minute-by-minute map of your week that only the badges could have made. Lumen reposted it in four minutes. Ellie offered you a way out. You went back to the con together.]

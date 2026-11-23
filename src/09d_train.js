@@ -14,7 +14,7 @@ function bMat(map,col,o){const T=G.T;o=o||{};const m=new T.MeshBasicMaterial(Obj
  m.userData.base=m.color.clone();m.userData.glow=!!o.glow;TRV.mats.push(m);return m}
 /* a box sitting on y=0, shaded by face (sun from the upper left), UVs scaled to metres/tile */
 function sGeo(w,h,d,tile){const T=G.T,g=new T.BoxGeometry(w,h,d);g.translate(0,h/2,0);const n=g.attributes.normal,uv=g.attributes.uv,col=[];
- for(let i=0;i<n.count;i++){const nx=n.getX(i),ny=n.getY(i),nz=n.getZ(i);const k=ny>.5?1:ny<-.5?.35:nx>.5?.86:nx<-.5?.66:nz>.5?.78:.72;col.push(k,k,k);
+ for(let i=0;i<n.count;i++){const nx=n.getX(i),ny=n.getY(i),nz=n.getZ(i);const k=ny>.5?[1.04,1,.92]:ny<-.5?[.32,.34,.4]:nx>.5?[.92,.86,.78]:nx<-.5?[.6,.64,.76]:nz>.5?[.8,.78,.76]:[.7,.72,.8];col.push(...k);
   if(tile){const fu=Math.abs(nx)>.5?d:w,fv=Math.abs(ny)>.5?d:h;uv.setXY(i,uv.getX(i)*fu/tile[0],uv.getY(i)*fv/tile[1])}}
  g.setAttribute('color',new T.Float32BufferAttribute(col,3));return g}
 function roofGeo(w,h,d){const T=G.T,g=new T.BufferGeometry(),hw=w/2,hd=d/2;
@@ -23,8 +23,8 @@ function roofGeo(w,h,d){const T=G.T,g=new T.BufferGeometry(),hw=w/2,hd=d/2;
  tri(0,2,1,.7,[0,0,.5,1,1,0]);tri(3,4,5,.7,[0,0,1,0,.5,1]);
  for(const[a,b,cc,dd,k]of[[0,3,5,2,.95],[1,2,5,4,.62]]){tri(a,b,cc,k,[0,0,d/3,0,d/3,1]);tri(a,cc,dd,k,[0,0,d/3,1,0,1])}
  g.setAttribute('position',new T.Float32BufferAttribute(v,3));g.setAttribute('color',new T.Float32BufferAttribute(c,3));g.setAttribute('uv',new T.Float32BufferAttribute(u,2));return g}
-function treeGeo(){const T=G.T,g=new T.BufferGeometry(),v=[],u=[],c=[];
- for(const a of[0,Math.PI/2]){const cx=Math.cos(a)*1.6,cz=Math.sin(a)*1.6;const q=[[-cx,0,-cz],[cx,0,cz],[cx,5,cz],[-cx,5,-cz]];for(const i of[0,1,2,0,2,3])v.push(...q[i]);u.push(0,0,1,0,1,1,0,0,1,1,0,1);for(let j=0;j<6;j++)c.push(1,1,1)}
+function treeGeo(w,h){w=w||1.6;h=h||5;const T=G.T,g=new T.BufferGeometry(),v=[],u=[],c=[];
+ for(const a of[0,Math.PI/3,Math.PI*2/3]){const cx=Math.cos(a)*w,cz=Math.sin(a)*w;const q=[[-cx,0,-cz],[cx,0,cz],[cx,h,cz],[-cx,h,-cz]];for(const i of[0,1,2,0,2,3])v.push(...q[i]);u.push(0,0,1,0,1,1,0,0,1,1,0,1);const k=a?.86:1;for(let j=0;j<6;j++)c.push(k,k,k)}
  g.setAttribute('position',new T.Float32BufferAttribute(v,3));g.setAttribute('uv',new T.Float32BufferAttribute(u,2));g.setAttribute('color',new T.Float32BufferAttribute(c,3));return g}
 /* a pool of the same thing, scattered along the loop; each frame they slide on by the distance travelled */
 function pool(geo,mat,items,parent){const T=G.T,m=new T.InstancedMesh(geo,mat,items.length);m.instanceMatrix.setUsage(T.DynamicDrawUsage);m.frustumCulled=false;
@@ -37,7 +37,38 @@ function poolTick(P,s){const T=G.T,o=_o3.o||(_o3.o=new T.Object3D()),L=TRV.L;
 /* ---- textures ---- */
 function trvTextures(){const R=Math.random;
  const T={};
- T.grass=cTex(256,256,(c,w,h)=>{c.fillStyle='#5a7a3a';c.fillRect(0,0,w,h);for(let i=0;i<5;i++){c.fillStyle=['#6a8a42','#4e6e34','#7a8a48','#5e7e3e','#8a9a5a'][i];c.fillRect(0,i*51,w,51)}for(let i=0;i<3000;i++){c.fillStyle=R()<.5?'#3e5a2a':'#7a9a4a';c.fillRect(R()*w,R()*h,2,2)}c.fillStyle='#4a3a2a55';for(let x=0;x<w;x+=64)c.fillRect(x,0,2,h)},12,12);
+ // the far ground: a patchwork of fields (400 m to a tile), hedgerows round them, a farm track or two
+ T.grass=cTex(1024,1024,(c,w,h)=>{c.fillStyle='#5f7d3c';c.fillRect(0,0,w,h);
+  const F=[['#6c8c40',0],['#7f9a48',0],['#58783a',0],['#c8b060',1],['#b89a52',1],['#8a6a48',2],['#7a5a3e',2],['#8aa458',0],['#a8a85a',1]];
+  const cut=(x,y,ww,hh,d)=>{if(d>3||ww<120&&hh<120||R()<.12&&d>1){const f=F[(R()*F.length)|0];c.fillStyle=f[0];c.fillRect(x,y,ww,hh);
+    if(f[1]){c.fillStyle='#00000014';const st=R()<.5;for(let k=0;k<(st?ww:hh);k+=5)st?c.fillRect(x+k,y,2,hh):c.fillRect(x,y+k,ww,2)}
+    for(let k=0;k<ww*hh/60;k++){c.fillStyle=R()<.5?'#ffffff0c':'#0000000e';c.fillRect(x+R()*ww,y+R()*hh,3,3)}
+    // the hedge round it, with a tree here and there
+    c.fillStyle='#3a5428';c.fillRect(x,y,ww,4);c.fillRect(x,y,4,hh);for(let k=0;k<(ww+hh)/40;k++){c.fillStyle=R()<.5?'#2e4a22':'#456a30';c.beginPath();c.arc(R()<.5?x+R()*ww:x+2,R()<.5?y+2:y+R()*hh,4+R()*5,0,7);c.fill()}return}
+   if(ww>hh){const s=ww*(.35+R()*.3);cut(x,y,s,hh,d+1);cut(x+s,y,ww-s,hh,d+1)}else{const s=hh*(.35+R()*.3);cut(x,y,ww,s,d+1);cut(x,y+s,ww,hh-s,d+1)}};
+  cut(0,0,w,h,0);c.strokeStyle='#a8987a';c.lineWidth=5;c.beginPath();c.moveTo(0,R()*h);c.bezierCurveTo(w*.3,R()*h,w*.6,R()*h,w,R()*h);c.stroke()},1,1);
+ // the verges by the line: rough grass, dandelions, worn earth
+ T.verge=cTex(256,256,(c,w,h)=>{c.fillStyle='#5a7a38';c.fillRect(0,0,w,h);for(let i=0;i<5000;i++){const v=R();c.fillStyle=v<.4?'#4a6a30':v<.75?'#6e8e44':v<.9?'#7e9a50':v<.97?'#8a7a58':'#e8d060';c.fillRect(R()*w,R()*h,v>.97?2:1+R()*2,v>.97?2:3+R()*4)}},1,1);
+ // trees: a round broadleaf, a tall poplar, a dark conifer; lit from the upper left, shadowed underneath
+ const tree=(kind)=>cTex(256,256,(c,w,h)=>{const pal=kind===2?['#1e3a26','#2a4a30','#34583a','#4a704a']:kind===1?['#3a5a26','#4a6e2e','#5e8436','#86a84a']:['#34522a','#46682e','#5a8036','#7ea046'];
+  c.fillStyle='#4a3424';c.fillRect(122,kind===2?190:150,12,106);c.fillStyle='#2a1e16';c.fillRect(128,kind===2?190:150,6,106);
+  const blob=(cx,cy,rx,ry)=>{for(let i=0;i<(kind===2?260:340);i++){const a=R()*Math.PI*2,r=Math.sqrt(R());const x=cx+Math.cos(a)*r*rx,y=cy+Math.sin(a)*r*ry;const l=clamp(.55-(x-cx)/rx*.25-(y-cy)/ry*.35+(R()-.5)*.35,0,.999);
+    const rr=kind===2?3+R()*4:5+R()*8;const gg=c.createRadialGradient(x-rr*.3,y-rr*.3,0,x,y,rr);gg.addColorStop(0,pal[Math.min(3,(l*4|0)+1)]);gg.addColorStop(1,pal[l*4|0]);c.fillStyle=gg;c.beginPath();c.arc(x,y,rr,0,7);c.fill()}};
+  if(kind===2){for(let k=0;k<7;k++){const y=40+k*24,rw=16+k*12;blob(128,y,rw,16)}}
+  else if(kind===1){blob(128,110,40,92)}
+  else{blob(128,96,84,64);blob(92,128,48,36);blob(166,124,50,38);blob(128,62,52,40)}},1,1);
+ T.tree=tree(0);T.tree1=tree(1);T.tree2=tree(2);
+ T.bush=cTex(128,64,(c,w,h)=>{for(let i=0;i<220;i++){const x=10+R()*108,y=20+R()*40,rr=4+R()*7,l=clamp(.6-(y-20)/40*.5+(R()-.5)*.3,0,.99);c.fillStyle=['#2e4a24','#3e5e2a','#527434','#6a8a40'][l*4|0];c.beginPath();c.arc(x,y,rr,0,7);c.fill()}},1,1);
+ T.hedge=cTex(256,64,(c,w,h)=>{c.fillStyle='#34502a';c.fillRect(0,0,w,h);for(let i=0;i<1400;i++){const y=R()*h,l=clamp(.75-y/h*.6+(R()-.5)*.3,0,.99);c.fillStyle=['#24401e','#30502a','#466a32','#5e843e'][l*4|0];c.beginPath();c.arc(R()*w,y,2+R()*4,0,7);c.fill()}},1,1);
+ // hills on the horizon: two ridgelines, the far one paler
+ const hill=(far)=>cTex(1024,128,(c,w,h)=>{const g=c.createLinearGradient(0,0,0,h);g.addColorStop(0,far?'#9aaab8':'#6f8a6a');g.addColorStop(1,far?'#b4bec6':'#8a9c80');c.fillStyle=g;c.beginPath();c.moveTo(0,h);
+  for(let x=0;x<=w;x+=8){const y=h*(.42+.22*Math.sin(x/w*Math.PI*2*(far?2:3)+(far?1:0))+.12*Math.sin(x/w*Math.PI*2*(far?5:7))+.04*Math.sin(x*.11));c.lineTo(x,y)}c.lineTo(w,h);c.closePath();c.fill();
+  if(!far){for(let i=0;i<220;i++){const x=R()*w,y=h*(.55+R()*.4);c.fillStyle='#5a744e';c.beginPath();c.arc(x,y,2+R()*3,0,7);c.fill()}}},1,1);
+ T.hill=hill(0);T.hillFar=hill(1);T.hill.wrapS=T.hillFar.wrapS=G.T.RepeatWrapping;
+ // an electricity pylon, drawn as a lattice
+ T.pylon=cTex(128,256,(c,w,h)=>{c.strokeStyle='#6a6e76';c.lineWidth=3;const L=(a,b,x,y)=>{c.beginPath();c.moveTo(a,b);c.lineTo(x,y);c.stroke()};
+  L(20,255,56,20);L(108,255,72,20);L(56,20,72,20);for(let y=40;y<250;y+=26){const k=(y-20)/235,xa=56-36*k,xb=72+36*k,k2=(y+26-20)/235;L(xa,y,72+36*k2,y+26);L(xb,y,56-36*k2,y+26);L(xa,y,xb,y)}
+  for(const y of[40,80]){L(8,y,120,y);L(8,y,40,y+14);L(120,y,88,y+14)}c.fillStyle='#4a4e56';for(const x of[10,118])for(const y of[44,84])c.fillRect(x-2,y,4,10)},1,1);
  T.ballast=cTex(128,128,(c,w,h)=>{c.fillStyle='#6a645c';c.fillRect(0,0,w,h);for(let i=0;i<2600;i++){const v=60+R()*80|0;c.fillStyle=`rgb(${v},${v-4},${v-10})`;c.fillRect(R()*w,R()*h,2+R()*2,2+R()*2)}},4,200);
  T.sleep=cTex(64,128,(c,w,h)=>{c.fillStyle='#6a645c';c.fillRect(0,0,w,h);for(let i=0;i<900;i++){const v=70+R()*70|0;c.fillStyle=`rgb(${v},${v-4},${v-10})`;c.fillRect(R()*w,R()*h,2,2)}for(let y=0;y<h;y+=32){c.fillStyle='#4a3e32';c.fillRect(4,y+6,w-8,14)}},1,1);
  T.house=cTex(256,256,(c,w,h)=>{c.fillStyle='#a8644a';c.fillRect(0,0,w,h);for(let y=0;y<h;y+=8)for(let x=(y/8)%2*8;x<w;x+=16){c.fillStyle=R()<.5?'#b06c50':'#984e3a';c.fillRect(x,y,15,7)}
@@ -47,7 +78,6 @@ function trvTextures(){const R=Math.random;
  T.tower=cTex(256,512,(c,w,h)=>{c.fillStyle='#8a8e98';c.fillRect(0,0,w,h);for(let y=8;y<h;y+=24)for(let x=8;x<w;x+=24){c.fillStyle=R()<.12?'#c8d4e0':'#3a4656';c.fillRect(x,y,16,14)}},1,1);
  T.towerLit=cTex(256,512,(c,w,h)=>{for(let y=8;y<h;y+=24)for(let x=8;x<w;x+=24)if(R()<.35){c.fillStyle=R()<.5?'#ffd89a':'#cfe6ff';c.fillRect(x,y,16,14)}},1,1);
  T.ware=cTex(256,128,(c,w,h)=>{c.fillStyle='#8a9098';c.fillRect(0,0,w,h);for(let x=0;x<w;x+=6){c.fillStyle='#727880';c.fillRect(x,0,2,h)}c.fillStyle='#c0304a';c.fillRect(0,0,w,10);c.fillStyle='#3a3e46';c.fillRect(100,60,56,68)},1,1);
- T.tree=cTex(128,128,(c,w,h)=>{c.fillStyle='#4a3020';c.fillRect(60,70,8,58);for(let i=0;i<260;i++){const a=R()*Math.PI*2,r=R()*50;c.fillStyle=['#3e6a2e','#4e7e36','#2e5a26','#6a8e3e'][(R()*4)|0];c.beginPath();c.arc(64+Math.cos(a)*r,56+Math.sin(a)*r*.85,5+R()*6,0,7);c.fill()}});
  T.fence=cTex(256,64,(c,w,h)=>{c.strokeStyle='#5a5e66';c.lineWidth=2;for(let y=14;y<h;y+=14){c.beginPath();c.moveTo(0,y);c.lineTo(w,y);c.stroke()}c.fillStyle='#3a3e46';for(let x=0;x<w;x+=64)c.fillRect(x,0,5,h)},1,1);
  T.brick=cTex(128,128,(c,w,h)=>{c.fillStyle='#7a4a3a';c.fillRect(0,0,w,h);for(let y=0;y<h;y+=8)for(let x=(y/8)%2*8;x<w;x+=16){c.fillStyle=R()<.5?'#8a5442':'#6a3e30';c.fillRect(x,y,15,7)}},1,1);
  T.tunnel=cTex(128,128,(c,w,h)=>{c.fillStyle='#2a2422';c.fillRect(0,0,w,h);for(let y=0;y<h;y+=8)for(let x=(y/8)%2*8;x<w;x+=16){c.fillStyle=R()<.5?'#332a26':'#221c1a';c.fillRect(x,y,15,7)}for(let i=0;i<40;i++){c.fillStyle='#ffffff10';c.fillRect(R()*w,R()*h,1,20)}},1,1);
@@ -57,8 +87,11 @@ function trvTextures(){const R=Math.random;
  T.board3=cTex(512,256,(c,w,h)=>{c.fillStyle='#f4efe6';c.fillRect(0,0,w,h);c.fillStyle='#1b1026';c.font='bold 58px Georgia, serif';c.fillText('Brindle & Co',40,110);c.font='italic 28px Georgia, serif';c.fillText('Insurance you\'ll never need to think about.',40,170)});
  T.trainSide=cTex(1024,128,(c,w,h)=>{c.fillStyle='#e9ece8';c.fillRect(0,0,w,h);c.fillStyle='#1f8a8a';c.fillRect(0,h-34,w,14);for(let x=24;x<w-40;x+=62){c.fillStyle='#2a3440';c.fillRect(x,26,48,42)}c.fillStyle='#ffd166';for(const x of[240,760])c.fillRect(x,14,56,h-14)},1,1);
  T.trainLit=cTex(1024,128,(c,w,h)=>{for(let x=24;x<w-40;x+=62){c.fillStyle='#fff1d6';c.fillRect(x,26,48,42)}},1,1);
- T.wallPlain=cTex(256,128,(c,w,h)=>{c.fillStyle='#8a8a84';c.fillRect(0,0,w,h);for(let i=0;i<1500;i++){c.fillStyle=R()<.5?'#7a7a74':'#9a9a94';c.fillRect(R()*w,R()*h,3,2)}c.fillStyle='#6a6a64';for(let x=0;x<w;x+=64)c.fillRect(x,0,3,h)},1,1);
- T.wall=cTex(512,128,(c,w,h)=>{c.fillStyle='#8a8a84';c.fillRect(0,0,w,h);for(let i=0;i<1500;i++){c.fillStyle=R()<.5?'#7a7a74':'#9a9a94';c.fillRect(R()*w,R()*h,3,2)}c.fillStyle='#ff5d73';c.font='bold 40px sans-serif';c.fillText('whisper was here',90,84);c.fillStyle='#8affc1';c.font='bold 20px sans-serif';c.fillText('FOREVER IS A LONG TIME',300,40)},1,1);
+ T.wallPlain=cTex(256,128,(c,w,h)=>{c.fillStyle='#8e8c86';c.fillRect(0,0,w,h);for(let i=0;i<1800;i++){c.fillStyle=R()<.5?'#7e7c76':'#a09e98';c.fillRect(R()*w,R()*h,3,2)}
+  // concrete panels: joints, a coping along the top, rust and rain streaks, moss low down
+  c.fillStyle='#6a6862';for(let x=0;x<w;x+=64)c.fillRect(x,0,3,h);c.fillStyle='#b4b2aa';c.fillRect(0,0,w,10);c.fillStyle='#5a5852';c.fillRect(0,10,w,3);
+  for(let i=0;i<14;i++){const x=R()*w,l=20+R()*80,g=c.createLinearGradient(0,13,0,13+l);g.addColorStop(0,'#5a4a3a66');g.addColorStop(1,'#5a4a3a00');c.fillStyle=g;c.fillRect(x,13,2+R()*4,l)}
+  const g=c.createLinearGradient(0,h-40,0,h);g.addColorStop(0,'#4a6a3a00');g.addColorStop(1,'#4a6a3acc');c.fillStyle=g;c.fillRect(0,h-40,w,40)},1,1);
  return T}
 /* ---------- the world outside ---------- */
 function trainSceneryBuild(){if(TRV.root||!G.ok)return;const T=G.T,X=TRN.x,TX=trvTextures(),L=TRV.L;TRV.tx=TX;const root=new T.Group();TRV.root=root;G.scene.add(root);
@@ -67,7 +100,9 @@ function trainSceneryBuild(){if(TRV.root||!G.ok)return;const T=G.T,X=TRN.x,TX=tr
  // ground: fields and verges, ballast under both tracks, the next track's sleepers, rails and wires that never end
  const plane=(w,d,map,col,y,x)=>{const g=new T.PlaneGeometry(w,d);g.rotateX(-Math.PI/2);const m=new T.Mesh(g,bMat(map,col));m.position.set(x,y,TRV.zc);m.frustumCulled=false;root.add(m);return m};
  TRV.scroll=[];const sc=(mesh,tile,axis)=>{TRV.scroll.push({t:mesh.material.map,tile,axis:axis||'y'});return mesh};
- sc(plane(1800,1800,TX.grass,'#ffffff',Y0-.08,X),1800/12);
+ TX.grass.repeat.set(1800/400,1800/400);sc(plane(1800,1800,TX.grass,'#ffffff',Y0-.12,X),400);
+ // the railway's own land: rough verges either side, out to a boundary hedge
+ for(const[x0,x1]of[[X-46,X-3.9],[X+7.9,X+50]]){const v=TX.verge.clone();v.needsUpdate=true;v.wrapS=v.wrapT=T.RepeatWrapping;v.repeat.set((x1-x0)/5,1800/5);sc(plane(x1-x0,1800,v,'#ffffff',Y0-.04,(x0+x1)/2),5)}
  TX.ballast.repeat.set(4,1800/9);sc(plane(12,1800,TX.ballast,'#ffffff',Y0,X+2),9);
  TX.sleep.repeat.set(1,1800/2.6);sc(plane(2.6,1800,TX.sleep,'#ffffff',Y0+.02,X+4.2),2.6);
  const rail=bMat(null,'#8a8a90');for(const x of[X+4.2-.72,X+4.2+.72]){const m=new T.Mesh(sGeo(.07,.16,1800),rail);m.position.set(x,Y0+.03,TRV.zc);m.frustumCulled=false;root.add(m)}
@@ -78,22 +113,44 @@ function trainSceneryBuild(){if(TRV.root||!G.ok)return;const T=G.T,X=TRN.x,TX=tr
  // catenary masts every 60 m, both sides
  {const g=sGeo(.25,6.2,.25),arm=sGeo(5.6,.14,.14);arm.translate(2.6,5.4,0);const mg=mergeG([g,arm]);const it=[];for(let z=0;z<L;z+=60){it.push({x:X-3.2,y:Y0,z});it.push({x:X+7.4,y:Y0,z:z+30,r:Math.PI})}pool(mg,bMat(null,'#7a8088',{vc:1}),it)}
  // trees: thin along the line, thick in the fields
- {const it=[];for(let i=0;i<420;i++){const side=r()<.5?-1:1,z=r()*L,field=z>1000&&z<1400,dx=field?14+r()*140:14+r()*40;const s=.8+r()*1.3;it.push({x:side<0?X-dx:X+5+dx,y:Y0,z,sx:s,sy:s*(.8+r()*.5),sz:s,r:r()*3})}pool(treeGeo(),bMat(TX.tree,'#ffffff',{at:.5,ds:true,vc:1}),it)}
+ // trees: broadleaves and poplars along the line, clumps of conifers, more of everything out in the fields
+ {const P=[[],[],[]];const put=(k,x,z,s)=>P[k].push({x,y:Y0,z,sx:s,sy:s*(.85+r()*.4),sz:s,r:r()*3});
+  for(let i=0;i<760;i++){const side=r()<.5?-1:1,z=r()*L,town=z>520&&z<990||z<500,far=r()<.55&&!town,dx=far?50+r()*260:15+r()*34;if(town&&r()<.6)continue;
+   const k=r()<.16?1:r()<.2?2:0,s=(k===2?1:.9)+r()*1.2;put(k,side<0?X-dx:X+5+dx,z,s);
+   if(k===2&&r()<.7)for(let j=0;j<3;j++)put(2,(side<0?X-dx:X+5+dx)+(r()-.5)*8,z+(r()-.5)*8,s*(.7+r()*.4))}
+  const tm=(m)=>bMat(m,'#ffffff',{at:.5,ds:true,vc:1});pool(treeGeo(2.4,7),tm(TX.tree),P[0]);pool(treeGeo(1.4,8.5),tm(TX.tree1),P[1]);pool(treeGeo(1.7,8),tm(TX.tree2),P[2])}
+ // scrub along the cess, and the boundary hedge (with gaps, and a gate now and then)
+ {const it=[];for(let i=0;i<520;i++){const side=r()<.5?-1:1,dx=8+r()*7,s=.6+r()*.9;it.push({x:side<0?X-dx:X+5+dx,y:Y0,z:r()*L,sx:s,sy:s*(.7+r()*.5),sz:s,r:r()*3})}
+  const g=new T.BufferGeometry(),v=[],u=[],c=[];for(const a of[0,Math.PI/2]){const cx=Math.cos(a)*1.3,cz=Math.sin(a)*1.3;const q=[[-cx,0,-cz],[cx,0,cz],[cx,1.3,cz],[-cx,1.3,-cz]];for(const i of[0,1,2,0,2,3])v.push(...q[i]);u.push(0,0,1,0,1,1,0,0,1,1,0,1);for(let j=0;j<6;j++)c.push(1,1,1)}
+  g.setAttribute('position',new T.Float32BufferAttribute(v,3));g.setAttribute('uv',new T.Float32BufferAttribute(u,2));g.setAttribute('color',new T.Float32BufferAttribute(c,3));pool(g,bMat(TX.bush,'#ffffff',{at:.5,ds:true,vc:1}),it)}
+ {const it=[];for(const x of[X-46,X+50])for(let z=0;z<L;){const len=14+r()*50;if(!(z<500&&r()<.6))it.push({x,y:Y0,z:z+len/2,sx:1,sy:.8+r()*.5,sz:len});z+=len+(r()<.3?4+r()*10:0)}
+  pool(sGeo(1.6,2.2,1,[4,2.2]),bMat(TX.hedge,'#ffffff',{vc:1}),it)}
+ // pylons striding across the fields
+ {const it=[];for(let z=0;z<L;z+=260)it.push({x:X-140,y:Y0,z});for(let z=130;z<L;z+=320)it.push({x:X+190,y:Y0,z});
+  const g=new T.BufferGeometry(),v=[],u=[],c=[];for(const a of[0,Math.PI/2]){const cx=Math.cos(a)*8,cz=Math.sin(a)*8;const q=[[-cx,0,-cz],[cx,0,cz],[cx,34,cz],[-cx,34,-cz]];for(const i of[0,1,2,0,2,3])v.push(...q[i]);u.push(0,0,1,0,1,1,0,0,1,1,0,1);for(let j=0;j<6;j++)c.push(1,1,1)}
+  g.setAttribute('position',new T.Float32BufferAttribute(v,3));g.setAttribute('uv',new T.Float32BufferAttribute(u,2));g.setAttribute('color',new T.Float32BufferAttribute(c,3));pool(g,bMat(TX.pylon,'#ffffff',{at:.4,ds:true,vc:1}),it)}
+ // the horizon: two ridgelines that drift by slowly (they're kilometres away)
+ for(const[side,dx,hh,tx,k]of[[-1,560,70,TX.hill,.05],[1,580,64,TX.hill,.05],[-1,760,120,TX.hillFar,.02],[1,780,110,TX.hillFar,.02]]){const m=tx.clone();m.needsUpdate=true;m.wrapS=T.RepeatWrapping;m.repeat.set(3,1);
+  const g=new T.PlaneGeometry(2400,hh);g.rotateY(side<0?Math.PI/2:-Math.PI/2);const mesh=new T.Mesh(g,bMat(m,'#ffffff',{at:.5,extra:{fog:false}}));mesh.position.set(side<0?X-dx:X+5+dx,Y0+hh/2-6,TRV.zc);mesh.frustumCulled=false;mesh.renderOrder=-5;root.add(mesh);
+  TRV.scroll.push({t:m,tile:(side<0?-1:1)*800/k,axis:'x'})}
  // terraces: the backs of houses in the suburbs, with their roofs
  {const it=[];for(let z=520;z<990;z+=7.2){for(const side of[-1,1]){if(r()<.12)continue;const dx=24+(side>0?6:0)+r()*2;it.push({x:side<0?X-dx:X+5+dx,y:Y0,z,c:['#ffffff','#e8d8c8','#d8c8c8','#f0e8d8','#c8b8a8'][(r()*5)|0]})}}
-  const hg=sGeo(9,6,7),rg=roofGeo(9.2,2.6,7.4);rg.translate(0,6,0);const H=pool(hg,bMat(TX.house,'#ffffff',{vc:1}),it);pool(rg,bMat(TX.roof,'#ffffff',{vc:1}),it);
+  const hg=sGeo(9,6,7),rg=roofGeo(9.2,2.6,7.4);rg.translate(0,6,0);const H=pool(hg,bMat(TX.house,'#ffffff',{vc:1}),it);const ri=it.map(h=>Object.assign({},h,{c:['#ffffff','#c8a898','#a8a8b0','#d8c0a8'][(r()*4)|0]}));pool(rg,bMat(TX.roof,'#ffffff',{vc:1}),ri);
+  const ch=sGeo(.9,1.6,1.4);ch.translate(2.6,6.9,0);pool(ch,bMat(TX.brick,'#ffffff',{vc:1}),it.map(h=>({x:h.x,y:h.y,z:h.z,r:r()<.5?0:Math.PI})));
+  // garden walls between the back gardens
+  {const gw=[];for(const h of it){const dir=h.x<X?1:-1;gw.push({x:h.x+dir*7.5,y:Y0,z:h.z+3.6})}const wg=sGeo(6,1.5,.25);pool(wg,bMat(TX.brick,'#ffffff',{vc:1}),gw)}
   const lit=pool(hg,bMat(TX.houseLit,'#ffffff',{tr:true,glow:1,extra:{blending:T.AdditiveBlending}}),it);lit.lit=1;
   // sheds at the ends of the gardens
   const sh=[];for(const h of it)if(r()<.4)sh.push({x:h.x+(h.x<X?8:-8),y:Y0,z:h.z+r()*2,c:['#6a8a5a','#8a6a4a','#5a6a8a'][(r()*3)|0]});pool(sGeo(2,2.1,2.4),bMat(null,'#ffffff',{vc:1}),sh)}
  // the city: towers and blocks, near and far; a few big ones on the skyline
  {const it=[];for(let i=0;i<120;i++){const z=r()*500,side=r()<.5?-1:1,dx=34+r()*200,w=14+r()*20,h=18+r()*(dx>120?90:50);it.push({x:side<0?X-dx:X+5+dx,y:Y0,z,sx:w/10,sy:h/10,sz:(10+r()*14)/10,c:['#ffffff','#d8dce8','#e8e0d8','#c8d0d8'][(r()*4)|0]})}
-  for(let i=0;i<40;i++){const z=r()*L,side=r()<.5?-1:1,dx=230+r()*55;it.push({x:side<0?X-dx:X+5+dx,y:Y0,z,sx:2+r()*2,sy:6+r()*10,sz:2+r()*2,c:'#c8ccd8'})}
+  for(let i=0;i<40;i++){const z=r()<.7?r()*620:1330+r()*260,side=r()<.5?-1:1,dx=230+r()*55;it.push({x:side<0?X-dx:X+5+dx,y:Y0,z,sx:2+r()*2,sy:6+r()*10,sz:2+r()*2,c:'#c8ccd8'})}
   const g=sGeo(10,10,10);pool(g,bMat(TX.tower,'#ffffff',{vc:1}),it);const l=pool(g,bMat(TX.towerLit,'#ffffff',{tr:true,glow:1,extra:{blending:T.AdditiveBlending}}),it);l.lit=1}
  // warehouses and yards past the city
  {const it=[];for(let i=0;i<26;i++){const z=1400+r()*200,side=r()<.5?-1:1,dx=26+r()*80;it.push({x:side<0?X-dx:X+5+dx,y:Y0,z,sx:2+r()*2.5,sy:.8+r()*.5,sz:1.5+r()*2})}pool(sGeo(12,8,12),bMat(TX.ware,'#ffffff',{vc:1}),it)}
- // walls along the cutting through the city, here and there with graffiti
- {const a=[],b=[];let i=0;for(let z=0;z<500;z+=16){for(const x of[X-7.2,X+11.4]){(i++%5===2?b:a).push({x,y:Y0,z:z+(x>X?8:0)})}}
-  pool(sGeo(.4,2.6,16,[8,2.6]),bMat(TX.wallPlain,'#ffffff',{vc:1}),a);pool(sGeo(.4,2.6,16,[16,2.6]),bMat(TX.wall,'#ffffff',{vc:1}),b)}
+ // concrete retaining walls along the cutting through the city
+ {const a=[];for(let z=0;z<500;z+=16){for(const x of[X-7.2,X+11.4])a.push({x,y:Y0,z:z+(x>X?8:0)})}
+  pool(sGeo(.4,2.6,16,[8,2.6]),bMat(TX.wallPlain,'#ffffff',{vc:1}),a)}
  // the coach windows: almost clear, a faint cool tint, a little more reflective in the dark
  {const gm=new T.MeshBasicMaterial({color:new T.Color('#c8d8e4'),transparent:true,opacity:.06,depthWrite:false,side:T.DoubleSide,fog:false});TRV.glass=gm;
   for(const w of TRN.glaze){const g=new T.PlaneGeometry(w.z1-w.z0,w.y1-w.y0);g.rotateY(Math.PI/2);const m=new T.Mesh(g,gm);m.position.set(w.x,(w.y0+w.y1)/2,(w.z0+w.z1)/2);m.renderOrder=2;root.add(m)}}
@@ -121,12 +178,14 @@ function trainSceneryBuild(){if(TRV.root||!G.ok)return;const T=G.T,X=TRN.x,TX=tr
   for(const s of[-1,1]){const p=new T.Mesh(new T.PlaneGeometry(len,1.6),bMat(TX.trainSide,'#ffffff'));p.rotation.y=s*Math.PI/2;p.position.set(s*1.41,1.6,0);g.add(p);const lp=new T.Mesh(new T.PlaneGeometry(len,1.6),bMat(TX.trainLit,'#ffffff',{tr:true,glow:1,extra:{blending:T.AdditiveBlending}}));lp.rotation.y=s*Math.PI/2;lp.position.set(s*1.42,1.6,0);g.add(lp)}
   g.position.set(X+4.2,Y0+.3,-9999);g.visible=false;root.add(g);TRV.pass={g,len,z:null}}
  // people in the seats: the top of a passer-by, cut off at the waist, sitting
- {const pick=TRN.seats.filter((s,i)=>((i*2654435761)>>>0)%100<11);for(const[i,s]of pick.entries()){const v=i%8,t=spriteTex('anon'+v,anonSVG(v));const g=new T.PlaneGeometry(.94,2.3*.56);const uv=g.attributes.uv;for(let j=0;j<uv.count;j++)uv.setY(j,.44+uv.getY(j)*.56);g.translate(0,2.3*.56/2,0);
+ {const tb=trainTable(),pick=TRN.seats.filter((s,i)=>((i*2654435761)>>>0)%100<11&&!(tb&&Math.hypot(s.x-tb.x,s.z-tb.z)<1.6));for(const[i,s]of pick.entries()){const v=i%8,t=spriteTex('anon'+v,anonSVG(v));const g=new T.PlaneGeometry(.94,2.3*.56);const uv=g.attributes.uv;for(let j=0;j<uv.count;j++)uv.setY(j,.44+uv.getY(j)*.56);g.translate(0,2.3*.56/2,0);
    const m=new T.Mesh(g,new T.MeshBasicMaterial({map:t,alphaTest:.5,color:new T.Color(.9,.9,.92)}));m.position.set(s.x,.36,s.z);root.add(m);TRV.sit.push(m)}}
  // the passenger information screens over each saloon doorway
  for(const[z0,z1]of TRN.cars)for(const[pz,dir]of[[z0+2.7,1],[z1-2.7,-1]]){const c=document.createElement('canvas');c.width=512;c.height=96;const t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;
   const m=new T.Mesh(new T.PlaneGeometry(.84,.16),new T.MeshBasicMaterial({map:t}));m.position.set(X,2.1,pz+dir*.024);if(dir<0)m.rotation.y=Math.PI;root.add(m);
   const bz=new T.Mesh(sGeo(.9,.2,.02),bMat(null,'#16161c',{vc:1}));bz.position.set(X,2.0,pz+dir*.012);root.add(bz);TRV.pis.push({c,t,o:Math.random()*300})}
+ // see-through cut-outs (trees, bushes, pylons, fences, people, glass) would stamp solid rectangles into ambient occlusion
+ root.traverse(o=>{const m=o.material;if(m&&(m.alphaTest>0||m.transparent))o.userData.noAO=1});
  root.visible=false}
 function mergeG(gs){const T=G.T,v=[],c=[],u=[];for(const g of gs){const n=g.index?g.toNonIndexed():g;v.push(...n.attributes.position.array);u.push(...(n.attributes.uv?n.attributes.uv.array:new Float32Array(n.attributes.position.count*2)));c.push(...(n.attributes.color?n.attributes.color.array:new Float32Array(n.attributes.position.count*3).fill(1)))}
  const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(v,3));g.setAttribute('uv',new T.Float32BufferAttribute(u,2));g.setAttribute('color',new T.Float32BufferAttribute(c,3));return g}
@@ -193,6 +252,12 @@ function tripStart(dest,o){o=o||{};closeOv();const ov_=$('ov');ov_.classList.rem
  if(!G.ok||window.__test||!AREAS.platform){go();return}
  const D=DEPART[(S.day+S.slot)%2];run([{bg:'platform'},{hide:1},{cut:'depart'},N(D[0]),N(D[1])],go);
 }
+/* story rides: whoever the story is with takes the table seat by the window in the middle of Coach B; you walk to
+   them yourself. Passengers never sit round that table. */
+function trainTable(){const c=TRN.cars[1];let b=null;for(const t of TRN.tables)if(t.z>c[0]&&t.z<c[1]&&(!b||Math.abs(t.z-36)<Math.abs(b.z-36)))b=t;return b}
+function trainSeat(who){S.hold=S.hold||{};const t=trainTable();
+ const s=t&&TRN.seats.filter(s=>Math.hypot(s.x-t.x,s.z-t.z)<1.3).sort((a,b)=>Math.abs(b.x-TRN.x)-Math.abs(a.x-TRN.x)||a.z-b.z)[0];
+ S.hold[who]=s?['train',+s.x.toFixed(2),+s.z.toFixed(2),0,'sit']:['train',TRN.x,36,0];if(typeof placeChars==='function')placeChars()}
 function tripReady(){return !!(S&&S.trip&&!S.trip.story&&WD.reg==='train'&&S.trip.el>=10)}
 function tripArrive(){const t=S.trip;if(!t)return;const D=TDEST[t.dest]||TDEST.con;S.trip=null;tripHud();fadeTp(()=>{teleportArea(D.area);run([{bg:D.area},{hide:1},N(D.arrive)],hub)})}
 function tripTick(dt){

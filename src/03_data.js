@@ -219,4 +219,9 @@ for(const m in MYST)ACH['solve_'+m]=['Solved: '+MYST[m].n,MYST[m].q];
 const ACHPG=k=>k.startsWith('end_')||k==='tree10'||k==='newgame';
 function metEver(g){if(META.met&&META.met[g]||META.routes&&META.routes[g])return true;const sc=META.seenSc||{};for(const k in sc)if(k.startsWith(g)&&/^\D+\d$/.test(k)&&k.replace(/\d$/,'')===g)return true;return false}
 function achSpoil(k){if(META.ach[k])return false;if(k.startsWith('love_'))return!metEver(k.slice(5));if(k.startsWith('solve_')){const m=k.slice(6);return!(META.mseen&&META.mseen[m]||META.solved&&META.solved[m])}return false}
-function achVis(){const pg=typeof pgOpen==='function'&&pgOpen();return Object.keys(ACH).filter(k=>(pg||!ACHPG(k))&&!achSpoil(k))}
+function achVis(){const pg=typeof pgOpen==='function'&&pgOpen();return Object.keys(ACH).filter(k=>pg||!ACHPG(k))}
+/* what a tile shows: [title, line, masked]. Love and Solved ones stay on the list but keep their names to
+   themselves until you've met that person or come across that mystery in some run */
+function achShow(k){const a=ACH[k],on=!!META.ach[k];
+ if(!on&&achSpoil(k))return k.startsWith('love_')?['In Love: ???','Someone you haven\'t met yet.',1]:['Solved: ???','A mystery you haven\'t come across yet.',1];
+ if(a[2]&&!on)return['???','Hidden. Keep playing.',1];return[a[0],a[1],0]}

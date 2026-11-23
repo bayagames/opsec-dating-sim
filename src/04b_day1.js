@@ -129,10 +129,16 @@ pia.n: He's away. Travelling. Anyway. Your train's in forty minutes and you're t
 pia.h: If you're ever back through here, request something. Anything. Except that one.
 [sum At Central Station you met Pia, a violinist who busks by the old piano. Her brother used to go to the con. He's "away".]
 `;
+SC.d1_board=`
+[hide]
+[call trainSeat('astrid')]
+~ Coach B. Half the seats are taken by people with their lanyards on already, the way some people wear the shirt to the match.
+~ There's one seat free at a table, facing backwards. Opposite it, a woman with a radio.
+`;
 SC.d1_train=`
 [bg carriage]
 [hide]
-~ The 16:12. You get a table seat facing backwards, which you hate, and put Ellie's bag of baking on the seat beside you like a guard dog.
+~ You take the seat facing backwards, which you hate, and put Ellie's bag of baking on the seat beside you like a guard dog.
 ~ Opposite: a woman with a long platinum-blond braid, round gold glasses and a cardigan the colour of the night sky with tiny embroidered stars on it. She has a radio on the table. Not a phone. A radio, with a whip antenna, and a pair of headphones, and she's smiling at something only she can hear.
 ~ The city slides past. Cranes, back gardens, a billboard: "SafeSphere. Your shield on the internet. Free forever." Someone has graffitied "FOREVER IS A LONG TIME" underneath.
 ~ The woman opposite lifts one side of her headphones and looks at you.
@@ -173,6 +179,7 @@ astrid.n: Sorry. Am I being loud? It hisses. The radio. Some people find it upse
  * Later you'll wonder what she was listening to.
 ~ Twenty minutes later, the train slows. A neon sign the height of a building slides into the window: THE HALCYON. Beyond it, a vast slab of dark glass and steel with a magenta line of light running round every storey.
 ~ CTRL+ALT+CON.
+[hold astrid off]
 [bg plaza]
 [cut pan plaza]
 ~ The station spits you out into the Conference Quarter. A plaza. Plane trees in pots. A coffee cart. A taxi rank. The sky's going orange.

@@ -177,9 +177,13 @@ on the plaza (it only goes to the station this week). The map on the phone opens
 out of it and you get the city (10d_world.js), where you can look at any place's map but not jump there. The board
 at Platform 4 and the taxi rank use their own versions of the city map.
 Boarding a train plays the departure (`[cut depart]`: the 16:12 pulling out under the iron roof) and puts you in Coach
-B. A story journey plays on board (`[bg carriage]`: Day 1's meeting with Astrid, Day 5's ride with Ellie) and arrives
-with the scene. Otherwise you can walk the train, look out of the windows, sit with the passengers, and after ten
-seconds a button (or Enter) takes you to your stop.
+B. A story journey is a beat with steps: the train step (`{int:'train',dest}` picks which train on the board will take
+you) plays a short boarding scene that seats someone at the window table in the middle of Coach B (`trainSeat(id)`,
+an `S.hold` with `'sit'`), and the next step (`{who:id}`) waits until you walk over and talk to them; that scene
+plays on board and arrives with its `[bg ...]`. Day 1 is Astrid; Day 5 is Ellie, both ways. Otherwise you can walk
+the train, look out of the windows, sit with the passengers, and after ten seconds a button (or Enter) takes you to
+your stop. Outside: patchwork fields and hedgerows, verges and scrub, oaks, poplars and conifers, pylons, two hazy
+ridgelines that drift slowly, terraces with chimneys and garden walls, the city behind concrete retaining walls.
 
 ## Cutscenes
 `[cut shot cast...]` moves the camera to a shot (`CUTS`, 09c) with the cast on their marks; `[cut off]` ends it (it
@@ -207,8 +211,9 @@ what people like (£15, Exposure +4). Gifts are everyday things; everyone loves 
 ## Save files and postgame
 Three files (profiles), each with its own meta (achievements, endings and their versions, hints, scenes seen, run
 history, stats, total playtime, the loop) and its own run saves. No Continue. The title's Achievements button shows
-only achievements (an "In Love" one appears once you've met that person, a "Solved" one once the mystery is on your
-case board; endings and run counts stay hidden until the postgame opens); the Postgame button (and a Postgame app on the phone) appears once the file has an ending.
+only achievements. Every "In Love" and "Solved" achievement is always on the list, but reads "In Love: ???" /
+"Solved: ???" until you've met that person or the mystery has been on your case board in some run (`achShow`);
+endings and run counts stay hidden until the postgame opens; the Postgame button (and a Postgame app on the phone) appears once the file has an ending.
 The postgame (06c data, 06d screen) is fullscreen with four rooms: The Week (a left-to-right map of every big choice
 and the endings at the end of each branch; drag, zoom, tap for details), Endings (a gallery by tier with your versions
 and why), Scenes (replay, sandboxed, from the title screen only) and Records (stats across every run, run history,
