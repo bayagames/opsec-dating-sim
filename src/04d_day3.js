@@ -1,6 +1,7 @@
 /* ============ DAY 3 · WEDNESDAY: Ellie arrives, two whispers, Saoirse, the roof ============ */
 SC.d3_ellie=`
 [bg lobby]
+[cut pan lobby]
 [hide]
 [flag ellie_here]
 ~ The Halcyon lobby at nine in the morning: marble, palms, a glass wall onto the garden, and a man dressed as a cardboard robot asking the concierge where the nearest charging point is.

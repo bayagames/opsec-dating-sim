@@ -219,6 +219,7 @@ SC.end_notfound=`
 `;
 SC.end_lasttrain=`
 [bg station]
+[cut pan station]
 [hide]
 ~ The last train. You take it on Sunday morning, actually, the 09:12, so it's not the last train. It just feels like one.
 ~ The carriage is nearly empty. You put your badge, still blue, in the bin on the platform.

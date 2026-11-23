@@ -61,6 +61,7 @@ ada.n: One more thing. A rule. Don't do CTF challenges on the con Wi-Fi. Or any 
 `;
 SC.d2_rin=`
 [bg lounge]
+[cut pan lounge]
 [hide]
 ~ You need ten minutes away from four thousand people. The Chill-out Lounge: lava lamps, bean bags, carpet in a colour you'd call "nap", and ambient music that sounds like a modem having a nice dream.
 ~ Behind the biggest bean bag, someone in a lilac hoodie, a pleated skirt and pink thigh-highs is hunched over a laptop covered in stickers, eating gummy worms with the focus of a surgeon.
@@ -99,6 +100,7 @@ rin.h: Come back later, if you want. It's nice to talk to someone who isn't on a
 `;
 SC.d2_badge=`
 [bg badgelab]
+[cut pan badgelab]
 [hide]
 ~ Your badge has been doing something weird since breakfast. The eight little lights round the edge, which yesterday did a happy rainbow, now pulse dim blue. Slowly. Like breathing. And the screen says "SPONSOR UPDATE INSTALLED · THANKS FOR BEING SAFE!"
 ~ You didn't install anything. You've had it round your neck all night.
@@ -145,6 +147,7 @@ tilly.b: ...Thank you.
 `;
 SC.d2_reception=`
 [bg lumenlounge]
+[cut pan lumenlounge]
 [hide]
 ~ The Lumen Lounge, on the Halcyon's mezzanine. Invite only. Your invite arrived at noon by email: "Lumen welcomes you. 7 PM. Drinks and canapés." You weren't sure whether to come. Free canapés decided for you.
 ~ Low lights, velvet booths, a baby grand piano, a bar lit from underneath. Glass walls look down into the hotel lobby. Lumen's blue shield glows on everything: the napkins, the coasters, the ice.

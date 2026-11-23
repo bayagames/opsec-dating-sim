@@ -37,6 +37,7 @@ SC.lead_dmtrace=`
 `;
 SC.lead_doxcompare=`
 [bg press]
+[cut pan press]
 ~ The press room has a big table and nobody who'll ask what you're doing. You lay the two posts side by side on your laptop: WHISPER's on Monday and Wednesday, and WH1SPER's.
 * Saoirse said it: two different people. Prove it.
 ~ WHISPER: public posts only. No addresses. Never a private person after Dave. Capitals, but careful grammar.
@@ -169,6 +170,7 @@ SC.lead_register=`
 `;
 SC.lead_locker=`
 [bg station]
+[cut pan station]
 ~ Left luggage, down the ramp behind the ticket hall. Locker 44. The tune in Pia's song had numbers in it: two, zero, one, nine.
 ~ The door clunks open. A padded envelope. A USB drive in a sandwich bag. An old paperback with a train ticket in it.
 ~ The drive: LANTERN's first design documents, three years old, with Victor Hale's initials on every page. "Primary market: government and private intelligence. Source detection is the product."
@@ -179,6 +181,7 @@ if met('pia')
 `;
 SC.lead_archive=`
 [bg press]
+[cut pan press]
 ~ The press room has a terminal with The Ledger's archive on it, for visiting journalists. You search for Jonah Reyes.
 ~ A year ago: "LUMEN'S SECRET PROJECT: THE APP THAT MAPS WHO YOU KNOW", by Saoirse Quinn. Front page.
 ~ A week later: "CORRECTION AND APOLOGY". Page two. "Following a forensic report by Bastion Security... we accept that the documents were obtained unlawfully... we apologise unreservedly to Lumen Analytics."
@@ -208,6 +211,7 @@ bea.s: Singers don't usually come with additional services. Not ones I'd invoice
 `;
 SC.lead_watchset=`
 [bg lumenlounge]
+[cut pan lumenlounge]
 ~ The second set in the Lumen Lounge. You sit at the back, with a lemonade, and you don't watch Vesper. You watch how she watches.
 ~ She sings to the room. Every few bars her eyes stop on a face, the way a camera does, and move on. She stops on Krall twice. She stops on you four times. Once, between songs, her hand goes to her right ear. Under the red waves of hair: a skin-coloured earpiece, the kind newsreaders wear.
 [clue earpiece]

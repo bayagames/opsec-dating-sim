@@ -174,6 +174,7 @@ astrid.n: Sorry. Am I being loud? It hisses. The radio. Some people find it upse
 ~ Twenty minutes later, the train slows. A neon sign the height of a building slides into the window: THE HALCYON. Beyond it, a vast slab of dark glass and steel with a magenta line of light running round every storey.
 ~ CTRL+ALT+CON.
 [bg plaza]
+[cut pan plaza]
 ~ The station spits you out into the Conference Quarter. A plaza. Plane trees in pots. A coffee cart. A taxi rank. The sky's going orange.
 ~ To your left, the Halcyon Hotel: twenty-five storeys of lit windows and a garden behind glass. Ahead, the convention centre's entrance, under letters taller than you: CTRL+ALT+CON.
 * Four thousand people. Seven days. You.
@@ -181,6 +182,7 @@ astrid.n: Sorry. Am I being loud? It hisses. The radio. Some people find it upse
 `;
 SC.d1_doors=`
 [bg vestibule]
+[cut pan vestibule]
 [hide]
 [flag d1v]
 ~ The convention doors slide open. It smells of new carpet, energy drinks and four thousand people's nerves.
@@ -242,11 +244,12 @@ dave.h: Stick with me, bro. I'm gonna be famous by Sunday. The opening ceremony'
 SC.d1_ceremony=`
 [bg hallA]
 [hide]
+[cut pan hallA]
 ~ Hall A. You stop in the doorway and just look.
 ~ A bowl of two thousand seats rising into the dark on three sides, a stage the width of a street, and over it a screen the size of a house. The seats are filling with hoodies. Somewhere a DJ is playing something that sounds like a modem falling in love.
 ~ Block C, Row 4, Seat 12. You find it. You sit. The person on your left is eating noodles. The person on your right is asleep.
 * Two thousand people. Some of them wrote the tools you've only read about. Some of them broke things you thought couldn't be broken. And you're in Row 4, with a bag of sausage rolls.
-[cut hallA_stage marge]
+[cut hallA_crane marge]
 ~ The lights go down. One spotlight. A woman in her sixties with silver hair cropped short and reading glasses on a chain walks to the podium like she owns the building, which, for this week, she basically does.
 marge.h: Welcome to CTRL+ALT+CON number twenty! I'm Marge, your con chair. I've been doing this since it was thirty people in a pub basement and a router we weren't supposed to have.
 ~ A roar from the seats. Marge waits for it with the patience of someone who's waited for it nineteen times before.
@@ -328,6 +331,7 @@ if f('plant')
 `;
 SC.d1_bar=`
 [bg bar]
+[cut pan bar]
 [hide]
 ~ The Hotel Bar, off the Promenade. Dark wood, brass, low green lamps, a long marble counter and a terrace door through to fairy lights and heaters.
 ~ Half the con is here, arguing about tabs versus spaces, and the other half is arguing about whether that argument is still funny. It is not. They're having it anyway.

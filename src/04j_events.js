@@ -56,6 +56,7 @@ if met('nyx')
 `;
 SC.ev_film=`
 [bg film]
+[cut pan film]
 ~ The Film Room, upstairs on Village Row: beanbags, a projector, popcorn in buckets, and a hand-made sign: "FILM NIGHT · A VERY BAD HACKER FILM · HECKLING MANDATORY".
 ~ The film is from 1995. Everyone in it hacks by flying through a city made of glowing towers, and typing very fast while someone shouts "I'm in".
 ~ The audience shouts along with every line. Someone has made bingo cards: "ENHANCE", "rollerblades", "the Gibson", "a password that's just 'GOD'".

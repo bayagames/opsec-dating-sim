@@ -31,7 +31,8 @@ The first plays twelve whole runs with no 3D (`?test`) and reports endings, how 
 - `03c_economy.js` money, shops, gifts and what everyone thinks of them, shifts, PEOPLEFINDR
 - `04q_loop.js`   the Big Score, Zero Day (secret), the loop (true route), people stepping into the story
 - `06c_postgame.js` the postgame: the week as a tree, endings and versions, hints, replay, the week after
-- `09c_cut.js`    cutscenes: camera shots with the cast on their marks
+- `09c_cut.js`    cutscenes (camera moves, close-ups on whoever's speaking, establishing pans) and the title screen's camera
+- `06e_title.js`   the title screen: boot, press any key, the menu, files, load
 - `01b_core.js`    the week (days and six parts of each), Skill and Clout ranks, closeness, Exposure and its daily reset and fail, clues, achievements, the story summary, what carries over between runs
 - `01c_script.js`  the scene language: scenes are written as plain text (`~` narration, `*` thoughts, `name.x:` lines, `?` choices, `if`, `[commands]`) and parsed on first use
 - `02_games.js`    minigames (quiz, phishing, terminal, timing, code review)
@@ -82,7 +83,7 @@ the car park, network ops, the plant room and the service tunnel. Areas open as 
 (`GATES` in `09a_place.js`).
 
 ## Controls
-Desktop: WASD/arrows to walk, Shift to run, mouse to look, E to interact, M for map. The mouse is captured from the moment you press Begin/Continue and stays captured in the 3D world, including during conversations (a drawn cursor appears for choices). Esc or P opens the phone and frees the mouse; closing it steps you straight back in.
+Desktop: WASD/arrows to walk, Shift to run, mouse to look, E to interact, M for map. The mouse is captured from the moment you press Begin/Continue and stays captured in the 3D world, including during conversations (a drawn cursor appears for choices). Esc, P or Tab opens the phone and frees the mouse; any of the three closes it again (Esc steps back out of an app first). In the postgame, Esc goes back and then closes.
 Touch: left stick to walk, drag anywhere else to look, tap the prompt to interact.
 
 ## Deploy to GitHub Pages

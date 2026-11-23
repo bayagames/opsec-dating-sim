@@ -5,6 +5,8 @@ addEventListener('touchstart',()=>{if(!WD.touch)setTouch(true)},{passive:true});
 for(const ev of['gesturestart','gesturechange','dblclick'])addEventListener(ev,e=>{if(e.cancelable)e.preventDefault()},{passive:false});
 addEventListener('mousemove',e=>{if(WD.touch&&e.movementX!==undefined&&(Math.abs(e.movementX)+Math.abs(e.movementY))>3&&!e.sourceCapabilities?.firesTouchEvents)setTouch(false)});
 addEventListener('keydown',e=>{
+ // the postgame sits over everything: Esc leaves it (closing a drawer first), and the phone keys do nothing under it
+ if($('pgx')){const k=e.key;if(k==='Escape'||k==='Backspace'&&!/INPUT|TEXTAREA/.test((document.activeElement||{}).tagName||'')){e.preventDefault();e.stopImmediatePropagation();pgEsc()}else if(k==='Tab'||k==='p'||k==='P'){e.preventDefault();e.stopImmediatePropagation()}return}
  if(!S)return;
  const tag=(document.activeElement&&document.activeElement.tagName)||'';if(tag==='INPUT'||tag==='TEXTAREA')return;
  const k=e.key,ovOn=$('ov').classList.contains('on'),isPhone=$('ov').classList.contains('phoneov');
@@ -13,9 +15,7 @@ addEventListener('keydown',e=>{
   if(isPhone){e.preventDefault();closePhone();return}
   if(!ovOn){e.preventDefault();phone();return}
  }
- // Esc steps back inside the phone but never puts it away: the browser spends Esc on releasing the mouse, and a
- // phone closed by Esc would drop you in the world with a loose cursor. P, Tab or the button put it away.
- if(k==='Escape'&&isPhone){e.preventDefault();if($('ov').dataset.app)phoneBack();else{const t=$('phtip');if(t){t.textContent='P, Tab or the button below to put it away';t.classList.remove('flash');void t.offsetWidth;t.classList.add('flash')}}return}
+ if(k==='Escape'&&isPhone){e.preventDefault();if($('ov').dataset.app)phoneBack();else closePhone();return}
  // Esc opens the phone (in the world the browser also uses Esc to release the mouse, which opens it too)
  if(k==='Escape'&&!ovOn&&!$('title').classList.contains('on')&&!$('card').classList.contains('on')){e.preventDefault();phone();return}
  if($('card').classList.contains('on')&&(k===' '||k==='Enter')){e.preventDefault();$('card').click();return}

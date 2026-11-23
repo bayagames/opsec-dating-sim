@@ -211,5 +211,7 @@ const ACH={
  newgame:['Again','Start a second run.']
 };
 for(const k of ENDORDER)ACH['end_'+k]=['Ending: '+ENDINFO[k][0],ENDINFO[k][1],1];
-for(const g of ROM)ACH['love_'+g]=['In Love: '+CH[g].name,'Finish '+CH[g].name+'\'s story.'];
-for(const m in MYST)ACH['solve_'+m]=['Solved: '+MYST[m].n,MYST[m].q];
+/* who you fell for and which mysteries you solved aren't achievements: their names alone would give the story away.
+   Endings, and anything that counts runs or endings, stay out of sight until the postgame opens */
+const ACHPG=k=>k.startsWith('end_')||k==='tree10'||k==='newgame';
+function achVis(){const pg=typeof pgOpen==='function'&&pgOpen();return Object.keys(ACH).filter(k=>pg||!ACHPG(k))}

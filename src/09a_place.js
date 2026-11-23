@@ -439,7 +439,7 @@ function placeChars(){if(!S)return;const d=S.day,sl=S.slot;
   if(Array.isArray(p)&&typeof p[0]==='string'&&!AREAS[p[0]]&&p.length>=3)p={reg:p[0],x:p[1],z:p[2],y:p[3]||0};
   else if(Array.isArray(p))p=spotIn(p[0],p[1]);
   // in a cutscene the cast stand on their marks, and nobody else wanders into the shot
-  if(WD.cut){p=WD.cut.cast[c.id]||(WD.reg===WD.cut.C.reg&&p&&p.reg===WD.cut.C.reg&&Math.hypot(p.x-WD.cut.C.at[0],p.z-WD.cut.C.at[2])<40?null:p)}
+  if(WD.cut){p=WD.cut.cast[c.id]||(WD.reg===WD.cut.C.reg&&p&&p.reg===WD.cut.C.reg&&Math.hypot(p.x-WD.cut.ctr[0],p.z-WD.cut.ctr[2])<(WD.cut.est?14:40)?null:p)}
   if(!p){c.on=false;continue}c.on=true;c.reg=p.reg;c.x=p.x;c.z=p.z;c.y=p.y||0}}
 /* the area a scene opens in: its first [bg ...] */
 const SCAREA={};function sceneArea(id){if(SCAREA[id]!==undefined)return SCAREA[id];const m=SC[id]&&SC[id].match(/^\s*\[bg ([a-z0-9]+)\]/m);return SCAREA[id]=m?bgArea(m[1]):null}

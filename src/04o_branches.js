@@ -59,6 +59,7 @@ krall.s: I'd like you to be our community liaison for the rest of the week. Info
 `;
 SC.ev_drop=`
 [bg lounge]
+[cut pan lounge]
 ~ The Chill-out Lounge. Third bean bag from the left, exactly as the message said. Under it, taped flat: a padded envelope, and inside it, a phone with no SIM and a USB stick.
 ~ On the phone, one note: "THE BLUE LIGHTS GO TO A BOX. THE BOX HAS A NAME. COME TO THE ROOF TONIGHT AND I'LL TELL YOU IT. BURN THIS PHONE."
 [clue dropmap]
