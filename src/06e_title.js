@@ -21,8 +21,8 @@ function titleScreen(){
 /* the logo's lines change alignment and size between stages; measure them before and after and glide each one
    from where it was (FLIP), so nothing jumps before it moves */
 /* ---------- the cast on the right ----------
-   One at a time and big: head to about the knees, filling the right of the screen. Ellie first, then the others in
-   turn (anyone with drawn creator art first), each stepping in from the right and out to the left. The one on screen
+   One at a time and big: head to about the knees, filling the right of the screen. The whole cast in a random order
+   (a new one each visit), each stepping in from the right and out to the left. The one on screen
    smiles now and then. Sizes follow the art, so taller characters stand taller. */
 const TC={on:false,t:null,i:0,el:null,smile:null};
 const TCH=150; // Ellie's head-to-toe height in vh: tall enough that the bottom of the screen cuts her off at the knees
@@ -34,8 +34,7 @@ function tcFig(id){const A=typeof artOf==='function'&&artOf(id),d=document.creat
   d.style.setProperty('--lift',((A.foot-A.top)/3078-1)*TCH+'vh')}
  else{const k=TCH/447.5;inn.style.width=200*k+'vh';inn.style.height=447.5*k+'vh';inn.innerHTML=fullSVG(id);const sv=inn.firstElementChild;sv.style.cssText=`left:0;top:${-46.5*k}vh;width:${200*k}vh;height:${500*k}vh`}
  return d}
-function tcPool(){const seen=g=>typeof metEver==='function'&&metEver(g),art=g=>typeof artOf==='function'&&!!artOf(g);
- return ['ellie',...ROM.filter(g=>g!=='ellie').sort((a,b)=>(art(b)-art(a))||(seen(b)-seen(a))||(Math.random()-.5))]}
+function tcPool(){const a=[...ROM];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function titleCast(on){const box=$('tcast');if(!box)return;
  if(!on){TC.on=false;clearInterval(TC.t);clearInterval(TC.smile);return}
  if(TC.on)return;TC.on=true;box.querySelectorAll('.tc').forEach(e=>e.remove());TC.pool=tcPool();TC.i=0;

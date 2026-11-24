@@ -97,7 +97,18 @@ function setupInput(){
 /* step back into mouse-look (after the phone closes, a scene ends...). While Esc is held, wait for it to come up:
    locking during an Esc press hands the browser an Esc to cancel the lock with, and the phone pops straight back */
 function relock(){if(WD.touch||WD.noLock||locked())return;if(WD.escDown){WD.lockAfterEsc=true;return}tryLock()}
-function tryLock(){if(WD.touch||WD.noLock||!S||!S.inWorld||S.ending||$('title').classList.contains('on')||$('pgx'))return;const el=lockEl();if(document.pointerLockElement===el)return;try{const p=el.requestPointerLock&&el.requestPointerLock();if(p&&p.catch)p.catch(()=>{})}catch(e){}}
+/* Full screen with Esc kept for the game. Browsers always let go of a captured mouse on Esc, and only take it back
+   after a click or a key that isn't Esc, so in a normal window Esc can open and close the phone but can't hand the
+   mouse straight back. In full screen the page can keep Esc for itself (Chrome, Edge, Opera): Esc opens and closes the
+   phone with the mouse staying captured, and holding Esc leaves full screen. It needs a click or key press to start,
+   so it's asked for the moment you step into the world. Off in Settings. Elsewhere the old way still works: after an
+   Esc, any key or click captures the mouse again. */
+function immersive(){if(WD.touch||SETTINGS.nofs||!document.documentElement.requestFullscreen)return;
+ const kl=()=>{if(navigator.keyboard&&navigator.keyboard.lock)navigator.keyboard.lock(['Escape']).catch(()=>{})};
+ if(document.fullscreenElement){kl();return}
+ try{document.documentElement.requestFullscreen({navigationUI:'hide'}).then(kl).catch(()=>{})}catch(e){}}
+const escKept=()=>!!(document.fullscreenElement&&navigator.keyboard&&navigator.keyboard.lock&&!SETTINGS.nofs);
+function tryLock(){if(WD.touch||WD.noLock||!S||!S.inWorld||S.ending||$('title').classList.contains('on')||$('pgx'))return;const el=lockEl();immersive();if(document.pointerLockElement===el)return;try{const p=el.requestPointerLock&&el.requestPointerLock();if(p&&p.catch)p.catch(()=>{})}catch(e){}}
 if(SETTINGS.nolock)WD.noLock=true;
 function setTouch(on){WD.touch=on;document.body.classList.toggle('touchui',on);document.body.classList.toggle('desk',!on)}
 /* dx>0 (mouse/finger moves right) turns right; dy<0 (moves up) looks up. Never inverted. */

@@ -11942,8 +11942,8 @@ function titleScreen(){
 /* the logo's lines change alignment and size between stages; measure them before and after and glide each one
    from where it was (FLIP), so nothing jumps before it moves */
 /* ---------- the cast on the right ----------
-   One at a time and big: head to about the knees, filling the right of the screen. Ellie first, then the others in
-   turn (anyone with drawn creator art first), each stepping in from the right and out to the left. The one on screen
+   One at a time and big: head to about the knees, filling the right of the screen. The whole cast in a random order
+   (a new one each visit), each stepping in from the right and out to the left. The one on screen
    smiles now and then. Sizes follow the art, so taller characters stand taller. */
 const TC={on:false,t:null,i:0,el:null,smile:null};
 const TCH=150; // Ellie's head-to-toe height in vh: tall enough that the bottom of the screen cuts her off at the knees
@@ -11955,8 +11955,7 @@ function tcFig(id){const A=typeof artOf==='function'&&artOf(id),d=document.creat
   d.style.setProperty('--lift',((A.foot-A.top)/3078-1)*TCH+'vh')}
  else{const k=TCH/447.5;inn.style.width=200*k+'vh';inn.style.height=447.5*k+'vh';inn.innerHTML=fullSVG(id);const sv=inn.firstElementChild;sv.style.cssText=`left:0;top:${-46.5*k}vh;width:${200*k}vh;height:${500*k}vh`}
  return d}
-function tcPool(){const seen=g=>typeof metEver==='function'&&metEver(g),art=g=>typeof artOf==='function'&&!!artOf(g);
- return ['ellie',...ROM.filter(g=>g!=='ellie').sort((a,b)=>(art(b)-art(a))||(seen(b)-seen(a))||(Math.random()-.5))]}
+function tcPool(){const a=[...ROM];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function titleCast(on){const box=$('tcast');if(!box)return;
  if(!on){TC.on=false;clearInterval(TC.t);clearInterval(TC.smile);return}
  if(TC.on)return;TC.on=true;box.querySelectorAll('.tc').forEach(e=>e.remove());TC.pool=tcPool();TC.i=0;
@@ -15670,7 +15669,18 @@ function setupInput(){
 /* step back into mouse-look (after the phone closes, a scene ends...). While Esc is held, wait for it to come up:
    locking during an Esc press hands the browser an Esc to cancel the lock with, and the phone pops straight back */
 function relock(){if(WD.touch||WD.noLock||locked())return;if(WD.escDown){WD.lockAfterEsc=true;return}tryLock()}
-function tryLock(){if(WD.touch||WD.noLock||!S||!S.inWorld||S.ending||$('title').classList.contains('on')||$('pgx'))return;const el=lockEl();if(document.pointerLockElement===el)return;try{const p=el.requestPointerLock&&el.requestPointerLock();if(p&&p.catch)p.catch(()=>{})}catch(e){}}
+/* Full screen with Esc kept for the game. Browsers always let go of a captured mouse on Esc, and only take it back
+   after a click or a key that isn't Esc, so in a normal window Esc can open and close the phone but can't hand the
+   mouse straight back. In full screen the page can keep Esc for itself (Chrome, Edge, Opera): Esc opens and closes the
+   phone with the mouse staying captured, and holding Esc leaves full screen. It needs a click or key press to start,
+   so it's asked for the moment you step into the world. Off in Settings. Elsewhere the old way still works: after an
+   Esc, any key or click captures the mouse again. */
+function immersive(){if(WD.touch||SETTINGS.nofs||!document.documentElement.requestFullscreen)return;
+ const kl=()=>{if(navigator.keyboard&&navigator.keyboard.lock)navigator.keyboard.lock(['Escape']).catch(()=>{})};
+ if(document.fullscreenElement){kl();return}
+ try{document.documentElement.requestFullscreen({navigationUI:'hide'}).then(kl).catch(()=>{})}catch(e){}}
+const escKept=()=>!!(document.fullscreenElement&&navigator.keyboard&&navigator.keyboard.lock&&!SETTINGS.nofs);
+function tryLock(){if(WD.touch||WD.noLock||!S||!S.inWorld||S.ending||$('title').classList.contains('on')||$('pgx'))return;const el=lockEl();immersive();if(document.pointerLockElement===el)return;try{const p=el.requestPointerLock&&el.requestPointerLock();if(p&&p.catch)p.catch(()=>{})}catch(e){}}
 if(SETTINGS.nolock)WD.noLock=true;
 function setTouch(on){WD.touch=on;document.body.classList.toggle('touchui',on);document.body.classList.toggle('desk',!on)}
 /* dx>0 (mouse/finger moves right) turns right; dy<0 (moves up) looks up. Never inverted. */
@@ -17169,6 +17179,7 @@ const APPS={
   <p class="small">${G.q==='low'?'Simpler lighting, no glow. Best for older phones.':G.q==='medium'?'Full lighting and glow, lower resolution.':'Everything on, with antialiasing. The resolution drops automatically if frames get slow.'}</p>
   <h4>Controls</h4><label class="sl"><span>Look speed</span><input type="range" min="30" max="250" step="5" value="${Math.round(SETTINGS.sens*100)}" id="sens" style="--p:${Math.round((SETTINGS.sens*100-30)/220*100)}%"><b>${SETTINGS.sens.toFixed(2)}×</b></label>
   <div class="row" style="margin-top:6px"><button class="btn" id="stf">Text: ${S.fast?'instant':'typewriter'}</button><button class="btn" id="stdbg">Debug menu (F9)</button></div>
+  <div class="row" style="margin-top:6px"><button class="btn" id="stfs">Full screen in the world: ${SETTINGS.nofs?'off':'on'}</button></div><p class="small">On: Esc opens and closes the phone and the mouse stays with the game (hold Esc to leave full screen). Off: after Esc, click or press any key to look around again.</p>
   <div class="row" style="margin-top:6px"><button class="btn" id="stlk">Capture the mouse: ${SETTINGS.nolock?'off (drag to look)':'on'}</button></div><p class="small">With capture off, the browser never shows its "press Esc to show your cursor" notice; you look around by dragging.</p>
   <p class="small" style="margin-top:12px">Keyboard: WASD or arrows to walk, Shift to run, mouse to look, E to interact with whatever you're pointing at, M for map. <b>Esc</b> or <b>P</b> opens this phone; Esc in an app goes back to the phone.<br>Touch: drag the left stick to walk, drag anywhere else to look, tap the prompt to interact.</p></div>
   <p class="small">The game autosaves while you explore. Use the Saves app for save slots and export.</p></div>`},
@@ -17205,7 +17216,7 @@ const APPS_AFTER={
  echo(){const b=$('erw');if(b)b.onclick=()=>{if(!b.dataset.c){b.dataset.c=1;b.textContent='Tap again: lose everything since this morning';return}rewindDay()}},
  achieve(){$('ov').querySelectorAll('[data-at]').forEach(b=>b.onclick=()=>{PH.atab=b.dataset.at;redraw()})},
  saves(){savesPanel($('spanel'),'phone',redraw)},
- settings(){$('stf').onclick=()=>{S.fast=!S.fast;redraw()};$('stlk').onclick=()=>{SETTINGS.nolock=!SETTINGS.nolock;saveSettings();WD.noLock=!!SETTINGS.nolock;if(WD.noLock&&document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}redraw()};$('stdbg').onclick=()=>{closeOv();dbgOpen()};
+ settings(){$('stf').onclick=()=>{S.fast=!S.fast;redraw()};$('stfs').onclick=()=>{SETTINGS.nofs=!SETTINGS.nofs;saveSettings();if(SETTINGS.nofs){try{navigator.keyboard&&navigator.keyboard.unlock&&navigator.keyboard.unlock()}catch(e){}if(document.fullscreenElement)document.exitFullscreen().catch(()=>{})}else immersive();redraw()};$('stlk').onclick=()=>{SETTINGS.nolock=!SETTINGS.nolock;saveSettings();WD.noLock=!!SETTINGS.nolock;if(WD.noLock&&document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}redraw()};$('stdbg').onclick=()=>{closeOv();dbgOpen()};
   $('ov').querySelectorAll('input[data-v]').forEach(r=>{r.oninput=()=>{const k=r.dataset.v;SETTINGS.vol[k]=r.value/100;r.style.setProperty('--p',r.value+'%');r.nextElementSibling.textContent=r.value;if(typeof applyVolumes==='function')applyVolumes()};r.onchange=()=>{saveSettings();if(r.dataset.v==='sfx'||r.dataset.v==='master')sfx('notify')}});
   const sn=$('sens');sn.oninput=()=>{SETTINGS.sens=sn.value/100;sn.style.setProperty('--p',((sn.value-30)/220*100)+'%');sn.nextElementSibling.textContent=SETTINGS.sens.toFixed(2)+'×'};sn.onchange=saveSettings;
   $('gq').querySelectorAll('button').forEach(b=>b.onclick=()=>{SETTINGS.gfx=b.dataset.q;saveSettings();if(G.ok)setQuality(b.dataset.q);else G.q=b.dataset.q;redraw()})},
