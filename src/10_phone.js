@@ -205,5 +205,5 @@ const APPS_AFTER={
   $('ov').querySelectorAll('input[data-v]').forEach(r=>{r.oninput=()=>{const k=r.dataset.v;SETTINGS.vol[k]=r.value/100;r.style.setProperty('--p',r.value+'%');r.nextElementSibling.textContent=r.value;if(typeof applyVolumes==='function')applyVolumes()};r.onchange=()=>{saveSettings();if(r.dataset.v==='sfx'||r.dataset.v==='master')sfx('notify')}});
   const sn=$('sens');sn.oninput=()=>{SETTINGS.sens=sn.value/100;sn.style.setProperty('--p',((sn.value-30)/220*100)+'%');sn.nextElementSibling.textContent=SETTINGS.sens.toFixed(2)+'×'};sn.onchange=saveSettings;
   $('gq').querySelectorAll('button').forEach(b=>b.onclick=()=>{SETTINGS.gfx=b.dataset.q;saveSettings();if(G.ok)setQuality(b.dataset.q);else G.q=b.dataset.q;redraw()})},
- quit(){$('stq').onclick=()=>{S.pos=[WD.reg,WD.x,WD.z,WD.yaw,WD.y];save();closeOv();$('ov').classList.remove('phoneov','mapov','appov');WD.active=false;if(document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}titleScreen()};$('stqn').onclick=phoneBack}
+ quit(){$('stq').onclick=()=>{S.pos=[WD.reg,WD.x,WD.z,WD.yaw,WD.y];save();closeOv();$('ov').classList.remove('phoneov','mapov','appov');WD.active=false;titleScreen()};$('stqn').onclick=phoneBack}
 };

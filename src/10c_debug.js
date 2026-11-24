@@ -18,18 +18,27 @@ async function autoplay(until,o){o=o||{};const keepGames={};for(const k in GAMES
   if(S.slot===5)endDay();else spend('wait')}}
  finally{for(const k in keepGames)GAMES[k]=keepGames[k];window.__test=wasTest}
  return n}
-function dbgOpen(){if(!S)return;if(document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}WD.active=false;dbgDraw()}
+function dbgOpen(){if(!S)return;WD.active=false;dbgDraw()}
 const DBG={tab:'jump'};
 function beatList(){const L=[];for(let d=1;d<=7;d++)(DAYS[d]||[]).forEach((b,i)=>{if(typeof b==='string')L.push({d,i,id:b,t:BEATS[b].t})});return L}
 function dbgDraw(){
- const tabs=[['jump','Jump to'],['tp','Teleport'],['give','Give & set'],['scene','Play a scene'],['end','Endings']];
+ const tabs=[['chap','Chapters'],['jump','Jump to'],['tp','Teleport'],['give','Give & set'],['scene','Play a scene'],['end','Endings'],['info','State']];
  let body='';
+ if(DBG.tab==='chap')body=`<p class="small">Starts a fresh game as "${esc(S.h)}", sets the choices that lead to the chapter, and fast-plays to the start of its day (the chapter card). Takes a few seconds.</p>
+  <label class="small"><input type="checkbox" id="dbgHang" ${DBG.hang?'checked':''}> Spend free time on people's scenes on the way</label>
+  ${[0,1,2,3,4,5,6,7].map(dd=>`<div class="dbh">${dd?'Day '+dd+' · '+DAYN[dd]:'Prologue'}</div><div class="dbg2">${CHORDER.filter(k=>CHAP[k].day===dd).map(k=>`<button class="dbi" data-ch="${k}"><b>${esc(CHAP[k].t)}${chapterNow()===k?' · now':''}</b><small>${esc(CHAP[k].via||'Every run')}${(META.chaps||{})[k]?' · reached '+META.chaps[k]+'×':''}</small></button>`).join('')}</div>`).join('')}`;
+ if(DBG.tab==='info'){const kv=(k,v)=>`<div class="kv"><span>${k}</span><b>${v}</b></div>`;const ch=S.chaps||{};
+  body=kv('Mouse captured',typeof locked==='function'&&locked()?'yes':'no')+kv('Drawn cursor',VC.on?'on':'off')+kv('Full screen',document.fullscreenElement?'yes':'no')+kv('Esc kept for the game',typeof escKept==='function'&&escKept()?'yes':'no')+kv('Full screen setting',SETTINGS.nofs?'off':'on')
+  +kv('Where',esc(WD.reg+' · '+(WD.area||'-')+' · '+WD.x.toFixed(1)+', '+WD.z.toFixed(1)+', '+WD.y.toFixed(1)))+kv('Train trip',S.trip?esc(JSON.stringify(S.trip)):'-')
+  +kv('Chapter now',chapterNow()?esc(CHAP[chapterNow()].t):'-')+kv('This run',Object.keys(ch).map(Number).sort((a,b)=>a-b).map(x=>esc(CHAP[ch[x]].t)).join(' → ')||'-')
+  +kv('Chapters reached (file)',Object.keys(META.chaps||{}).length+' of '+CHORDER.length)+kv('Last run',(META.lastPath||[]).map(k=>esc(CHAP[k]?CHAP[k].t:k)).join(' → ')||'-')
+  +kv('Creator art loaded',Object.keys(window.ART||{}).join(', ')||'none')+kv('Graphics',esc(G.q||'-')+(G.baked?' · baked light':''))+kv('Flags',esc(Object.keys(S.f).filter(x=>S.f[x]).slice(0,40).join(' ')))}
  if(DBG.tab==='jump')body=`<p class="small">Starts a fresh game as "${esc(S.h)}" and fast-plays to the start of the chosen beat. Careful choices, minigames skipped. Takes a few seconds.</p>
   <label class="small"><input type="checkbox" id="dbgHang" ${DBG.hang?'checked':''}> Spend free time on people's scenes on the way (otherwise free time is skipped)</label>
-  <div class="dbl">${beatList().map(b=>`<button class="dbi" data-b="${b.id}"><b>Day ${b.d} · ${SLOTN[b.i]}</b><small>${esc(b.t)}</small></button>`).join('')}<button class="dbi" data-b="__end"><b>Day 7 · the end</b><small>Play everything through to an ending</small></button></div>`;
+  <div class="dbl">${beatList().map(b=>`<button class="dbi" data-b="${b.id}"><b>Day ${b.d}${S.chaps&&S.chaps[b.d]?' · '+esc(CHAP[S.chaps[b.d]].t):''} · ${SLOTN[b.i]}</b><small>${esc(b.t)}</small></button>`).join('')}<button class="dbi" data-b="__end"><b>Day 7 · the end</b><small>Play everything through to an ending</small></button></div>`;
  if(DBG.tab==='tp'){const net=MAPNET[WD.reg]?Object.values(AREAS):[];const g={};for(const a of Object.values(AREAS)){if(a.hide)continue;(g[areaGroup(a)]=g[areaGroup(a)]||[]).push(a)}
   body=`<label class="small"><input type="checkbox" id="dbgOpenAll" ${window.__allOpen?'checked':''}> Ignore area locks</label>`+AGROUPS.filter(k=>g[k]).map(k=>`<div class="dbh">${esc(k)}</div><div class="dbg2">${g[k].map(a=>`<button class="dbi" data-tp="${a.k}"><b>${esc(a.n)}</b><small>${esc(levelName(a.reg,a.sp[3]||0))}${areaLock(a.k)?' · locked now':''}</small></button>`).join('')}</div>`).join('')}
- if(DBG.tab==='give')body=`<div class="dbg2">${[['meet','Meet all 21'],['aff20','+20 affection, everyone met'],['aff100','Max affection, everyone met'],['clues','Every clue'],['solve','Solve every mystery'],['skill','Skill +100'],['clout','Clout +100'],['exp0','Exposure to 0'],['exp95','Exposure to 95'],['cred','+£200'],['items','Every item'],['visit','Visit every area'],['slot','Next part of the day'],['day','End the day'],['restore','Enter the loop (time control)']].map(x=>`<button class="dbi" data-g="${x[0]}"><b>${x[1]}</b></button>`).join('')}</div>
+ if(DBG.tab==='give')body=`<div class="dbg2">${[['meet','Meet all 21'],['aff20','+20 affection, everyone met'],['aff100','Max affection, everyone met'],['clues','Every clue'],['solve','Solve every mystery'],['skill','Skill +100'],['clout','Clout +100'],['pgopen','Unlock the postgame'],['chreset','Forget chapter history'],['trip','Ride a train now'],['fs','Toggle full screen'],['chcard','Show today\'s chapter card'],['exp0','Exposure to 0'],['exp95','Exposure to 95'],['cred','+£200'],['items','Every item'],['visit','Visit every area'],['slot','Next part of the day'],['day','End the day'],['restore','Enter the loop (time control)']].map(x=>`<button class="dbi" data-g="${x[0]}"><b>${x[1]}</b></button>`).join('')}</div>
   <div class="dbh">Advance someone's story by one scene (plays it)</div><div class="dbg2">${ROM.map(g=>`<button class="dbi" data-adv="${g}"><b>${CH[g].name}</b><small>${scn(g)}/${ROUTES[g].n} · ♥ ${aff(g)}</small></button>`).join('')}</div>`;
  if(DBG.tab==='scene'){const ks=Object.keys(SC).sort();body=`<input class="inp" id="dbgQ" placeholder="Filter scenes" value="${esc(DBG.q||'')}"><div class="dbg2">${ks.filter(k=>!DBG.q||k.includes(DBG.q)).slice(0,300).map(k=>`<button class="dbi" data-sc="${k}"><b>${k}</b></button>`).join('')}</div>`}
  if(DBG.tab==='end')body=`<p class="small">Plays the ending's epilogue and shows its card. Ends this run.</p><div class="dbg2">${ENDORDER.map(k=>`<button class="dbi" data-end="${k}"><b>${esc(ENDINFO[k][0])}</b><small>${META.ends[k]?'seen':''}</small></button>`).join('')}</div>`;
@@ -41,6 +50,7 @@ function dbgDraw(){
  if($('dbgOpenAll'))$('dbgOpenAll').onchange=e=>{window.__allOpen=e.target.checked};
  if($('dbgQ'))$('dbgQ').oninput=e=>{DBG.q=e.target.value;const p=e.target.selectionStart;dbgDraw();$('dbgQ').focus();$('dbgQ').setSelectionRange(p,p)};
  o.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>dbgJump(b.dataset.b));
+ o.querySelectorAll('[data-ch]').forEach(b=>b.onclick=()=>dbgChapter(b.dataset.ch));
  o.querySelectorAll('[data-tp]').forEach(b=>b.onclick=()=>{const k=b.dataset.tp;closePhone();fadeTp(()=>{teleportArea(k);S.visited[k]=1;hub()})});
  o.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{dbgGive(b.dataset.g);dbgDraw()});
  o.querySelectorAll('[data-adv]').forEach(b=>b.onclick=()=>{const g=b.dataset.adv;closePhone();if(!met(g)){meet(g);adv(g,0);return run(scr(g+'0'),hub)}const i=scn(g);if(i>=ROUTES[g].n)return;run([...scr(g+i),()=>{adv(g,i);return[]}],hub)});
@@ -60,11 +70,33 @@ function dbgGive(k){
  if(k==='slot'){closePhone();if(S.slot===5)endDay();else nextSlot();return}
  if(k==='day'){closePhone();endDay();return}
  if(k==='restore'){S.loop=1;S.unl.echo=1}
+ if(k==='pgopen'){if(!Object.keys(META.ends).length)META.ends.disclosure=Date.now();saveMeta()}
+ if(k==='chreset'){META.chaps={};META.chpath={};META.chend={};META.lastPath=[];saveMeta()}
+ if(k==='trip'){closePhone();if(typeof tripStart==='function')tripStart(S.day>=1?'con':'home');return}
+ if(k==='fs'){if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});else if(typeof immersive==='function')immersive()}
+ if(k==='chcard'){closePhone();const d=S.day;run([{chapter:d},{hide:1}],hub);return}
  hud();save();toast('Done','var(--mint)')}
+/* straight to a chapter: a fresh game, fast-played to the start of the chapter's day, with the choices that lead
+   there set as the day begins (chapterStart picks it up through DBGCH) */
+const CHFORCE={deaddrop:{path_whisper:1},liaison:{path_report:1},exposure:{path_alone:1},lantern:{heist_yes:1},thirty:{path_report:1,heist_yes:1,betray_mira:1,informant:1},packetloss:{},
+ suite:{fake_accept:1},lumenblue:{took_offer:1},crew:{crew_in:1},finals:{},keynote:{plan:'disc'},kralls:{plan:'informant',informant:1,path_report:1},bigscore:{plan:'bigscore',crew_in:1},zeroday:{plan:'oracle',heard_echo:1,badge0:1},all:{loop:1}};
+const CHCLASH=['path_whisper','path_report','path_alone','heist_yes','betray_mira','informant','fake_accept','took_offer','crew_in'];
+let DBGCH=null;
+function dbgForce(d){if(!DBGCH||DBGCH.day!==d)return null;const F=CHFORCE[DBGCH.k]||{};
+ for(const f of CHCLASH)if(!F[f])delete S.f[f];
+ for(const f in F){if(f==='plan')S.plan=F.plan;else if(f==='loop'){S.loop=1;dbgGive('meet');dbgGive('aff100');dbgGive('solve')}else S.f[f]=1}
+ const k=DBGCH.k;DBGCH=null;return k}
+async function dbgChapter(k){const C=CHAP[k],h=S.h,hang=DBG.hang;closePhone();
+ ov(`<div class="card"><p class="k">Debug</p><h3>Fast-playing…</h3><p class="small">To ${esc(C.t)}${C.day?', Day '+C.day:''}.</p></div>`);
+ S=fresh(h);S.dbg=1;S.unl={};beatBusy=false;S.day=0;S.slot=0;S.wakeAt='flat';if(G.ok){S.inWorld=1;teleportArea('flat')}hub();
+ if(C.day>0){DBGCH={k,day:C.day};await autoplay(()=>S.day===C.day&&S.chaps&&S.chaps[C.day]&&!$('card').classList.contains('on'),{hang})}
+ DBGCH=null;if(S.ending)return;closeOv();
+ const b=curBeat(),tg=b&&beatTarget(b);if(G.ok&&tg&&C.day>0){const A=b.w&&AREAS[b.w];if(A)teleportArea(b.w);else teleport(tg.reg,tg.x,tg.z+2,0,tg.y)}
+ save();hub();toast('Chapter: '+C.t,'var(--mint)')}
 async function dbgJump(id){
  const h=S.h,hang=DBG.hang;closePhone();
  ov(`<div class="card"><h3>Fast-playing…</h3><p class="small">To ${id==='__end'?'an ending':esc(BEATS[id].t)}.</p></div>`);
- S=fresh(h);S.unl={};beatBusy=false;
+ S=fresh(h);S.dbg=1;S.unl={};beatBusy=false;
  if(G.ok&&S.inWorld!==1){S.inWorld=1}
  S.day=0;S.slot=0;S.wakeAt='flat';if(G.ok){S.inWorld=1;teleportArea('flat')}hub();
  await autoplay(()=>id!=='__end'&&curBeat()&&curBeat().id===id&&!beatBusy&&!$('vn').classList.contains('on'),{hang});

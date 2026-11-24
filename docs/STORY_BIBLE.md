@@ -116,7 +116,11 @@ chapter reached (`META.chaps`), every step between two (`META.chpath`), which ch
 chapters as banner cards (greyed until reached; the two secret ones hidden until found), the four big choices marked
 between the columns, the endings in the last column joined to the chapter they come from, the paths you've taken lit,
 "Show your last run" tracing your most recent week, and a drawer for any chapter (what it is, how you get there, how
-often you have, what can follow, which endings come out of it).
+often you have, what can follow, which endings come out of it). Chapters sit in an order that keeps lines
+from crossing; each line runs in its own lane like a train map, with an arrow into the next chapter; the endings are
+grouped by the chapter they come out of; pointing at a chapter (or selecting it) lights every path through it.
+The debug menu (F9 or `) has a Chapters tab that fast-plays a fresh game into any chapter with its choices set, and a
+State tab (mouse, full screen, chapters, art). Debug runs never count towards the file's chapter history.
 
 ## The branches
 Five big decisions (marked ⚑ in the game) change which beats you get:
@@ -236,7 +240,10 @@ appears or jumps. Browsers release a captured mouse on Esc and only take it back
 stepping into the world also goes full screen and keeps Esc for the game (Chrome, Edge, Opera): Esc opens and closes
 the phone and the mouse stays captured; holding Esc leaves full screen. Settings can turn full screen off. Without it
 (or in Firefox and Safari), Esc still opens and closes the phone, and the next key or click captures the mouse again,
-with no prompt; while it's free the centre dot dims. Leaving the window changes nothing. The first movements after a capture are ignored, so the view doesn't jolt.
+with no prompt; while it's free the centre dot dims. Leaving the window changes nothing. The capture is also kept on the title screen, the
+postgame and endings (the drawn cursor works there too) and through loading screens, so moving between the menu and
+the game never makes the cursor jump. In full screen Esc acts when it's let go, and only on a tap: holding it to leave
+full screen does nothing else. Cards (chapters, days) go on with any key or click after a moment. The first movements after a capture are ignored, so the view doesn't jolt.
 
 ## Money and gifts (03c_economy.js)
 Money instead of credits: a £20 per diem each morning, bug bounties, minigames, shifts (info desk, bar, Proof),

@@ -60,6 +60,7 @@ function setupInput(){
     cursor, so the real one never appears or jumps. The only thing that releases it is the browser's own Esc (or
     leaving the window). Esc from the world opens the phone; Esc with the phone open closes it. Any key or click puts
     the capture back, with no prompt. */
+ document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement)WD.fsExitAt=performance.now()});
  document.addEventListener('pointerlockchange',()=>{
   WD.locked=document.pointerLockElement===lockEl();
   if(WD.locked){WD.everLocked=true;WD.lockFails=0;WD.lockAt=performance.now();return}
@@ -68,10 +69,10 @@ function setupInput(){
   // it: our own releases (and a second one the browser sometimes sends), loading screens and the moment after them,
   // moving to another place, a capture that dies as soon as it's granted
   const now=performance.now();if(WD.selfUnlock)WD.quietUntil=now+1500;
-  const self=WD.selfUnlock||G.baking||G.lmBusy||!S||S.ending||!S.inWorld||now<(WD.quietUntil||0)||now-(WD.tpAt||0)<2500||now-(G.lmDoneAt||0)<1500||now-(WD.lockAt||0)<450;
+  const self=WD.selfUnlock||G.baking||G.lmBusy||!S||S.ending||!S.inWorld||now<(WD.quietUntil||0)||now-(WD.tpAt||0)<2500||now-(G.lmDoneAt||0)<1500||now-(WD.lockAt||0)<450||now-(WD.fsExitAt||0)<900||!!WD.escAt;
   WD.selfUnlock=false;if(self)return;
   // leaving the window also drops the capture: that's not an Esc, so leave everything as it was
-  setTimeout(()=>{if(document.hidden||!document.hasFocus()||WD.blurAt&&performance.now()-WD.blurAt<600)return;if(!S||!S.inWorld)return;
+  setTimeout(()=>{if(document.hidden||!document.hasFocus()||WD.blurAt&&performance.now()-WD.blurAt<600)return;if(!S||!S.inWorld)return;if(performance.now()-(WD.fsExitAt||0)<900)return;
    const o=$('ov');
    if(o.classList.contains('phoneov')){closePhone();return}
    if(!o.classList.contains('on')&&!$('card').classList.contains('on')&&(worldLive()||$('vn').classList.contains('on')))phone()},90);
@@ -444,10 +445,11 @@ function loop(t){
  if(typeof audioTick==='function')audioTick(dt);
  // the place you're in needs its lightmaps on the GPU (loaded from cache, or baked on a first visit)
  if(S&&S.inWorld&&G.ok&&G.baked){const R=G.regions[WD.reg];if(R&&!R.lmTex&&!R.lmSkip){if(!G.lmBusy)regionNeed(WD.reg,true);else lmUI(true,G.lmBusy,null,G.bakeP)}}
+ vcShow(vcActive());
  // the title screen: the convention, on its own, through a slow camera
  if(TT.on&&G.ok&&$('title').classList.contains('on')){const R=G.regions.con;if(G.baking||$('pgx'))return;if(G.baked&&R&&!R.lmTex&&!R.lmSkip){$('tfade').classList.add('on');if(!G.lmBusy)titleNeed();return}
   if($('gl').style.display==='none')$('gl').style.display='block';G.skip=(G.skip||0)+1;if(!window.__nr)render(dt);if(typeof adaptRes==='function')adaptRes(dt);return}
- if(!S||!S.inWorld||S.ending){vcShow(false);if(locked()){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}return}
+ if(!S||!S.inWorld||S.ending){vcShow(vcActive());return}
  if(!G.ok||G.baking||$('gl').style.display==='none')return;
  const live=worldLive();
  if(live)update(dt);

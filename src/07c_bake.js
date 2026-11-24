@@ -165,7 +165,7 @@ function regionNeed(reg,show){
  const R=G.regions[reg];if(!R||R.lmTex||R.lmSkip||!G.baked)return;if(G.lmBusy)return;
  G.lmBusy=reg;G.baking=true;
  // let go of the mouse while the loading screen is up (it's taken back when the bake is done, or on any click/key)
- const hadLock=show&&typeof locked==='function'&&locked();if(hadLock){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}
+ const hadLock=false;// the mouse stays captured through a loading screen: letting go made the cursor jump
  lmUI(show,reg,null);
  regionLM(reg,(f,cached)=>{G.bakeP=f;lmUI(show,reg,cached,f)}).then(ok=>{
   if(!ok&&!R.lmSkip){G.baked=false;setQuality(G.q)}

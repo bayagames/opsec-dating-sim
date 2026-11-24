@@ -906,6 +906,20 @@ h1,h2,h3,h4{font-family:'Chakra Petch',sans-serif}
 .bg .sign::before,.bg .sign::after{content:'';width:42px;height:1px;background:currentColor;opacity:.5}
 #card:not(.chap) h2{font:700 clamp(40px,7vw,72px)/1 'Chakra Petch',sans-serif;color:var(--ink);letter-spacing:.01em}
 #card:not(.chap) p{font-size:15px}
+/* the week, refined: lanes, groups, focus */
+.cdec path{fill:#0b0711;stroke:var(--coral);stroke-width:1.6}.cdec text{font:600 11px 'Chakra Petch',sans-serif;letter-spacing:.12em;text-transform:uppercase;fill:var(--coral)}
+.ce{stroke-linejoin:round;stroke-linecap:round}
+.eg .egbg{fill:#120c19;stroke:#ffffff1a}.eg .egk{font:600 11px 'Chakra Petch',sans-serif;letter-spacing:.14em;fill:#a99cb6}
+.eg .te rect{fill:#1a1222;stroke:var(--c);stroke-opacity:.35}.eg .te.got rect{stroke-opacity:1;fill:#1f1729}.eg .te text{font:500 12.5px 'Inter',sans-serif}
+.eg .te.sel rect{stroke:var(--butter)!important;stroke-width:2}
+.eg.off{opacity:.28}
+#pgView.focus .ct:not(.hl),#pgView.focus .eg:not(.hl){opacity:.22}
+#pgView.focus .ce:not(.hl){opacity:.08}
+#pgView.focus .ce.hl{stroke:#f3eef7cc;stroke-width:3}
+#pgView.focus .ce.hl.lit{stroke:var(--mint)}
+#pgView.focus .ce.hl.onpath{stroke:var(--butter)}
+.ct,.eg,.ce{transition:opacity .25s ease,stroke .25s ease}
+.lg.lit{background:transparent;border:0;border-top:3px solid var(--mint);border-radius:0;height:0;margin-top:6px}
 </style>
 </head>
 <body>
@@ -1368,7 +1382,7 @@ function chapterCard(n,cb){
   // a chapter: its banner across the screen, slowly drifting, and the name over the bottom of it
   c.innerHTML=`<div class="chcard"><div class="chb">${chBanner(k)}</div><div class="chtx"><div class="chk">${esc(CHN[C.n]||'')}${n?' · '+esc(DAYN[n]):' · '+esc(DAYN[0])}</div><h2>${esc(C.t)}</h2><p class="chd">${esc(C.d)}</p>${dc[2]?`<p class="chs">${esc(dc[2])}</p>`:''}<div class="tap">${WD&&WD.touch?'Tap':'Press any key'} to continue</div></div></div>`}
  else{const t=typeof n==='object'?n:DAYCARD[n];c.innerHTML=`<div><div class="k">${esc(t[0])}</div><h2>${esc(t[1])}</h2><p>${esc(t[2]||'')}</p><div class="tap">tap to continue</div></div>`}
- c.classList.add('on');clearPor();if(typeof sfx==='function')sfx('chapter');
+ c.classList.add('on');c.dataset.at=performance.now();clearPor();if(typeof sfx==='function')sfx('chapter');
  c.onclick=()=>{c.onclick=null;const f=$('fade');f.style.transition='none';f.classList.add('on');void f.offsetWidth;c.classList.remove('on');cb();
   if(typeof G!=='undefined'&&G.ok)G.forceFrame=true;
   requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(()=>{f.style.transition='';f.classList.remove('on')},60)))};
@@ -2284,9 +2298,9 @@ const CHN=['Prologue','Chapter One','Chapter Two','Chapter Three','Chapter Four'
 /* which chapter a day is: the first that fits, in order */
 function chapterFor(d){const ks=CHORDER.filter(k=>CHAP[k].day===d);for(const k of ks)if(!CHAP[k].when||CHAP[k].when())return k;return ks[ks.length-1]||null}
 /* starting a day's chapter: remembered in the run and across runs */
-function chapterStart(d){if(!S)return null;S.chaps=S.chaps||{};const k=S.chaps[d]||chapterFor(d);if(!k)return null;
+function chapterStart(d){if(!S)return null;S.chaps=S.chaps||{};const k=S.chaps[d]||(typeof dbgForce==='function'&&dbgForce(d))||chapterFor(d);if(!k)return null;
  const prev=d>0?S.chaps[d-1]:null;S.chaps[d]=k;
- if(!S.replay&&!S.epilogue){META.chaps=META.chaps||{};META.chpath=META.chpath||{};if(!S['ch_'+d+'_seen']){S['ch_'+d+'_seen']=1;META.chaps[k]=(META.chaps[k]||0)+1;if(prev)META.chpath[prev+'>'+k]=1;if(typeof saveMeta==='function')saveMeta()}}
+ if(!S.replay&&!S.epilogue&&!S.dbg){META.chaps=META.chaps||{};META.chpath=META.chpath||{};if(!S['ch_'+d+'_seen']){S['ch_'+d+'_seen']=1;META.chaps[k]=(META.chaps[k]||0)+1;if(prev)META.chpath[prev+'>'+k]=1;if(typeof saveMeta==='function')saveMeta()}}
  return k}
 const chapterNow=()=>S&&S.chaps&&S.chaps[S.day]||null;
 /* ---------- banners ----------
@@ -11876,7 +11890,7 @@ function endingKey(){
  if(!romCount())return ROM.filter(g=>scn(g)>=2).length>=6?'opensource':'notfound';
  return'disclosure'}
 function finishEnding(k){
- S.ending=k;S.inWorld=0;WD.active=false;if(typeof vcShow==='function')vcShow(false);if(document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}if(typeof updBlur==='function')updBlur();META.ends[k]=1;META.runs=(META.runs||0)+1;saveMeta();const learned=typeof recordEnding==='function'&&!S.replay?recordEnding(k):[];ach('end_'+k);if(!S.fails)ach('survivor');if(S.foot<=5)ach('ghostfoot');
+ S.ending=k;S.inWorld=0;WD.active=false;if(typeof vcShow==='function')vcShow(false);if(typeof updBlur==='function')updBlur();META.ends[k]=1;META.runs=(META.runs||0)+1;saveMeta();const learned=typeof recordEnding==='function'&&!S.replay?recordEnding(k):[];ach('end_'+k);if(!S.fails)ach('survivor');if(S.foot<=5)ach('ghostfoot');
  LS.set(slotKey('auto'),'');
  const E=ENDINFO[k],seen=Object.keys(META.ends).length;
  const who=ROM.filter(loved);const face=k==='harem'?null:(S.partner||who[0]);
@@ -11997,7 +12011,6 @@ const TIERN={true:'True ending',good:'Ending',mixed:'Ending',bad:'Bad ending',se
 /* opening and closing: from the title, or from the phone (where it sits over the phone and returns to it) */
 function postgame(sec,from){if(!pgOpen()){toast('Finish a run to open the postgame','var(--dim)');return}
  if(sec)PGV.sec=sec;PGV.from=from||(S&&S.inWorld&&$('ov').classList.contains('phoneov')?'phone':PGV.from||'title');
- if(document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}
  pgDraw()}
 function pgEsc(){if(PGV.end||PGV.node!==null&&PGV.node!==undefined){PGV.end=null;PGV.node=null;pgDraw();return}pgClose()}
 function pgClose(){const el=$('pgx');if(el)el.remove();document.body.classList.remove('pgon');if(PGV.from==='phone'&&S&&S.inWorld){phone()}else if($('title').classList.contains('on'))titleView('main')}
@@ -12019,18 +12032,26 @@ function pgDraw(){const f={map:pgMap,ends:pgEnds,scenes:pgScenes,records:pgRecor
    the big choices sit between the columns; the endings make the last column, each joined to the chapter it comes out
    of. Chapters you've reached show their banner; ones you haven't are greyed; secret ones stay hidden until found.
    The paths you've actually taken are lit, and "Last run" traces your most recent week. */
-const PGL={cw:330,w:260,bh:98,h:150,ry:178,ew:200,eh:40,er:50};
+const PGL={cw:340,w:260,bh:98,h:150,ry:182,ew:210,eh:34,eg:42,r:12};
 const PGDEC=[[2,'WHISPER\'s message'],[3,'Mira\'s ask'],[5,'Victor\'s offer'],[6,'The plan']];
-function pgLayout(){const fl=META.fl||{},seen=META.chaps||{};
+// top to bottom in each column, chosen so the lines between columns cross as little as possible
+const PGORD={3:['deaddrop','exposure','liaison'],4:['lantern','packetloss','thirty'],6:['crew','suite','lumenblue','finals'],7:['bigscore','keynote','kralls','zeroday','all']};
+function pgLayout(){const seen=META.chaps||{};
  const vis=k=>!CHAP[k].secret||seen[k]||(k==='zeroday'&&META.secret)||(k==='all'&&META.loop);
  const nodes={},cols=[];
- for(let d=0;d<=7;d++){const ks=CHORDER.filter(k=>CHAP[k].day===d&&vis(k));cols[d]=ks;ks.forEach((k,i)=>nodes[k]={k,x:d*PGL.cw,y:(i-(ks.length-1)/2)*PGL.ry})}
- // endings: next to the chapter they come out of
- const ends=ENDORDER.filter(k=>k!=='harem'||nodes.all).map(k=>{const src=(Object.keys(META.chend||{}).find(e=>e.endsWith('>'+k))||'').split('>')[0]||endSrc(k);return{k,src:nodes[src]?src:'keynote'}});
- ends.sort((a,b)=>nodes[a.src].y-nodes[b.src].y||ENDORDER.indexOf(a.k)-ENDORDER.indexOf(b.k));
- ends.forEach((e,i)=>{e.x=8*PGL.cw+40;e.y=(i-(ends.length-1)/2)*PGL.er});
- const ys=[...Object.values(nodes).map(n=>n.y),...ends.map(e=>e.y)];
- return{nodes,cols,ends,top:Math.min(...ys)-PGL.h/2-90,bot:Math.max(...ys)+PGL.h/2+20,w:8*PGL.cw+40+PGL.ew}}
+ for(let d=0;d<=7;d++){const ks=(PGORD[d]||CHORDER.filter(k=>CHAP[k].day===d)).filter(vis);cols[d]=ks;ks.forEach((k,i)=>nodes[k]={k,d,i,x:d*PGL.cw,y:(i-(ks.length-1)/2)*PGL.ry})}
+ // endings: in groups, one for each chapter they come out of, each group as close to its chapter as it can sit
+ const src=k=>{const r=(Object.keys(META.chend||{}).find(e=>e.endsWith('>'+k))||'').split('>')[0]||endSrc(k);return nodes[r]?r:'keynote'};
+ const by={};for(const k of ENDORDER){if(k==='harem'&&!nodes.all)continue;(by[src(k)]=by[src(k)]||[]).push(k)}
+ const groups=Object.keys(by).map(s=>({src:s,ends:by[s],h:PGL.eg+by[s].length*PGL.eh})).sort((a,b)=>nodes[a.src].y-nodes[b.src].y);
+ let bot=-1e9;for(const g of groups){g.x=8*PGL.cw+30;g.y=Math.max(bot+28,nodes[g.src].y-g.h/2);bot=g.y+g.h}
+ // pull the whole stack back towards the middle
+ const mid=(groups[0].y+bot)/2,ctr=groups.reduce((a,g)=>a+nodes[g.src].y,0)/groups.length;for(const g of groups)g.y+=ctr-mid;
+ const ys=[...Object.values(nodes).map(n=>[n.y-PGL.h/2,n.y+PGL.h/2]).flat(),...groups.map(g=>[g.y,g.y+g.h]).flat()];
+ return{nodes,cols,groups,top:Math.min(...ys)-90,bot:Math.max(...ys)+24,w:8*PGL.cw+30+PGL.ew}}
+/* a line like a train map: out of the right of one card, along to its own lane in the gap, up or down, into the next */
+function pgPath(x1,y1,x2,y2,lx){const r=Math.min(PGL.r,Math.abs(y2-y1)/2);if(Math.abs(y2-y1)<1)return`M${x1},${y1} H${x2}`;const s=y2>y1?1:-1;
+ return`M${x1},${y1} H${lx-r} Q${lx},${y1} ${lx},${y1+s*r} V${y2-s*r} Q${lx},${y2} ${lx+r},${y2} H${x2}`}
 function pgMap(){const T=pgLayout(),seen=META.chaps||{},path=META.chpath||{},chend=META.chend||{},last=PGV.last?(META.lastPath||[]):null;
  const onLast=k=>last&&last.includes(k),lastEnd=last&&META.hist&&META.hist[0]?META.hist[0].k:null;
  const card=n=>{const C=CHAP[n.k],s=!!seen[n.k],cls=['ct',s?'seen':'',PGV.node===n.k?'sel':'',last?(onLast(n.k)?'onpath':'off'):''].join(' ');
@@ -12039,19 +12060,27 @@ function pgMap(){const T=pgLayout(),seen=META.chaps||{},path=META.chpath||{},che
   <g clip-path="url(#pgClip)" class="ctban">${ban}</g>${s?'':`<rect class="ctveil" width="${PGL.w}" height="${PGL.bh}" rx="12"/><text class="ctlock" x="${PGL.w/2}" y="${PGL.bh/2+6}" text-anchor="middle">NOT REACHED</text>`}
   <text class="ctk" x="14" y="${PGL.bh+19}">${C.n?'CH '+C.n:'PROLOGUE'}${C.n?' · '+DAYN[C.day].slice(0,3).toUpperCase():''}${s&&seen[n.k]>1?' · ×'+seen[n.k]:''}</text>
   <text class="ctn" x="14" y="${PGL.bh+39}">${esc(C.t)}</text>${C.via?`<text class="ctv" x="14" y="${PGL.bh+55}" >${esc(C.via.length>34?C.via.slice(0,33)+'…':C.via)}</text>`:''}${s?`<circle class="ctdot" cx="${PGL.w-16}" cy="${PGL.bh+16}" r="5"/>`:''}</g>`};
- const edge=(a,b,lit,on)=>{const x1=a.x+PGL.w,y1=a.y,x2=b.x,y2=b.y,mx=(x1+x2)/2;return`<path class="ce ${lit?'lit':''} ${on?'onpath':''}" d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}"/>`};
- let E='';for(const k in T.nodes)for(const nx of CHAP[k].next){const b=T.nodes[nx];if(!b)continue;const lit=!!path[k+'>'+nx];E+=edge(T.nodes[k],b,lit,last&&lit&&onLast(k)&&onLast(nx)&&last.indexOf(nx)===last.indexOf(k)+1)}
- for(const e of T.ends){const a=T.nodes[e.src],got=!!META.ends[e.k],lit=!!chend[e.src+'>'+e.k];E+=edge(a,{x:e.x,y:e.y},lit||got&&e.src===endSrc(e.k)&&lit,last&&lastEnd===e.k&&onLast(e.src))}
- const endN=e=>{const k=e.k,got=!!META.ends[k],I=ENDINFO[k],c=TIERC[I[2]];return`<g class="tn te ${got?'got':''} ${PGV.end===k?'sel':''} ${last?(lastEnd===k?'onpath':'off'):''}" data-e="${k}" transform="translate(${e.x},${e.y})"><rect x="0" y="${-PGL.eh/2}" width="${PGL.ew}" height="${PGL.eh}" rx="20" style="--c:${c}"/><circle cx="18" cy="0" r="6" style="fill:${got?c:'none'};stroke:${c}"/><text x="32" y="5">${esc(got?I[0]:'? ? ?')}</text></g>`};
- const heads=[0,1,2,3,4,5,6,7].map(d=>`<text class="cday" x="${d*PGL.cw+PGL.w/2}" y="${T.top+28}" text-anchor="middle">${d?DAYN[d].toUpperCase():'TWO WEEKS EARLIER'}</text>`).join('')+`<text class="cday" x="${8*PGL.cw+40+PGL.ew/2}" y="${T.top+28}" text-anchor="middle">ENDINGS</text>`;
- const decs=PGDEC.map(([d,t])=>{const x=d*PGL.cw+PGL.w+(PGL.cw-PGL.w)/2,ys=T.cols[d+1].map(k=>T.nodes[k].y);return`<g class="cdec" transform="translate(${x},${Math.min(...ys)-PGL.h/2-34})"><path d="M0 -12 L12 0 L0 12 L-12 0Z"/><text x="0" y="-20" text-anchor="middle">⚑ ${esc(t)}</text></g>`}).join('');
+ // chapter to chapter: each target in the next column has its own lane, so lines into it share one track
+ let E='';
+ for(const k in T.nodes){const a=T.nodes[k];for(const nx of CHAP[k].next){const b=T.nodes[nx];if(!b)continue;const n=T.cols[b.d].length,gx=a.x+PGL.w,lx=gx+(b.i+1)*(b.x-gx)/(n+1);
+  const lit=!!path[k+'>'+nx],on=last&&lit&&onLast(k)&&onLast(nx)&&last.indexOf(nx)===last.indexOf(k)+1;
+  E+=`<path class="ce ${lit?'lit':''} ${on?'onpath':''}" data-a="${k}" data-b="${nx}" d="${pgPath(gx,a.y,b.x-6,b.y,lx)}" marker-end="url(#pgArr${on?'O':lit?'L':''})"/>`}}
+ // chapter to its endings: one line to the group
+ T.groups.forEach((g,gi)=>{const a=T.nodes[g.src],gx=a.x+PGL.w,lx=gx+(gi+1)*(g.x-gx)/(T.groups.length+1),ty=Math.max(g.y+20,Math.min(g.y+g.h-16,a.y));
+  const lit=g.ends.some(e=>chend[g.src+'>'+e]),on=last&&lastEnd&&g.ends.includes(lastEnd)&&onLast(g.src);
+  E+=`<path class="ce ${lit?'lit':''} ${on?'onpath':''}" data-a="${g.src}" data-b="eg:${g.src}" d="${pgPath(gx,a.y,g.x-6,ty,lx)}" marker-end="url(#pgArr${on?'O':lit?'L':''})"/>`});
+ const grp=g=>`<g class="eg ${last?(g.ends.includes(lastEnd)?'onpath':'off'):''}" data-g="${g.src}" transform="translate(${g.x},${g.y})"><rect class="egbg" width="${PGL.ew}" height="${g.h}" rx="12"/><text class="egk" x="14" y="24">FROM ${esc(CHAP[g.src].t.toUpperCase())}</text>
+  ${g.ends.map((k,i)=>{const got=!!META.ends[k],I=ENDINFO[k],c=TIERC[I[2]];return`<g class="tn te ${got?'got':''} ${PGV.end===k?'sel':''} ${last?(lastEnd===k?'onpath':''):''}" data-e="${k}" transform="translate(8,${PGL.eg+i*PGL.eh})"><rect x="0" y="-13" width="${PGL.ew-16}" height="26" rx="13" style="--c:${c}"/><circle cx="14" cy="0" r="5" style="fill:${got?c:'none'};stroke:${c}"/><text x="26" y="4.5">${esc(got?I[0]:'? ? ?')}</text></g>`}).join('')}</g>`;
+ const heads=[0,1,2,3,4,5,6,7].map(d=>`<text class="cday" x="${d*PGL.cw+PGL.w/2}" y="${T.top+28}" text-anchor="middle">${d?DAYN[d].toUpperCase():'TWO WEEKS EARLIER'}</text>`).join('')+`<text class="cday" x="${8*PGL.cw+30+PGL.ew/2}" y="${T.top+28}" text-anchor="middle">ENDINGS</text>`;
+ const decs=PGDEC.map(([d,t])=>{const x=d*PGL.cw+PGL.w+(PGL.cw-PGL.w)/2;return`<g class="cdec" transform="translate(${x},${T.top+58})"><path d="M0 -9 L9 0 L0 9 L-9 0Z"/><text x="0" y="26" text-anchor="middle">${esc(t)}</text></g>`}).join('');
  const nCh=CHORDER.filter(k=>!CHAP[k].secret).length,gotCh=CHORDER.filter(k=>seen[k]).length;
- const inner=`<div class="pgmapwrap"><div class="pghead pgmh"><div><h2>The Week</h2><p>${gotCh} of ${nCh}${CHORDER.length>nCh?'+':''} chapters reached · ${Object.keys(META.ends).length} of ${ENDORDER.length} endings. Each day is a chapter; the choices between them decide which. Drag, zoom, tap anything.</p></div>
+ const inner=`<div class="pgmapwrap"><div class="pghead pgmh"><div><h2>The Week</h2><p>${gotCh} of ${nCh}${CHORDER.length>nCh?'+':''} chapters reached · ${Object.keys(META.ends).length} of ${ENDORDER.length} endings. Each day is a chapter; the choice before it decides which. Point at a chapter to see every path through it.</p></div>
   <button class="pglast ${PGV.last?'on':''}" id="pgLast" ${META.lastPath&&META.lastPath.length?'':'disabled'}>${PGV.last?'Showing your last run':'Show your last run'}</button></div>
-  <div class="pgcanvas" id="pgCanvas"><svg id="pgSvg" width="100%" height="100%"><defs><pattern id="pgGrid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#ffffff08"/></pattern><clipPath id="pgClip"><rect width="${PGL.w}" height="${PGL.bh}" rx="12"/></clipPath></defs><rect width="100%" height="100%" fill="url(#pgGrid)"/>
-   <g id="pgView">${[0,1,2,3,4,5,6,7,8].map(d=>`<rect class="ccol" x="${d*PGL.cw-16+(d===8?40:0)}" y="${T.top}" width="${(d===8?PGL.ew:PGL.w)+32}" height="${T.bot-T.top}" rx="18"/>`).join('')}${heads}${E}${decs}${Object.values(T.nodes).map(card).join('')}${T.ends.map(endN).join('')}</g></svg>
+  <div class="pgcanvas" id="pgCanvas"><svg id="pgSvg" width="100%" height="100%"><defs><pattern id="pgGrid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#ffffff08"/></pattern><clipPath id="pgClip"><rect width="${PGL.w}" height="${PGL.bh}" rx="12"/></clipPath>
+   ${[['','#ffffff40'],['L','#8affc1'],['O','#ffd166']].map(([k,c])=>`<marker id="pgArr${k}" viewBox="0 0 10 10" refX="4" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 1 L8 5 L0 9z" fill="${c}"/></marker>`).join('')}</defs><rect width="100%" height="100%" fill="url(#pgGrid)"/>
+   <g id="pgView">${[0,1,2,3,4,5,6,7].map(d=>`<rect class="ccol" x="${d*PGL.cw-16}" y="${T.top}" width="${PGL.w+32}" height="${T.bot-T.top}" rx="18"/>`).join('')}${heads}${decs}${E}${Object.values(T.nodes).map(card).join('')}${T.groups.map(grp).join('')}</g></svg>
    <div class="pgzoom"><button id="pgZi" aria-label="Zoom in">+</button><button id="pgZo" aria-label="Zoom out">−</button><button id="pgZf" aria-label="Fit">⤢</button></div>
-   <div class="pglegend"><span><i class="lg seen"></i>Reached</span><span><i class="lg"></i>Not yet</span><span><i class="lg path"></i>A path you've taken</span><span><i class="lg end"></i>Ending</span></div>
+   <div class="pglegend"><span><i class="lg seen"></i>Reached</span><span><i class="lg"></i>Not yet</span><span><i class="lg lit"></i>A way you've gone</span><span><i class="lg path"></i>Your last run</span></div>
    ${pgDetail()}</div></div>`;
  const el=pgShell(inner,pgRail());const cv=$('pgCanvas'),svg=$('pgSvg'),G_=$('pgView');
  $('pgLast').onclick=()=>{PGV.last=!PGV.last;pgMap()};
@@ -12075,7 +12104,20 @@ function pgMap(){const T=pgLayout(),seen=META.chaps||{},path=META.chpath||{},che
   const t=document.elementFromPoint(e.clientX,e.clientY),g=t&&t.closest&&t.closest('.tn,.ct');if(!g){if(PGV.end||PGV.node){PGV.end=null;PGV.node=null;pgMap()}return}
   if(g.dataset.e){PGV.end=g.dataset.e;PGV.node=null}else{PGV.node=g.dataset.c;PGV.end=null}pgMap()};
  svg.addEventListener('pointerup',up);svg.addEventListener('pointercancel',drop);
+ const focus=k=>{G_.classList.toggle('focus',!!k);G_.querySelectorAll('.hl').forEach(x=>x.classList.remove('hl'));if(!k)return;const set=pgThrough(k);
+  G_.querySelectorAll('.ct').forEach(x=>{if(set.has(x.dataset.c))x.classList.add('hl')});
+  G_.querySelectorAll('.ce').forEach(x=>{const b=x.dataset.b;if(set.has(x.dataset.a)&&(set.has(b)||b.startsWith('eg:')&&set.has(b.slice(3))))x.classList.add('hl')});
+  G_.querySelectorAll('.eg').forEach(x=>{if(set.has(x.dataset.g))x.classList.add('hl')})};
+ const base=PGV.node||(PGV.end?(Object.keys(META.chend||{}).find(e=>e.endsWith('>'+PGV.end))||'').split('>')[0]||endSrc(PGV.end):null);
+ focus(base);
+ G_.addEventListener('mouseover',e=>{if(P.size)return;const g=e.target.closest&&e.target.closest('.ct,.eg');focus(g?(g.dataset.c||g.dataset.g):base)});
+ G_.addEventListener('mouseleave',()=>focus(base));
  pgDetailWire()}
+/* every chapter on some path through k: everything that can lead to it, and everything it can lead to */
+function pgThrough(k){const set=new Set([k]);const up=[k],dn=[k];
+ while(up.length){const x=up.pop();for(const p in CHAP)if(CHAP[p].next.includes(x)&&!set.has(p)){set.add(p);up.push(p)}}
+ const seenDn=new Set([k]);while(dn.length){const x=dn.pop();for(const n of CHAP[x].next)if(!seenDn.has(n)){seenDn.add(n);set.add(n);dn.push(n)}}
+ return set}
 /* the drawer on the right: a chapter, or an ending */
 function pgDetail(){if(PGV.end)return`<aside class="pgdrawer">${pgEndCard(PGV.end)}</aside>`;
  const k=PGV.node;if(!k||!CHAP[k])return'';const C=CHAP[k],n=(META.chaps||{})[k]||0,s=n>0;
@@ -12287,10 +12329,13 @@ addEventListener('keydown',e=>{if(!titleOn())return;const k=e.key,tag=(document.
  if(tag==='INPUT'||tag==='TEXTAREA')return;
  if(k==='ArrowDown'||k==='s'||k==='S'){e.preventDefault();titleMove(1)}
  else if(k==='ArrowUp'||k==='w'||k==='W'){e.preventDefault();if(TS.view==='name'&&TS.focus.name===$('bGo')){$('hIn').focus();return}titleMove(-1)}
- else if(k==='Enter'||k===' '){e.preventDefault();const b=TS.focus[TS.view];if(b&&!b.disabled&&b.offsetParent)b.click()}
+ else if(k==='Enter'){e.preventDefault();const b=TS.focus[TS.view];if(b&&!b.disabled&&b.offsetParent)b.click()}
+ else if(k===' '){e.preventDefault()}
  else if(k==='Escape'||k==='Backspace'){e.preventDefault();titleBack()}
  else if((k==='Delete')&&TS.view==='files'){const b=TS.focus.files;if(b&&b.dataset.n&&readProf(+b.dataset.n))tconfDelete(+b.dataset.n)}});
 $('title').addEventListener('pointerdown',e=>{if(TS.stage==='press'){e.preventDefault();titlePress()}});
+// the browser's own Space-presses-the-focused-button is off on the title (only Enter or a click choose)
+addEventListener('keyup',e=>{if(e.key===' '&&titleOn()&&!/INPUT|TEXTAREA/.test((document.activeElement||{}).tagName||''))e.preventDefault()},true);
 $('title').addEventListener('mouseover',e=>{const b=e.target.closest&&e.target.closest('.ti');if(b&&!b.disabled&&TS.stage==='menu'&&TS.focus[TS.view]!==b){titleFocus(b);if(typeof sfx==='function')sfx('hover')}});
 /* the place on screen, top right, as the camera moves on */
 function titlePlace(k,slot){const el=$('tplace');if(!el)return;el.classList.remove('on');setTimeout(()=>{$('tplaceN').textContent=(TPLACE[k]||'')+' · '+TSLOT[slot||0];el.classList.add('on')},500)}
@@ -12955,7 +13000,7 @@ function regionNeed(reg,show){
  const R=G.regions[reg];if(!R||R.lmTex||R.lmSkip||!G.baked)return;if(G.lmBusy)return;
  G.lmBusy=reg;G.baking=true;
  // let go of the mouse while the loading screen is up (it's taken back when the bake is done, or on any click/key)
- const hadLock=show&&typeof locked==='function'&&locked();if(hadLock){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}
+ const hadLock=false;// the mouse stays captured through a loading screen: letting go made the cursor jump
  lmUI(show,reg,null);
  regionLM(reg,(f,cached)=>{G.bakeP=f;lmUI(show,reg,cached,f)}).then(ok=>{
   if(!ok&&!R.lmSkip){G.baked=false;setQuality(G.q)}
@@ -15853,6 +15898,7 @@ function setupInput(){
     cursor, so the real one never appears or jumps. The only thing that releases it is the browser's own Esc (or
     leaving the window). Esc from the world opens the phone; Esc with the phone open closes it. Any key or click puts
     the capture back, with no prompt. */
+ document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement)WD.fsExitAt=performance.now()});
  document.addEventListener('pointerlockchange',()=>{
   WD.locked=document.pointerLockElement===lockEl();
   if(WD.locked){WD.everLocked=true;WD.lockFails=0;WD.lockAt=performance.now();return}
@@ -15861,10 +15907,10 @@ function setupInput(){
   // it: our own releases (and a second one the browser sometimes sends), loading screens and the moment after them,
   // moving to another place, a capture that dies as soon as it's granted
   const now=performance.now();if(WD.selfUnlock)WD.quietUntil=now+1500;
-  const self=WD.selfUnlock||G.baking||G.lmBusy||!S||S.ending||!S.inWorld||now<(WD.quietUntil||0)||now-(WD.tpAt||0)<2500||now-(G.lmDoneAt||0)<1500||now-(WD.lockAt||0)<450;
+  const self=WD.selfUnlock||G.baking||G.lmBusy||!S||S.ending||!S.inWorld||now<(WD.quietUntil||0)||now-(WD.tpAt||0)<2500||now-(G.lmDoneAt||0)<1500||now-(WD.lockAt||0)<450||now-(WD.fsExitAt||0)<900||!!WD.escAt;
   WD.selfUnlock=false;if(self)return;
   // leaving the window also drops the capture: that's not an Esc, so leave everything as it was
-  setTimeout(()=>{if(document.hidden||!document.hasFocus()||WD.blurAt&&performance.now()-WD.blurAt<600)return;if(!S||!S.inWorld)return;
+  setTimeout(()=>{if(document.hidden||!document.hasFocus()||WD.blurAt&&performance.now()-WD.blurAt<600)return;if(!S||!S.inWorld)return;if(performance.now()-(WD.fsExitAt||0)<900)return;
    const o=$('ov');
    if(o.classList.contains('phoneov')){closePhone();return}
    if(!o.classList.contains('on')&&!$('card').classList.contains('on')&&(worldLive()||$('vn').classList.contains('on')))phone()},90);
@@ -16237,10 +16283,11 @@ function loop(t){
  if(typeof audioTick==='function')audioTick(dt);
  // the place you're in needs its lightmaps on the GPU (loaded from cache, or baked on a first visit)
  if(S&&S.inWorld&&G.ok&&G.baked){const R=G.regions[WD.reg];if(R&&!R.lmTex&&!R.lmSkip){if(!G.lmBusy)regionNeed(WD.reg,true);else lmUI(true,G.lmBusy,null,G.bakeP)}}
+ vcShow(vcActive());
  // the title screen: the convention, on its own, through a slow camera
  if(TT.on&&G.ok&&$('title').classList.contains('on')){const R=G.regions.con;if(G.baking||$('pgx'))return;if(G.baked&&R&&!R.lmTex&&!R.lmSkip){$('tfade').classList.add('on');if(!G.lmBusy)titleNeed();return}
   if($('gl').style.display==='none')$('gl').style.display='block';G.skip=(G.skip||0)+1;if(!window.__nr)render(dt);if(typeof adaptRes==='function')adaptRes(dt);return}
- if(!S||!S.inWorld||S.ending){vcShow(false);if(locked()){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}return}
+ if(!S||!S.inWorld||S.ending){vcShow(vcActive());return}
  if(!G.ok||G.baking||$('gl').style.display==='none')return;
  const live=worldLive();
  if(live)update(dt);
@@ -17446,7 +17493,7 @@ const APPS_AFTER={
   $('ov').querySelectorAll('input[data-v]').forEach(r=>{r.oninput=()=>{const k=r.dataset.v;SETTINGS.vol[k]=r.value/100;r.style.setProperty('--p',r.value+'%');r.nextElementSibling.textContent=r.value;if(typeof applyVolumes==='function')applyVolumes()};r.onchange=()=>{saveSettings();if(r.dataset.v==='sfx'||r.dataset.v==='master')sfx('notify')}});
   const sn=$('sens');sn.oninput=()=>{SETTINGS.sens=sn.value/100;sn.style.setProperty('--p',((sn.value-30)/220*100)+'%');sn.nextElementSibling.textContent=SETTINGS.sens.toFixed(2)+'×'};sn.onchange=saveSettings;
   $('gq').querySelectorAll('button').forEach(b=>b.onclick=()=>{SETTINGS.gfx=b.dataset.q;saveSettings();if(G.ok)setQuality(b.dataset.q);else G.q=b.dataset.q;redraw()})},
- quit(){$('stq').onclick=()=>{S.pos=[WD.reg,WD.x,WD.z,WD.yaw,WD.y];save();closeOv();$('ov').classList.remove('phoneov','mapov','appov');WD.active=false;if(document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}titleScreen()};$('stqn').onclick=phoneBack}
+ quit(){$('stq').onclick=()=>{S.pos=[WD.reg,WD.x,WD.z,WD.yaw,WD.y];save();closeOv();$('ov').classList.remove('phoneov','mapov','appov');WD.active=false;titleScreen()};$('stqn').onclick=phoneBack}
 };
 
 /* ============ THE MAP: full screen, pan and zoom, fast travel grouped by building ============ */
@@ -17572,18 +17619,27 @@ async function autoplay(until,o){o=o||{};const keepGames={};for(const k in GAMES
   if(S.slot===5)endDay();else spend('wait')}}
  finally{for(const k in keepGames)GAMES[k]=keepGames[k];window.__test=wasTest}
  return n}
-function dbgOpen(){if(!S)return;if(document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}WD.active=false;dbgDraw()}
+function dbgOpen(){if(!S)return;WD.active=false;dbgDraw()}
 const DBG={tab:'jump'};
 function beatList(){const L=[];for(let d=1;d<=7;d++)(DAYS[d]||[]).forEach((b,i)=>{if(typeof b==='string')L.push({d,i,id:b,t:BEATS[b].t})});return L}
 function dbgDraw(){
- const tabs=[['jump','Jump to'],['tp','Teleport'],['give','Give & set'],['scene','Play a scene'],['end','Endings']];
+ const tabs=[['chap','Chapters'],['jump','Jump to'],['tp','Teleport'],['give','Give & set'],['scene','Play a scene'],['end','Endings'],['info','State']];
  let body='';
+ if(DBG.tab==='chap')body=`<p class="small">Starts a fresh game as "${esc(S.h)}", sets the choices that lead to the chapter, and fast-plays to the start of its day (the chapter card). Takes a few seconds.</p>
+  <label class="small"><input type="checkbox" id="dbgHang" ${DBG.hang?'checked':''}> Spend free time on people's scenes on the way</label>
+  ${[0,1,2,3,4,5,6,7].map(dd=>`<div class="dbh">${dd?'Day '+dd+' · '+DAYN[dd]:'Prologue'}</div><div class="dbg2">${CHORDER.filter(k=>CHAP[k].day===dd).map(k=>`<button class="dbi" data-ch="${k}"><b>${esc(CHAP[k].t)}${chapterNow()===k?' · now':''}</b><small>${esc(CHAP[k].via||'Every run')}${(META.chaps||{})[k]?' · reached '+META.chaps[k]+'×':''}</small></button>`).join('')}</div>`).join('')}`;
+ if(DBG.tab==='info'){const kv=(k,v)=>`<div class="kv"><span>${k}</span><b>${v}</b></div>`;const ch=S.chaps||{};
+  body=kv('Mouse captured',typeof locked==='function'&&locked()?'yes':'no')+kv('Drawn cursor',VC.on?'on':'off')+kv('Full screen',document.fullscreenElement?'yes':'no')+kv('Esc kept for the game',typeof escKept==='function'&&escKept()?'yes':'no')+kv('Full screen setting',SETTINGS.nofs?'off':'on')
+  +kv('Where',esc(WD.reg+' · '+(WD.area||'-')+' · '+WD.x.toFixed(1)+', '+WD.z.toFixed(1)+', '+WD.y.toFixed(1)))+kv('Train trip',S.trip?esc(JSON.stringify(S.trip)):'-')
+  +kv('Chapter now',chapterNow()?esc(CHAP[chapterNow()].t):'-')+kv('This run',Object.keys(ch).map(Number).sort((a,b)=>a-b).map(x=>esc(CHAP[ch[x]].t)).join(' → ')||'-')
+  +kv('Chapters reached (file)',Object.keys(META.chaps||{}).length+' of '+CHORDER.length)+kv('Last run',(META.lastPath||[]).map(k=>esc(CHAP[k]?CHAP[k].t:k)).join(' → ')||'-')
+  +kv('Creator art loaded',Object.keys(window.ART||{}).join(', ')||'none')+kv('Graphics',esc(G.q||'-')+(G.baked?' · baked light':''))+kv('Flags',esc(Object.keys(S.f).filter(x=>S.f[x]).slice(0,40).join(' ')))}
  if(DBG.tab==='jump')body=`<p class="small">Starts a fresh game as "${esc(S.h)}" and fast-plays to the start of the chosen beat. Careful choices, minigames skipped. Takes a few seconds.</p>
   <label class="small"><input type="checkbox" id="dbgHang" ${DBG.hang?'checked':''}> Spend free time on people's scenes on the way (otherwise free time is skipped)</label>
-  <div class="dbl">${beatList().map(b=>`<button class="dbi" data-b="${b.id}"><b>Day ${b.d} · ${SLOTN[b.i]}</b><small>${esc(b.t)}</small></button>`).join('')}<button class="dbi" data-b="__end"><b>Day 7 · the end</b><small>Play everything through to an ending</small></button></div>`;
+  <div class="dbl">${beatList().map(b=>`<button class="dbi" data-b="${b.id}"><b>Day ${b.d}${S.chaps&&S.chaps[b.d]?' · '+esc(CHAP[S.chaps[b.d]].t):''} · ${SLOTN[b.i]}</b><small>${esc(b.t)}</small></button>`).join('')}<button class="dbi" data-b="__end"><b>Day 7 · the end</b><small>Play everything through to an ending</small></button></div>`;
  if(DBG.tab==='tp'){const net=MAPNET[WD.reg]?Object.values(AREAS):[];const g={};for(const a of Object.values(AREAS)){if(a.hide)continue;(g[areaGroup(a)]=g[areaGroup(a)]||[]).push(a)}
   body=`<label class="small"><input type="checkbox" id="dbgOpenAll" ${window.__allOpen?'checked':''}> Ignore area locks</label>`+AGROUPS.filter(k=>g[k]).map(k=>`<div class="dbh">${esc(k)}</div><div class="dbg2">${g[k].map(a=>`<button class="dbi" data-tp="${a.k}"><b>${esc(a.n)}</b><small>${esc(levelName(a.reg,a.sp[3]||0))}${areaLock(a.k)?' · locked now':''}</small></button>`).join('')}</div>`).join('')}
- if(DBG.tab==='give')body=`<div class="dbg2">${[['meet','Meet all 21'],['aff20','+20 affection, everyone met'],['aff100','Max affection, everyone met'],['clues','Every clue'],['solve','Solve every mystery'],['skill','Skill +100'],['clout','Clout +100'],['exp0','Exposure to 0'],['exp95','Exposure to 95'],['cred','+£200'],['items','Every item'],['visit','Visit every area'],['slot','Next part of the day'],['day','End the day'],['restore','Enter the loop (time control)']].map(x=>`<button class="dbi" data-g="${x[0]}"><b>${x[1]}</b></button>`).join('')}</div>
+ if(DBG.tab==='give')body=`<div class="dbg2">${[['meet','Meet all 21'],['aff20','+20 affection, everyone met'],['aff100','Max affection, everyone met'],['clues','Every clue'],['solve','Solve every mystery'],['skill','Skill +100'],['clout','Clout +100'],['pgopen','Unlock the postgame'],['chreset','Forget chapter history'],['trip','Ride a train now'],['fs','Toggle full screen'],['chcard','Show today\'s chapter card'],['exp0','Exposure to 0'],['exp95','Exposure to 95'],['cred','+£200'],['items','Every item'],['visit','Visit every area'],['slot','Next part of the day'],['day','End the day'],['restore','Enter the loop (time control)']].map(x=>`<button class="dbi" data-g="${x[0]}"><b>${x[1]}</b></button>`).join('')}</div>
   <div class="dbh">Advance someone's story by one scene (plays it)</div><div class="dbg2">${ROM.map(g=>`<button class="dbi" data-adv="${g}"><b>${CH[g].name}</b><small>${scn(g)}/${ROUTES[g].n} · ♥ ${aff(g)}</small></button>`).join('')}</div>`;
  if(DBG.tab==='scene'){const ks=Object.keys(SC).sort();body=`<input class="inp" id="dbgQ" placeholder="Filter scenes" value="${esc(DBG.q||'')}"><div class="dbg2">${ks.filter(k=>!DBG.q||k.includes(DBG.q)).slice(0,300).map(k=>`<button class="dbi" data-sc="${k}"><b>${k}</b></button>`).join('')}</div>`}
  if(DBG.tab==='end')body=`<p class="small">Plays the ending's epilogue and shows its card. Ends this run.</p><div class="dbg2">${ENDORDER.map(k=>`<button class="dbi" data-end="${k}"><b>${esc(ENDINFO[k][0])}</b><small>${META.ends[k]?'seen':''}</small></button>`).join('')}</div>`;
@@ -17595,6 +17651,7 @@ function dbgDraw(){
  if($('dbgOpenAll'))$('dbgOpenAll').onchange=e=>{window.__allOpen=e.target.checked};
  if($('dbgQ'))$('dbgQ').oninput=e=>{DBG.q=e.target.value;const p=e.target.selectionStart;dbgDraw();$('dbgQ').focus();$('dbgQ').setSelectionRange(p,p)};
  o.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>dbgJump(b.dataset.b));
+ o.querySelectorAll('[data-ch]').forEach(b=>b.onclick=()=>dbgChapter(b.dataset.ch));
  o.querySelectorAll('[data-tp]').forEach(b=>b.onclick=()=>{const k=b.dataset.tp;closePhone();fadeTp(()=>{teleportArea(k);S.visited[k]=1;hub()})});
  o.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{dbgGive(b.dataset.g);dbgDraw()});
  o.querySelectorAll('[data-adv]').forEach(b=>b.onclick=()=>{const g=b.dataset.adv;closePhone();if(!met(g)){meet(g);adv(g,0);return run(scr(g+'0'),hub)}const i=scn(g);if(i>=ROUTES[g].n)return;run([...scr(g+i),()=>{adv(g,i);return[]}],hub)});
@@ -17614,11 +17671,33 @@ function dbgGive(k){
  if(k==='slot'){closePhone();if(S.slot===5)endDay();else nextSlot();return}
  if(k==='day'){closePhone();endDay();return}
  if(k==='restore'){S.loop=1;S.unl.echo=1}
+ if(k==='pgopen'){if(!Object.keys(META.ends).length)META.ends.disclosure=Date.now();saveMeta()}
+ if(k==='chreset'){META.chaps={};META.chpath={};META.chend={};META.lastPath=[];saveMeta()}
+ if(k==='trip'){closePhone();if(typeof tripStart==='function')tripStart(S.day>=1?'con':'home');return}
+ if(k==='fs'){if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});else if(typeof immersive==='function')immersive()}
+ if(k==='chcard'){closePhone();const d=S.day;run([{chapter:d},{hide:1}],hub);return}
  hud();save();toast('Done','var(--mint)')}
+/* straight to a chapter: a fresh game, fast-played to the start of the chapter's day, with the choices that lead
+   there set as the day begins (chapterStart picks it up through DBGCH) */
+const CHFORCE={deaddrop:{path_whisper:1},liaison:{path_report:1},exposure:{path_alone:1},lantern:{heist_yes:1},thirty:{path_report:1,heist_yes:1,betray_mira:1,informant:1},packetloss:{},
+ suite:{fake_accept:1},lumenblue:{took_offer:1},crew:{crew_in:1},finals:{},keynote:{plan:'disc'},kralls:{plan:'informant',informant:1,path_report:1},bigscore:{plan:'bigscore',crew_in:1},zeroday:{plan:'oracle',heard_echo:1,badge0:1},all:{loop:1}};
+const CHCLASH=['path_whisper','path_report','path_alone','heist_yes','betray_mira','informant','fake_accept','took_offer','crew_in'];
+let DBGCH=null;
+function dbgForce(d){if(!DBGCH||DBGCH.day!==d)return null;const F=CHFORCE[DBGCH.k]||{};
+ for(const f of CHCLASH)if(!F[f])delete S.f[f];
+ for(const f in F){if(f==='plan')S.plan=F.plan;else if(f==='loop'){S.loop=1;dbgGive('meet');dbgGive('aff100');dbgGive('solve')}else S.f[f]=1}
+ const k=DBGCH.k;DBGCH=null;return k}
+async function dbgChapter(k){const C=CHAP[k],h=S.h,hang=DBG.hang;closePhone();
+ ov(`<div class="card"><p class="k">Debug</p><h3>Fast-playing…</h3><p class="small">To ${esc(C.t)}${C.day?', Day '+C.day:''}.</p></div>`);
+ S=fresh(h);S.dbg=1;S.unl={};beatBusy=false;S.day=0;S.slot=0;S.wakeAt='flat';if(G.ok){S.inWorld=1;teleportArea('flat')}hub();
+ if(C.day>0){DBGCH={k,day:C.day};await autoplay(()=>S.day===C.day&&S.chaps&&S.chaps[C.day]&&!$('card').classList.contains('on'),{hang})}
+ DBGCH=null;if(S.ending)return;closeOv();
+ const b=curBeat(),tg=b&&beatTarget(b);if(G.ok&&tg&&C.day>0){const A=b.w&&AREAS[b.w];if(A)teleportArea(b.w);else teleport(tg.reg,tg.x,tg.z+2,0,tg.y)}
+ save();hub();toast('Chapter: '+C.t,'var(--mint)')}
 async function dbgJump(id){
  const h=S.h,hang=DBG.hang;closePhone();
  ov(`<div class="card"><h3>Fast-playing…</h3><p class="small">To ${id==='__end'?'an ending':esc(BEATS[id].t)}.</p></div>`);
- S=fresh(h);S.unl={};beatBusy=false;
+ S=fresh(h);S.dbg=1;S.unl={};beatBusy=false;
  if(G.ok&&S.inWorld!==1){S.inWorld=1}
  S.day=0;S.slot=0;S.wakeAt='flat';if(G.ok){S.inWorld=1;teleportArea('flat')}hub();
  await autoplay(()=>id!=='__end'&&curBeat()&&curBeat().id===id&&!beatBusy&&!$('vn').classList.contains('on'),{hang});
@@ -17795,6 +17874,15 @@ addEventListener('touchstart',()=>{if(!WD.touch)setTouch(true)},{passive:true});
 /* no pinch or double-tap zoom on phones: the game owns every touch */
 for(const ev of['gesturestart','gesturechange','dblclick'])addEventListener(ev,e=>{if(e.cancelable)e.preventDefault()},{passive:false});
 addEventListener('mousemove',e=>{if(WD.touch&&e.movementX!==undefined&&(Math.abs(e.movementX)+Math.abs(e.movementY))>3&&!e.sourceCapabilities?.firesTouchEvents)setTouch(false)});
+/* a card (a chapter, a day) goes on with any key or click, once it's been up long enough to read the first line.
+   With the mouse captured, clicks land on the game, not the card, so they're caught here too. */
+function cardGo(){const c=$('card');if(!c.classList.contains('on')||performance.now()-(+c.dataset.at||0)<650)return;c.click()}
+addEventListener('mousedown',e=>{if(e.isTrusted&&e.button===0&&$('card').classList.contains('on')&&document.pointerLockElement){e.preventDefault();cardGo()}},true);
+/* in full screen the game keeps Esc, and the browser leaves full screen when Esc is held. So Esc acts when it's let go,
+   and only if it was a tap: holding it to leave full screen never opens or closes anything */
+addEventListener('keydown',e=>{if(e.key!=='Escape'||WD.escSynth||!(typeof escKept==='function'&&escKept()))return;e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)WD.escAt=performance.now()},true);
+addEventListener('keyup',e=>{if(e.key!=='Escape'||!WD.escAt)return;const t=performance.now()-WD.escAt;WD.escAt=0;if(t>550||!document.fullscreenElement)return;
+ WD.escSynth=true;try{dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',code:'Escape',bubbles:true,cancelable:true}))}finally{WD.escSynth=false}},true);
 addEventListener('keydown',e=>{
  // the postgame sits over everything: Esc leaves it (closing a drawer first), and the phone keys do nothing under it
  if($('pgx')){const k=e.key;if(k==='Escape'||k==='Backspace'&&!/INPUT|TEXTAREA/.test((document.activeElement||{}).tagName||'')){e.preventDefault();e.stopImmediatePropagation();pgEsc()}else if(k==='Tab'||k==='p'||k==='P'){e.preventDefault();e.stopImmediatePropagation()}return}
@@ -17810,7 +17898,7 @@ addEventListener('keydown',e=>{
  if(k==='Escape'&&isPhone){e.preventDefault();WD.phoneEscAt=performance.now();const ap=$('ov').dataset.app;if(ap==='world'&&WV.mode!=='phone')worldClose();else if(ap==='map'||ap==='world')closePhone();else if(ap)phoneBack();else closePhone();return}
  // Esc opens the phone (in the world the browser also uses Esc to release the mouse, which opens it too)
  if(k==='Escape'&&!ovOn&&!$('title').classList.contains('on')&&!$('card').classList.contains('on')){e.preventDefault();phone();return}
- if($('card').classList.contains('on')&&(k===' '||k==='Enter')){e.preventDefault();$('card').click();return}
+ if($('card').classList.contains('on')){if(['Shift','Control','Alt','Meta','Tab','CapsLock','p','P'].includes(k))return;e.preventDefault();cardGo();return}
  if(ovOn&&!isPhone){
   const ans=[...$('ov').querySelectorAll('.ans .ch:not([disabled])')];
   if(ans.length&&/^[1-9]$/.test(k)){const b=ans[+k-1];if(b){e.preventDefault();b.click()}return}
@@ -17837,11 +17925,13 @@ $('vn').addEventListener('click',e=>{if(e.target.closest('#chs')||e.target.close
 const VC={x:0,y:0,on:false,hover:null,drag:null};
 const lockEl=()=>$('app');
 const locked=()=>document.pointerLockElement===lockEl();
-function vcActive(){return locked()&&S&&S.inWorld&&!worldLive()}
+/* wherever the mouse is still captured and you're not walking around: menus over the world, the title screen, the
+   postgame, endings. Keeping the capture across them is what stops the real cursor jumping about */
+function vcActive(){return locked()&&!worldLive()}
 function vcShow(on){if(on===VC.on)return;VC.on=on;$('vcur').style.display=on?'block':'none';if(on){if(!VC.placed){VC.placed=1;VC.x=innerWidth/2;VC.y=innerHeight*.62}vcMove(0,0)}else vcHover(null)}
 function vcMove(dx,dy){VC.x=clamp(VC.x+dx,0,innerWidth-2);VC.y=clamp(VC.y+dy,0,innerHeight-2);$('vcur').style.transform=`translate(${VC.x}px,${VC.y}px)`;
  if(VC.drag){vcSlide(VC.drag);return}
- vcHover(vcTarget())}
+ const el=vcTarget();if(el!==VC.over){VC.over=el;if(el)el.dispatchEvent(new MouseEvent('mouseover',{bubbles:true,clientX:VC.x,clientY:VC.y}))}vcHover(el)}
 function vcTarget(){const c=$('vcur');c.style.visibility='hidden';const el=document.elementFromPoint(VC.x,VC.y);c.style.visibility='';return el}
 function vcHover(el){const b=el&&el.closest?el.closest('button,input,.loc,#box,.app,.chat,label'):null;if(b===VC.hover)return;if(VC.hover)VC.hover.classList.remove('vhover');VC.hover=b;$('vcur').classList.toggle('hot',!!(b&&!b.disabled));if(b){b.classList.add('vhover');if(b.tagName==='BUTTON'&&!b.disabled&&typeof sfx==='function')sfx('hover')}}
 function vcSlide(r){const R=r.getBoundingClientRect(),t=clamp((VC.x-R.left)/R.width,0,1),mn=+r.min||0,mx=+r.max||100,st=+r.step||1;const v=Math.round((mn+t*(mx-mn))/st)*st;if(+r.value!==v){r.value=v;r.dispatchEvent(new Event('input',{bubbles:true}))}}
@@ -17856,7 +17946,7 @@ document.addEventListener('mouseup',e=>{if(!e.isTrusted||!vcActive()||e.button!=
  const el=vcTarget();if(!el||!VC.down)return;VC.down=null;
  if(el.closest('button')){const b=el.closest('button');if(!b.disabled)b.click();return}
  el.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,clientX:VC.x,clientY:VC.y,view:window}))});
-document.addEventListener('wheel',e=>{if(!e.isTrusted||!vcActive())return;let el=vcTarget();if(el&&el.tagName==='CANVAS'){el.dispatchEvent(new WheelEvent('wheel',{bubbles:true,cancelable:true,deltaY:e.deltaY,deltaX:e.deltaX,clientX:VC.x,clientY:VC.y}));return}while(el&&el!==document.body){const cs=getComputedStyle(el);if(/(auto|scroll)/.test(cs.overflowY)&&el.scrollHeight>el.clientHeight){el.scrollBy(0,e.deltaY);break}el=el.parentElement}},{passive:true});
+document.addEventListener('wheel',e=>{if(!e.isTrusted||!vcActive())return;let el=vcTarget();if(el&&(el.tagName==='CANVAS'||el.closest&&el.closest('svg#pgSvg'))){el.dispatchEvent(new WheelEvent('wheel',{bubbles:true,cancelable:true,deltaY:e.deltaY,deltaX:e.deltaX,clientX:VC.x,clientY:VC.y}));return}while(el&&el!==document.body){const cs=getComputedStyle(el);if(/(auto|scroll)/.test(cs.overflowY)&&el.scrollHeight>el.clientHeight){el.scrollBy(0,e.deltaY);break}el=el.parentElement}},{passive:true});
 
 /* ============ AUDIO ============ */
 /* All sound is synthesised with Web Audio. Area music and ambience loops are rendered once with an

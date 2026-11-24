@@ -348,7 +348,7 @@ function chapterCard(n,cb){
   // a chapter: its banner across the screen, slowly drifting, and the name over the bottom of it
   c.innerHTML=`<div class="chcard"><div class="chb">${chBanner(k)}</div><div class="chtx"><div class="chk">${esc(CHN[C.n]||'')}${n?' · '+esc(DAYN[n]):' · '+esc(DAYN[0])}</div><h2>${esc(C.t)}</h2><p class="chd">${esc(C.d)}</p>${dc[2]?`<p class="chs">${esc(dc[2])}</p>`:''}<div class="tap">${WD&&WD.touch?'Tap':'Press any key'} to continue</div></div></div>`}
  else{const t=typeof n==='object'?n:DAYCARD[n];c.innerHTML=`<div><div class="k">${esc(t[0])}</div><h2>${esc(t[1])}</h2><p>${esc(t[2]||'')}</p><div class="tap">tap to continue</div></div>`}
- c.classList.add('on');clearPor();if(typeof sfx==='function')sfx('chapter');
+ c.classList.add('on');c.dataset.at=performance.now();clearPor();if(typeof sfx==='function')sfx('chapter');
  c.onclick=()=>{c.onclick=null;const f=$('fade');f.style.transition='none';f.classList.add('on');void f.offsetWidth;c.classList.remove('on');cb();
   if(typeof G!=='undefined'&&G.ok)G.forceFrame=true;
   requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(()=>{f.style.transition='';f.classList.remove('on')},60)))};

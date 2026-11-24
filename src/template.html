@@ -906,6 +906,20 @@ h1,h2,h3,h4{font-family:'Chakra Petch',sans-serif}
 .bg .sign::before,.bg .sign::after{content:'';width:42px;height:1px;background:currentColor;opacity:.5}
 #card:not(.chap) h2{font:700 clamp(40px,7vw,72px)/1 'Chakra Petch',sans-serif;color:var(--ink);letter-spacing:.01em}
 #card:not(.chap) p{font-size:15px}
+/* the week, refined: lanes, groups, focus */
+.cdec path{fill:#0b0711;stroke:var(--coral);stroke-width:1.6}.cdec text{font:600 11px 'Chakra Petch',sans-serif;letter-spacing:.12em;text-transform:uppercase;fill:var(--coral)}
+.ce{stroke-linejoin:round;stroke-linecap:round}
+.eg .egbg{fill:#120c19;stroke:#ffffff1a}.eg .egk{font:600 11px 'Chakra Petch',sans-serif;letter-spacing:.14em;fill:#a99cb6}
+.eg .te rect{fill:#1a1222;stroke:var(--c);stroke-opacity:.35}.eg .te.got rect{stroke-opacity:1;fill:#1f1729}.eg .te text{font:500 12.5px 'Inter',sans-serif}
+.eg .te.sel rect{stroke:var(--butter)!important;stroke-width:2}
+.eg.off{opacity:.28}
+#pgView.focus .ct:not(.hl),#pgView.focus .eg:not(.hl){opacity:.22}
+#pgView.focus .ce:not(.hl){opacity:.08}
+#pgView.focus .ce.hl{stroke:#f3eef7cc;stroke-width:3}
+#pgView.focus .ce.hl.lit{stroke:var(--mint)}
+#pgView.focus .ce.hl.onpath{stroke:var(--butter)}
+.ct,.eg,.ce{transition:opacity .25s ease,stroke .25s ease}
+.lg.lit{background:transparent;border:0;border-top:3px solid var(--mint);border-radius:0;height:0;margin-top:6px}
 </style>
 </head>
 <body>
