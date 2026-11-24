@@ -83,7 +83,7 @@ function cutSet(a){
   if(p[0]==='wide'){if(WD.cut){WD.cut.sub=null;WD.cut.lock=true;cutBlend(0)}return}
   if(p[0]==='close'){if(WD.cut)cutClose(p[1],true);return}
   let C=CUTS[p[0]];
-  if(p[0]==='pan'){const ak=AREAS[p[1]]?p[1]:typeof bgArea==='function'&&bgArea(p[1]||CURBG),A=ak&&AREAS[ak],mv=A&&panFor(ak);C=mv?{reg:A.reg,moves:mv,marks:[],est:1,area:ak}:null}
+  if(p[0]==='pan'){const ak=AREAS[p[1]]?p[1]:typeof bgArea==='function'&&bgArea(p[1]||CURBG),A=ak&&AREAS[ak],mv=A&&panFor(ak);C=mv?{reg:A.reg,moves:mv,marks:[],est:1,area:ak,auto:!PANS[ak]}:null}
   if(!C||!(S&&S.inWorld&&G.ok)||C.reg!==WD.reg){WD.cut=null}
   else{const cast={};p.slice(1).forEach((id,i)=>{const m=C.marks[i];if(m&&CH[id])cast[id]={reg:C.reg,x:m[0],z:m[1],y:m[2]}});
    const prev=WD.cut&&WD.cut.pose;
@@ -96,7 +96,7 @@ function cutSet(a){
 function cutBlend(d){if(!WD.cut||!WD.cut.pose)return;WD.cut.from=d?{pose:WD.cut.pose,t0:performance.now(),dur:d}:null}
 /* a close-up of someone on their mark: from the wide shot's side of them, turned a little to one side or the other,
    framed slightly off-centre, pushing in slowly */
-function cutClose(id,force){const c=WD.cut;if(!c||!c.cast[id])return;const m=c.cast[id],base=movesPose(c.C.moves,0).eye;
+function cutClose(id,force){const c=WD.cut;if(!c||!c.cast[id])return;c.safe=undefined;const m=c.cast[id],base=movesPose(c.C.moves,0).eye;
  let dx=base[0]-m.x,dz=base[2]-m.z;const L=Math.hypot(dx,dz)||1;dx/=L;dz/=L;
  c.side=-c.side;const th=c.side*.42,cs=Math.cos(th),sn=Math.sin(th),ux=dx*cs-dz*sn,uz=dx*sn+dz*cs,px=-uz,pz=ux;
  const hy=m.y+1.86,d0=3.7,d1=3.15,off=c.side*.5;
@@ -119,7 +119,14 @@ function camApply(cam,p){cam.position.set(p.eye[0],p.eye[1],p.eye[2]);cam.lookAt
 function cutCam(cam){const c=WD.cut,now=performance.now(),src=c.sub||c,t=(now-src.t0)/1000;
  let p=camBreath(movesPose(src.moves||c.C.moves,t),now/1000,c.sub?.6:1);
  if(c.from){const u=Math.min(1,(now-c.from.t0)/1000/c.from.dur),e=EZ.sine(u),f=c.from.pose;p={eye:lerp3(f.eye,p.eye,e),at:lerp3(f.at,p.at,e),fov:f.fov+(p.fov-f.fov)*e};if(u>=1)c.from=null}
+ // shots worked out on the fly (a room's establishing pan, a close-up on whoever's talking) can land behind a wall or
+ // a pillar: trace from what the camera looks at back to the camera, and pull it in before the first thing in the way.
+ // Hand-placed shots are left exactly where they were put (some look in through glass on purpose).
+ if(c.sub||c.C.auto){const s=camSafe(c.C.reg,p);c.safe=c.safe===undefined||s<c.safe?s:c.safe+(s-c.safe)*.06;
+  if(c.safe<.999)p={eye:lerp3(p.at,p.eye,c.safe),at:p.at,fov:p.fov}}
  c.pose=p;camApply(cam,p);return p.eye}
+function camSafe(reg,p){const a=p.at,e=p.eye,dx=e[0]-a[0],dy=e[1]-a[1],dz=e[2]-a[2],L=Math.hypot(dx,dy,dz);if(L<.8||!G.regions[reg])return 1;
+ for(let d=.6;d<=L+.3;d+=.15){const k=Math.min(1,d/L);if(blockedAt(reg,a[0]+dx*k,a[2]+dz*k,a[1]+dy*k-1.1,.24))return Math.max(.12,(d-.45)/L)}return 1}
 /* ---------- the title screen's camera ---------- */
 const TT={on:false,i:0,t0:0,cast:{}};
 function titleCamOn(on){TT.on=!!on&&G.ok&&!/[?&]nopre\b/.test(location.search);if(TT.on&&!TT.t0){TT.i=Math.floor(Math.random()*TITLESHOTS.length);TT.t0=performance.now();titleShotIn()}if(!TT.on)TT.t0=0}
