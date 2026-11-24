@@ -35,7 +35,7 @@ const CUTS={
    awkward (columns, low ceilings); anywhere else panFor() works one out from the room's shape */
 const PANS={
  plaza:[{eye:[-60,9,128],at:[-86,6,66],to:{eye:[-108,6,118],at:[-88,5,64]},dur:16,fov:52}],
- vestibule:[{eye:[-88,2.4,92],at:[-88,2.4,62],to:{eye:[-88,2,76],at:[-88,2.2,60]},dur:12,fov:50}],
+ vestibule:[{eye:[-88,2.4,92],at:[-88,2.4,62],to:{eye:[-88,2,76],at:[-88,2.2,60]},dur:24,fov:50}],
  foyer:[{eye:[-104,7.5,52],at:[-80,3,-10],to:{eye:[-70,5,48],at:[-90,2.5,-14]},dur:16,fov:54}],
  courtyard:[{orbit:[-5,2,-15],r:28,h:9,h1:6,a0:-.6,a1:.4,dur:18,fov:50}],
  hallA:[{eye:[-13,10.5,-79],at:[-5,3,-124],to:{eye:[3,9,-82],at:[-5,3,-124]},dur:18,fov:50}],

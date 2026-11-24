@@ -20,6 +20,31 @@ function titleScreen(){
 }
 /* the logo's lines change alignment and size between stages; measure them before and after and glide each one
    from where it was (FLIP), so nothing jumps before it moves */
+/* ---------- the cast on the right ----------
+   One at a time and big: head to about the knees, filling the right of the screen. Ellie first, then the others in
+   turn (anyone with drawn creator art first), each stepping in from the right and out to the left. The one on screen
+   smiles now and then. Sizes follow the art, so taller characters stand taller. */
+const TC={on:false,t:null,i:0,el:null,smile:null};
+const TCH=150; // Ellie's head-to-toe height in vh: tall enough that the bottom of the screen cuts her off at the knees
+function tcFig(id){const A=typeof artOf==='function'&&artOf(id),d=document.createElement('div');d.className='tc';d.dataset.id=id;const inn=document.createElement('div');inn.className='tcin';inn.style.setProperty('--bd',(-Math.random()*6).toFixed(2)+'s');d.appendChild(inn);
+ if(A){const k=TCH/3078,b=A.body,W=b[2]*k,H=(A.foot-A.top)*k;inn.style.width=W+'vh';inn.style.height=H+'vh';
+  const img=new Image();img.src=A.img;img.alt='';img.style.cssText=`left:0;top:${(b[1]-A.top)*k}vh;width:${W}vh;height:${b[3]*k}vh`;inn.appendChild(img);
+  if(A.face&&A.ex.h){const f=new Image();f.src=A.ex.h;f.alt='';f.className='tcface';f.style.cssText=`opacity:0;left:${(A.face[0]-b[0])*k}vh;top:${(A.face[1]-A.top)*k}vh;width:${A.face[2]*k}vh;height:${A.face[3]*k}vh`;inn.appendChild(f)}
+  // taller characters' heads sit higher (Ellie's at the top margin)
+  d.style.setProperty('--lift',((A.foot-A.top)/3078-1)*TCH+'vh')}
+ else{const k=TCH/447.5;inn.style.width=200*k+'vh';inn.style.height=447.5*k+'vh';inn.innerHTML=fullSVG(id);const sv=inn.firstElementChild;sv.style.cssText=`left:0;top:${-46.5*k}vh;width:${200*k}vh;height:${500*k}vh`}
+ return d}
+function tcPool(){const seen=g=>typeof metEver==='function'&&metEver(g),art=g=>typeof artOf==='function'&&!!artOf(g);
+ return ['ellie',...ROM.filter(g=>g!=='ellie').sort((a,b)=>(art(b)-art(a))||(seen(b)-seen(a))||(Math.random()-.5))]}
+function titleCast(on){const box=$('tcast');if(!box)return;
+ if(!on){TC.on=false;clearInterval(TC.t);clearInterval(TC.smile);return}
+ if(TC.on)return;TC.on=true;box.querySelectorAll('.tc').forEach(e=>e.remove());TC.pool=tcPool();TC.i=0;
+ const next=delay=>{const el=tcFig(TC.pool[TC.i++%TC.pool.length]);box.appendChild(el);void el.offsetWidth;setTimeout(()=>el.classList.add('s0'),delay);TC.el=el};
+ next(450);
+ TC.t=setInterval(()=>{if(document.hidden)return;const old=TC.el;old.classList.remove('s0');old.classList.add('gone');setTimeout(()=>old.remove(),1300);next(700)},10000);
+ TC.smile=setInterval(()=>{const f=TC.el&&TC.el.querySelector('.tcface');if(!f||document.hidden)return;f.style.opacity=1;setTimeout(()=>f.style.opacity=0,2600)},6500)}
+// a little parallax with the mouse
+addEventListener('mousemove',e=>{const t=$('title');if(!t||!t.classList.contains('on')||TS.stage!=='menu')return;const c=$('tcast');if(!c)return;c.style.setProperty('--px',((e.clientX/innerWidth-.5)*-18).toFixed(1)+'px');c.style.setProperty('--py',((e.clientY/innerHeight-.5)*-8).toFixed(1)+'px')});
 function titleStage(s){const t=$('title'),L=$('tlogo'),prev=t.dataset.stage;
  const kids=[...L.children],flip=prev&&prev!=='boot'&&prev!==s&&t.classList.contains('on');
  const first=flip?kids.map(k=>k.getBoundingClientRect()):null;
@@ -28,7 +53,7 @@ function titleStage(s){const t=$('title'),L=$('tlogo'),prev=t.dataset.stage;
   kids.forEach((k,i)=>{const a=first[i],b=k.getBoundingClientRect();if(!b.width||!a.width)return;const sc=b.width/(k.offsetWidth||1),dx=(a.left-b.left)/sc,dy=(a.top-b.top)/sc,z=a.width/b.width;
    k.style.transformOrigin='0 0';k.animate([{transform:`translate(${dx}px,${dy}px) scale(${z})`},{transform:'none'}],{duration:1100,easing:'cubic-bezier(.7,0,.2,1)'})});
   requestAnimationFrame(()=>{L.style.transition=''})}
- if(s==='menu')setTimeout(()=>titleFocus(),40)}
+ if(s==='menu')setTimeout(()=>titleFocus(),40);titleCast(s==='menu')}
 /* boot: wait for the world, then for the convention's light; then "press any key" */
 function titleBoot(){if(TS.boot)return;TS.t0=performance.now();
  const tick=()=>{if(!$('title').classList.contains('on')){TS.boot=null;return}

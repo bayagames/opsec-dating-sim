@@ -201,6 +201,16 @@ Boot (the convention is built and lit; the progress bar is the lightmap bake, ca
 right), then the menu: the logo glides into the corner and the options come in down the left. Mouse, arrows and
 Enter all work; Esc goes back. Deleting a file asks for confirmation and lists what goes. Without WebGL it falls back
 to a drawn background.
+With the menu, the cast steps in on the right, one at a time and big (head to about the knees): Ellie first, then
+the others every ten seconds, anyone with creator art first, sized by their creator heights, smiling now and then. The title
+is silent until "press any key"; the menu music comes in with the menu.
+
+## The mouse
+In the world the mouse is captured, and everything over the world (the phone, maps, conversations, minigames) uses
+the drawn cursor (12b_cursor.js forwards clicks, hovers, drags, sliders and the wheel), so the real cursor never
+appears or jumps. Only the browser's Esc releases it: Esc in the world opens the phone, Esc with the phone open closes
+it. Leaving the window changes nothing. Any key or click captures the mouse again, with no prompt; while it's free the
+centre dot dims. The first movements after a capture are ignored, so the view doesn't jolt.
 
 ## Money and gifts (03c_economy.js)
 Money instead of credits: a £20 per diem each morning, bug bounties, minigames, shifts (info desk, bar, Proof),

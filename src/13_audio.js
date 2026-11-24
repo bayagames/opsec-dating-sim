@@ -35,7 +35,9 @@ const AREA_AUD={coachA:['home','train'],coachB:['home','train'],coachC:['home','
  corridor:['hotel','hotel'],room1337:['hotel','hotel'],room1336:['party','bar'],housekeeping:['hotel','hotel'],stairwell:['hotel','hotel'],roof:['night','wind'],plantdeck:['night','wind']};
 const BG_AUD={carriage:['home','train'],con:['con','hum'],lock:['con','room'],ctf:['con','room'],soc:['con','room'],stream:['con','hum'],hotel:['hotel','hotel'],roof:['night','wind'],dawn:['night','wind'],stage:['hall','hall'],keynote:['hall','hall'],vendor:['con','hum'],party:['party','bar'],void:['tense',null],flat:['home','home'],bakery:['home','bakery'],office:['hotel','office'],train:['home','station'],cos:['con','hum'],chill:['night','room'],bar:['bar','bar'],lobby:['hotel','lobby']};
 function audioScene(){
- if(!S||$('title').classList.contains('on'))return['night',null];
+ // the title stays silent through loading and "press any key"; the music comes in with the menu
+ if($('title').classList.contains('on'))return typeof TS!=='undefined'&&TS.stage==='menu'?['night',null]:[null,null];
+ if(!S)return['night',null];
  if(S.ending)return BG_AUD[CURBG]||['night',null];
  const vn=$('vn').classList.contains('on'),dimmed=$('bg').classList.contains('bg-dim');
  if(vn&&!dimmed&&CURBG&&BG_AUD[CURBG])return BG_AUD[CURBG];

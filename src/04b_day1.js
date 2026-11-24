@@ -180,11 +180,6 @@ astrid.n: Sorry. Am I being loud? It hisses. The radio. Some people find it upse
 ~ Twenty minutes later, the train slows. A neon sign the height of a building slides into the window: THE HALCYON. Beyond it, a vast slab of dark glass and steel with a magenta line of light running round every storey.
 ~ CTRL+ALT+CON.
 [hold astrid off]
-[bg plaza]
-[cut pan plaza]
-~ The station spits you out into the Conference Quarter. A plaza. Plane trees in pots. A coffee cart. A taxi rank. The sky's going orange.
-~ To your left, the Halcyon Hotel: twenty-five storeys of lit windows and a garden behind glass. Ahead, the convention centre's entrance, under letters taller than you: CTRL+ALT+CON.
-* Four thousand people. Seven days. You.
 [sum The train to the Conference Quarter.]
 `;
 SC.d1_doors=`
@@ -192,6 +187,9 @@ SC.d1_doors=`
 [cut pan vestibule]
 [hide]
 [flag d1v]
+~ The station spits you out into the Conference Quarter. A plaza. Plane trees in pots. A coffee cart. A taxi rank. The sky's going orange.
+~ To your left, the Halcyon Hotel: twenty-five storeys of lit windows and a garden behind glass. Ahead, the convention centre's entrance, under letters taller than you: CTRL+ALT+CON.
+* Four thousand people. Seven days. You.
 ~ The convention doors slide open. It smells of new carpet, energy drinks and four thousand people's nerves.
 ~ The Foyer: a glass atrium four storeys high, escalators climbing into the light, a giant rotating Lumen logo hanging in the middle of it all like a moon. Banners everywhere. Lanyards everywhere. Somebody is soldering on the floor.
 ~ Ahead, a velvet rope, a queue, and a desk on the west wall marked REGISTRATION. Nobody gets past the rope without a badge.

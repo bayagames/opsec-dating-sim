@@ -2,7 +2,7 @@
 /* On desktop the mouse stays captured (pointer-locked) the whole time you're in the 3D world, including
    conversations and minigames, so you never have to click your way back in. While a conversation or
    overlay is up, mouse movement drives this drawn cursor instead of the camera, and clicks, hovers,
-   sliders and the wheel are forwarded to whatever is under it. Only the phone (Esc/P) frees the real mouse. */
+   sliders, drags and the wheel are forwarded to whatever is under it: the phone, maps and conversations all use it. Only Esc frees the real mouse. */
 const VC={x:0,y:0,on:false,hover:null,drag:null};
 const lockEl=()=>$('app');
 const locked=()=>document.pointerLockElement===lockEl();
@@ -14,13 +14,15 @@ function vcMove(dx,dy){VC.x=clamp(VC.x+dx,0,innerWidth-2);VC.y=clamp(VC.y+dy,0,i
 function vcTarget(){const c=$('vcur');c.style.visibility='hidden';const el=document.elementFromPoint(VC.x,VC.y);c.style.visibility='';return el}
 function vcHover(el){const b=el&&el.closest?el.closest('button,input,.loc,#box,.app,.chat,label'):null;if(b===VC.hover)return;if(VC.hover)VC.hover.classList.remove('vhover');VC.hover=b;$('vcur').classList.toggle('hot',!!(b&&!b.disabled));if(b){b.classList.add('vhover');if(b.tagName==='BUTTON'&&!b.disabled&&typeof sfx==='function')sfx('hover')}}
 function vcSlide(r){const R=r.getBoundingClientRect(),t=clamp((VC.x-R.left)/R.width,0,1),mn=+r.min||0,mx=+r.max||100,st=+r.step||1;const v=Math.round((mn+t*(mx-mn))/st)*st;if(+r.value!==v){r.value=v;r.dispatchEvent(new Event('input',{bubbles:true}))}}
-document.addEventListener('mousemove',e=>{if(!e.isTrusted||!vcActive())return;vcMove(e.movementX,e.movementY)});
+const vcPtr=(type,el,b)=>{try{el.dispatchEvent(new PointerEvent(type,{bubbles:true,cancelable:true,pointerId:1,pointerType:'mouse',isPrimary:true,button:type==='pointermove'?-1:0,buttons:b,clientX:VC.x,clientY:VC.y}))}catch(_){}};
+document.addEventListener('mousemove',e=>{if(!e.isTrusted||!vcActive())return;if(VC.pdown&&(Math.abs(e.movementX)>260||Math.abs(e.movementY)>260))return;vcMove(e.movementX,e.movementY);if(VC.pdown)vcPtr('pointermove',VC.pdown,1)});
 document.addEventListener('mousedown',e=>{if(!e.isTrusted||!vcActive()||e.button!==0)return;const el=vcTarget();if(!el)return;
  const r=el.closest&&el.closest('input[type=range]');if(r){VC.drag=r;vcSlide(r);return}
- el.dispatchEvent(new MouseEvent('mousedown',{bubbles:true,cancelable:true,clientX:VC.x,clientY:VC.y}));VC.down=el});
+ vcPtr('pointerdown',el,1);VC.pdown=el;el.dispatchEvent(new MouseEvent('mousedown',{bubbles:true,cancelable:true,clientX:VC.x,clientY:VC.y}));VC.down=el});
 document.addEventListener('mouseup',e=>{if(!e.isTrusted||!vcActive()||e.button!==0)return;
  if(VC.drag){VC.drag.dispatchEvent(new Event('change',{bubbles:true}));VC.drag=null;return}
+ if(VC.pdown){vcPtr('pointerup',VC.pdown,0);VC.pdown=null}
  const el=vcTarget();if(!el||!VC.down)return;VC.down=null;
  if(el.closest('button')){const b=el.closest('button');if(!b.disabled)b.click();return}
  el.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,clientX:VC.x,clientY:VC.y,view:window}))});
-document.addEventListener('wheel',e=>{if(!vcActive())return;let el=vcTarget();while(el&&el!==document.body){const cs=getComputedStyle(el);if(/(auto|scroll)/.test(cs.overflowY)&&el.scrollHeight>el.clientHeight){el.scrollBy(0,e.deltaY);break}el=el.parentElement}},{passive:true});
+document.addEventListener('wheel',e=>{if(!e.isTrusted||!vcActive())return;let el=vcTarget();if(el&&el.tagName==='CANVAS'){el.dispatchEvent(new WheelEvent('wheel',{bubbles:true,cancelable:true,deltaY:e.deltaY,deltaX:e.deltaX,clientX:VC.x,clientY:VC.y}));return}while(el&&el!==document.body){const cs=getComputedStyle(el);if(/(auto|scroll)/.test(cs.overflowY)&&el.scrollHeight>el.clientHeight){el.scrollBy(0,e.deltaY);break}el=el.parentElement}},{passive:true});

@@ -228,7 +228,7 @@ function hud(){
  $('phoneBtn').style.display='block';
  $('phoneBtn').innerHTML='Phone<span class="kn" style="margin:0 0 0 6px">P</span>'+(S.msgs.some(m=>!m.r)?'<span class="dot"></span>':'');
 }
-function show(id){document.body.classList.toggle('inworld',id==='world');if(id!=='title'&&typeof titleCamOn==='function')titleCamOn(false);if(id==='title'&&typeof vcShow==='function')vcShow(false);setTimeout(updBlur,0);document.querySelectorAll('.scr').forEach(s=>s.classList.toggle('on',s.id===id));$('hud').style.display=id==='title'?'none':'flex';$('gl').style.display=(id!=='title'&&S&&S.inWorld&&G.ok)?'block':'none';if(id!=='world'){WD.active=false;if((id==='title'||id==='hub')&&document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}}}
+function show(id){document.body.classList.toggle('inworld',id==='world');if(id!=='title'&&typeof titleCamOn==='function'){titleCamOn(false);if(typeof titleCast==='function')titleCast(false)}if(id==='title'&&typeof vcShow==='function')vcShow(false);setTimeout(updBlur,0);document.querySelectorAll('.scr').forEach(s=>s.classList.toggle('on',s.id===id));$('hud').style.display=id==='title'?'none':'flex';$('gl').style.display=(id!=='title'&&S&&S.inWorld&&G.ok)?'block':'none';if(id!=='world'){WD.active=false;if((id==='title'||id==='hub')&&document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}}}
 
 /* ============ VN ENGINE ============ */
 let Q=[],onDone=null,typing=null,full='',waiting=false;

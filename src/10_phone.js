@@ -26,7 +26,7 @@ function phone(app){
  if(!S)return;
  const o=$('ov');if((o.classList.contains('on')&&!o.classList.contains('phoneov'))||$('card').classList.contains('on'))return;
  const opening=!o.classList.contains('phoneov');if(opening)PH.day=null;
- if(document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}
+ // the mouse stays captured: the phone uses the drawn cursor (see pointerlockchange in 09_world.js)
  WD.active=false;phThread=null;
  if(app){openApp(app,false);return}
  phApp=null;drawPhone();

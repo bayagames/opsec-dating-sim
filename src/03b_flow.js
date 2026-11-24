@@ -116,7 +116,8 @@ function riskRoll(r,caught){
  {let p=[0,.2,.38,.55][r]||0;if(S.inv.hoodie)p-=.12;p-=rank('skill')*.04;p=clamp(p,.04,.9);
   if(S.inv.espresso){S.inv.espresso--;if(!S.inv.espresso)delete S.inv.espresso;return[N('The triple espresso kicks in. You\'re in and out before anyone has blinked.')]}
   const bad=Math.random()<p;if(!bad)return[N('Nobody sees you. '+pick(['Your heart is going like a drum, but nobody sees you.','A door closes somewhere else. You breathe out.','You\'re just another lanyard in a corridor.']))];
-  return scr(caught||'caught').concat([FX({exp:20+r*12})])}}
+  // caught: either a line of what went wrong, or the id of a scene that plays it out
+  return(caught&&/\s/.test(caught)?[N(caught)]:scr(caught||'caught')).concat([FX({exp:20+r*12})])}}
 /* ---- the case board ---- */
 function solveMyst(m,answer,picks){const M=MYST[m];
  const ok=answer===M.a&&picks.length===3&&picks.every(c=>M.ev.includes(c));
