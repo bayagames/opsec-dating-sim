@@ -4,6 +4,11 @@ Working reference for the expanded game. Spoilers throughout.
 
 ## Shape of a run
 - **Prologue (Two weeks earlier).** Linear. Proof, Flat 1A, Brindle & Co, Ellie's stolen account, WHISPER's first DM, Lumen.
+  It's framed by a log: a few terse lines through the day of a machine writing down your Friday, which the player sees
+  and you don't. At work, the LifeScore map has an amber dot on your building: Proof, "leaves home 03:52 daily
+  (anomalous)", one flagged contact. At 00:58 the log flags that contact (you), notes your hotel if you posted the
+  ticket, and signs off as LifeScore: "hello, {h}". Bread runs through it: crumbs are exposure ("so the internet has
+  mice"), and your reply to packet_pam's "source?" stays in drafts, proving.
 - **Day 1 (Monday).** Linear morning to afternoon: packing, saying goodbye at Proof, a last half-day at the office (Linda, Gary, SafeSphere rolled out to work phones), Central Station (Pia busking), the train (Astrid). From the Evening slot the calendar runs.
 - **Days 1 to 7** of CTRL+ALT+CON's 20th anniversary "Hack Week". Six slots a day: Morning, Midday, Afternoon, Evening, Night, Late night. Day 1 starts at Evening. Time never moves on its own: only story beats and slot activities move it.
 - **Story slots** hold a beat that happens at a place (the goal beacon points there). Other activities wait until it's done.
