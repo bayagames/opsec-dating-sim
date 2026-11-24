@@ -66,7 +66,6 @@ function WDEP(){const story=typeof stepIs==='function'&&stepIs('train'),off=f=>t
 /* ---- opening ---- */
 function worldOpen(mode,from){if(!S)return;WV.mode=mode||'phone';WV.from=from||(mode==='phone'?'phone':'world');
  WV.sel=WV.mode==='station'?null:WV.mode==='taxi'?'station':(WV.sel||wHere()||'con');
- if(document.pointerLockElement&&WV.mode==='phone'){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}
  WD.active=false;if(typeof sfx==='function')sfx('phoneOpen');worldDraw()}
 function worldClose(){const o=$('ov');o.classList.remove('wmapov');if(WV.mode==='phone'){closePhone();return}delete o.dataset.app;delete o.dataset.from;closeOv();o.classList.remove('phoneov','mapov','appov');hub()}
 function worldDraw(){const m=WV.mode,o=ov(`<div class="wmap wm-${m}"><div class="wtop">${m==='phone'?'<button class="pback" id="wback" aria-label="Back">‹</button>':''}

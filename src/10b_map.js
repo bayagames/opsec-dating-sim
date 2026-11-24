@@ -24,7 +24,7 @@ function fastTravel(k){if(!AREAS[k])return;S.ftRecent=[k].concat((S.ftRecent||[]
 /* the map of the place you're in (or, from the world map, of somewhere else: look, but you can't travel there) */
 function mapOpen(fromPhone,view){
  if(!S)return;const o=$('ov');if(!(o.classList.contains('wmapov'))){MAPV.from=fromPhone?'phone':'direct';MAPV.fromWorld=false}if((o.classList.contains('on')&&!o.classList.contains('phoneov'))||$('card').classList.contains('on'))return;
- if(document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}
+
  WD.active=false;o.classList.remove('wmapov');
  const mine=!view||(MAPNET[WD.reg]||[WD.reg]).includes(view);const reg=mine&&!view?WD.reg:view;MAPV.base=mine?WD.reg:view;MAPV.reg=mine&&!view?WD.reg:view;
  if(MAPV.reg===WD.reg)MAPV.lv=levelOf(WD.reg,WD.y);else{const L=LEVELS[MAPV.reg]||[[0]];MAPV.lv=(L.find(l=>l[0]===0)||L[0])[0]}
@@ -87,7 +87,7 @@ function paintMap(){const cv=$('bmap');if(!cv)return;mapSize(cv);MAPV.sc=clamp(M
 function mapWire(cv){
  const pts=new Map();let moved=0,pinch=0;
  const toW=(px,py)=>{const r=cv.getBoundingClientRect(),k=cv.width/r.width;return[MAPV.ox+((px-r.left)*k-cv.width/2)/MAPV.sc,MAPV.oz+((py-r.top)*k-cv.height/2)/MAPV.sc]};
- cv.onpointerdown=e=>{cv.setPointerCapture(e.pointerId);pts.set(e.pointerId,[e.clientX,e.clientY]);moved=0;if(pts.size===2){const[a,b]=[...pts.values()];pinch=Math.hypot(a[0]-b[0],a[1]-b[1])}};
+ cv.onpointerdown=e=>{try{cv.setPointerCapture(e.pointerId)}catch(_){}pts.set(e.pointerId,[e.clientX,e.clientY]);moved=0;if(pts.size===2){const[a,b]=[...pts.values()];pinch=Math.hypot(a[0]-b[0],a[1]-b[1])}};
  cv.onpointermove=e=>{if(!pts.has(e.pointerId))return;const p=pts.get(e.pointerId),r=cv.getBoundingClientRect(),k=cv.width/r.width;
   if(pts.size===1){const dx=e.clientX-p[0],dy=e.clientY-p[1];moved+=Math.abs(dx)+Math.abs(dy);MAPV.ox-=dx*k/MAPV.sc;MAPV.oz-=dy*k/MAPV.sc}
   pts.set(e.pointerId,[e.clientX,e.clientY]);

@@ -16,7 +16,7 @@ addEventListener('keydown',e=>{
   if(!ovOn){e.preventDefault();phone();return}
  }
  // Esc on a map (a building's or the city's) closes it outright; the on-screen ‹ City button is the way back out
- if(k==='Escape'&&isPhone){e.preventDefault();const ap=$('ov').dataset.app;if(ap==='world'&&WV.mode!=='phone')worldClose();else if(ap==='map'||ap==='world')closePhone();else if(ap)phoneBack();else closePhone();return}
+ if(k==='Escape'&&isPhone){e.preventDefault();WD.phoneEscAt=performance.now();const ap=$('ov').dataset.app;if(ap==='world'&&WV.mode!=='phone')worldClose();else if(ap==='map'||ap==='world')closePhone();else if(ap)phoneBack();else closePhone();return}
  // Esc opens the phone (in the world the browser also uses Esc to release the mouse, which opens it too)
  if(k==='Escape'&&!ovOn&&!$('title').classList.contains('on')&&!$('card').classList.contains('on')){e.preventDefault();phone();return}
  if($('card').classList.contains('on')&&(k===' '||k==='Enter')){e.preventDefault();$('card').click();return}

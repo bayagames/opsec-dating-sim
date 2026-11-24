@@ -253,6 +253,23 @@ button:focus-visible{outline:3px solid var(--butter);outline-offset:2px}
 .tloadv{flex-direction:column;align-items:flex-start;min-height:0;flex:1}
 .tpanel{width:min(680px,100%);max-height:calc(100% - 80px);overflow:auto;padding:18px 20px;margin-bottom:14px;background:#0a0610c4;border:1px solid #ffffff14;border-radius:6px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);animation:tpin .5s cubic-bezier(.2,.8,.2,1)}
 @keyframes tpin{from{opacity:0;transform:translateX(-30px)}}
+/* the cast, down the right: one in front, two behind in the half-light; the two behind change every few seconds */
+.tcast{position:absolute;z-index:4;right:clamp(0px,5vw,110px);bottom:0;width:min(44vw,780px);height:94vh;pointer-events:none;opacity:0;transition:opacity 1s ease;transform:translate(var(--px,0px),var(--py,0px))}
+#title[data-stage=menu] .tcast{opacity:1}
+#title[data-view=name] .tcast,#title[data-view=load] .tcast{opacity:.35;filter:blur(2px)}
+.tcglow{position:absolute;left:-10%;right:-10%;bottom:-6vh;height:46vh;background:radial-gradient(50% 42% at 50% 92%,#ff5d7336,transparent 70%),radial-gradient(34% 16% at 50% 100%,#000a,transparent 75%)}
+.tc{position:absolute;bottom:2vh;left:50%;transform-origin:50% 100%;will-change:transform,opacity,filter;
+ transition:transform 1.5s cubic-bezier(.16,.84,.24,1),opacity 1.1s ease,filter 1.5s ease;opacity:0;transform:translateX(calc(-50% + 9vw)) scale(.96);filter:brightness(.2) blur(8px)}
+.tc .tcin{position:relative;transform-origin:50% 100%;animation:tcbreathe 6s ease-in-out infinite;animation-delay:var(--bd,0s)}
+.tc img,.tc svg{display:block;position:absolute;max-width:none}
+.tc .tcface{transition:opacity .25s ease}
+.tc.s0{transform:translateX(-50%) translateX(calc(var(--px,0px)*-.6)) scale(1);opacity:1;filter:drop-shadow(0 0 28px #ff5d7322) drop-shadow(0 18px 34px #000b);z-index:3}
+.tc.s1{transform:translateX(-50%) translateX(-14vw) translateY(-2.2vh) translateX(calc(var(--px,0px)*.5)) scale(.88);opacity:1;filter:brightness(.46) saturate(.75) blur(.6px);z-index:2}
+.tc.s2{transform:translateX(-50%) translateX(13vw) translateY(-2.6vh) translateX(calc(var(--px,0px)*.5)) scale(.86);opacity:1;filter:brightness(.42) saturate(.75) blur(.8px);z-index:1}
+.tc.gone{opacity:0;transform:translateX(-50%) translateX(var(--gx,10vw)) scale(.84);filter:brightness(.1) blur(10px);transition-duration:1s}
+@keyframes tcbreathe{0%,100%{transform:scale(1,1)}50%{transform:scale(1.004,1.009)}}
+@media(max-width:900px){.tcast{display:none}}
+@media(prefers-reduced-motion:reduce){.tc .tcin{animation:none}.tc{transition-duration:.01s}}
 /* the corners */
 .tfile{position:absolute;z-index:5;right:clamp(18px,4vw,60px);bottom:clamp(18px,5vh,52px);text-align:right;opacity:0;transform:translateY(12px);transition:opacity .6s .4s,transform .6s .4s}
 #title[data-stage=menu] .tfile.on{opacity:1;transform:none}
@@ -738,6 +755,32 @@ body.pgon #hud,body.pgon #vcur{display:none!important}
 #thGo.on{opacity:1;transform:none;pointer-events:auto;animation:thpulse 2.2s ease-in-out infinite}
 #thGo .kn{margin-left:8px;background:#1b102633;border-radius:4px;padding:1px 6px;font-size:12px}
 @keyframes thpulse{50%{box-shadow:0 8px 26px #0008,0 0 0 6px #8affc133}}
+/* ============ polish pass ============ */
+/* notifications: a small glass card that drops in, with a colour bar for what kind it is */
+#toasts{top:60px;gap:6px}
+.toast{font:600 14px 'Chakra Petch',system-ui,sans-serif;letter-spacing:.02em;padding:8px 16px 8px 14px;border-radius:10px;background:#140b1ee6;border:1px solid #ffffff14;border-left:3px solid currentColor;box-shadow:0 8px 24px #0009;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);animation:tst2 2.6s cubic-bezier(.2,.8,.2,1) forwards}
+@keyframes tst2{0%{opacity:0;transform:translateY(-14px) scale(.96)}9%{opacity:1;transform:none}78%{opacity:1;transform:none}100%{opacity:0;transform:translateY(-6px) scale(.98)}}
+/* the objective: slides in and glows when it changes */
+#obj{transition:opacity .3s ease;box-shadow:0 6px 20px #0006;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+#obj.new{animation:objNew 1.4s cubic-bezier(.2,.8,.2,1)}
+@keyframes objNew{0%{opacity:0;transform:translateX(-24px)}18%{opacity:1;transform:none;box-shadow:0 0 0 2px var(--mint),0 0 30px #8affc155}100%{box-shadow:0 6px 20px #0006}}
+/* scene changes: a slower, softer fade */
+#fade{transition:opacity .42s cubic-bezier(.4,0,.2,1);background:radial-gradient(120% 90% at 50% 50%,#120a1c,#05030a)}
+/* the interaction prompt eases out as well as in */
+#prompt{transition:opacity .18s ease,transform .18s ease}
+/* bigger screens: a bigger, calmer HUD */
+@media(min-width:1180px){
+ #hud{height:58px;padding:0 16px}#hud .when{font-size:23px}
+ #obj{top:70px;left:16px;max-width:440px;font-size:16px;padding:10px 16px}#objN{font-size:13px}
+ #keys{left:16px;bottom:16px;font-size:13px;padding:7px 12px}#keys b{font-size:17px}
+ #prompt{bottom:56px;font-size:18px;padding:8px 22px 8px 8px}#promptK{width:36px;height:36px;font-size:24px}
+ #areaName{font-size:38px}
+ .toast{font-size:15px}
+}
+/* the phone's key hint sits under the phone, not on it */
+.phtip{bottom:max(2px,env(safe-area-inset-bottom));font-size:12px}
+#cross.idle{opacity:.3;transform:scale(.7)}
+@media(prefers-reduced-motion:reduce){#obj.new,.toast{animation-duration:.01s}}
 </style>
 </head>
 <body>
@@ -746,7 +789,9 @@ body.pgon #hud,body.pgon #vcur{display:none!important}
   <section id="title" class="scr on" data-stage="boot" data-view="main">
     <div class="tflat"><div class="heads" id="heads"></div></div>
     <div id="tfade" class="on"></div>
-    <div class="tshade"></div><div class="tgrain"></div>
+    <div class="tshade"></div>
+    <div class="tcast" id="tcast"><div class="tcglow"></div></div>
+    <div class="tgrain"></div>
     <div class="tplace" id="tplace"><i></i><span id="tplaceN"></span></div>
     <div class="tlogo" id="tlogo"><span class="tl1">OPSEC</span><span class="tl2">DATING SIMULATOR</span><span class="tl3">A visual novel about love, lies and leaving your Bluetooth on.</span></div>
     <div class="tboot" id="tboot"><div class="tbar"><i id="tbootBar"></i></div><span id="tbootT">Loading</span></div>
@@ -1078,7 +1123,7 @@ function hud(){
  $('phoneBtn').style.display='block';
  $('phoneBtn').innerHTML='Phone<span class="kn" style="margin:0 0 0 6px">P</span>'+(S.msgs.some(m=>!m.r)?'<span class="dot"></span>':'');
 }
-function show(id){document.body.classList.toggle('inworld',id==='world');if(id!=='title'&&typeof titleCamOn==='function')titleCamOn(false);if(id==='title'&&typeof vcShow==='function')vcShow(false);setTimeout(updBlur,0);document.querySelectorAll('.scr').forEach(s=>s.classList.toggle('on',s.id===id));$('hud').style.display=id==='title'?'none':'flex';$('gl').style.display=(id!=='title'&&S&&S.inWorld&&G.ok)?'block':'none';if(id!=='world'){WD.active=false;if((id==='title'||id==='hub')&&document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}}}
+function show(id){document.body.classList.toggle('inworld',id==='world');if(id!=='title'&&typeof titleCamOn==='function'){titleCamOn(false);if(typeof titleCast==='function')titleCast(false)}if(id==='title'&&typeof vcShow==='function')vcShow(false);setTimeout(updBlur,0);document.querySelectorAll('.scr').forEach(s=>s.classList.toggle('on',s.id===id));$('hud').style.display=id==='title'?'none':'flex';$('gl').style.display=(id!=='title'&&S&&S.inWorld&&G.ok)?'block':'none';if(id!=='world'){WD.active=false;if((id==='title'||id==='hub')&&document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}}}
 
 /* ============ VN ENGINE ============ */
 let Q=[],onDone=null,typing=null,full='',waiting=false;
@@ -1931,7 +1976,8 @@ function riskRoll(r,caught){
  {let p=[0,.2,.38,.55][r]||0;if(S.inv.hoodie)p-=.12;p-=rank('skill')*.04;p=clamp(p,.04,.9);
   if(S.inv.espresso){S.inv.espresso--;if(!S.inv.espresso)delete S.inv.espresso;return[N('The triple espresso kicks in. You\'re in and out before anyone has blinked.')]}
   const bad=Math.random()<p;if(!bad)return[N('Nobody sees you. '+pick(['Your heart is going like a drum, but nobody sees you.','A door closes somewhere else. You breathe out.','You\'re just another lanyard in a corridor.']))];
-  return scr(caught||'caught').concat([FX({exp:20+r*12})])}}
+  // caught: either a line of what went wrong, or the id of a scene that plays it out
+  return(caught&&/\s/.test(caught)?[N(caught)]:scr(caught||'caught')).concat([FX({exp:20+r*12})])}}
 /* ---- the case board ---- */
 function solveMyst(m,answer,picks){const M=MYST[m];
  const ok=answer===M.a&&picks.length===3&&picks.every(c=>M.ev.includes(c));
@@ -2687,11 +2733,6 @@ astrid.n: Sorry. Am I being loud? It hisses. The radio. Some people find it upse
 ~ Twenty minutes later, the train slows. A neon sign the height of a building slides into the window: THE HALCYON. Beyond it, a vast slab of dark glass and steel with a magenta line of light running round every storey.
 ~ CTRL+ALT+CON.
 [hold astrid off]
-[bg plaza]
-[cut pan plaza]
-~ The station spits you out into the Conference Quarter. A plaza. Plane trees in pots. A coffee cart. A taxi rank. The sky's going orange.
-~ To your left, the Halcyon Hotel: twenty-five storeys of lit windows and a garden behind glass. Ahead, the convention centre's entrance, under letters taller than you: CTRL+ALT+CON.
-* Four thousand people. Seven days. You.
 [sum The train to the Conference Quarter.]
 `;
 SC.d1_doors=`
@@ -2699,6 +2740,9 @@ SC.d1_doors=`
 [cut pan vestibule]
 [hide]
 [flag d1v]
+~ The station spits you out into the Conference Quarter. A plaza. Plane trees in pots. A coffee cart. A taxi rank. The sky's going orange.
+~ To your left, the Halcyon Hotel: twenty-five storeys of lit windows and a garden behind glass. Ahead, the convention centre's entrance, under letters taller than you: CTRL+ALT+CON.
+* Four thousand people. Seven days. You.
 ~ The convention doors slide open. It smells of new carpet, energy drinks and four thousand people's nerves.
 ~ The Foyer: a glass atrium four storeys high, escalators climbing into the light, a giant rotating Lumen logo hanging in the middle of it all like a moon. Banners everywhere. Lanyards everywhere. Somebody is soldering on the floor.
 ~ Ahead, a velvet rope, a queue, and a desk on the west wall marked REGISTRATION. Nobody gets past the rope without a badge.
@@ -11897,6 +11941,32 @@ function titleScreen(){
 }
 /* the logo's lines change alignment and size between stages; measure them before and after and glide each one
    from where it was (FLIP), so nothing jumps before it moves */
+/* ---------- the cast on the right ----------
+   Ellie in front; behind her, two of the others, changed every few seconds (anyone with drawn creator art first).
+   Sizes follow the art: Ellie, head to toe, is 70% of the column; the creator's heights carry over. Drawn-in-code
+   figures stand at Ellie's height. The one in front smiles now and then. */
+const TC={on:false,t:null,i:0,els:[],smile:null};
+const TCH=70*.94; // Ellie's height in vh (70% of a 94vh column)
+function tcFig(id){const A=typeof artOf==='function'&&artOf(id),d=document.createElement('div');d.className='tc';d.dataset.id=id;const inn=document.createElement('div');inn.className='tcin';inn.style.setProperty('--bd',(-Math.random()*6).toFixed(2)+'s');d.appendChild(inn);
+ if(A){const k=TCH/3078,b=A.body,W=b[2]*k,H=(A.foot-A.top)*k;inn.style.width=W+'vh';inn.style.height=H+'vh';
+  const img=new Image();img.src=A.img;img.alt='';img.style.cssText=`left:0;top:${(b[1]-A.top)*k}vh;width:${W}vh;height:${b[3]*k}vh`;inn.appendChild(img);
+  if(A.face&&A.ex.h){const f=new Image();f.src=A.ex.h;f.alt='';f.className='tcface';f.style.cssText=`opacity:0;left:${(A.face[0]-b[0])*k}vh;top:${(A.face[1]-A.top)*k}vh;width:${A.face[2]*k}vh;height:${A.face[3]*k}vh`;inn.appendChild(f)}}
+ else{const k=TCH/447.5;inn.style.width=200*k+'vh';inn.style.height=447.5*k+'vh';inn.innerHTML=fullSVG(id);const sv=inn.firstElementChild;sv.style.cssText=`left:0;top:${-46.5*k}vh;width:${200*k}vh;height:${500*k}vh`}
+ return d}
+function tcPool(){const seen=g=>typeof metEver==='function'&&metEver(g),art=g=>typeof artOf==='function'&&!!artOf(g);
+ return ROM.filter(g=>g!=='ellie').sort((a,b)=>(art(b)-art(a))||(seen(b)-seen(a))||(Math.random()-.5))}
+function titleCast(on){const box=$('tcast');if(!box)return;
+ if(!on){TC.on=false;clearInterval(TC.t);clearInterval(TC.smile);return}
+ if(TC.on)return;TC.on=true;box.querySelectorAll('.tc').forEach(e=>e.remove());TC.pool=tcPool();TC.i=0;
+ const put=(el,slot,delay)=>{box.appendChild(el);void el.offsetWidth;setTimeout(()=>el.classList.add(slot),delay)};
+ TC.els=[tcFig('ellie'),tcFig(TC.pool[0]),tcFig(TC.pool[1])];TC.i=2;
+ put(TC.els[0],'s0',350);put(TC.els[1],'s1',700);put(TC.els[2],'s2',900);
+ // the two behind step out (the left one leftwards, the right one rightwards) and the next two step in
+ TC.t=setInterval(()=>{if(document.hidden)return;for(const s of[1,2]){const old=TC.els[s];old.style.setProperty('--gx',s===1?'-24vw':'26vw');old.classList.remove('s1','s2');old.classList.add('gone');setTimeout(()=>old.remove(),1200);
+  const nx=tcFig(TC.pool[TC.i++%TC.pool.length]);TC.els[s]=nx;put(nx,'s'+s,s===1?650:850)}},9000);
+ TC.smile=setInterval(()=>{const f=TC.els[0]&&TC.els[0].querySelector('.tcface');if(!f||document.hidden)return;f.style.opacity=1;setTimeout(()=>f.style.opacity=0,2600)},7000)}
+// a little parallax with the mouse
+addEventListener('mousemove',e=>{const t=$('title');if(!t||!t.classList.contains('on')||TS.stage!=='menu')return;const c=$('tcast');if(!c)return;c.style.setProperty('--px',((e.clientX/innerWidth-.5)*-18).toFixed(1)+'px');c.style.setProperty('--py',((e.clientY/innerHeight-.5)*-8).toFixed(1)+'px')});
 function titleStage(s){const t=$('title'),L=$('tlogo'),prev=t.dataset.stage;
  const kids=[...L.children],flip=prev&&prev!=='boot'&&prev!==s&&t.classList.contains('on');
  const first=flip?kids.map(k=>k.getBoundingClientRect()):null;
@@ -11905,7 +11975,7 @@ function titleStage(s){const t=$('title'),L=$('tlogo'),prev=t.dataset.stage;
   kids.forEach((k,i)=>{const a=first[i],b=k.getBoundingClientRect();if(!b.width||!a.width)return;const sc=b.width/(k.offsetWidth||1),dx=(a.left-b.left)/sc,dy=(a.top-b.top)/sc,z=a.width/b.width;
    k.style.transformOrigin='0 0';k.animate([{transform:`translate(${dx}px,${dy}px) scale(${z})`},{transform:'none'}],{duration:1100,easing:'cubic-bezier(.7,0,.2,1)'})});
   requestAnimationFrame(()=>{L.style.transition=''})}
- if(s==='menu')setTimeout(()=>titleFocus(),40)}
+ if(s==='menu')setTimeout(()=>titleFocus(),40);titleCast(s==='menu')}
 /* boot: wait for the world, then for the convention's light; then "press any key" */
 function titleBoot(){if(TS.boot)return;TS.t0=performance.now();
  const tick=()=>{if(!$('title').classList.contains('on')){TS.boot=null;return}
@@ -15560,17 +15630,20 @@ function setupInput(){
  addEventListener('keydown',e=>{if(e.key==='Escape')WD.escDown=true},true);
  addEventListener('blur',()=>{WD.keys={};WD.blurAt=performance.now()});
  document.addEventListener('pointerlockerror',()=>{if(!WD.clickLock)return;WD.clickLock=false;WD.lockFails=(WD.lockFails||0)+1;if(WD.lockFails>=3&&!WD.everLocked){WD.noLock=true;$('lockHint').innerHTML='<b>Drag</b> to look around'}});
+ /* The mouse, in one rule: in the world the mouse is captured, and the phone, maps and conversations use the drawn
+    cursor, so the real one never appears or jumps. The only thing that releases it is the browser's own Esc (or
+    leaving the window). Esc from the world opens the phone; Esc with the phone open closes it. Any key or click puts
+    the capture back, with no prompt. */
  document.addEventListener('pointerlockchange',()=>{
   WD.locked=document.pointerLockElement===lockEl();
   if(WD.locked){WD.everLocked=true;WD.lockFails=0;WD.lockAt=performance.now();return}
   WD.unlockAt=performance.now();
-  // our own unlocks, loading screens and the moments after a teleport never count as the player asking for the phone
-  const self=WD.selfUnlock||G.baking||G.lmBusy||performance.now()-(WD.tpAt||0)<2500||!S||S.ending||!S.inWorld;WD.selfUnlock=false;
-  // a lock that dies within a moment of being granted was the browser finishing an Esc press, not the player asking for the phone
-  if(performance.now()-(WD.lockAt||0)<450)return;
-  // Esc released the mouse: that's the "open phone" key
-  // tabbing out also drops the lock: only treat it as Esc if the window still has focus a moment later
-  if(!self&&S&&S.inWorld&&(worldLive()||$('vn').classList.contains('on')))setTimeout(()=>{if(document.hidden||!document.hasFocus()||WD.blurAt&&performance.now()-WD.blurAt<600)return;if(S&&S.inWorld&&!$('ov').classList.contains('on')&&(worldLive()||$('vn').classList.contains('on')))phone()},120);
+  const self=WD.selfUnlock||G.baking||G.lmBusy||!S||S.ending||!S.inWorld;WD.selfUnlock=false;if(self)return;
+  // leaving the window also drops the capture: that's not an Esc, so leave everything as it was
+  setTimeout(()=>{if(document.hidden||!document.hasFocus()||WD.blurAt&&performance.now()-WD.blurAt<600)return;if(!S||!S.inWorld)return;
+   const o=$('ov');
+   if(o.classList.contains('phoneov')){closePhone();return}
+   if(!o.classList.contains('on')&&!$('card').classList.contains('on')&&(worldLive()||$('vn').classList.contains('on')))phone()},90);
  });
  // only explicit clicks count towards the 'pointer lock is impossible here' fallback (e.g. a sandboxed iframe)
  tz.addEventListener('click',()=>{if(WD.touch||!worldLive())return;WD.clickLock=true;tryLock()});
@@ -15581,7 +15654,7 @@ function setupInput(){
  tz.addEventListener('mousedown',e=>{if(WD.noLock)drag=[e.clientX,e.clientY]});
  addEventListener('mouseup',()=>drag=null);
  addEventListener('mousemove',e=>{if(!worldLive()||WD.touch)return;
-  if(locked())look(e.movementX,e.movementY,.0022);
+  if(locked()){if(performance.now()-(WD.lockAt||0)<120||Math.abs(e.movementX)>260||Math.abs(e.movementY)>260)return;look(e.movementX,e.movementY,.0022)}
   else if(drag&&WD.noLock){look(e.clientX-drag[0],e.clientY-drag[1],.0045);drag=[e.clientX,e.clientY]}});
  const joyCenter=()=>{const r=$('joy').getBoundingClientRect();return[r.left+r.width/2,r.top+r.height/2,r.width/2]};
  const tStart=e=>{setTouch(true);for(const t of e.changedTouches){
@@ -15712,7 +15785,7 @@ function objective(){
  return o;
 }
 function newScenes(){if(!S||S.day<1)return[];const L=[];for(const c of WCH){if(ROM.includes(c.id)&&c.when()&&sceneReady(c.id))L.push({id:c.id,reg:c.reg,x:c.x,z:c.z,y:c.y||0,a:areaAt(c.reg,c.x,c.z,c.y||0)})}return L}
-function updObjective(){const o=objective();const n=S.day>0?newScenes().length:0;$('objT').textContent=o?o.t:'';$('objN').textContent=o&&o.far?'(Follow the green light: it\'s in another building)':'';$('obj').style.display=o?'block':'none'}
+function updObjective(){const o=objective();const n=S.day>0?newScenes().length:0;const ot=o?o.t:'';if($('objT').textContent!==ot){$('objT').textContent=ot;const ob=$('obj');if(ot){ob.classList.remove('new');void ob.offsetWidth;ob.classList.add('new')}}$('objN').textContent=o&&o.far?'(Follow the green light: it\'s in another building)':'';$('obj').style.display=o?'block':'none'}
 /* ---------- render ---------- */
 const _c1={r:0,g:0,b:0};
 function storyMark(c){return stepIs(c.id)}
@@ -15758,7 +15831,7 @@ function render(dt){
  cam.fov=vf*180/Math.PI;cam.far=(FAR[WD.reg]||180)+40;cam.updateProjectionMatrix();
  if(TT.on&&$('title').classList.contains('on')){const p=titleCam(cam);zoneCull(WD.reg,p[0],p[1],p[2])}
  else if(WD.cut&&cutOn()){const p=cutCam(cam);zoneCull(WD.reg,p[0],p[1],p[2])}
- else{cam.position.set(WD.x,WD.eye+bob,WD.z);cam.rotation.set(WD.pit,WD.yaw,0);if(typeof trainSway==='function')trainSway(cam);zoneCull(WD.reg,WD.x,WD.eye,WD.z)}
+ else{cam.position.set(WD.x,WD.eye+bob,WD.z);WD.roll=(WD.roll||0)+((worldLive()?-(Math.cos(WD.yaw)*WD.vx-Math.sin(WD.yaw)*WD.vz)*.0022:0)-(WD.roll||0))*Math.min(1,dt*6);cam.rotation.set(WD.pit,WD.yaw,WD.roll,'YXZ');if(typeof trainSway==='function')trainSway(cam);zoneCull(WD.reg,WD.x,WD.eye,WD.z)}
  G.sky.position.copy(cam.position);const su=G.sky.material.uniforms;su.t.value=performance.now()/1000;
  const tod=todNow();if(tod){su.hz.value.setRGB(...tod.hz);su.zn.value.setRGB(...tod.zn);su.st.value=tod.st}
  else{su.hz.value.copy(G.fog.color);if(R.day){su.zn.value.setRGB(.12,.3,.75);su.st.value=0}else{su.zn.value.setRGB(.012,.012,.05);su.st.value=1}}
@@ -15943,7 +16016,9 @@ function loop(t){
  if(live){adaptRes(dt);}
  $('mini').style.display=S.unl.map?'block':'none';
  vcShow(vcActive());
- $('lockHint').style.display=live&&!WD.touch&&!WD.noLock&&!locked()&&!WD.escDown&&performance.now()-(WD.unlockAt||0)>700?'block':'none';
+ $('lockHint').style.display=WD.noLock&&live&&!WD.touch?'block':'none';
+ // after an Esc the mouse is free until the next key or click: the dot in the middle dims to say so, no prompt
+ $('cross').classList.toggle('idle',live&&!WD.touch&&!WD.noLock&&!locked());
  if(live){if(t-icT>66){icT=t;interactCheck()}if(t-mmT>90&&S.unl.map){mmT=t;drawMapCanvas($('mini'),WD.reg,{mini:1,sc:3})}}
 }
 /* drop render resolution when frames get slow, raise it again when there's headroom */
@@ -16370,7 +16445,7 @@ function trainMenu(){
  if(!G.ok||window.__test){if(stepIs('train'))return stepGo();return run([N('The train hums at Platform 4.'),C({t:'Conference Quarter',if:()=>S.day>=1,then:()=>{tripStart('con');return[]}},{t:'Linden Street',then:()=>{tripStart('home');return[]}},{t:'Not yet',then:[]})],hub)}
  stationBoard();
 }
-function fadeTp(fn){if(window.__test){fn();WD.area=null;return}const f=$('fade');sfx('whoosh');f.classList.add('on');setTimeout(()=>{fn();WD.area=null;G.forceFrame=true;setTimeout(()=>f.classList.remove('on'),160)},300)}
+function fadeTp(fn){if(window.__test){fn();WD.area=null;return}const f=$('fade');sfx('whoosh');f.classList.add('on');setTimeout(()=>{fn();WD.area=null;G.forceFrame=true;setTimeout(()=>f.classList.remove('on'),220)},440)}
 /* ---------- characters ---------- */
 /* a spot inside an area: near its middle, on its floor, with room round it; k picks the k-th such spot */
 const SPOTC={};
@@ -16559,7 +16634,7 @@ const CUTS={
    awkward (columns, low ceilings); anywhere else panFor() works one out from the room's shape */
 const PANS={
  plaza:[{eye:[-60,9,128],at:[-86,6,66],to:{eye:[-108,6,118],at:[-88,5,64]},dur:16,fov:52}],
- vestibule:[{eye:[-88,2.4,92],at:[-88,2.4,62],to:{eye:[-88,2,76],at:[-88,2.2,60]},dur:12,fov:50}],
+ vestibule:[{eye:[-88,2.4,92],at:[-88,2.4,62],to:{eye:[-88,2,76],at:[-88,2.2,60]},dur:24,fov:50}],
  foyer:[{eye:[-104,7.5,52],at:[-80,3,-10],to:{eye:[-70,5,48],at:[-90,2.5,-14]},dur:16,fov:54}],
  courtyard:[{orbit:[-5,2,-15],r:28,h:9,h1:6,a0:-.6,a1:.4,dur:18,fov:50}],
  hallA:[{eye:[-13,10.5,-79],at:[-5,3,-124],to:{eye:[3,9,-82],at:[-5,3,-124]},dur:18,fov:50}],
@@ -16957,7 +17032,7 @@ function phone(app){
  if(!S)return;
  const o=$('ov');if((o.classList.contains('on')&&!o.classList.contains('phoneov'))||$('card').classList.contains('on'))return;
  const opening=!o.classList.contains('phoneov');if(opening)PH.day=null;
- if(document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}
+ // the mouse stays captured: the phone uses the drawn cursor (see pointerlockchange in 09_world.js)
  WD.active=false;phThread=null;
  if(app){openApp(app,false);return}
  phApp=null;drawPhone();
@@ -17164,7 +17239,7 @@ function fastTravel(k){if(!AREAS[k])return;S.ftRecent=[k].concat((S.ftRecent||[]
 /* the map of the place you're in (or, from the world map, of somewhere else: look, but you can't travel there) */
 function mapOpen(fromPhone,view){
  if(!S)return;const o=$('ov');if(!(o.classList.contains('wmapov'))){MAPV.from=fromPhone?'phone':'direct';MAPV.fromWorld=false}if((o.classList.contains('on')&&!o.classList.contains('phoneov'))||$('card').classList.contains('on'))return;
- if(document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}
+
  WD.active=false;o.classList.remove('wmapov');
  const mine=!view||(MAPNET[WD.reg]||[WD.reg]).includes(view);const reg=mine&&!view?WD.reg:view;MAPV.base=mine?WD.reg:view;MAPV.reg=mine&&!view?WD.reg:view;
  if(MAPV.reg===WD.reg)MAPV.lv=levelOf(WD.reg,WD.y);else{const L=LEVELS[MAPV.reg]||[[0]];MAPV.lv=(L.find(l=>l[0]===0)||L[0])[0]}
@@ -17227,7 +17302,7 @@ function paintMap(){const cv=$('bmap');if(!cv)return;mapSize(cv);MAPV.sc=clamp(M
 function mapWire(cv){
  const pts=new Map();let moved=0,pinch=0;
  const toW=(px,py)=>{const r=cv.getBoundingClientRect(),k=cv.width/r.width;return[MAPV.ox+((px-r.left)*k-cv.width/2)/MAPV.sc,MAPV.oz+((py-r.top)*k-cv.height/2)/MAPV.sc]};
- cv.onpointerdown=e=>{cv.setPointerCapture(e.pointerId);pts.set(e.pointerId,[e.clientX,e.clientY]);moved=0;if(pts.size===2){const[a,b]=[...pts.values()];pinch=Math.hypot(a[0]-b[0],a[1]-b[1])}};
+ cv.onpointerdown=e=>{try{cv.setPointerCapture(e.pointerId)}catch(_){}pts.set(e.pointerId,[e.clientX,e.clientY]);moved=0;if(pts.size===2){const[a,b]=[...pts.values()];pinch=Math.hypot(a[0]-b[0],a[1]-b[1])}};
  cv.onpointermove=e=>{if(!pts.has(e.pointerId))return;const p=pts.get(e.pointerId),r=cv.getBoundingClientRect(),k=cv.width/r.width;
   if(pts.size===1){const dx=e.clientX-p[0],dy=e.clientY-p[1];moved+=Math.abs(dx)+Math.abs(dy);MAPV.ox-=dx*k/MAPV.sc;MAPV.oz-=dy*k/MAPV.sc}
   pts.set(e.pointerId,[e.clientX,e.clientY]);
@@ -17385,7 +17460,6 @@ function WDEP(){const story=typeof stepIs==='function'&&stepIs('train'),off=f=>t
 /* ---- opening ---- */
 function worldOpen(mode,from){if(!S)return;WV.mode=mode||'phone';WV.from=from||(mode==='phone'?'phone':'world');
  WV.sel=WV.mode==='station'?null:WV.mode==='taxi'?'station':(WV.sel||wHere()||'con');
- if(document.pointerLockElement&&WV.mode==='phone'){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}
  WD.active=false;if(typeof sfx==='function')sfx('phoneOpen');worldDraw()}
 function worldClose(){const o=$('ov');o.classList.remove('wmapov');if(WV.mode==='phone'){closePhone();return}delete o.dataset.app;delete o.dataset.from;closeOv();o.classList.remove('phoneov','mapov','appov');hub()}
 function worldDraw(){const m=WV.mode,o=ov(`<div class="wmap wm-${m}"><div class="wtop">${m==='phone'?'<button class="pback" id="wback" aria-label="Back">‹</button>':''}
@@ -17497,7 +17571,7 @@ addEventListener('keydown',e=>{
   if(!ovOn){e.preventDefault();phone();return}
  }
  // Esc on a map (a building's or the city's) closes it outright; the on-screen ‹ City button is the way back out
- if(k==='Escape'&&isPhone){e.preventDefault();const ap=$('ov').dataset.app;if(ap==='world'&&WV.mode!=='phone')worldClose();else if(ap==='map'||ap==='world')closePhone();else if(ap)phoneBack();else closePhone();return}
+ if(k==='Escape'&&isPhone){e.preventDefault();WD.phoneEscAt=performance.now();const ap=$('ov').dataset.app;if(ap==='world'&&WV.mode!=='phone')worldClose();else if(ap==='map'||ap==='world')closePhone();else if(ap)phoneBack();else closePhone();return}
  // Esc opens the phone (in the world the browser also uses Esc to release the mouse, which opens it too)
  if(k==='Escape'&&!ovOn&&!$('title').classList.contains('on')&&!$('card').classList.contains('on')){e.preventDefault();phone();return}
  if($('card').classList.contains('on')&&(k===' '||k==='Enter')){e.preventDefault();$('card').click();return}
@@ -17523,7 +17597,7 @@ $('vn').addEventListener('click',e=>{if(e.target.closest('#chs')||e.target.close
 /* On desktop the mouse stays captured (pointer-locked) the whole time you're in the 3D world, including
    conversations and minigames, so you never have to click your way back in. While a conversation or
    overlay is up, mouse movement drives this drawn cursor instead of the camera, and clicks, hovers,
-   sliders and the wheel are forwarded to whatever is under it. Only the phone (Esc/P) frees the real mouse. */
+   sliders, drags and the wheel are forwarded to whatever is under it: the phone, maps and conversations all use it. Only Esc frees the real mouse. */
 const VC={x:0,y:0,on:false,hover:null,drag:null};
 const lockEl=()=>$('app');
 const locked=()=>document.pointerLockElement===lockEl();
@@ -17535,16 +17609,18 @@ function vcMove(dx,dy){VC.x=clamp(VC.x+dx,0,innerWidth-2);VC.y=clamp(VC.y+dy,0,i
 function vcTarget(){const c=$('vcur');c.style.visibility='hidden';const el=document.elementFromPoint(VC.x,VC.y);c.style.visibility='';return el}
 function vcHover(el){const b=el&&el.closest?el.closest('button,input,.loc,#box,.app,.chat,label'):null;if(b===VC.hover)return;if(VC.hover)VC.hover.classList.remove('vhover');VC.hover=b;$('vcur').classList.toggle('hot',!!(b&&!b.disabled));if(b){b.classList.add('vhover');if(b.tagName==='BUTTON'&&!b.disabled&&typeof sfx==='function')sfx('hover')}}
 function vcSlide(r){const R=r.getBoundingClientRect(),t=clamp((VC.x-R.left)/R.width,0,1),mn=+r.min||0,mx=+r.max||100,st=+r.step||1;const v=Math.round((mn+t*(mx-mn))/st)*st;if(+r.value!==v){r.value=v;r.dispatchEvent(new Event('input',{bubbles:true}))}}
-document.addEventListener('mousemove',e=>{if(!e.isTrusted||!vcActive())return;vcMove(e.movementX,e.movementY)});
+const vcPtr=(type,el,b)=>{try{el.dispatchEvent(new PointerEvent(type,{bubbles:true,cancelable:true,pointerId:1,pointerType:'mouse',isPrimary:true,button:type==='pointermove'?-1:0,buttons:b,clientX:VC.x,clientY:VC.y}))}catch(_){}};
+document.addEventListener('mousemove',e=>{if(!e.isTrusted||!vcActive())return;if(VC.pdown&&(Math.abs(e.movementX)>260||Math.abs(e.movementY)>260))return;vcMove(e.movementX,e.movementY);if(VC.pdown)vcPtr('pointermove',VC.pdown,1)});
 document.addEventListener('mousedown',e=>{if(!e.isTrusted||!vcActive()||e.button!==0)return;const el=vcTarget();if(!el)return;
  const r=el.closest&&el.closest('input[type=range]');if(r){VC.drag=r;vcSlide(r);return}
- el.dispatchEvent(new MouseEvent('mousedown',{bubbles:true,cancelable:true,clientX:VC.x,clientY:VC.y}));VC.down=el});
+ vcPtr('pointerdown',el,1);VC.pdown=el;el.dispatchEvent(new MouseEvent('mousedown',{bubbles:true,cancelable:true,clientX:VC.x,clientY:VC.y}));VC.down=el});
 document.addEventListener('mouseup',e=>{if(!e.isTrusted||!vcActive()||e.button!==0)return;
  if(VC.drag){VC.drag.dispatchEvent(new Event('change',{bubbles:true}));VC.drag=null;return}
+ if(VC.pdown){vcPtr('pointerup',VC.pdown,0);VC.pdown=null}
  const el=vcTarget();if(!el||!VC.down)return;VC.down=null;
  if(el.closest('button')){const b=el.closest('button');if(!b.disabled)b.click();return}
  el.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,clientX:VC.x,clientY:VC.y,view:window}))});
-document.addEventListener('wheel',e=>{if(!vcActive())return;let el=vcTarget();while(el&&el!==document.body){const cs=getComputedStyle(el);if(/(auto|scroll)/.test(cs.overflowY)&&el.scrollHeight>el.clientHeight){el.scrollBy(0,e.deltaY);break}el=el.parentElement}},{passive:true});
+document.addEventListener('wheel',e=>{if(!e.isTrusted||!vcActive())return;let el=vcTarget();if(el&&el.tagName==='CANVAS'){el.dispatchEvent(new WheelEvent('wheel',{bubbles:true,cancelable:true,deltaY:e.deltaY,deltaX:e.deltaX,clientX:VC.x,clientY:VC.y}));return}while(el&&el!==document.body){const cs=getComputedStyle(el);if(/(auto|scroll)/.test(cs.overflowY)&&el.scrollHeight>el.clientHeight){el.scrollBy(0,e.deltaY);break}el=el.parentElement}},{passive:true});
 
 /* ============ AUDIO ============ */
 /* All sound is synthesised with Web Audio. Area music and ambience loops are rendered once with an
@@ -17583,7 +17659,9 @@ const AREA_AUD={coachA:['home','train'],coachB:['home','train'],coachC:['home','
  corridor:['hotel','hotel'],room1337:['hotel','hotel'],room1336:['party','bar'],housekeeping:['hotel','hotel'],stairwell:['hotel','hotel'],roof:['night','wind'],plantdeck:['night','wind']};
 const BG_AUD={carriage:['home','train'],con:['con','hum'],lock:['con','room'],ctf:['con','room'],soc:['con','room'],stream:['con','hum'],hotel:['hotel','hotel'],roof:['night','wind'],dawn:['night','wind'],stage:['hall','hall'],keynote:['hall','hall'],vendor:['con','hum'],party:['party','bar'],void:['tense',null],flat:['home','home'],bakery:['home','bakery'],office:['hotel','office'],train:['home','station'],cos:['con','hum'],chill:['night','room'],bar:['bar','bar'],lobby:['hotel','lobby']};
 function audioScene(){
- if(!S||$('title').classList.contains('on'))return['night',null];
+ // the title stays silent through loading and "press any key"; the music comes in with the menu
+ if($('title').classList.contains('on'))return typeof TS!=='undefined'&&TS.stage==='menu'?['night',null]:[null,null];
+ if(!S)return['night',null];
  if(S.ending)return BG_AUD[CURBG]||['night',null];
  const vn=$('vn').classList.contains('on'),dimmed=$('bg').classList.contains('bg-dim');
  if(vn&&!dimmed&&CURBG&&BG_AUD[CURBG])return BG_AUD[CURBG];

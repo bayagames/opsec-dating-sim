@@ -401,7 +401,7 @@ function trainMenu(){
  if(!G.ok||window.__test){if(stepIs('train'))return stepGo();return run([N('The train hums at Platform 4.'),C({t:'Conference Quarter',if:()=>S.day>=1,then:()=>{tripStart('con');return[]}},{t:'Linden Street',then:()=>{tripStart('home');return[]}},{t:'Not yet',then:[]})],hub)}
  stationBoard();
 }
-function fadeTp(fn){if(window.__test){fn();WD.area=null;return}const f=$('fade');sfx('whoosh');f.classList.add('on');setTimeout(()=>{fn();WD.area=null;G.forceFrame=true;setTimeout(()=>f.classList.remove('on'),160)},300)}
+function fadeTp(fn){if(window.__test){fn();WD.area=null;return}const f=$('fade');sfx('whoosh');f.classList.add('on');setTimeout(()=>{fn();WD.area=null;G.forceFrame=true;setTimeout(()=>f.classList.remove('on'),220)},440)}
 /* ---------- characters ---------- */
 /* a spot inside an area: near its middle, on its floor, with room round it; k picks the k-th such spot */
 const SPOTC={};

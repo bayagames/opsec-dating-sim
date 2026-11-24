@@ -56,17 +56,20 @@ function setupInput(){
  addEventListener('keydown',e=>{if(e.key==='Escape')WD.escDown=true},true);
  addEventListener('blur',()=>{WD.keys={};WD.blurAt=performance.now()});
  document.addEventListener('pointerlockerror',()=>{if(!WD.clickLock)return;WD.clickLock=false;WD.lockFails=(WD.lockFails||0)+1;if(WD.lockFails>=3&&!WD.everLocked){WD.noLock=true;$('lockHint').innerHTML='<b>Drag</b> to look around'}});
+ /* The mouse, in one rule: in the world the mouse is captured, and the phone, maps and conversations use the drawn
+    cursor, so the real one never appears or jumps. The only thing that releases it is the browser's own Esc (or
+    leaving the window). Esc from the world opens the phone; Esc with the phone open closes it. Any key or click puts
+    the capture back, with no prompt. */
  document.addEventListener('pointerlockchange',()=>{
   WD.locked=document.pointerLockElement===lockEl();
   if(WD.locked){WD.everLocked=true;WD.lockFails=0;WD.lockAt=performance.now();return}
   WD.unlockAt=performance.now();
-  // our own unlocks, loading screens and the moments after a teleport never count as the player asking for the phone
-  const self=WD.selfUnlock||G.baking||G.lmBusy||performance.now()-(WD.tpAt||0)<2500||!S||S.ending||!S.inWorld;WD.selfUnlock=false;
-  // a lock that dies within a moment of being granted was the browser finishing an Esc press, not the player asking for the phone
-  if(performance.now()-(WD.lockAt||0)<450)return;
-  // Esc released the mouse: that's the "open phone" key
-  // tabbing out also drops the lock: only treat it as Esc if the window still has focus a moment later
-  if(!self&&S&&S.inWorld&&(worldLive()||$('vn').classList.contains('on')))setTimeout(()=>{if(document.hidden||!document.hasFocus()||WD.blurAt&&performance.now()-WD.blurAt<600)return;if(S&&S.inWorld&&!$('ov').classList.contains('on')&&(worldLive()||$('vn').classList.contains('on')))phone()},120);
+  const self=WD.selfUnlock||G.baking||G.lmBusy||!S||S.ending||!S.inWorld;WD.selfUnlock=false;if(self)return;
+  // leaving the window also drops the capture: that's not an Esc, so leave everything as it was
+  setTimeout(()=>{if(document.hidden||!document.hasFocus()||WD.blurAt&&performance.now()-WD.blurAt<600)return;if(!S||!S.inWorld)return;
+   const o=$('ov');
+   if(o.classList.contains('phoneov')){closePhone();return}
+   if(!o.classList.contains('on')&&!$('card').classList.contains('on')&&(worldLive()||$('vn').classList.contains('on')))phone()},90);
  });
  // only explicit clicks count towards the 'pointer lock is impossible here' fallback (e.g. a sandboxed iframe)
  tz.addEventListener('click',()=>{if(WD.touch||!worldLive())return;WD.clickLock=true;tryLock()});
@@ -77,7 +80,7 @@ function setupInput(){
  tz.addEventListener('mousedown',e=>{if(WD.noLock)drag=[e.clientX,e.clientY]});
  addEventListener('mouseup',()=>drag=null);
  addEventListener('mousemove',e=>{if(!worldLive()||WD.touch)return;
-  if(locked())look(e.movementX,e.movementY,.0022);
+  if(locked()){if(performance.now()-(WD.lockAt||0)<120||Math.abs(e.movementX)>260||Math.abs(e.movementY)>260)return;look(e.movementX,e.movementY,.0022)}
   else if(drag&&WD.noLock){look(e.clientX-drag[0],e.clientY-drag[1],.0045);drag=[e.clientX,e.clientY]}});
  const joyCenter=()=>{const r=$('joy').getBoundingClientRect();return[r.left+r.width/2,r.top+r.height/2,r.width/2]};
  const tStart=e=>{setTouch(true);for(const t of e.changedTouches){
@@ -208,7 +211,7 @@ function objective(){
  return o;
 }
 function newScenes(){if(!S||S.day<1)return[];const L=[];for(const c of WCH){if(ROM.includes(c.id)&&c.when()&&sceneReady(c.id))L.push({id:c.id,reg:c.reg,x:c.x,z:c.z,y:c.y||0,a:areaAt(c.reg,c.x,c.z,c.y||0)})}return L}
-function updObjective(){const o=objective();const n=S.day>0?newScenes().length:0;$('objT').textContent=o?o.t:'';$('objN').textContent=o&&o.far?'(Follow the green light: it\'s in another building)':'';$('obj').style.display=o?'block':'none'}
+function updObjective(){const o=objective();const n=S.day>0?newScenes().length:0;const ot=o?o.t:'';if($('objT').textContent!==ot){$('objT').textContent=ot;const ob=$('obj');if(ot){ob.classList.remove('new');void ob.offsetWidth;ob.classList.add('new')}}$('objN').textContent=o&&o.far?'(Follow the green light: it\'s in another building)':'';$('obj').style.display=o?'block':'none'}
 /* ---------- render ---------- */
 const _c1={r:0,g:0,b:0};
 function storyMark(c){return stepIs(c.id)}
@@ -254,7 +257,7 @@ function render(dt){
  cam.fov=vf*180/Math.PI;cam.far=(FAR[WD.reg]||180)+40;cam.updateProjectionMatrix();
  if(TT.on&&$('title').classList.contains('on')){const p=titleCam(cam);zoneCull(WD.reg,p[0],p[1],p[2])}
  else if(WD.cut&&cutOn()){const p=cutCam(cam);zoneCull(WD.reg,p[0],p[1],p[2])}
- else{cam.position.set(WD.x,WD.eye+bob,WD.z);cam.rotation.set(WD.pit,WD.yaw,0);if(typeof trainSway==='function')trainSway(cam);zoneCull(WD.reg,WD.x,WD.eye,WD.z)}
+ else{cam.position.set(WD.x,WD.eye+bob,WD.z);WD.roll=(WD.roll||0)+((worldLive()?-(Math.cos(WD.yaw)*WD.vx-Math.sin(WD.yaw)*WD.vz)*.0022:0)-(WD.roll||0))*Math.min(1,dt*6);cam.rotation.set(WD.pit,WD.yaw,WD.roll,'YXZ');if(typeof trainSway==='function')trainSway(cam);zoneCull(WD.reg,WD.x,WD.eye,WD.z)}
  G.sky.position.copy(cam.position);const su=G.sky.material.uniforms;su.t.value=performance.now()/1000;
  const tod=todNow();if(tod){su.hz.value.setRGB(...tod.hz);su.zn.value.setRGB(...tod.zn);su.st.value=tod.st}
  else{su.hz.value.copy(G.fog.color);if(R.day){su.zn.value.setRGB(.12,.3,.75);su.st.value=0}else{su.zn.value.setRGB(.012,.012,.05);su.st.value=1}}
@@ -439,7 +442,9 @@ function loop(t){
  if(live){adaptRes(dt);}
  $('mini').style.display=S.unl.map?'block':'none';
  vcShow(vcActive());
- $('lockHint').style.display=live&&!WD.touch&&!WD.noLock&&!locked()&&!WD.escDown&&performance.now()-(WD.unlockAt||0)>700?'block':'none';
+ $('lockHint').style.display=WD.noLock&&live&&!WD.touch?'block':'none';
+ // after an Esc the mouse is free until the next key or click: the dot in the middle dims to say so, no prompt
+ $('cross').classList.toggle('idle',live&&!WD.touch&&!WD.noLock&&!locked());
  if(live){if(t-icT>66){icT=t;interactCheck()}if(t-mmT>90&&S.unl.map){mmT=t;drawMapCanvas($('mini'),WD.reg,{mini:1,sc:3})}}
 }
 /* drop render resolution when frames get slow, raise it again when there's headroom */
