@@ -12423,12 +12423,12 @@ const G={qlog:window.__qlog?[]:null,qd:{},sun:{},zones:{},lmK:1,LK:7.6,HK:5.5,ok
 const lin=c=>c<=.04045?c/12.92:Math.pow((c+.055)/1.055,2.4);
 const QUALITY={
  low:{dpr:1,lights:6,bloom:false,msaa:0,std:false,shadowBlobs:true},
- medium:{dpr:1.5,lights:10,bloom:true,msaa:0,std:true,env:true,grade:true,bump:true},
- high:{dpr:2,lights:16,bloom:true,msaa:0,fxaa:true,std:true,env:true,grade:true,ao:true,bump:true}
+ medium:{dpr:1.5,lights:10,bloom:true,msaa:0,std:true,env:true,grade:true,ao:true,aoS:10,bump:true},
+ high:{dpr:2,lights:16,bloom:true,msaa:0,fxaa:true,std:true,env:true,grade:true,ao:true,aoS:16,bump:true}
 };
 /* the look, in one place: emissive gain is compressed above 1 so signs and fixtures read as lit without
    blooming into fog; bloom only catches what is genuinely bright */
-const LOOK={exposure:1.05,hemi:3.2,fill:.5,env:{home:.6,con:.5,f13:.55,office:.7,station:.7,train:.75},bloomStr:.17,bloomRad:.42,bloomThr:1.3,ao:.85,sat:1.1,con:1.08,vig:.12,light:7.6,reach:1.3,bake:1.7,bakeFill:.13,bakeEnv:.3};
+const LOOK={exposure:1.05,hemi:3.2,fill:.5,env:{home:.6,con:.5,f13:.55,office:.7,station:.7,train:.75},bloomStr:.17,bloomRad:.42,bloomThr:1.3,ao:1,sat:1.1,con:1.08,vig:.12,light:7.6,reach:1.3,bake:1.7,bakeFill:.045,bakeEnv:.3};
 /* ---- textures: every texture gets its own canvas; small non-repeating ones are packed into atlases later ---- */
 function tex(key,w,h,paint){
  if(G.tx[key])return key;
@@ -12626,7 +12626,8 @@ function setQuality(q){
   // glossy floors right under bright lights can overflow half-float to Inf; bloom would smear that into NaN
   // ambient occlusion: contact shadows where walls meet floors, under furniture, round people's feet
   if(Q.ao&&T.GTAOPass){try{const ao=new T.GTAOPass(G.scene,G.cam,Math.max(1,size.x>>1),Math.max(1,size.y>>1));
-   ao.updateGtaoMaterial({radius:.55,distanceExponent:1.6,thickness:1.2,scale:1,samples:12,distanceFallOff:1});ao.updatePdMaterial({lumaPhi:10,depthPhi:2,normalPhi:3,radius:6,rings:2,samples:12});ao.blendIntensity=LOOK.ao;
+   // reach about a metre: enough to darken the floor under a chair or table, the gap behind a counter, the corner of a room
+   ao.updateGtaoMaterial({radius:1.05,distanceExponent:1.4,thickness:1.6,scale:1.25,samples:Q.aoS||12,distanceFallOff:1});ao.updatePdMaterial({lumaPhi:10,depthPhi:2,normalPhi:3,radius:6,rings:2,samples:12});ao.blendIntensity=LOOK.ao;
    // reversed depth: the AO and denoise shaders expect 0 = near, 1 = far
    if(G.revZ)for(const m of[ao.gtaoMaterial,ao.pdMaterial]){m.fragmentShader=m.fragmentShader.replace(/return (textureLod|texelFetch)\(tDepth/g,'return 1.0-$1(tDepth');m.needsUpdate=true}
    // cut-out characters, glass, the sky and markers would stamp rectangles into the AO buffer: leave them out
@@ -12916,7 +12917,7 @@ function anonSVG(v){
    4. gutters are dilated and the result is packed to 8-bit RGBM, which the materials read as a lightMap.
    So all light comes from the level's own sources, and every source casts shadows on everything in its reach.
    Characters and other moving things sample the same lights on the CPU (probeAt). */
-const BAKE={cube:448,fill:.06,soft:.15,rgbm:8,knee:.85,white:2.4};
+const BAKE={cube:448,fill:.2,soft:.15,rgbm:8,knee:.85,white:2.4};
 const PD12='const vec2 PD[12]=vec2[](vec2(-.326,-.406),vec2(-.840,-.074),vec2(-.696,.457),vec2(-.203,.621),vec2(.962,-.195),vec2(.473,-.480),vec2(.519,.767),vec2(.185,-.893),vec2(.507,.064),vec2(.896,.412),vec2(-.322,-.933),vec2(-.792,-.598));';
 function bakeOK(){const r=G.r;if(/[?&]nobake\b/.test(location.search))return false;return !!(r&&r.capabilities.isWebGL2&&(r.extensions.has('EXT_color_buffer_half_float')||r.extensions.has('EXT_color_buffer_float')))}
 function bakeMats(){
@@ -16180,10 +16181,10 @@ function render(dt){
  G.hT=G.hT||new T.Color();G.hT.setRGB(amb[0]*1.25,amb[1]*1.25,amb[2]*1.35,T.SRGBColorSpace);G.hemi.color.lerp(G.hT,ease);
  G.gT=G.gT||new T.Color();G.gT.setRGB(amb[0]*.55,amb[1]*.5,amb[2]*.5,T.SRGBColorSpace);G.hemi.groundColor.lerp(G.gT,ease);
  // with baked light the sources do the work: only a faint fill remains (more outdoors and in daylight)
- const fillK=G.baked?(R.day?LOOK.bakeFill*1.2:A&&A.out?LOOK.bakeFill*1.8:LOOK.bakeFill):(QUALITY[G.q].env?LOOK.fill:1);
+ const fillK=G.baked?(A&&A.out?.36:LOOK.bakeFill*(R.day?1:1.6)):(QUALITY[G.q].env?LOOK.fill:1);
  G.hemi.intensity=(A&&A.out?1.2*(TOD?TOD.sun:1):1)*G.HK*fillK*(TOD&&!(A&&A.out)?TOD.inside:1);
  // reflections + directional fill from the region's environment (medium/high); outdoors leans on the sky instead
- if(QUALITY[G.q].env){const env=buildEnv(WD.reg);if(G.scene.environment!==env)G.scene.environment=env;const ek=(LOOK.env[WD.reg]||.7)*(A&&A.out?.55:1)*(A&&A.envk||1)*(G.baked&&!R.day?LOOK.bakeEnv:1);
+ if(QUALITY[G.q].env){const env=buildEnv(WD.reg);if(G.scene.environment!==env)G.scene.environment=env;const ek=(LOOK.env[WD.reg]||.7)*(A&&A.out?.55:1)*(A&&A.envk||1)*(G.baked&&!(A&&A.out)?LOOK.bakeEnv:1);
   G.scene.environmentIntensity=G.scene.environmentIntensity===undefined?ek:G.scene.environmentIntensity+(ek-G.scene.environmentIntensity)*ease}else G.scene.environment=null;
  if(G.grade){const u=G.grade.uniforms;u.t.value=performance.now()/1000;u.res.value=u.res.value||new T.Vector2();u.res.value.set(w,h);u.sat.value=LOOK.sat;u.con.value=LOOK.con;u.vig.value=LOOK.vig;
   u.sh.value=u.sh.value||new T.Vector3(.55,.25,.9);u.hi.value=u.hi.value||new T.Vector3(1.04,1.,.95)}

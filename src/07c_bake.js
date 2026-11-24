@@ -7,7 +7,7 @@
    4. gutters are dilated and the result is packed to 8-bit RGBM, which the materials read as a lightMap.
    So all light comes from the level's own sources, and every source casts shadows on everything in its reach.
    Characters and other moving things sample the same lights on the CPU (probeAt). */
-const BAKE={cube:448,fill:.06,soft:.15,rgbm:8,knee:.85,white:2.4};
+const BAKE={cube:448,fill:.2,soft:.15,rgbm:8,knee:.85,white:2.4};
 const PD12='const vec2 PD[12]=vec2[](vec2(-.326,-.406),vec2(-.840,-.074),vec2(-.696,.457),vec2(-.203,.621),vec2(.962,-.195),vec2(.473,-.480),vec2(.519,.767),vec2(.185,-.893),vec2(.507,.064),vec2(.896,.412),vec2(-.322,-.933),vec2(-.792,-.598));';
 function bakeOK(){const r=G.r;if(/[?&]nobake\b/.test(location.search))return false;return !!(r&&r.capabilities.isWebGL2&&(r.extensions.has('EXT_color_buffer_half_float')||r.extensions.has('EXT_color_buffer_float')))}
 function bakeMats(){

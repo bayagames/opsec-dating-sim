@@ -7,12 +7,12 @@ const G={qlog:window.__qlog?[]:null,qd:{},sun:{},zones:{},lmK:1,LK:7.6,HK:5.5,ok
 const lin=c=>c<=.04045?c/12.92:Math.pow((c+.055)/1.055,2.4);
 const QUALITY={
  low:{dpr:1,lights:6,bloom:false,msaa:0,std:false,shadowBlobs:true},
- medium:{dpr:1.5,lights:10,bloom:true,msaa:0,std:true,env:true,grade:true,bump:true},
- high:{dpr:2,lights:16,bloom:true,msaa:0,fxaa:true,std:true,env:true,grade:true,ao:true,bump:true}
+ medium:{dpr:1.5,lights:10,bloom:true,msaa:0,std:true,env:true,grade:true,ao:true,aoS:10,bump:true},
+ high:{dpr:2,lights:16,bloom:true,msaa:0,fxaa:true,std:true,env:true,grade:true,ao:true,aoS:16,bump:true}
 };
 /* the look, in one place: emissive gain is compressed above 1 so signs and fixtures read as lit without
    blooming into fog; bloom only catches what is genuinely bright */
-const LOOK={exposure:1.05,hemi:3.2,fill:.5,env:{home:.6,con:.5,f13:.55,office:.7,station:.7,train:.75},bloomStr:.17,bloomRad:.42,bloomThr:1.3,ao:.85,sat:1.1,con:1.08,vig:.12,light:7.6,reach:1.3,bake:1.7,bakeFill:.13,bakeEnv:.3};
+const LOOK={exposure:1.05,hemi:3.2,fill:.5,env:{home:.6,con:.5,f13:.55,office:.7,station:.7,train:.75},bloomStr:.17,bloomRad:.42,bloomThr:1.3,ao:1,sat:1.1,con:1.08,vig:.12,light:7.6,reach:1.3,bake:1.7,bakeFill:.045,bakeEnv:.3};
 /* ---- textures: every texture gets its own canvas; small non-repeating ones are packed into atlases later ---- */
 function tex(key,w,h,paint){
  if(G.tx[key])return key;
@@ -210,7 +210,8 @@ function setQuality(q){
   // glossy floors right under bright lights can overflow half-float to Inf; bloom would smear that into NaN
   // ambient occlusion: contact shadows where walls meet floors, under furniture, round people's feet
   if(Q.ao&&T.GTAOPass){try{const ao=new T.GTAOPass(G.scene,G.cam,Math.max(1,size.x>>1),Math.max(1,size.y>>1));
-   ao.updateGtaoMaterial({radius:.55,distanceExponent:1.6,thickness:1.2,scale:1,samples:12,distanceFallOff:1});ao.updatePdMaterial({lumaPhi:10,depthPhi:2,normalPhi:3,radius:6,rings:2,samples:12});ao.blendIntensity=LOOK.ao;
+   // reach about a metre: enough to darken the floor under a chair or table, the gap behind a counter, the corner of a room
+   ao.updateGtaoMaterial({radius:1.05,distanceExponent:1.4,thickness:1.6,scale:1.25,samples:Q.aoS||12,distanceFallOff:1});ao.updatePdMaterial({lumaPhi:10,depthPhi:2,normalPhi:3,radius:6,rings:2,samples:12});ao.blendIntensity=LOOK.ao;
    // reversed depth: the AO and denoise shaders expect 0 = near, 1 = far
    if(G.revZ)for(const m of[ao.gtaoMaterial,ao.pdMaterial]){m.fragmentShader=m.fragmentShader.replace(/return (textureLod|texelFetch)\(tDepth/g,'return 1.0-$1(tDepth');m.needsUpdate=true}
    // cut-out characters, glass, the sky and markers would stamp rectangles into the AO buffer: leave them out
