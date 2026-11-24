@@ -801,7 +801,7 @@ body.pgon #hud,body.pgon #vcur{display:none!important}
 .pglast{flex:none;font:600 13px 'Chakra Petch',sans-serif;color:var(--ink);background:#1b1026;border:1px solid #ffffff22;border-radius:999px;padding:8px 16px;cursor:pointer;transition:background .2s,border-color .2s}
 .pglast:hover{border-color:var(--butter)}.pglast.on{background:var(--butter);color:#1b1026;border-color:var(--butter)}.pglast:disabled{opacity:.35;cursor:default}
 .ccol{fill:#ffffff05;stroke:#ffffff0a}
-.cday{font:15px 'VT323',monospace;letter-spacing:.35em;fill:#8f7da3}
+.pgday{font:15px 'VT323',monospace;letter-spacing:.35em;fill:#8f7da3}
 .cdec path{fill:#1b1026;stroke:var(--coral);stroke-width:2}.cdec text{font:600 12px 'Chakra Petch',sans-serif;fill:var(--coral);letter-spacing:.03em}
 .ce{fill:none;stroke:#ffffff1a;stroke-width:2.4;transition:stroke .3s,opacity .3s}
 .ce.lit{stroke:#8affc1aa;stroke-width:3}
@@ -920,6 +920,51 @@ h1,h2,h3,h4{font-family:'Chakra Petch',sans-serif}
 #pgView.focus .ce.hl.onpath{stroke:var(--butter)}
 .ct,.eg,.ce{transition:opacity .25s ease,stroke .25s ease}
 .lg.lit{background:transparent;border:0;border-top:3px solid var(--mint);border-radius:0;height:0;margin-top:6px}
+/* ============ polish pass 3 ============ */
+/* notifications: over an app or the phone they gather in the bottom right, off the headers and tabs */
+body:has(#ov.on) #toasts{top:auto;bottom:22px;left:auto;right:20px;align-items:flex-end}
+/* empty states: a quiet centred note instead of a grey line in the corner */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px;padding:48px 20px;color:var(--dim)}
+.empty i{font-style:normal;width:46px;height:46px;border-radius:12px;display:grid;place-items:center;border:1px solid var(--hair);background:#ffffff07;font-size:22px;margin-bottom:6px;color:#ffffff88}
+.empty b{font:600 16px 'Chakra Petch',sans-serif;color:var(--ink);letter-spacing:.02em}
+.empty span{font-size:13px;max-width:34em;line-height:1.5}
+/* the calendar's week strip */
+.cweek{gap:4px}
+.cday{border:1px solid var(--hair);border-radius:8px;background:#ffffff06;padding:8px 4px 7px;transition:background .15s,border-color .15s}
+.cday b{font:600 13px 'Chakra Petch',sans-serif;letter-spacing:.04em}
+.cday small{font:500 10.5px 'Inter',sans-serif;color:var(--dim);letter-spacing:0}
+.cday.on{border-color:var(--butter);background:#ffd16614}.cday.now b{color:var(--butter)}.cday.past{opacity:.6}
+.cday:hover{border-color:#ffffff40}
+/* the rank ladders: names that fit */
+.rung{padding:7px 3px;border-radius:6px;gap:1px}.rung b{font:600 14px 'Chakra Petch',sans-serif}
+.rung span{display:none}.rung.cur{flex:2.4}.rung.cur span{display:block;font:600 11px/1.25 'Inter',sans-serif;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rung small{font-size:9.5px}
+.rung.cur{outline:1px solid var(--butter);background:#ffd16612}
+.sbox h4 .term{font:600 12px 'Chakra Petch',sans-serif;letter-spacing:.06em;color:var(--butter);margin-left:6px}
+/* the loading screen: where you're going, how far along, and something worth knowing while you wait */
+#loading{background:radial-gradient(70% 60% at 50% 45%,#1a1224,#07050a 75%)}
+#loading .ldin{display:flex;flex-direction:column;align-items:center;gap:0;max-width:min(560px,86vw);animation:ldIn .6s cubic-bezier(.2,.8,.2,1)}
+@keyframes ldIn{from{opacity:0;transform:translateY(10px)}}
+#loading .ldk{font:600 11px 'Chakra Petch',sans-serif;letter-spacing:.32em;text-transform:uppercase;color:var(--coral)}
+#loading b{font:700 clamp(30px,4vw,44px)/1.1 'Chakra Petch',sans-serif;color:var(--ink);margin:8px 0 22px;letter-spacing:.01em}
+#loading .lbar{width:min(360px,70vw);height:3px;border-radius:2px;background:#ffffff14}
+#loading .lbar i{background:linear-gradient(90deg,var(--coral),var(--butter));box-shadow:0 0 12px #ff5d7388}
+#loading small{font:500 12px 'Inter',sans-serif;color:var(--dim);margin-top:10px;letter-spacing:.04em}
+#loading .ldtip{margin:34px 0 0;font:400 14px/1.55 'Inter',sans-serif;color:#cfc4da;max-width:34em;min-height:3.1em;transition:opacity .4s}
+#loading .ldtip::before{content:'TIP';display:block;font:600 10px 'Chakra Petch',sans-serif;letter-spacing:.3em;color:var(--mint);margin-bottom:6px}
+/* the ending card: the tier's colour behind it, the title big, the run in a row of numbers */
+#ov.endov{background:radial-gradient(60% 55% at 50% 40%,color-mix(in srgb,var(--ec,#ff5d73) 22%,#0c0912),#06040a 80%);backdrop-filter:blur(10px)}
+.endc{width:min(760px,100%);text-align:center;padding:10px 20px 20px;animation:ldIn .9s cubic-bezier(.2,.8,.2,1)}
+.endc .endface{width:150px;height:170px;margin:0 auto 6px;filter:drop-shadow(0 12px 30px #000a)}
+.endc .endk{font:600 12px 'Chakra Petch',sans-serif;letter-spacing:.3em;text-transform:uppercase;color:var(--ec);margin:0}
+.endc h2{font:700 clamp(40px,6vw,76px)/1 'Chakra Petch',sans-serif;margin:10px 0 14px;color:var(--ink);text-shadow:0 8px 40px #000}
+.endc .endd{font:400 17px/1.6 'Inter',sans-serif;color:#e2d8ec;max-width:36em;margin:0 auto 22px}
+.endc .endstats{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:0 0 20px}
+.endc .endstats span{font:500 12.5px 'Inter',sans-serif;color:var(--dim);padding:6px 12px;border:1px solid var(--hair);border-radius:999px;background:#ffffff06}
+.endc .endstats b{color:var(--ink);font-weight:600}
+.endc .ehints{text-align:left;max-width:520px;margin:0 auto 18px;padding:14px 16px;border:1px solid var(--hair);border-left:2px solid var(--mint);border-radius:0 10px 10px 0;background:#0b0810cc}
+.endc .ehints .hint{margin:6px 0;font-size:14px}
+.endc .row{justify-content:center}
 </style>
 </head>
 <body>
@@ -990,7 +1035,7 @@ h1,h2,h3,h4{font-family:'Chakra Petch',sans-serif}
   <div class="ov" id="ov"></div>
   <div id="card"></div>
   <div id="toasts"></div>
-  <div id="loading"><div><b>Loading...</b><div class="lbar"><i id="loadBar"></i></div><small id="loadPct">0%</small></div></div>
+  <div id="loading"><div class="ldin"><span class="ldk" id="loadK">Getting there</span><b id="loadT">Loading</b><div class="lbar"><i id="loadBar"></i></div><small id="loadPct">0%</small><p class="ldtip" id="loadTip"></p></div></div>
   <div id="fade"></div>
   <div id="vcur"></div>
 </div>
@@ -1351,7 +1396,7 @@ const CHAT=t=>({w:'Chat',t});
 /* NB: the overlay is shared by minigames, tutorials and the phone. Any click handler the phone puts on the
    backdrop must not survive into a minigame, or clicking beside the card closes the game mid-story. */
 function ov(html){const o=$('ov');o.onclick=null;o.innerHTML=html;o.classList.add('on');o.scrollTop=0;updBlur();return o}
-function closeOv(){const o=$('ov');o.onclick=null;o.classList.remove('on');o.innerHTML='';updBlur()}
+function closeOv(){const o=$('ov');o.onclick=null;o.classList.remove('on','endov');o.innerHTML='';updBlur()}
 const TUT={
  aff:['Affection','Your choices change how people feel about you. Hearts float up when they do. Spending time together moves you closer: Met, Acquaintance, Friend, Close, Dating, and finally In love. Each person has a story of their own, and it ends with a scene that is only for the two of you.'],
  skill:['Skill','Real knowledge, earned by learning, answering honestly and doing the work. It builds in ranks, from Script Kiddie to Elite. Some people, and some doors, only open to a high enough rank.'],
@@ -11920,10 +11965,13 @@ function finishEnding(k){
  LS.set(slotKey('auto'),'');
  const E=ENDINFO[k],seen=Object.keys(META.ends).length;
  const who=ROM.filter(loved);const face=k==='harem'?null:(S.partner||who[0]);
- ov(`<div class="card" style="text-align:center">${face?`<div style="width:150px;height:170px;margin:0 auto">${head(lookOf(face),'h')}</div>`:''}<p class="small">${{true:'TRUE ENDING',good:'ENDING',mixed:'ENDING',bad:'BAD ENDING',secret:'SECRET ENDING'}[E[2]]}</p><h3 style="font-size:40px">${esc(E[0])}</h3><p>${esc(E[1])}</p><p>${seen}/${ENDORDER.length} endings found.</p>
- <p class="small">${RANKS.skill[rank('skill')]} · ${RANKS.clout[rank('clout')]} · ${who.length} in love · ${Object.keys(S.solved).length}/12 mysteries · ${S.clues.length} clues</p>${learned.length?`<div class="ehints"><p class="small"><b>You learned something</b></p>${learned.map(h=>`<p class="hint ${h.riddle?'riddle':''}">${h.riddle?'<b>?</b> ':''}${esc(h.t)}</p>`).join('')}<p class="small">All your hints are in Postgame, on the title screen.</p></div>`:''}
- <div class="row" style="justify-content:center"><button class="btn pri" id="eT">Title screen</button></div></div>`);
- $('eT').onclick=()=>{closeOv();titleScreen()};
+ const tierN={true:'The true ending',good:'Ending',mixed:'Ending',bad:'Bad ending',secret:'Secret ending'}[E[2]];
+ ov(`<div class="endc">${face?`<div class="endface">${head(lookOf(face),'h')}</div>`:''}<p class="endk">${tierN} · ${String(ENDORDER.indexOf(k)+1).padStart(2,'0')} of ${ENDORDER.length}</p><h2>${esc(E[0])}</h2><p class="endd">${esc(E[1])}</p>
+ <div class="endstats"><span><b>${seen}</b> of ${ENDORDER.length} endings found</span><span><b>${who.length}</b> in love</span><span><b>${Object.keys(S.solved).length}</b>/12 mysteries</span><span><b>${S.clues.length}</b> clues</span><span>${RANKS.skill[rank('skill')]} · ${RANKS.clout[rank('clout')]}</span></div>
+ ${learned.length?`<div class="ehints"><p class="small"><b>You learned something</b></p>${learned.map(h=>`<p class="hint ${h.riddle?'riddle':''}">${h.riddle?'<b>?</b> ':''}${esc(h.t)}</p>`).join('')}<p class="small">All your hints are in the Postgame, on the title screen.</p></div>`:''}
+ <div class="row"><button class="btn pri" id="eT">Title screen</button></div></div>`);
+ {const o=$('ov');o.classList.add('endov');o.style.setProperty('--ec',typeof TIERC!=='undefined'&&TIERC[E[2]]||'#ff5d73')}
+ $('eT').onclick=()=>{$('ov').classList.remove('endov');closeOv();titleScreen()};
  if(k==='harem'){META.loopClosed=1;saveMeta()}
 }
 /* ---- title: choose a file, then play ---- */
@@ -12097,7 +12145,7 @@ function pgMap(){const T=pgLayout(),seen=META.chaps||{},path=META.chpath||{},che
   E+=`<path class="ce ${lit?'lit':''} ${on?'onpath':''}" data-a="${g.src}" data-b="eg:${g.src}" d="${pgPath(gx,a.y,g.x-6,ty,lx)}" marker-end="url(#pgArr${on?'O':lit?'L':''})"/>`});
  const grp=g=>`<g class="eg ${last?(g.ends.includes(lastEnd)?'onpath':'off'):''}" data-g="${g.src}" transform="translate(${g.x},${g.y})"><rect class="egbg" width="${PGL.ew}" height="${g.h}" rx="12"/><text class="egk" x="14" y="24">FROM ${esc(CHAP[g.src].t.toUpperCase())}</text>
   ${g.ends.map((k,i)=>{const got=!!META.ends[k],I=ENDINFO[k],c=TIERC[I[2]];return`<g class="tn te ${got?'got':''} ${PGV.end===k?'sel':''} ${last?(lastEnd===k?'onpath':''):''}" data-e="${k}" transform="translate(8,${PGL.eg+i*PGL.eh})"><rect x="0" y="-13" width="${PGL.ew-16}" height="26" rx="13" style="--c:${c}"/><circle cx="14" cy="0" r="5" style="fill:${got?c:'none'};stroke:${c}"/><text x="26" y="4.5">${esc(got?I[0]:'? ? ?')}</text></g>`}).join('')}</g>`;
- const heads=[0,1,2,3,4,5,6,7].map(d=>`<text class="cday" x="${d*PGL.cw+PGL.w/2}" y="${T.top+28}" text-anchor="middle">${d?DAYN[d].toUpperCase():'TWO WEEKS EARLIER'}</text>`).join('')+`<text class="cday" x="${8*PGL.cw+30+PGL.ew/2}" y="${T.top+28}" text-anchor="middle">ENDINGS</text>`;
+ const heads=[0,1,2,3,4,5,6,7].map(d=>`<text class="pgday" x="${d*PGL.cw+PGL.w/2}" y="${T.top+28}" text-anchor="middle">${d?DAYN[d].toUpperCase():'TWO WEEKS EARLIER'}</text>`).join('')+`<text class="pgday" x="${8*PGL.cw+30+PGL.ew/2}" y="${T.top+28}" text-anchor="middle">ENDINGS</text>`;
  const decs=PGDEC.map(([d,t])=>{const x=d*PGL.cw+PGL.w+(PGL.cw-PGL.w)/2;return`<g class="cdec" transform="translate(${x},${T.top+58})"><path d="M0 -9 L9 0 L0 9 L-9 0Z"/><text x="0" y="26" text-anchor="middle">${esc(t)}</text></g>`}).join('');
  const nCh=CHORDER.filter(k=>!CHAP[k].secret).length,gotCh=CHORDER.filter(k=>seen[k]).length;
  const inner=`<div class="pgmapwrap"><div class="pghead pgmh"><div><h2>The Week</h2><p>${gotCh} of ${nCh}${CHORDER.length>nCh?'+':''} chapters reached · ${Object.keys(META.ends).length} of ${ENDORDER.length} endings. Each day is a chapter; the choice before it decides which. Point at a chapter to see every path through it.</p></div>
@@ -13032,7 +13080,12 @@ function regionNeed(reg,show){
   if(!ok&&!R.lmSkip){G.baked=false;setQuality(G.q)}
   G.lmBusy=null;G.baking=false;G.lmDoneAt=performance.now();lmUI(false);G.forceFrame=true;if(hadLock&&typeof relock==='function')setTimeout(relock,50)});
 }
-function lmUI(on,reg,cached,f){const e=$('loading');if(!e)return;e.classList.toggle('on',!!on);
+/* what the loading screen says: where you're going, and a tip, changed every few seconds */
+const LDNAME={con:'The Conference Quarter',f13:'The Halcyon · Thirteenth floor',home:'Linden Street',station:'Central Station',office:'Brindle & Co',train:'The Quarterline'};
+const LDTIPS=['A free app is paid for somehow. Check what it asks to see before you tap Allow.','Bluetooth left on is a little beacon. Turn it off when you\'re not using it.','Your email resets every other account you have. Give it its own long password and two-factor.','A photo carries more than its subject: a street sign, a window, sometimes the exact place it was taken.','Urgent, scary, and asking you to log in: that\'s the shape of most phishing.','People who know your handle and your face can usually find your door. Keep the two apart where you can.','A password manager means you only have to remember one good password. Make it a long sentence.','Location history is a diary you didn\'t know you were keeping. You can switch it off.','Public Wi-Fi with a login page asking for your socials is collecting more than a login.','The hotel will never call your room to ask for your card number.','The people around you can be a risk to your privacy without meaning to be. So can you, to theirs.'];
+function lmUI(on,reg,cached,f){const e=$('loading');if(!e)return;const was=e.classList.contains('on');e.classList.toggle('on',!!on);
+ if(on&&!was){$('loadT').textContent=LDNAME[reg]||'Loading';$('loadK').textContent=cached?'Getting there':'Lighting it, the first time';
+  const tip=()=>{const el=$('loadTip');if(!el)return;el.style.opacity=0;setTimeout(()=>{el.textContent=LDTIPS[(Math.random()*LDTIPS.length)|0];el.style.opacity=1},300)};tip();clearInterval(lmUI.t);lmUI.t=setInterval(()=>{if(!e.classList.contains('on')){clearInterval(lmUI.t);return}tip()},7000)}
  // the game view stays hidden while a bake runs: compositing a live canvas the GPU is busy baking into is slow and,
  // in some drivers, piles up memory
  const gl=$('gl');if(gl)gl.style.visibility=on?'hidden':'';if(!on)return;
@@ -17335,7 +17388,9 @@ const ICON={
 const APPN={postgame:'Postgame',echo:'Echo',messages:'Messages',calendar:'Calendar',map:'Map',hearts:'Hearts',cases:'Case board',stats:'Stats',story:'Story',achieve:'Achievements',bag:'Bag',saves:'Saves',log:'Log',settings:'Settings',quit:'Quit'};
 const APPU={echo:'echo',messages:'phone',calendar:'phone',map:'map',hearts:'aff',cases:'clues',stats:'skill',story:'phone',achieve:'phone',bag:'phone'};
 /* the phone: a home screen of apps; every app opens full screen. Back (or Esc) goes back to the home screen. */
-let phApp=null,phThread=null,phReg=null;const PH={case:null,pick:[],ans:null,heart:null,day:null,stab:'week',atab:'all',ctab:'board',sday:null};
+let phApp=null,phThread=null,phReg=null;/* a quiet empty state: a glyph, a line, a hint */
+const EMPTY=(ic,t,h)=>`<div class="empty"><i>${ic}</i><b>${t}</b>${h?`<span>${h}</span>`:''}</div>`;
+const PH={case:null,pick:[],ans:null,heart:null,day:null,stab:'week',atab:'all',ctab:'board',sday:null};
 function phone(app){
  if(!S)return;
  const o=$('ov');if((o.classList.contains('on')&&!o.classList.contains('phoneov'))||$('card').classList.contains('on'))return;
@@ -17387,7 +17442,7 @@ const APPS={
   if(phThread&&by[phThread]){by[phThread].forEach(m=>m.r=1);hud();
    th=`<div class="mhead"><span class="hd">${av(phThread)}</span><b>${esc(nm(phThread))}</b>${CH[phThread]&&ROM.includes(phThread)?`<small>${met(phThread)?stageOf(phThread)+' · ♥ '+aff(phThread):''}</small>`:''}</div><div class="mlog">`+
     by[phThread].map(m=>`<div class="bub ${m.me?'me':''}">${esc(m.t)}<small>${m.c?'Day '+m.c+' · '+SLOTN[m.s||0]:'Before the con'}</small></div>${m.q&&m.ans===undefined&&TEXTQ[m.q]?`<div class="mreply">${TEXTQ[m.q].replies.map((r,i)=>`<button class="ch" data-q="${S.msgs.indexOf(m)}" data-i="${i}">${esc(sub(r.t))}</button>`).join('')}</div>`:''}`).join('')+'</div>'}
-  return`<div class="msgs ${phThread?'open':''}"><div class="mlist">${list||'<p class="small" style="padding:12px">No messages yet.</p>'}</div><div class="mview2">${innerWidth<=760&&phThread?'<button class="btn" id="mback">‹ All conversations</button>':''}${th}</div></div>`},
+  return`<div class="msgs ${phThread?'open':''}"><div class="mlist">${list||EMPTY('✉','No messages yet','When someone texts you, it lands here. Some of them will want a reply.')}</div><div class="mview2">${innerWidth<=760&&phThread?'<button class="btn" id="mback">‹ All conversations</button>':''}${th}</div></div>`},
  /* ---- Calendar: the week, today in detail, what you can do now ---- */
  calendar(){
   const d=PH.day!=null&&PH.day<=7?PH.day:S.day;
@@ -17453,13 +17508,13 @@ const APPS={
   const pk=S.expPeak||{};
   const chart=`<div class="sbox"><h4>Exposure <span class="term">${S.exp}/100</span></h4>${bar(S.exp,'var(--coral)')}<p class="small">Resets each morning to your Footprint: ${S.foot}. ${S.fails?'Doxxed '+S.fails+' time'+(S.fails>1?'s':'')+'.':'Never doxxed this run.'}</p>
    <div class="echart">${[1,2,3,4,5,6,7].map(d=>`<div class="ecol ${d===S.day?'now':''}"><i style="height:${pk[d]||0}%"></i><small>D${d}</small><em>${pk[d]!==undefined?pk[d]:''}</em></div>`).join('')}</div><p class="small">Highest Exposure each day.</p>
-   <h4 style="margin-top:12px">Your footprint</h4>${(S.footLog||[]).filter(x=>x.v).map(x=>`<div class="fl ${x.v<0?'good':''}"><b>${x.v>0?'+':''}${x.v}</b><span>${esc(x.w||'')}</span><small>${x.d?'Day '+x.d+' · '+SLOTN[x.s]:'Before the con'}</small></div>`).join('')||'<p class="small">Nothing yet.</p>'}</div>`;
+   <h4 style="margin-top:12px">Your footprint</h4>${(S.footLog||[]).filter(x=>x.v).map(x=>`<div class="fl ${x.v<0?'good':''}"><b>${x.v>0?'+':''}${x.v}</b><span>${esc(x.w||'')}</span><small>${x.d?'Day '+x.d+' · '+SLOTN[x.s]:'Before the con'}</small></div>`).join('')||'<p class="small">Nothing yet. Every post, photo and slip that makes you easier to find adds to it.</p>'}</div>`;
   const cnt=[['People met',ROM.filter(met).length+'/'+ROM.length],['In love',ROM.filter(loved).length],['Scenes seen',ROM.reduce((a,g)=>a+Math.max(0,scn(g)-1),0)],['Mysteries solved',Object.keys(S.solved).length+'/12'],['Clues',S.clues.length+'/'+Object.keys(CLUE).length],['Leads worked',Object.keys(S.leads).length],['Talks',S.talks||0],['Things done with your time',S.acts||0],['Money','£'+(S.money||0)]];
   return`<div class="abody sgrid">${S.unl.skill?ladder('skill'):''}${S.unl.clout?ladder('clout'):''}${S.unl.exp?chart:''}<div class="sbox"><h4>This run</h4>${cnt.map(c=>`<div class="kv"><span>${c[0]}</span><b>${c[1]}</b></div>`).join('')}</div></div>`},
  /* ---- Story: your week so far ---- */
  story(){const by={};for(const e of S.sum)(by[e.d]=by[e.d]||[]).push(e);const ks=Object.keys(by).map(Number).sort((a,b)=>a-b);
   const d=PH.sday!==null&&by[PH.sday]?PH.sday:ks[ks.length-1];
-  return ks.length?`<div class="atabs">${ks.map(k=>`<button class="${k===d?'on':''}" data-sd="${k}">${S.chaps&&S.chaps[k]&&CHAP[S.chaps[k]]?esc(CHAP[S.chaps[k]].t):k===0?'Prologue':'Day '+k}</button>`).join('')}</div><div class="abody sview"><h3>${d===0?'Two weeks before':'Day '+d+' · '+DAYN[d]}${S.chaps&&S.chaps[d]&&CHAP[S.chaps[d]]?` · <span class="chname">${esc(CHAP[S.chaps[d]].t)}</span>`:''}</h3>${by[d].map(e=>`<div class="sent">${d?`<small>${SLOTN[e.s]}</small>`:''}<p>${esc(e.t)}</p></div>`).join('')}</div>`:'<div class="abody"><p class="small">Your story so far will be written here.</p></div>'},
+  return ks.length?`<div class="atabs">${ks.map(k=>`<button class="${k===d?'on':''}" data-sd="${k}">${S.chaps&&S.chaps[k]&&CHAP[S.chaps[k]]?esc(CHAP[S.chaps[k]].t):k===0?'Prologue':'Day '+k}</button>`).join('')}</div><div class="abody sview"><h3>${d===0?'Two weeks before':'Day '+d+' · '+DAYN[d]}${S.chaps&&S.chaps[d]&&CHAP[S.chaps[d]]?` · <span class="chname">${esc(CHAP[S.chaps[d]].t)}</span>`:''}</h3>${by[d].map(e=>`<div class="sent">${d?`<small>${SLOTN[e.s]}</small>`:''}<p>${esc(e.t)}</p></div>`).join('')}</div>`:'<div class="abody">'+EMPTY('✎','Nothing written yet','Your week gets written up here as it happens, one part of the day at a time.')+'</div>'},
  /* ---- Achievements: across every run ---- */
  achieve(){const cat=k=>k.startsWith('end_')?'end':k.startsWith('love_')?'love':k.startsWith('solve_')||k.includes('clue')||k.includes('solve')||k==='first_lead'?'myst':k.startsWith('skill_')||k.startsWith('clout_')?'rank':'other';
   const all=achVis();if(PH.atab==='end'&&!pgOpen())PH.atab='all';const ks=all.filter(k=>PH.atab==='all'||cat(k)===PH.atab),got=all.filter(k=>META.ach[k]).length;
@@ -17469,9 +17524,9 @@ const APPS={
   return`<div class="abody"><p class="small">Loop ${META.loop||1}. Each part of the day holds ${LOOPOC+1} things. People can take three times as much of you each day, and stories can run up to two days early. Routes you've finished before aren't held to their day.</p><div class="row"><button class="btn pri" id="erw" ${S.snap&&S.day>=1?'':'disabled'}>Rewind to this morning</button></div><p class="small" style="margin-top:12px"><b>People · ${ROM.length-left.length}/${ROM.length} in love</b></p>${left.map(p=>`<div class="kv"><span>${esc(p[0])}</span><b class="small">${esc(p[1])}</b></div>`).join('')||'<p class="small">Everyone. You did it.</p>'}<p class="small" style="margin-top:12px"><b>Mysteries · ${allMyst().filter(m=>S.solved[m]).length}/${allMyst().length}</b></p>${P.mys.map(m=>`<div class="kv"><span>${esc(m[0])}</span><b class="small">${esc(m[1])}</b></div>`).join('')||'<p class="small">All of it.</p>'}<p class="small" style="margin-top:12px">${haremReady()?'Ready. Go to the keynote on Sunday.':'When everyone is in love with you and every mystery is solved, Sunday becomes something else.'}</p></div>`},
  bag(){const e=Object.entries(S.inv).filter(([k])=>ITEMS[k]);
   const who=k=>ROM.filter(g=>met(g)&&prefKnown(g,k)&&prefOf(g,k)>0).sort((a,b)=>prefOf(b,k)-prefOf(a,k));
-  return`<div class="abody"><p class="small"><b class="term" style="font-size:22px;color:var(--butter)">£${S.money||0}</b> · Shops: Con Store (Expo Hall), Byte Café (Food Court), Halcyon Boutique (hotel lobby), the bar (evenings), Paper & Co (Central Station), Proof (mornings). Work: the info desk, a bar shift with Bea, a morning at Proof.</p><div class="bgrid">${e.length?e.map(([k,v])=>{const it=ITEMS[k],w=it.gear?[]:who(k);return`<div class="bitem"><b>${esc(it.n)}${v>1?' ×'+v:''}</b><small>${esc(it.d)}${it.gear?' (gear)':w.length?' · '+w.map(g=>CH[g].name+(prefOf(g,k)===2?' ♥':'')).join(', '):' · a gift: you haven\'t learned who loves it yet'}</small></div>`}).join(''):'<p class="small">Empty.</p>'}</div></div>`},
+  return`<div class="abody"><p class="small"><b class="term" style="font-size:22px;color:var(--butter)">£${S.money||0}</b> · Shops: Con Store (Expo Hall), Byte Café (Food Court), Halcyon Boutique (hotel lobby), the bar (evenings), Paper & Co (Central Station), Proof (mornings). Work: the info desk, a bar shift with Bea, a morning at Proof.</p><div class="bgrid">${e.length?e.map(([k,v])=>{const it=ITEMS[k],w=it.gear?[]:who(k);return`<div class="bitem"><b>${esc(it.n)}${v>1?' ×'+v:''}</b><small>${esc(it.d)}${it.gear?' (gear)':w.length?' · '+w.map(g=>CH[g].name+(prefOf(g,k)===2?' ♥':'')).join(', '):' · a gift: you haven\'t learned who loves it yet'}</small></div>`}).join(''):EMPTY('◇','Nothing in your bag','Shops, shifts and people hand you things. Some of them make very good gifts.')}</div></div>`},
  saves(){return '<div class="abody"><div id="spanel"></div></div>'},
- log(){return`<div class="abody">`+(S.log.slice(-150).reverse().map(l=>`<div class="logl">${l[0]?`<b>${esc(l[0])}</b> `:''}${esc(l[1])}</div>`).join('')||'<p class="small">Nothing yet.</p>')+'</div>'},
+ log(){return`<div class="abody">`+(S.log.slice(-150).reverse().map(l=>`<div class="logl">${l[0]?`<b>${esc(l[0])}</b> `:''}${esc(l[1])}</div>`).join('')||EMPTY('≡','Nothing in the log yet','Every line anyone says to you this run is kept here, newest first.'))+'</div>'},
  settings(){const vol=[['master','Master'],['music','Music'],['amb','Ambience'],['sfx','Effects']];
   return `<div class="abody"><div class="set"><h4>Sound</h4>${vol.map(([k,n])=>`<label class="sl"><span>${n}</span><input type="range" min="0" max="100" step="1" value="${Math.round(SETTINGS.vol[k]*100)}" data-v="${k}" style="--p:${Math.round(SETTINGS.vol[k]*100)}%"><b>${Math.round(SETTINGS.vol[k]*100)}</b></label>`).join('')}
   <h4>Graphics</h4><div class="seg" id="gq">${['low','medium','high'].map(q=>`<button data-q="${q}" class="${(G.q||'high')===q?'on':''}">${q[0].toUpperCase()+q.slice(1)}</button>`).join('')}</div>

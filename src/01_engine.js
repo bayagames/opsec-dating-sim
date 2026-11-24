@@ -317,7 +317,7 @@ const CHAT=t=>({w:'Chat',t});
 /* NB: the overlay is shared by minigames, tutorials and the phone. Any click handler the phone puts on the
    backdrop must not survive into a minigame, or clicking beside the card closes the game mid-story. */
 function ov(html){const o=$('ov');o.onclick=null;o.innerHTML=html;o.classList.add('on');o.scrollTop=0;updBlur();return o}
-function closeOv(){const o=$('ov');o.onclick=null;o.classList.remove('on');o.innerHTML='';updBlur()}
+function closeOv(){const o=$('ov');o.onclick=null;o.classList.remove('on','endov');o.innerHTML='';updBlur()}
 const TUT={
  aff:['Affection','Your choices change how people feel about you. Hearts float up when they do. Spending time together moves you closer: Met, Acquaintance, Friend, Close, Dating, and finally In love. Each person has a story of their own, and it ends with a scene that is only for the two of you.'],
  skill:['Skill','Real knowledge, earned by learning, answering honestly and doing the work. It builds in ranks, from Script Kiddie to Elite. Some people, and some doors, only open to a high enough rank.'],

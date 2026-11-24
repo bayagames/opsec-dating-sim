@@ -801,7 +801,7 @@ body.pgon #hud,body.pgon #vcur{display:none!important}
 .pglast{flex:none;font:600 13px 'Chakra Petch',sans-serif;color:var(--ink);background:#1b1026;border:1px solid #ffffff22;border-radius:999px;padding:8px 16px;cursor:pointer;transition:background .2s,border-color .2s}
 .pglast:hover{border-color:var(--butter)}.pglast.on{background:var(--butter);color:#1b1026;border-color:var(--butter)}.pglast:disabled{opacity:.35;cursor:default}
 .ccol{fill:#ffffff05;stroke:#ffffff0a}
-.cday{font:15px 'VT323',monospace;letter-spacing:.35em;fill:#8f7da3}
+.pgday{font:15px 'VT323',monospace;letter-spacing:.35em;fill:#8f7da3}
 .cdec path{fill:#1b1026;stroke:var(--coral);stroke-width:2}.cdec text{font:600 12px 'Chakra Petch',sans-serif;fill:var(--coral);letter-spacing:.03em}
 .ce{fill:none;stroke:#ffffff1a;stroke-width:2.4;transition:stroke .3s,opacity .3s}
 .ce.lit{stroke:#8affc1aa;stroke-width:3}
@@ -920,6 +920,51 @@ h1,h2,h3,h4{font-family:'Chakra Petch',sans-serif}
 #pgView.focus .ce.hl.onpath{stroke:var(--butter)}
 .ct,.eg,.ce{transition:opacity .25s ease,stroke .25s ease}
 .lg.lit{background:transparent;border:0;border-top:3px solid var(--mint);border-radius:0;height:0;margin-top:6px}
+/* ============ polish pass 3 ============ */
+/* notifications: over an app or the phone they gather in the bottom right, off the headers and tabs */
+body:has(#ov.on) #toasts{top:auto;bottom:22px;left:auto;right:20px;align-items:flex-end}
+/* empty states: a quiet centred note instead of a grey line in the corner */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px;padding:48px 20px;color:var(--dim)}
+.empty i{font-style:normal;width:46px;height:46px;border-radius:12px;display:grid;place-items:center;border:1px solid var(--hair);background:#ffffff07;font-size:22px;margin-bottom:6px;color:#ffffff88}
+.empty b{font:600 16px 'Chakra Petch',sans-serif;color:var(--ink);letter-spacing:.02em}
+.empty span{font-size:13px;max-width:34em;line-height:1.5}
+/* the calendar's week strip */
+.cweek{gap:4px}
+.cday{border:1px solid var(--hair);border-radius:8px;background:#ffffff06;padding:8px 4px 7px;transition:background .15s,border-color .15s}
+.cday b{font:600 13px 'Chakra Petch',sans-serif;letter-spacing:.04em}
+.cday small{font:500 10.5px 'Inter',sans-serif;color:var(--dim);letter-spacing:0}
+.cday.on{border-color:var(--butter);background:#ffd16614}.cday.now b{color:var(--butter)}.cday.past{opacity:.6}
+.cday:hover{border-color:#ffffff40}
+/* the rank ladders: names that fit */
+.rung{padding:7px 3px;border-radius:6px;gap:1px}.rung b{font:600 14px 'Chakra Petch',sans-serif}
+.rung span{display:none}.rung.cur{flex:2.4}.rung.cur span{display:block;font:600 11px/1.25 'Inter',sans-serif;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rung small{font-size:9.5px}
+.rung.cur{outline:1px solid var(--butter);background:#ffd16612}
+.sbox h4 .term{font:600 12px 'Chakra Petch',sans-serif;letter-spacing:.06em;color:var(--butter);margin-left:6px}
+/* the loading screen: where you're going, how far along, and something worth knowing while you wait */
+#loading{background:radial-gradient(70% 60% at 50% 45%,#1a1224,#07050a 75%)}
+#loading .ldin{display:flex;flex-direction:column;align-items:center;gap:0;max-width:min(560px,86vw);animation:ldIn .6s cubic-bezier(.2,.8,.2,1)}
+@keyframes ldIn{from{opacity:0;transform:translateY(10px)}}
+#loading .ldk{font:600 11px 'Chakra Petch',sans-serif;letter-spacing:.32em;text-transform:uppercase;color:var(--coral)}
+#loading b{font:700 clamp(30px,4vw,44px)/1.1 'Chakra Petch',sans-serif;color:var(--ink);margin:8px 0 22px;letter-spacing:.01em}
+#loading .lbar{width:min(360px,70vw);height:3px;border-radius:2px;background:#ffffff14}
+#loading .lbar i{background:linear-gradient(90deg,var(--coral),var(--butter));box-shadow:0 0 12px #ff5d7388}
+#loading small{font:500 12px 'Inter',sans-serif;color:var(--dim);margin-top:10px;letter-spacing:.04em}
+#loading .ldtip{margin:34px 0 0;font:400 14px/1.55 'Inter',sans-serif;color:#cfc4da;max-width:34em;min-height:3.1em;transition:opacity .4s}
+#loading .ldtip::before{content:'TIP';display:block;font:600 10px 'Chakra Petch',sans-serif;letter-spacing:.3em;color:var(--mint);margin-bottom:6px}
+/* the ending card: the tier's colour behind it, the title big, the run in a row of numbers */
+#ov.endov{background:radial-gradient(60% 55% at 50% 40%,color-mix(in srgb,var(--ec,#ff5d73) 22%,#0c0912),#06040a 80%);backdrop-filter:blur(10px)}
+.endc{width:min(760px,100%);text-align:center;padding:10px 20px 20px;animation:ldIn .9s cubic-bezier(.2,.8,.2,1)}
+.endc .endface{width:150px;height:170px;margin:0 auto 6px;filter:drop-shadow(0 12px 30px #000a)}
+.endc .endk{font:600 12px 'Chakra Petch',sans-serif;letter-spacing:.3em;text-transform:uppercase;color:var(--ec);margin:0}
+.endc h2{font:700 clamp(40px,6vw,76px)/1 'Chakra Petch',sans-serif;margin:10px 0 14px;color:var(--ink);text-shadow:0 8px 40px #000}
+.endc .endd{font:400 17px/1.6 'Inter',sans-serif;color:#e2d8ec;max-width:36em;margin:0 auto 22px}
+.endc .endstats{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:0 0 20px}
+.endc .endstats span{font:500 12.5px 'Inter',sans-serif;color:var(--dim);padding:6px 12px;border:1px solid var(--hair);border-radius:999px;background:#ffffff06}
+.endc .endstats b{color:var(--ink);font-weight:600}
+.endc .ehints{text-align:left;max-width:520px;margin:0 auto 18px;padding:14px 16px;border:1px solid var(--hair);border-left:2px solid var(--mint);border-radius:0 10px 10px 0;background:#0b0810cc}
+.endc .ehints .hint{margin:6px 0;font-size:14px}
+.endc .row{justify-content:center}
 </style>
 </head>
 <body>
@@ -990,7 +1035,7 @@ h1,h2,h3,h4{font-family:'Chakra Petch',sans-serif}
   <div class="ov" id="ov"></div>
   <div id="card"></div>
   <div id="toasts"></div>
-  <div id="loading"><div><b>Loading...</b><div class="lbar"><i id="loadBar"></i></div><small id="loadPct">0%</small></div></div>
+  <div id="loading"><div class="ldin"><span class="ldk" id="loadK">Getting there</span><b id="loadT">Loading</b><div class="lbar"><i id="loadBar"></i></div><small id="loadPct">0%</small><p class="ldtip" id="loadTip"></p></div></div>
   <div id="fade"></div>
   <div id="vcur"></div>
 </div>

@@ -171,7 +171,12 @@ function regionNeed(reg,show){
   if(!ok&&!R.lmSkip){G.baked=false;setQuality(G.q)}
   G.lmBusy=null;G.baking=false;G.lmDoneAt=performance.now();lmUI(false);G.forceFrame=true;if(hadLock&&typeof relock==='function')setTimeout(relock,50)});
 }
-function lmUI(on,reg,cached,f){const e=$('loading');if(!e)return;e.classList.toggle('on',!!on);
+/* what the loading screen says: where you're going, and a tip, changed every few seconds */
+const LDNAME={con:'The Conference Quarter',f13:'The Halcyon · Thirteenth floor',home:'Linden Street',station:'Central Station',office:'Brindle & Co',train:'The Quarterline'};
+const LDTIPS=['A free app is paid for somehow. Check what it asks to see before you tap Allow.','Bluetooth left on is a little beacon. Turn it off when you\'re not using it.','Your email resets every other account you have. Give it its own long password and two-factor.','A photo carries more than its subject: a street sign, a window, sometimes the exact place it was taken.','Urgent, scary, and asking you to log in: that\'s the shape of most phishing.','People who know your handle and your face can usually find your door. Keep the two apart where you can.','A password manager means you only have to remember one good password. Make it a long sentence.','Location history is a diary you didn\'t know you were keeping. You can switch it off.','Public Wi-Fi with a login page asking for your socials is collecting more than a login.','The hotel will never call your room to ask for your card number.','The people around you can be a risk to your privacy without meaning to be. So can you, to theirs.'];
+function lmUI(on,reg,cached,f){const e=$('loading');if(!e)return;const was=e.classList.contains('on');e.classList.toggle('on',!!on);
+ if(on&&!was){$('loadT').textContent=LDNAME[reg]||'Loading';$('loadK').textContent=cached?'Getting there':'Lighting it, the first time';
+  const tip=()=>{const el=$('loadTip');if(!el)return;el.style.opacity=0;setTimeout(()=>{el.textContent=LDTIPS[(Math.random()*LDTIPS.length)|0];el.style.opacity=1},300)};tip();clearInterval(lmUI.t);lmUI.t=setInterval(()=>{if(!e.classList.contains('on')){clearInterval(lmUI.t);return}tip()},7000)}
  // the game view stays hidden while a bake runs: compositing a live canvas the GPU is busy baking into is slow and,
  // in some drivers, piles up memory
  const gl=$('gl');if(gl)gl.style.visibility=on?'hidden':'';if(!on)return;
