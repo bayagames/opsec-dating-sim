@@ -94,6 +94,30 @@ Solving: pick the answer and the three clues that prove it. A wrong deduction co
 - D6 Sat: Morning F · Midday S CTF Finals (Ada; Mira's challenge names Halberd) · Afternoon F · Evening S The Raid (Room 1337 searched) · Night S War Council (choose the plan) · Late F (the night before)
 - D7 Sun: Morning S Positions · Midday S Krall's Move · Afternoon S The Keynote (tasks) · Evening S The Thirteenth Floor (roof, 1313, Mira, Krall, Ashgrove) · Night S 0xFF (afterparty, epilogue)
 
+## Chapters (03d_chapters.js)
+The week is told in chapters, one a day, and the branches below decide which version of a day you get. A chapter is
+picked when its day starts (every branch is settled the evening before) and opens with a full-screen card: its banner
+(drawn in code: the chapter's colours, a far-off skyline, its number, its picture), its name, and a line about it.
+
+| Day | Chapters |
+|---|---|
+| Prologue | Hello, World |
+| 1 Monday | Badge In |
+| 2 Tuesday | Capture the Flag |
+| 3 Wednesday | Dead Drop (answered WHISPER) · The Liaison (reported it) · Exposure (told nobody) |
+| 4 Thursday | Lantern (helped Mira) · Thirty Pieces (helped her, then told Krall) · Packet Loss (stayed out of it) |
+| 5 Friday | Home |
+| 6 Saturday | Suite 1313 (faked yes to Victor) · Lumen Blue (took his offer) · The Crew (said yes to Nyx) · Finals |
+| 7 Sunday | Closing Keynote · Krall's Way (gave Krall the plan) · The Big Score (the crew's plan) · Zero Day (secret) · All of Us (the loop) |
+
+The run keeps them in `S.chaps` (day → chapter; the phone's Story app uses the names), and the file remembers every
+chapter reached (`META.chaps`), every step between two (`META.chpath`), which chapter each ending came out of
+(`META.chend`) and the last run's path (`META.lastPath`). The postgame's The Week draws it: a column per day with its
+chapters as banner cards (greyed until reached; the two secret ones hidden until found), the four big choices marked
+between the columns, the endings in the last column joined to the chapter they come from, the paths you've taken lit,
+"Show your last run" tracing your most recent week, and a drawer for any chapter (what it is, how you get there, how
+often you have, what can follow, which endings come out of it).
+
 ## The branches
 Five big decisions (marked ⚑ in the game) change which beats you get:
 - **A. Day 2, late: WHISPER's message.** Answer it (`path_whisper`: a dead drop on Day 3 afternoon, only then), forward
@@ -201,16 +225,18 @@ Boot (the convention is built and lit; the progress bar is the lightmap bake, ca
 right), then the menu: the logo glides into the corner and the options come in down the left. Mouse, arrows and
 Enter all work; Esc goes back. Deleting a file asks for confirmation and lists what goes. Without WebGL it falls back
 to a drawn background.
-With the menu, the cast steps in on the right, one at a time and big (head to about the knees): Ellie first, then
-the others every ten seconds, anyone with creator art first, sized by their creator heights, smiling now and then. The title
+With the menu, the cast steps in on the right, one at a time and big (head to about the knees), in a random order
+that changes each visit, one every ten seconds, sized by their creator heights, smiling now and then. The title
 is silent until "press any key"; the menu music comes in with the menu.
 
 ## The mouse
 In the world the mouse is captured, and everything over the world (the phone, maps, conversations, minigames) uses
 the drawn cursor (12b_cursor.js forwards clicks, hovers, drags, sliders and the wheel), so the real cursor never
-appears or jumps. Only the browser's Esc releases it: Esc in the world opens the phone, Esc with the phone open closes
-it. Leaving the window changes nothing. Any key or click captures the mouse again, with no prompt; while it's free the
-centre dot dims. The first movements after a capture are ignored, so the view doesn't jolt.
+appears or jumps. Browsers release a captured mouse on Esc and only take it back after a click or another key, so
+stepping into the world also goes full screen and keeps Esc for the game (Chrome, Edge, Opera): Esc opens and closes
+the phone and the mouse stays captured; holding Esc leaves full screen. Settings can turn full screen off. Without it
+(or in Firefox and Safari), Esc still opens and closes the phone, and the next key or click captures the mouse again,
+with no prompt; while it's free the centre dot dims. Leaving the window changes nothing. The first movements after a capture are ignored, so the view doesn't jolt.
 
 ## Money and gifts (03c_economy.js)
 Money instead of credits: a £20 per diem each morning, bug bounties, minigames, shifts (info desk, bar, Proof),

@@ -64,7 +64,12 @@ function setupInput(){
   WD.locked=document.pointerLockElement===lockEl();
   if(WD.locked){WD.everLocked=true;WD.lockFails=0;WD.lockAt=performance.now();return}
   WD.unlockAt=performance.now();
-  const self=WD.selfUnlock||G.baking||G.lmBusy||!S||S.ending||!S.inWorld;WD.selfUnlock=false;if(self)return;
+  // only a real Esc opens the phone. Anything the game does itself doesn't count, and neither does anything just after
+  // it: our own releases (and a second one the browser sometimes sends), loading screens and the moment after them,
+  // moving to another place, a capture that dies as soon as it's granted
+  const now=performance.now();if(WD.selfUnlock)WD.quietUntil=now+1500;
+  const self=WD.selfUnlock||G.baking||G.lmBusy||!S||S.ending||!S.inWorld||now<(WD.quietUntil||0)||now-(WD.tpAt||0)<2500||now-(G.lmDoneAt||0)<1500||now-(WD.lockAt||0)<450;
+  WD.selfUnlock=false;if(self)return;
   // leaving the window also drops the capture: that's not an Esc, so leave everything as it was
   setTimeout(()=>{if(document.hidden||!document.hasFocus()||WD.blurAt&&performance.now()-WD.blurAt<600)return;if(!S||!S.inWorld)return;
    const o=$('ov');
@@ -97,7 +102,18 @@ function setupInput(){
 /* step back into mouse-look (after the phone closes, a scene ends...). While Esc is held, wait for it to come up:
    locking during an Esc press hands the browser an Esc to cancel the lock with, and the phone pops straight back */
 function relock(){if(WD.touch||WD.noLock||locked())return;if(WD.escDown){WD.lockAfterEsc=true;return}tryLock()}
-function tryLock(){if(WD.touch||WD.noLock||!S||!S.inWorld||S.ending||$('title').classList.contains('on')||$('pgx'))return;const el=lockEl();if(document.pointerLockElement===el)return;try{const p=el.requestPointerLock&&el.requestPointerLock();if(p&&p.catch)p.catch(()=>{})}catch(e){}}
+/* Full screen with Esc kept for the game. Browsers always let go of a captured mouse on Esc, and only take it back
+   after a click or a key that isn't Esc, so in a normal window Esc can open and close the phone but can't hand the
+   mouse straight back. In full screen the page can keep Esc for itself (Chrome, Edge, Opera): Esc opens and closes the
+   phone with the mouse staying captured, and holding Esc leaves full screen. It needs a click or key press to start,
+   so it's asked for the moment you step into the world. Off in Settings. Elsewhere the old way still works: after an
+   Esc, any key or click captures the mouse again. */
+function immersive(){if(WD.touch||SETTINGS.nofs||!document.documentElement.requestFullscreen)return;
+ const kl=()=>{if(navigator.keyboard&&navigator.keyboard.lock)navigator.keyboard.lock(['Escape']).catch(()=>{})};
+ if(document.fullscreenElement){kl();return}
+ try{document.documentElement.requestFullscreen({navigationUI:'hide'}).then(kl).catch(()=>{})}catch(e){}}
+const escKept=()=>!!(document.fullscreenElement&&navigator.keyboard&&navigator.keyboard.lock&&!SETTINGS.nofs);
+function tryLock(){if(WD.touch||WD.noLock||!S||!S.inWorld||S.ending||$('title').classList.contains('on')||$('pgx'))return;const el=lockEl();if(document.pointerLockElement===el)return;immersive();try{const p=el.requestPointerLock&&el.requestPointerLock();if(p&&p.catch)p.catch(()=>{})}catch(e){}}
 if(SETTINGS.nolock)WD.noLock=true;
 function setTouch(on){WD.touch=on;document.body.classList.toggle('touchui',on);document.body.classList.toggle('desk',!on)}
 /* dx>0 (mouse/finger moves right) turns right; dy<0 (moves up) looks up. Never inverted. */

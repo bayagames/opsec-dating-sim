@@ -58,6 +58,8 @@ function recordEnding(k){META.endv=META.endv||{};const L=META.endv[k]=META.endv[
  const v={at:Date.now(),h:S.h,loved:lv,partner:S.partner||null,plan:S.plan||null,day:S.day,solved:Object.keys(S.solved).length,
   f:['path_whisper','path_report','path_alone','heist_yes','betray_mira','mira_taken','informant','fake_accept','took_offer','turncoat','crew_in','vesper_leaked','leak_you','jonah_met','loop_closed'].filter(x=>S.f[x])};
  L.unshift(v);if(L.length>8)L.length=8;
+ // the chapters this run went through, and the one the ending came out of
+ {const ch=S.chaps||{},path=Object.keys(ch).map(Number).sort((a,b)=>a-b).map(d=>ch[d]);META.lastPath=path;const last=path[path.length-1];if(last){META.chend=META.chend||{};META.chend[last+'>'+k]=1}}
  META.fl=META.fl||{};for(const x in S.f)if(S.f[x])META.fl[x]=1;if(S.plan)META.fl['plan_'+S.plan]=1;if(S.loop)META.fl.loop=1;
  // every ending teaches you something new
  META.hints=META.hints||[];const fresh=[];for(const h of HINTS){if(fresh.length>=2)break;if(!META.hints.includes(h.id)&&hintOK(h)){META.hints.push(h.id);fresh.push(h)}}
@@ -74,26 +76,6 @@ const FLN={path_whisper:'answered WHISPER',path_report:'reported WHISPER to Kral
 function whyLines(v){const out=[];if(v.plan)out.push('Plan: '+(PLANN[v.plan]||v.plan)+'.');
  out.push(v.loved.length?'In love: '+v.loved.map(g=>CH[g].name).join(', ')+'.':'Nobody in love with you.');
  if(v.f.length)out.push('You '+v.f.map(x=>FLN[x]).filter(Boolean).join('; ')+'.');out.push(v.solved+' mysteries solved.');return out}
-/* the map of the week: every big choice, what it leads to, and the endings at the end of each branch */
-const TREE_KIDS=[
- {t:'Prologue · the forum post',kids:[
-  {t:'Day 1 · on the train, ask Astrid what else is up there',fl:'heard_echo',secret:1,kids:[{t:'Find the badge in the pool after midnight',fl:'badge0',secret:1,kids:[{t:'Saturday: pull the plug',fl:'plan_oracle',secret:1,ends:['zeroday']}]}]},
-  {t:'Next run, at the very start: rewind',fl:'loop',secret:1,need:()=>META.secret,kids:[{t:'Everyone in love, all fifteen mysteries',fl:'loop_closed',ends:['harem']}]}]},
- {t:'Tuesday night ⚑ WHISPER\'s message',kids:[
-  {t:'Answer',fl:'path_whisper',kids:[{t:'Wednesday ⚑ help Mira into LANTERN-01',fl:'heist_yes',kids:[{t:'The Dump',fl:'plan_dump',ends:['dump']}]},{t:'Help her, then tell Krall',fl:'betray_mira',ends:['lastlogin']}]},
-  {t:'Report it to Krall',fl:'path_report',kids:[{t:'Become his informant',fl:'informant',ends:['informant','lastlogin']}]},
-  {t:'Tell nobody',fl:'path_alone'}]},
- {t:'Friday',kids:[
-  {t:'Proof is in trouble: stay home',fl:'stayed_home',ends:['proof']},
-  {t:'Nyx\'s crew: steal LANTERN-02',fl:'crew_in',kids:[{t:'The Big Score',fl:'plan_bigscore',ends:['bigscore']}]},
-  {t:'⚑ Victor\'s offer',kids:[{t:'Fake yes: inside Suite 1313',fl:'fake_accept',ends:['trojan']},{t:'Yes',fl:'took_offer',kids:[{t:'Stay sold',ends:['soldout']},{t:'Turn on him',fl:'turncoat',ends:['doublecross']}]}]}]},
- {t:'Saturday ⚑ the plan',kids:[
-  {t:'Disclosure',fl:'plan_disc',ends:['disclosure','half','graph','opensource','notfound','found','whistle','signal','blackout','larp','scapegoat','double']},
-  {t:'Front Page (Saoirse)',fl:'plan_front',ends:['frontpage']},{t:'Injunction (Noor)',fl:'plan_inj',ends:['injunction']},
-  {t:'Rollback (Sunny and Tilly)',fl:'plan_rollback',ends:['rollback']},{t:'Kill Switch (Mira)',fl:'plan_kill',ends:['killswitch','ghost']},
-  {t:'Walk away',fl:'plan_walk',ends:['lasttrain']}]}
-];
-const TREE={t:'3:02 AM · the forum post',kids:TREE_KIDS};
 /* replaying a scene: a sandbox week where everyone's met and nothing you do is kept */
 function replayScene(id){const keep=S;S=fresh(META.lastH||'you');S.replay=1;S.unl={aff:1};for(const g of ROM){S.met[g]=1;S.f['met_'+g]=1;S.aff[g]=70}
  const m=id.match(/^([a-z]+)(\d)$/);if(m){S.sc[m[1]]=+m[2];S.aff[m[1]]=Math.max(20,ROUTES[m[1]].aff[+m[2]]||20)}

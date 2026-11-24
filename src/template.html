@@ -781,6 +781,51 @@ body.pgon #hud,body.pgon #vcur{display:none!important}
 .phtip{bottom:max(2px,env(safe-area-inset-bottom));font-size:12px}
 #cross.idle{opacity:.3;transform:scale(.7)}
 @media(prefers-reduced-motion:reduce){#obj.new,.toast{animation-duration:.01s}}
+/* ============ chapter cards ============ */
+#card.chap{display:none;place-items:stretch;padding:0;background:#07040a;text-align:left}
+#card.chap.on{display:grid}
+.chcard{position:relative;display:grid;grid-template-rows:1fr auto;height:100%;overflow:hidden}
+.chb{position:absolute;inset:0 0 auto 0;height:72%;overflow:hidden;-webkit-mask:linear-gradient(#000 60%,transparent);mask:linear-gradient(#000 60%,transparent)}
+.chb svg{width:100%;height:100%;display:block;animation:chDrift 14s ease-out forwards;transform-origin:70% 50%}
+@keyframes chDrift{from{transform:scale(1.12) translateX(2%);filter:brightness(.3)}25%{filter:brightness(1)}to{transform:scale(1)}}
+.chtx{position:relative;grid-row:2;padding:0 clamp(22px,8vw,140px) clamp(30px,8vh,80px);max-width:1000px}
+.chk{font:clamp(16px,1.5vw,22px) 'VT323',monospace;letter-spacing:.4em;color:var(--coral);text-transform:uppercase;opacity:0;animation:chIn2 .9s .5s cubic-bezier(.2,.8,.2,1) forwards}
+#card.chap h2{margin:.12em 0 .2em;font:700 clamp(46px,8vw,120px)/.95 'Chakra Petch',sans-serif;color:#f6eefc;letter-spacing:.01em;text-shadow:0 6px 40px #000;opacity:0;animation:chIn2 1.1s .75s cubic-bezier(.2,.8,.2,1) forwards}
+.chd{margin:0;font-size:clamp(16px,1.35vw,21px);line-height:1.5;color:#e6dcf0;max-width:42em;opacity:0;animation:chIn2 1s 1.1s cubic-bezier(.2,.8,.2,1) forwards}
+.chs{margin:.8em 0 0;font:clamp(15px,1.2vw,19px) 'VT323',monospace;letter-spacing:.15em;color:var(--butter);opacity:0;animation:chIn2 1s 1.35s ease forwards}
+#card.chap .tap{margin-top:1.6em;font-size:13px;color:#8f7da3;opacity:0;animation:chIn2 1s 2s ease forwards}
+@keyframes chIn2{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.chb svg,.chk,#card.chap h2,.chd,.chs,#card.chap .tap{animation-duration:.01s;animation-delay:0s}}
+/* ============ postgame: the week in chapters ============ */
+.pgmh{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;padding-bottom:10px!important}
+.pglast{flex:none;font:600 13px 'Chakra Petch',sans-serif;color:var(--ink);background:#1b1026;border:1px solid #ffffff22;border-radius:999px;padding:8px 16px;cursor:pointer;transition:background .2s,border-color .2s}
+.pglast:hover{border-color:var(--butter)}.pglast.on{background:var(--butter);color:#1b1026;border-color:var(--butter)}.pglast:disabled{opacity:.35;cursor:default}
+.ccol{fill:#ffffff05;stroke:#ffffff0a}
+.cday{font:15px 'VT323',monospace;letter-spacing:.35em;fill:#8f7da3}
+.cdec path{fill:#1b1026;stroke:var(--coral);stroke-width:2}.cdec text{font:600 12px 'Chakra Petch',sans-serif;fill:var(--coral);letter-spacing:.03em}
+.ce{fill:none;stroke:#ffffff1a;stroke-width:2.4;transition:stroke .3s,opacity .3s}
+.ce.lit{stroke:#8affc1aa;stroke-width:3}
+.ce.onpath{stroke:var(--butter);stroke-width:4;stroke-dasharray:10 8;animation:ceflow 1s linear infinite;filter:drop-shadow(0 0 6px #ffd16688)}
+@keyframes ceflow{to{stroke-dashoffset:-18}}
+.ct{cursor:pointer;transition:opacity .3s}
+.ct .ctbg{fill:#160e20;stroke:#ffffff1c;stroke-width:1.4;transition:stroke .2s}
+.ct.seen .ctbg{stroke:#8affc177}
+.ct:not(.seen) .ctban{filter:grayscale(1) brightness(.45)}
+.ct .ctveil{fill:#0b0711;opacity:.35}
+.ct .ctlock{font:15px 'VT323',monospace;letter-spacing:.3em;fill:#f6eefc99}
+.ct .ctk{font:13px 'VT323',monospace;letter-spacing:.2em;fill:var(--coral)}
+.ct .ctn{font:700 17px 'Chakra Petch',sans-serif;fill:#f6eefc}
+.ct:not(.seen) .ctn{fill:#a998bb}
+.ct .ctv{font:12px 'Chakra Petch',sans-serif;fill:#8f7da3}
+.ct .ctdot{fill:var(--mint)}
+.ct:hover .ctbg{stroke:#f6eefc88}.ct.sel .ctbg{stroke:var(--butter);stroke-width:3}
+.ct.off,.te.off{opacity:.28}.ct.onpath .ctbg{stroke:var(--butter);stroke-width:3}
+.lg.path{background:transparent;border:0;border-top:3px dashed var(--butter);border-radius:0;height:0;margin-top:6px}
+.pgchd .pgchb{margin:-18px -18px 14px;border-radius:14px 14px 0 0;overflow:hidden;aspect-ratio:8/3}.pgchd .pgchb svg{width:100%;height:100%;display:block}
+.pgchd .pgchb.dim svg{filter:grayscale(1) brightness(.5)}
+.pgchd h3{font:700 26px 'Chakra Petch',sans-serif;margin:2px 0 8px}
+.chname{color:var(--butter)}
+@media(max-width:700px){.pglast{padding:6px 12px;font-size:12px}}
 </style>
 </head>
 <body>
