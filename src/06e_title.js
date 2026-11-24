@@ -43,7 +43,7 @@ function titleCast(on){const box=$('tcast');if(!box)return;
  TC.t=setInterval(()=>{if(document.hidden)return;const old=TC.el;old.classList.remove('s0');old.classList.add('gone');setTimeout(()=>old.remove(),1300);next(700)},10000);
  TC.smile=setInterval(()=>{const f=TC.el&&TC.el.querySelector('.tcface');if(!f||document.hidden)return;f.style.opacity=1;setTimeout(()=>f.style.opacity=0,2600)},6500)}
 // a little parallax with the mouse
-addEventListener('mousemove',e=>{const t=$('title');if(!t||!t.classList.contains('on')||TS.stage!=='menu')return;const c=$('tcast');if(!c)return;c.style.setProperty('--px',((e.clientX/innerWidth-.5)*-18).toFixed(1)+'px');c.style.setProperty('--py',((e.clientY/innerHeight-.5)*-8).toFixed(1)+'px')});
+addEventListener('mousemove',e=>{const t=$('title');if(!t||!t.classList.contains('on')||TS.stage!=='menu')return;const c=$('tcast');if(!c)return;c.style.setProperty('--px',((e.clientX/innerWidth-.5)*-18).toFixed(1)+'px');c.style.setProperty('--py','0px')});
 function titleStage(s){const t=$('title'),L=$('tlogo'),prev=t.dataset.stage;
  const kids=[...L.children],flip=prev&&prev!=='boot'&&prev!==s&&t.classList.contains('on');
  const first=flip?kids.map(k=>k.getBoundingClientRect()):null;

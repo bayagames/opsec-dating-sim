@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>OPSEC Dating Simulator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=VT323&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Inter:wght@300;400;500;600&family=VT323&display=swap" rel="stylesheet">
 <style>
 /* VOICE: a warm, silly, sincere hacker-con visual novel. Jokes on the surface, heart underneath.
    IDEA: the whole game is a conference badge at 2am: lanyard coral, terminal mint, badge butter on aubergine night.
@@ -267,7 +267,7 @@ button:focus-visible{outline:3px solid var(--butter);outline-offset:2px}
 .tc.gone{opacity:0;transform:translateX(calc(-50% - 10vw)) scale(.97);filter:brightness(.2) blur(10px);transition-duration:1.1s}
 @keyframes tcbreathe{0%,100%{transform:scale(1,1)}50%{transform:scale(1.004,1.008)}}
 /* the bottom of the column fades into the dark, so the cut at the knees is soft */
-.tcast::after{content:'';position:absolute;left:-60%;right:-40%;bottom:0;height:22vh;background:linear-gradient(transparent,#07040a);-webkit-mask:linear-gradient(90deg,transparent,#000 35%);mask:linear-gradient(90deg,transparent,#000 35%);z-index:5}
+.tcast{-webkit-mask:linear-gradient(#000 68%,transparent 96%);mask:linear-gradient(#000 68%,transparent 96%)}
 @media(max-width:900px){.tcast{display:none}}
 @media(prefers-reduced-motion:reduce){.tc .tcin{animation:none}.tc{transition-duration:.01s}}
 /* the corners */
@@ -826,6 +826,86 @@ body.pgon #hud,body.pgon #vcur{display:none!important}
 .pgchd h3{font:700 26px 'Chakra Petch',sans-serif;margin:2px 0 8px}
 .chname{color:var(--butter)}
 @media(max-width:700px){.pglast{padding:6px 12px;font-size:12px}}
+/* ============ design pass 2: calmer, sharper, one system ============
+   The first screens were built loud: thick 2px borders, pill shapes, purple gradients and the pixel font on every
+   heading. Everything now speaks the same language as the title and chapter cards: dark glass panels with hairline
+   borders, small radii, Chakra Petch for headings and labels, Inter for reading, and the accent colours used sparingly.
+   The pixel font is kept for terminals, texts and WHISPER. */
+:root{--bg:#0c0912;--panel:#15101c;--panel2:#1c1625;--ink:#f3eef7;--dim:#a99cb6;--line:#ffffff17;--glass:#100b17e8;--hair:#ffffff1a;--r:10px}
+body{font:15px/1.55 'Inter',system-ui,sans-serif;letter-spacing:.003em}
+h1,h2,h3,h4{font-family:'Chakra Petch',sans-serif}
+/* buttons */
+.btn{min-height:42px;padding:9px 18px;border-radius:8px;border:1px solid var(--hair);background:#ffffff09;font:600 14px 'Chakra Petch',sans-serif;letter-spacing:.03em;color:var(--ink)}
+.btn:not(:disabled):hover,.btn.vhover:not(:disabled){translate:none;box-shadow:none;filter:none;border-color:#ffffff55;background:#ffffff12}
+.btn:not(:disabled):active{translate:none;scale:.985}
+.btn.pri{background:linear-gradient(#ff6d81,#f04a62);border-color:transparent;color:#160b14;box-shadow:0 6px 20px #ff5d7333}
+.btn.pri:not(:disabled):hover,.btn.pri.vhover:not(:disabled){background:linear-gradient(#ff8191,#ff5d73);border-color:transparent}
+.btn.danger{background:#ff5d7322;border-color:#ff5d7388;color:#ffb3bd}
+/* cards and overlays */
+.card{background:var(--glass);border:1px solid var(--hair);border-radius:14px;padding:24px 26px;box-shadow:0 30px 80px #000b;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.card h3{font:600 24px/1.2 'Chakra Petch',sans-serif;color:var(--ink);letter-spacing:.01em;margin:2px 0 8px}
+.card .k,.tut .k,#card .k{font:600 11px 'Chakra Petch',sans-serif;letter-spacing:.24em;text-transform:uppercase;color:var(--coral)}
+.tut{border-color:var(--hair);box-shadow:0 30px 80px #000b;border-top:2px solid var(--mint)}.tut .k{color:var(--mint)}
+.small{font-size:12.5px;color:var(--dim)}
+/* the dialogue box: a lower-third, not a speech bubble */
+#box{background:linear-gradient(#0d0913e6,#0b0810f5);border:1px solid var(--hair);border-radius:12px;padding:26px 30px 22px;min-height:150px;box-shadow:0 24px 60px #000a;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+#box.vhover{border-color:#ffffff33}
+#who{top:-13px;left:26px;padding:4px 12px;border-radius:4px;font:700 12px 'Chakra Petch',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#120a12;box-shadow:0 6px 18px #0008}
+#txt{font:17.5px/1.6 'Inter',sans-serif;color:#f3eef7}
+#txt.narr,#txt.think{color:#d4c9de;font-style:italic}
+#nexti{right:20px;bottom:10px;color:#ffffff66;font-size:12px}
+#nexti .kn{border-color:#ffffff22}
+/* choices: quiet rows that light up on the left */
+.ch{min-height:46px;padding:11px 18px;border-radius:8px;border:1px solid var(--hair);background:#0d0913e8;font:500 15px/1.45 'Inter',sans-serif;box-shadow:0 8px 24px #0007;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.ch:hover,.ch:focus-visible,.ch.vhover{border-color:#ffffff40;background:#1a1322f0;translate:3px 0;box-shadow:inset 3px 0 0 var(--butter),0 8px 24px #0008}
+.ch small{font-size:12.5px;color:var(--dim)}
+/* the top bar */
+#hud{background:linear-gradient(#000a,#0000)}
+#hud .when{font:600 13px 'Chakra Petch',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--ink)}
+#hud .when .t{color:var(--dim)}
+.hb{border:1px solid var(--hair);background:#0d0913cc;border-radius:8px;font:600 13px 'Chakra Petch',sans-serif;letter-spacing:.04em;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.m{font:600 11px 'Chakra Petch',sans-serif;letter-spacing:.08em}
+@media(min-width:1180px){#hud .when{font-size:14px}}
+/* the phone: a slimmer device, glass tiles with the glyph in the app's colour */
+.phone{background:linear-gradient(170deg,#18111f,#0b0810 70%);border:1px solid #ffffff22;border-radius:42px;box-shadow:0 40px 100px #000d,inset 0 0 0 7px #07050a,inset 0 0 0 8px #ffffff10}
+.pbar{font:500 12px 'Inter',sans-serif;letter-spacing:.04em}
+.home .clock{font:300 66px/1 'Inter',sans-serif;letter-spacing:-.02em;margin-top:18px}
+.home .date{font:500 12px 'Chakra Petch',sans-serif;letter-spacing:.14em;text-transform:uppercase}
+.app .ic{width:58px;height:58px;border-radius:15px;background:linear-gradient(160deg,color-mix(in srgb,var(--ic) 24%,#1a1422),#100c16)!important;border:1px solid color-mix(in srgb,var(--ic) 38%,transparent);box-shadow:0 8px 20px #0007}
+.app .ic svg [fill="#1b1026"]{fill:var(--ic)}.app .ic svg [stroke="#1b1026"]{stroke:var(--ic)}
+.app .ic i{font:700 11px/22px 'Inter',sans-serif;box-shadow:0 0 0 2px #0b0810}
+.app .nm{font:500 12px 'Inter',sans-serif;color:#d8cfe2}
+.app:hover .ic,.app.vhover .ic{translate:0 -2px;border-color:var(--ic)}
+.phome{background:#ffffff55;height:5px}
+.ptop{border-bottom:1px solid var(--hair)}
+.pback{border:1px solid var(--hair);background:#ffffff08;border-radius:8px}
+/* full-screen apps */
+.bigapp{background:radial-gradient(120% 80% at 10% 0%,#1a1224,#0a0710 70%)}
+.bigapp .mtop{border-bottom:1px solid var(--hair);padding:12px 18px}.bigapp .mtop b{font:600 19px 'Chakra Petch',sans-serif;letter-spacing:.02em}
+.atabs{border-bottom:1px solid var(--hair);gap:2px;padding:0 14px}
+.atabs button{min-height:42px;border-radius:0;border:0;border-bottom:2px solid transparent;background:none;padding:4px 14px;font:600 13px 'Chakra Petch',sans-serif;letter-spacing:.06em;color:var(--dim)}
+.atabs button.on{color:var(--ink);border-bottom-color:var(--coral);background:none}
+.atabs button:hover{color:var(--ink)}
+.kv{border-bottom:1px solid var(--hair)}
+.goal{background:#ffffff07;border-left:2px solid var(--mint);border-radius:0 8px 8px 0}
+.achv{background:#ffffff07;border-radius:8px}
+/* the 2D hub (no-WebGL fallback) */
+#hub h2{font:600 28px/1.1 'Chakra Petch',sans-serif;color:var(--ink)}
+.story{border:1px solid #ff5d7366;border-radius:10px;background:linear-gradient(90deg,#ff5d731f,#ff5d7305)}
+.story span.ar{font:600 22px 'Chakra Petch',sans-serif}
+/* the world HUD */
+#obj{background:#0b0810cc;border-left:2px solid var(--mint);border-radius:0 8px 8px 0;font:500 14px 'Inter',sans-serif}
+#keys{font:500 12px 'Inter',sans-serif;background:#0b0810b8;border-radius:8px}
+#keys b{font:600 11px 'Chakra Petch',sans-serif;letter-spacing:.06em;padding:1px 6px;border:1px solid #ffffff22;background:#ffffff0d}
+#prompt{background:#0d0913eb;border:1px solid #ffffff33;border-radius:10px;font:600 15px 'Inter',sans-serif;padding:6px 18px 6px 6px;box-shadow:0 10px 30px #0009}
+#promptK{border-radius:7px;font:700 15px 'Chakra Petch',sans-serif}
+#areaName{font:600 28px 'Chakra Petch',sans-serif;letter-spacing:.3em;text-transform:uppercase;color:var(--ink)}
+@media(min-width:1180px){#areaName{font-size:32px}#prompt{font-size:16px}#obj{font-size:15px}}
+/* the location sign over a scene: a quiet caption between two hairlines */
+.bg .sign{top:62px;padding:0;border:0;border-radius:0;box-shadow:none;background:none;font:600 12px 'Chakra Petch',sans-serif;letter-spacing:.34em;text-transform:uppercase;opacity:.8;display:flex;align-items:center;gap:14px;text-shadow:0 1px 10px #000}
+.bg .sign::before,.bg .sign::after{content:'';width:42px;height:1px;background:currentColor;opacity:.5}
+#card:not(.chap) h2{font:700 clamp(40px,7vw,72px)/1 'Chakra Petch',sans-serif;color:var(--ink);letter-spacing:.01em}
+#card:not(.chap) p{font-size:15px}
 </style>
 </head>
 <body>
@@ -881,7 +961,7 @@ body.pgon #hud,body.pgon #vcur{display:none!important}
     <div id="obj"><div id="objT"></div><div id="objN"></div></div>
     <canvas id="mini" width="264" height="264"></canvas>
     <div id="lockHint"><b>Click</b> to look around</div>
-    <div id="keys"><b>WASD</b> move <b>Shift</b> run <b>E</b> interact <b>M</b> map <b>Esc</b> phone</div>
+    <div id="keys"><b>WASD</b> move <b>Shift</b> run <b>E</b> interact <b>M</b> map <b>Tab</b> phone</div>
     <div id="joy"><div id="knob"></div></div>
     <div id="prompt"><span id="promptK">E</span><span id="promptT"></span></div>
     <button id="actBtn" aria-label="Interact"><span id="actL">Use</span></button>
@@ -1166,7 +1246,7 @@ function hud(){
  if(S.unl.exp)ms.push(['EXP '+S.exp,S.exp,'var(--coral)','Exposure '+S.exp+'/100 · resets to '+S.foot+' each morning']);
  $('meters').innerHTML=ms.map(m=>`<div class="m" title="${m[3]}">${m[0]}<b><i style="width:${m[1]}%;background:${m[2]}"></i></b></div>`).join('')+(S.unl.money||S.unl.cred?`<div class="m" style="width:auto;color:var(--butter)">£<br>${S.money||0}</div>`:'');
  $('phoneBtn').style.display='block';
- $('phoneBtn').innerHTML='Phone<span class="kn" style="margin:0 0 0 6px">P</span>'+(S.msgs.some(m=>!m.r)?'<span class="dot"></span>':'');
+ $('phoneBtn').innerHTML='Phone<span class="kn" style="margin:0 0 0 6px">Tab</span>'+(S.msgs.some(m=>!m.r)?'<span class="dot"></span>':'');
 }
 function show(id){document.body.classList.toggle('inworld',id==='world');if(id!=='title'&&typeof titleCamOn==='function'){titleCamOn(false);if(typeof titleCast==='function')titleCast(false)}if(id==='title'&&typeof vcShow==='function')vcShow(false);setTimeout(updBlur,0);document.querySelectorAll('.scr').forEach(s=>s.classList.toggle('on',s.id===id));$('hud').style.display=id==='title'?'none':'flex';$('gl').style.display=(id!=='title'&&S&&S.inWorld&&G.ok)?'block':'none';if(id!=='world'){WD.active=false;if((id==='title'||id==='hub')&&document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}}}
 
@@ -12105,7 +12185,7 @@ function titleCast(on){const box=$('tcast');if(!box)return;
  TC.t=setInterval(()=>{if(document.hidden)return;const old=TC.el;old.classList.remove('s0');old.classList.add('gone');setTimeout(()=>old.remove(),1300);next(700)},10000);
  TC.smile=setInterval(()=>{const f=TC.el&&TC.el.querySelector('.tcface');if(!f||document.hidden)return;f.style.opacity=1;setTimeout(()=>f.style.opacity=0,2600)},6500)}
 // a little parallax with the mouse
-addEventListener('mousemove',e=>{const t=$('title');if(!t||!t.classList.contains('on')||TS.stage!=='menu')return;const c=$('tcast');if(!c)return;c.style.setProperty('--px',((e.clientX/innerWidth-.5)*-18).toFixed(1)+'px');c.style.setProperty('--py',((e.clientY/innerHeight-.5)*-8).toFixed(1)+'px')});
+addEventListener('mousemove',e=>{const t=$('title');if(!t||!t.classList.contains('on')||TS.stage!=='menu')return;const c=$('tcast');if(!c)return;c.style.setProperty('--px',((e.clientX/innerWidth-.5)*-18).toFixed(1)+'px');c.style.setProperty('--py','0px')});
 function titleStage(s){const t=$('title'),L=$('tlogo'),prev=t.dataset.stage;
  const kids=[...L.children],flip=prev&&prev!=='boot'&&prev!==s&&t.classList.contains('on');
  const first=flip?kids.map(k=>k.getBoundingClientRect()):null;
@@ -17203,7 +17283,7 @@ function phoneBack(){const o=$('ov');
 function drawPhone(){
  const apps=Object.keys(APPN).filter(a=>a==='postgame'?pgOpen():!APPU[a]||S.unl[APPU[a]]);
  const unread=S.msgs.filter(m=>!m.r).length,nn=S.day>0?ROM.filter(sceneReady).length:0,nc=S.day>0?Object.keys(MYST).filter(m=>S.unl.clues&&canSolve(m)).length:0;
- const body=`<div class="home"><div class="clock">${S.day?SLOTT[S.slot]:'07:12'}</div><div class="date">${esc(clockLabel())}</div><div class="grid">${apps.map(a=>`<button class="app" data-a="${a}"><span class="ic" style="background:${ICON[a][0]}"><svg viewBox="0 0 32 32">${ICON[a][1]}</svg>${a==='messages'&&unread?`<i>${unread}</i>`:''}${a==='hearts'&&nn?`<i>${nn}</i>`:''}${a==='cases'&&nc?`<i>${nc}</i>`:''}</span><span class="nm">${APPN[a]}</span></button>`).join('')}</div></div>`;
+ const body=`<div class="home"><div class="clock">${S.day?SLOTT[S.slot]:'07:12'}</div><div class="date">${esc(clockLabel())}</div><div class="grid">${apps.map(a=>`<button class="app" data-a="${a}"><span class="ic" style="--ic:${ICON[a][0]}"><svg viewBox="0 0 32 32">${ICON[a][1]}</svg>${a==='messages'&&unread?`<i>${unread}</i>`:''}${a==='hearts'&&nn?`<i>${nn}</i>`:''}${a==='cases'&&nc?`<i>${nc}</i>`:''}</span><span class="nm">${APPN[a]}</span></button>`).join('')}</div></div>`;
  ov(`<div class="phone"><div class="pbar"><span>${S.day>0&&WD.reg!=='home'&&WD.reg!=='office'?'CTRL+ALT+NET':'HOME-WIFI'}</span><span>${S.day?SLOTT[S.slot]:'07:12'}</span><span class="bat"><b style="width:${Math.max(8,96-S.slot*15)}%"></b></span></div><div class="pbody">${body}</div><button class="phome" id="phome" aria-label="Close phone"></button></div><p class="small phtip" id="phtip">${WD.touch?'':'Esc, P or Tab to put it away'}</p>`);
  const o=$('ov');delete o.dataset.app;delete o.dataset.from;o.classList.remove('mapov','appov');o.classList.add('phoneov');updBlur();
  o.onclick=e=>{if(e.target===o)closePhone()};
