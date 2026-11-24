@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Character Importer</title>
+<style>
+:root{--bg:#140d1c;--panel:#221632;--line:#3a2a50;--ink:#f6eefc;--dim:#a998bb;--coral:#ff5d73;--butter:#ffd166;--mint:#8affc1}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,sans-serif;padding:24px 16px 60px}
+main{max-width:1100px;margin:0 auto}h1{font-size:28px;margin:0 0 4px}h2{font-size:17px;margin:0 0 10px;color:var(--butter)}p{margin:0 0 10px;color:var(--dim)}
+.step{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin-top:16px}
+#drop{border:2px dashed var(--line);border-radius:12px;padding:34px 16px;text-align:center;cursor:pointer;transition:.2s}#drop.on{border-color:var(--mint);background:#8affc110}
+#drop b{display:block;font-size:18px;margin-bottom:4px}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:13px}td{padding:6px 8px;border-top:1px solid var(--line)}td:first-child{word-break:break-all;color:var(--dim)}
+select,button{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+button.pri{background:var(--coral);border-color:var(--coral);color:#1b1026;font-weight:700;cursor:pointer}button:disabled{opacity:.4;cursor:default}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:12px}
+#status{color:var(--mint);font-size:14px}
+.warn{color:var(--butter);font-size:13px;margin-top:8px}
+#stage{display:flex;gap:28px;align-items:flex-end;background:radial-gradient(#3a2a50,#140d1c);border-radius:12px;padding:20px 24px 0;position:relative;overflow:hidden;min-height:200px;flex-wrap:wrap}
+#stage figure{margin:0;text-align:center}#stage figcaption{font-size:13px;padding:6px 0 10px}#stage canvas{display:block}
+#faces{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:14px}
+#faces figure{margin:0;background:var(--bg);border-radius:10px;padding:6px;text-align:center}#faces canvas{width:100%;height:auto;display:block}#faces figcaption{font-size:12px;color:var(--dim)}
+#faces figure.miss{opacity:.45}
+ol{margin:6px 0 0;padding-left:20px;color:var(--dim)}code{background:var(--bg);padding:1px 5px;border-radius:5px;color:var(--ink)}
+</style></head>
+<body><main>
+<h1>Character importer</h1>
+<p>Turns character-creator exports into game art. Everything happens in this page; nothing is uploaded anywhere.</p>
+
+<section class="step"><h2>1 · Drop the exports</h2>
+<div id="drop"><b>Drop the SVG files here</b>or click to choose them. One file per expression, same pose and canvas.</div>
+<input type="file" id="pick" accept=".svg,image/svg+xml" multiple hidden>
+<table id="files"></table>
+<div class="row"><label>Character <select id="look"></select></label><button class="pri" id="go" disabled>Make the art</button><span id="status"></span></div>
+<div id="warn" class="warn"></div>
+</section>
+
+<section class="step" id="out" hidden><h2>2 · Check it</h2>
+<p>At true scale next to Ellie (165 cm). Heights come straight from the creator, so this is how they'll stand in the game.</p>
+<div id="stage"></div>
+<div id="faces"></div>
+</section>
+
+<section class="step" id="save" hidden><h2>3 · Put it in the game</h2>
+<div class="row"><button class="pri" id="dl">Download</button><span id="dlname"></span></div>
+<ol>
+<li>On GitHub, open the repository's <code>art/chars</code> folder (on the branch you play from).</li>
+<li><b>Add file → Upload files</b>, drop the downloaded file in, and commit. Replacing an existing file is fine.</li>
+<li>Reload the game. No rebuild needed.</li>
+</ol>
+<p style="margin-top:10px">Playing from a copy on your computer instead? Put the file in that copy's <code>art/chars</code> folder.</p>
+</section>
+</main>
+<script src="artcore.js"></script>
+<script src="looks.js"></script>
+<script src="../art/chars/ellie.js" onerror="this.remove()"></script>
+<script>
+const $=id=>document.getElementById(id);
+const NOTE={ellie:'Ellie (apron, Days 0–2)',ellie2:'Ellie (cardigan, Day 3 on)',kit:'Kit (everyday)',kitc:'Kit (armour)',dave:'Dave (Day 1, shades)',davex:'Dave (Day 2 on)'};
+$('look').innerHTML='<option value="">Choose…</option>'+LOOKS.map(([id,n])=>`<option value="${id}">${NOTE[id]||n} · ${id}${window.ART&&ART[id]?' (has art)':''}</option>`).join('');
+let F=[],result=null;
+function table(){$('files').innerHTML=F.map((f,i)=>`<tr><td>${f.name}</td><td><select data-i="${i}">${Object.entries(ARTEXP).map(([k,n])=>`<option value="${k}" ${f.k===k?'selected':''}>${n}</option>`).join('')}<option value="" ${f.k?'':'selected'}>(skip)</option></select></td></tr>`).join('');
+ $('files').querySelectorAll('select').forEach(s=>s.onchange=()=>{F[s.dataset.i].k=s.value;check()});check()}
+function check(){const ks=F.map(f=>f.k).filter(Boolean),dup=ks.filter((k,i)=>ks.indexOf(k)!==i),miss=Object.keys(ARTEXP).filter(k=>!ks.includes(k));
+ const w=[];if(F.length&&!ks.includes('n'))w.push('A neutral is needed (the creator calls it Default_Expression).');if(dup.length)w.push('Two files are set to the same expression: '+[...new Set(dup)].map(k=>ARTEXP[k]).join(', ')+'.');
+ if(F.length&&miss.length&&ks.includes('n'))w.push('Missing: '+miss.map(k=>ARTEXP[k]).join(', ')+'. That works; the game stands in angry → neutral, teary → worried, others → neutral.');
+ $('warn').textContent=w.join(' ');$('go').disabled=!(ks.includes('n')&&!dup.length&&$('look').value)}
+async function add(list){for(const f of list){if(!/\.svg$/i.test(f.name))continue;const text=await f.text();F=F.filter(x=>x.name!==f.name);F.push({name:f.name,text,k:artGuessExp(f.name)||''});
+ const id=artGuessId(f.name);if(id&&!$('look').value&&LOOKS.some(l=>l[0]===id))$('look').value=id}
+ F.sort((a,b)=>Object.keys(ARTEXP).indexOf(a.k)-Object.keys(ARTEXP).indexOf(b.k));table()}
+$('drop').onclick=()=>$('pick').click();$('pick').onchange=e=>add([...e.target.files]);
+for(const ev of['dragenter','dragover'])$('drop').addEventListener(ev,e=>{e.preventDefault();$('drop').classList.add('on')});
+for(const ev of['dragleave','drop'])$('drop').addEventListener(ev,e=>{e.preventDefault();$('drop').classList.remove('on')});
+$('drop').addEventListener('drop',e=>add([...e.dataTransfer.files]));
+$('look').onchange=check;
+$('go').onclick=async()=>{const svgs={};for(const f of F)if(f.k)svgs[f.k]=f.text;$('go').disabled=true;
+ try{result=await artProcess(svgs,t=>$('status').textContent=t+'…');$('status').textContent='Done.';show()}catch(e){$('status').textContent='';$('warn').textContent='Couldn\'t read that: '+e.message}
+ $('go').disabled=false};
+const load=src=>new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.src=src});
+async function figure(A,label,scale){const b=A.body,cv=document.createElement('canvas');cv.width=Math.round(b[2]*scale);cv.height=Math.round((ARTCM.px*1.18+40)*scale);
+ const x=cv.getContext('2d'),img=await load(A.img),base=cv.height-6*scale;x.drawImage(img,0,base-(A.foot-b[1])*scale,b[2]*scale,b[3]*scale);
+ const cm=Math.round((A.foot-A.top)/ARTCM.px*ARTCM.cm);const f=document.createElement('figure');f.appendChild(cv);f.insertAdjacentHTML('beforeend',`<figcaption>${label}<br><b>${cm} cm</b></figcaption>`);return f}
+async function show(){const id=$('look').value,A=result,sc=.16;$('out').hidden=$('save').hidden=false;
+ const st=$('stage');st.innerHTML='';if(window.ART&&ART.ellie&&id!=='ellie')st.appendChild(await figure(ART.ellie,'Ellie',sc));st.appendChild(await figure(A,(NOTE[id]||(LOOKS.find(l=>l[0]===id)||[,id])[1]),sc));
+ // a line at Ellie's height
+ const fc=$('faces');fc.innerHTML='';const body=await load(A.img);
+ for(const k of Object.keys(ARTEXP)){const cv=document.createElement('canvas'),w=Math.round(A.face?A.face[2]*2.2:600),h=Math.round(w*1.15);cv.width=w;cv.height=h;const x=cv.getContext('2d');
+  const fx=A.face?A.face[0]+A.face[2]/2-w/2:A.cx-w/2,fy=A.top-40;x.drawImage(body,A.body[0]-fx,A.body[1]-fy);
+  const have=k==='n'||A.ex[k];if(A.ex[k]){const im=await load(A.ex[k]);x.drawImage(im,A.face[0]-fx,A.face[1]-fy)}
+  const f=document.createElement('figure');if(!have)f.className='miss';f.appendChild(cv);f.insertAdjacentHTML('beforeend',`<figcaption>${ARTEXP[k]}${have?'':' (missing)'}</figcaption>`);fc.appendChild(f)}
+ $('dlname').textContent=id+'.js · '+Math.round(artFile(id,A).length/1024)+' KB';$('out').scrollIntoView({behavior:'smooth'})}
+$('dl').onclick=()=>{const id=$('look').value,a=document.createElement('a');a.href=URL.createObjectURL(new Blob([artFile(id,result)],{type:'text/javascript'}));a.download=id+'.js';a.click()};
+</script>
+</body></html>
