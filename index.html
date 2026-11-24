@@ -811,6 +811,7 @@ body.pgon #hud,body.pgon #vcur{display:none!important}
   <div id="vcur"></div>
 </div>
 <script src="vendor/three.bundle.js"></script>
+<script src="art/chars/ellie.js"></script>
 <script>
 {
 /* ============ CHARACTERS ============ */
@@ -854,8 +855,21 @@ const CH={
 const ROM=['ellie','nyx','ada','priya','juno','kit','rin','bea','mira','saoirse','sunny','tilly','petra','astrid','yuki','vesper','delphine','noor','fern','wren','pia'];
 const DK='#1a1220';
 const PC={};
+/* ---------- drawn art from the character creator (art/chars/<look>.js, made by tools/artprep.js) ----------
+   A look without its own art borrows its base character's until it gets some (Ellie's cardigan, Kit's armour).
+   Expressions that haven't been made yet fall back: angry → neutral, teary → worried. */
+const ARTBASE={ellie2:'ellie',kitc:'kit',davex:'dave'},ARTEX={a:'n',d:'b'};
+function artOf(id){const A=window.ART||{};return A[id]||A[ARTBASE[id]]||null}
+/* framing, calibrated on Ellie so the new art reads at the same size as the old: in a portrait (200 x 262) the top of
+   the head sits at y 47, centred, at 0.26 units per creator pixel; in the 3D figure (200 x 500) the feet sit at y 494
+   at 0.1453 units per pixel, so a character who is taller in the creator stands taller in the world */
+const ARTP={k:.26,top:47},ART3={k:.1453,foot:494};
+function artPor(A,x){const k=ARTP.k,X=v=>(100+(v-A.cx)*k).toFixed(2),Y=v=>(ARTP.top+(v-A.top)*k).toFixed(2);
+ const e=A.ex[x]?x:A.ex[ARTEX[x]]?ARTEX[x]:null,b=A.body,f=A.face;
+ return`<image href="${A.img}" x="${X(b[0])}" y="${Y(b[1])}" width="${(b[2]*k).toFixed(2)}" height="${(b[3]*k).toFixed(2)}" preserveAspectRatio="none"/>`+(e&&f?`<image href="${A.ex[e]}" x="${X(f[0])}" y="${Y(f[1])}" width="${(f[2]*k).toFixed(2)}" height="${(f[3]*k).toFixed(2)}" preserveAspectRatio="none"/>`:'')}
 function por(id,x,full){
  x=x||'n';const key=id+x+(full?'F':'');if(PC[key])return PC[key];
+ if(!full&&artOf(id))return PC[key]=`<svg viewBox="0 0 200 262" xmlns="http://www.w3.org/2000/svg" aria-label="${CH[id].name}" class="art">${artPor(artOf(id),x)}</svg>`;
  const c=CH[id],sk=c.skin,hr=c.hair,st=c.style,ec=c.eye,bw=c.brow||DK;
  let o='';
  if(st==='bob')o+=`<path d="M50 104 Q44 42 100 40 Q156 42 150 104 L154 164 Q128 172 112 160 L100 150 L88 160 Q72 172 46 164Z" fill="${hr}"/>`;
@@ -12339,6 +12353,12 @@ function updLights(dt,force){
 }
 /* ---- characters as lit, camera-facing cut-outs ---- */
 const SPRW=288,SPRH=720;
+/* a character from the creator art: the full body, feet on the same line as the drawn figures */
+function artTex(key,A){G.stx=G.stx||{};if(G.stx[key])return G.stx[key];const T=G.T;
+ const c=document.createElement('canvas');c.width=SPRW*2;c.height=SPRH*2;const t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;t.anisotropy=G.aniso;
+ const img=new Image();img.onload=()=>{const x=c.getContext('2d'),s=SPRW*2/200,k=ART3.k,b=A.body;x.clearRect(0,0,c.width,c.height);
+  x.imageSmoothingQuality='high';x.drawImage(img,(100+(b[0]-A.cx)*k)*s,(ART3.foot+(b[1]-A.foot)*k)*s,b[2]*k*s,b[3]*k*s);t.needsUpdate=true};
+ img.src=A.img;return G.stx[key]=t}
 function spriteTex(key,svg){
  G.stx=G.stx||{};if(G.stx[key])return G.stx[key];const T=G.T;
  const c=document.createElement('canvas');c.width=SPRW;c.height=SPRH;const t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;t.anisotropy=G.aniso;
@@ -15759,7 +15779,7 @@ function updSprites(dt){
   const vis=TT.on?!!TT.cast[c.id]:c.reg===WD.reg&&c.when();
   if(!c.obj){if(!vis)continue;c.obj=cutout(null,.98,2.45);G.scene.add(c.obj);c.mark=markObj();G.scene.add(c.mark)}
   c.obj.visible=vis;c.mark.visible=false;if(!vis)continue;
-  const sk=charSVGKey(c);if(c.objKey!==sk){c.objKey=sk;const t=spriteTex('c:'+sk,fullSVG(sk));const bd=c.obj.userData.body,b=bd.material;b.map=t;b.emissiveMap=t;b.needsUpdate=true;if(bd.customDistanceMaterial){bd.customDistanceMaterial.map=t;bd.customDistanceMaterial.needsUpdate=true}}
+  const sk=charSVGKey(c);if(c.objKey!==sk){c.objKey=sk;const t=artOf(sk)?artTex('a:'+sk,artOf(sk)):spriteTex('c:'+sk,fullSVG(sk));const bd=c.obj.userData.body,b=bd.material;b.map=t;b.emissiveMap=t;b.needsUpdate=true;if(bd.customDistanceMaterial){bd.customDistanceMaterial.map=t;bd.customDistanceMaterial.needsUpdate=true}}
   if(TT.on){const m=TT.cast[c.id];c.obj.position.set(m[0],m[2]||0,m[1]);c.obj.rotation.y=yaw;litSprite(c.obj,WD.reg,m[0],(m[2]||0)+1.2,m[1],tt,CHAR_MIN);continue}
   // sitting down (a seat on the train): the same figure, lowered so the floor hides the legs
   const sy=(c.y||0)-(c.sit&&!WD.cut?.58:0);c.obj.position.set(c.x,sy,c.z);c.obj.rotation.y=yaw;litSprite(c.obj,WD.reg,c.x,(c.y||0)+1.2,c.z,tt,CHAR_MIN);

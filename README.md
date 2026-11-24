@@ -3,7 +3,20 @@
 A first-person 3D visual novel about love, lies and leaving your Bluetooth on.
 
 ## Play
-Open `index.html` in a browser (or serve the folder). It needs `vendor/three.bundle.js` next to it; there are no other assets. Music and sound are synthesised at runtime with Web Audio.
+Open `index.html` in a browser (or serve the folder). It needs `vendor/three.bundle.js` and the `art/` folder next to it. Music and sound are synthesised at runtime with Web Audio.
+
+## Character art
+Characters without their own art are drawn in code (`por()` in `01_engine.js`, `fullSVG()` in `07b_chars.js`). To give
+one drawn art, export the same pose from the character creator once per expression (same canvas, 2560x5120, feet on
+the same line) and run:
+
+    node tools/artprep.js ellie n=neutral.svg h=happy.svg o=surprised.svg s=half-lidded.svg b=worried.svg a=angry.svg d=teary.svg
+    python3 build.py
+
+That writes `art/chars/<look>.js` (the body once, plus the changing part of the face for each expression) and the
+build loads it. The portrait, the face shots and the 3D figure all switch over; heights from the creator carry
+into the world. Missing expressions fall back (angry → neutral, teary → worried), and a look without art borrows
+its base character's (`ellie2` → `ellie`, `kitc` → `kit`, `davex` → `dave`).
 
 ## Build
 Source lives in `src/`. To rebuild `index.html` after editing:

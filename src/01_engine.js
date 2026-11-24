@@ -39,8 +39,21 @@ const CH={
 const ROM=['ellie','nyx','ada','priya','juno','kit','rin','bea','mira','saoirse','sunny','tilly','petra','astrid','yuki','vesper','delphine','noor','fern','wren','pia'];
 const DK='#1a1220';
 const PC={};
+/* ---------- drawn art from the character creator (art/chars/<look>.js, made by tools/artprep.js) ----------
+   A look without its own art borrows its base character's until it gets some (Ellie's cardigan, Kit's armour).
+   Expressions that haven't been made yet fall back: angry → neutral, teary → worried. */
+const ARTBASE={ellie2:'ellie',kitc:'kit',davex:'dave'},ARTEX={a:'n',d:'b'};
+function artOf(id){const A=window.ART||{};return A[id]||A[ARTBASE[id]]||null}
+/* framing, calibrated on Ellie so the new art reads at the same size as the old: in a portrait (200 x 262) the top of
+   the head sits at y 47, centred, at 0.26 units per creator pixel; in the 3D figure (200 x 500) the feet sit at y 494
+   at 0.1453 units per pixel, so a character who is taller in the creator stands taller in the world */
+const ARTP={k:.26,top:47},ART3={k:.1453,foot:494};
+function artPor(A,x){const k=ARTP.k,X=v=>(100+(v-A.cx)*k).toFixed(2),Y=v=>(ARTP.top+(v-A.top)*k).toFixed(2);
+ const e=A.ex[x]?x:A.ex[ARTEX[x]]?ARTEX[x]:null,b=A.body,f=A.face;
+ return`<image href="${A.img}" x="${X(b[0])}" y="${Y(b[1])}" width="${(b[2]*k).toFixed(2)}" height="${(b[3]*k).toFixed(2)}" preserveAspectRatio="none"/>`+(e&&f?`<image href="${A.ex[e]}" x="${X(f[0])}" y="${Y(f[1])}" width="${(f[2]*k).toFixed(2)}" height="${(f[3]*k).toFixed(2)}" preserveAspectRatio="none"/>`:'')}
 function por(id,x,full){
  x=x||'n';const key=id+x+(full?'F':'');if(PC[key])return PC[key];
+ if(!full&&artOf(id))return PC[key]=`<svg viewBox="0 0 200 262" xmlns="http://www.w3.org/2000/svg" aria-label="${CH[id].name}" class="art">${artPor(artOf(id),x)}</svg>`;
  const c=CH[id],sk=c.skin,hr=c.hair,st=c.style,ec=c.eye,bw=c.brow||DK;
  let o='';
  if(st==='bob')o+=`<path d="M50 104 Q44 42 100 40 Q156 42 150 104 L154 164 Q128 172 112 160 L100 150 L88 160 Q72 172 46 164Z" fill="${hr}"/>`;

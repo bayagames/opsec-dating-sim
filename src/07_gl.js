@@ -379,6 +379,12 @@ function updLights(dt,force){
 }
 /* ---- characters as lit, camera-facing cut-outs ---- */
 const SPRW=288,SPRH=720;
+/* a character from the creator art: the full body, feet on the same line as the drawn figures */
+function artTex(key,A){G.stx=G.stx||{};if(G.stx[key])return G.stx[key];const T=G.T;
+ const c=document.createElement('canvas');c.width=SPRW*2;c.height=SPRH*2;const t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;t.anisotropy=G.aniso;
+ const img=new Image();img.onload=()=>{const x=c.getContext('2d'),s=SPRW*2/200,k=ART3.k,b=A.body;x.clearRect(0,0,c.width,c.height);
+  x.imageSmoothingQuality='high';x.drawImage(img,(100+(b[0]-A.cx)*k)*s,(ART3.foot+(b[1]-A.foot)*k)*s,b[2]*k*s,b[3]*k*s);t.needsUpdate=true};
+ img.src=A.img;return G.stx[key]=t}
 function spriteTex(key,svg){
  G.stx=G.stx||{};if(G.stx[key])return G.stx[key];const T=G.T;
  const c=document.createElement('canvas');c.width=SPRW;c.height=SPRH;const t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;t.anisotropy=G.aniso;
