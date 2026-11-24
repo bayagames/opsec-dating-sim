@@ -3,7 +3,23 @@
 A first-person 3D visual novel about love, lies and leaving your Bluetooth on.
 
 ## Play
-Open `index.html` in a browser (or serve the folder). It needs `vendor/three.bundle.js` next to it; there are no other assets. Music and sound are synthesised at runtime with Web Audio.
+Open `index.html` in a browser (or serve the folder). It needs `vendor/three.bundle.js` and the `art/` folder next to it. Music and sound are synthesised at runtime with Web Audio.
+
+## Character art
+Characters without their own art are drawn in code (`por()` in `01_engine.js`, `fullSVG()` in `07b_chars.js`). To give
+one drawn art, export the same pose from the character creator once per expression (same canvas, 2560x5120, feet on
+the same line), then either:
+
+- open `tools/import.html` in a browser, drop the SVGs in (it recognises the creator's file names and, if the
+  character is named after its look id, the character too), check the preview, download `<look>.js`, and upload it
+  to `art/chars/` on GitHub; or
+- `node tools/artprep.js <look> <folder of SVGs>` (or `n=… h=… o=… s=… b=… a=… d=…`).
+
+No rebuild is needed: `index.html` already has a tag for every look's file and skips the ones that don't exist.
+A file holds the body once plus the changing part of the face per expression (about 250 KB). The portrait, the face
+shots and the 3D figure all switch over, and heights from the creator carry into the world. Missing expressions fall
+back (angry → neutral, teary → worried), and a look without art borrows its base character's (`ellie2` → `ellie`,
+`kitc` → `kit`, `davex` → `dave`). Run `python3 build.py` only when a new look is added to `CH`.
 
 ## Build
 Source lives in `src/`. To rebuild `index.html` after editing:

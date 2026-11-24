@@ -309,7 +309,7 @@ function updSprites(dt){
   const vis=TT.on?!!TT.cast[c.id]:c.reg===WD.reg&&c.when();
   if(!c.obj){if(!vis)continue;c.obj=cutout(null,.98,2.45);G.scene.add(c.obj);c.mark=markObj();G.scene.add(c.mark)}
   c.obj.visible=vis;c.mark.visible=false;if(!vis)continue;
-  const sk=charSVGKey(c);if(c.objKey!==sk){c.objKey=sk;const t=spriteTex('c:'+sk,fullSVG(sk));const bd=c.obj.userData.body,b=bd.material;b.map=t;b.emissiveMap=t;b.needsUpdate=true;if(bd.customDistanceMaterial){bd.customDistanceMaterial.map=t;bd.customDistanceMaterial.needsUpdate=true}}
+  const sk=charSVGKey(c);if(c.objKey!==sk){c.objKey=sk;const t=artOf(sk)?artTex('a:'+sk,artOf(sk)):spriteTex('c:'+sk,fullSVG(sk));const bd=c.obj.userData.body,b=bd.material;b.map=t;b.emissiveMap=t;b.needsUpdate=true;if(bd.customDistanceMaterial){bd.customDistanceMaterial.map=t;bd.customDistanceMaterial.needsUpdate=true}}
   if(TT.on){const m=TT.cast[c.id];c.obj.position.set(m[0],m[2]||0,m[1]);c.obj.rotation.y=yaw;litSprite(c.obj,WD.reg,m[0],(m[2]||0)+1.2,m[1],tt,CHAR_MIN);continue}
   // sitting down (a seat on the train): the same figure, lowered so the floor hides the legs
   const sy=(c.y||0)-(c.sit&&!WD.cut?.58:0);c.obj.position.set(c.x,sy,c.z);c.obj.rotation.y=yaw;litSprite(c.obj,WD.reg,c.x,(c.y||0)+1.2,c.z,tt,CHAR_MIN);
