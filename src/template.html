@@ -479,7 +479,11 @@ body.cutscene #txt{text-shadow:0 2px 10px #000,0 0 2px #000}
 body.cutscene #who{position:static!important;display:inline-block;margin:0 0 6px;transform:none!important}body.cutscene #who:empty{display:none!important}
 body.cutscene #nexti{opacity:.5}
 body.cutest #txt{font-size:clamp(18px,1.7vw,24px);font-style:italic;letter-spacing:.01em}
-body.cutscene #chs{left:50%!important;right:auto!important;transform:translateX(-50%)!important;z-index:6}
+/* choices in a cutscene: a column on the right, clear of the subtitle line, read left to right like any other list */
+body.cutscene #chs{left:auto!important;right:max(24px,4vw)!important;transform:none!important;width:min(460px,38vw)!important;top:13vh;bottom:calc(11vh + 150px)!important;max-height:none!important;justify-content:flex-end;z-index:6}
+body.cutscene #chs .ch{text-align:left;font-size:15px;padding:11px 16px;background:#0b0810e6}
+body.cutscene #vn.choosing #box,body.cutscene #chs:not(:empty)~#box{opacity:.85}
+@media(max-width:760px){body.cutscene #chs{left:12px!important;right:12px!important;width:auto!important;top:auto;bottom:calc(11vh + 140px)!important}}
 #world::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 58%,#05020a99 100%)}
 #vn.on #box{animation:boxIn .42s cubic-bezier(.2,.8,.2,1)}
 @keyframes boxIn{from{opacity:0;translate:0 26px}}
@@ -965,6 +969,13 @@ body:has(#ov.on) #toasts{top:auto;bottom:22px;left:auto;right:20px;align-items:f
 .endc .ehints{text-align:left;max-width:520px;margin:0 auto 18px;padding:14px 16px;border:1px solid var(--hair);border-left:2px solid var(--mint);border-radius:0 10px 10px 0;background:#0b0810cc}
 .endc .ehints .hint{margin:6px 0;font-size:14px}
 .endc .row{justify-content:center}
+/* empty save files: quiet rows, not three shouting EMPTYs */
+.pfile.empty span::after{display:none}
+.ti.pfile.empty{flex-direction:row;align-items:baseline;gap:18px}
+.pfile.empty span{display:block;font:600 clamp(22px,2.2vw,34px)/1.15 'Chakra Petch',sans-serif;text-transform:none;letter-spacing:.01em;color:#8f7da3}
+.pfile.empty .pfplus{font-style:normal;display:inline-grid;place-items:center;width:1.05em;height:1.05em;margin-right:.45em;vertical-align:-.12em;border:1px dashed #ffffff40;border-radius:6px;font-size:.75em;color:#bba8cf}
+.pfile.empty .pfm{display:block;font:500 clamp(12px,.95vw,14px) 'Inter',sans-serif;color:#8f7da3;margin-top:4px;letter-spacing:0}
+.pfile.empty.on span,.pfile.empty:hover span{color:#f6eefc}.pfile.empty.on .pfplus{border-color:var(--butter);color:var(--butter)}
 </style>
 </head>
 <body>

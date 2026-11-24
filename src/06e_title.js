@@ -100,7 +100,7 @@ function titleCorner(){const el=$('tfile');if(TS.view==='files'||!PROF){el.class
  el.innerHTML=`<span class="tfp">${achPct()}%</span><b>${esc(META.name||'File '+PROF)}</b><small>${META.play?fmtDur(META.play)+' played':'New file'}${pg?' · '+e+'/'+ENDORDER.length+' endings · '+(META.runs||0)+' runs':''}</small>`;el.classList.add('on')}
 function titleFiles(){PROF=0;const el=$('tprof');
  const row=n=>{const p=readProf(n);
-  if(!p)return`<div class="pfrow"><button class="ti pfile empty" data-n="${n}" data-d="An empty file. Start here."><em>F${n}</em><span>Empty</span></button></div>`;
+  if(!p)return`<div class="pfrow"><button class="ti pfile empty" data-n="${n}" data-d="A fresh file: its own saves, achievements and endings."><em>F${n}</em><span><i class="pfplus">+</i>Empty slot<small class="pfm">Start a new file here</small></span></button></div>`;
   const m=p.meta||{},a=achPct(m),pg=Object.keys(m.ends||{}).length>0;
   const meta=[m.play?fmtDur(m.play)+' played':'',pg?Object.keys(m.ends).length+'/'+ENDORDER.length+' endings':'',pg&&m.runs?m.runs+' runs':'',p.last?'last played '+fmtTime(p.last):''].filter(Boolean).join(' · ');
   return`<div class="pfrow"><button class="ti pfile" data-n="${n}" data-d="${esc(meta)}"><em>F${n}</em><span class="pfn">${esc(p.name||'File '+n)}<small class="pfp">${a}%</small></span></button><button class="tfdel" data-del="${n}">Delete file</button></div>`};
