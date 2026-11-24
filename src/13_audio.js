@@ -14,7 +14,7 @@ function audioOn(){
  const n=AC.sampleRate*.12;AU.nb=AC.createBuffer(1,n,AC.sampleRate);const d=AU.nb.getChannelData(0);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,3);
  applyVolumes();
  // warm up the loops you're most likely to hear first, when the browser is idle
- const idle=window.requestIdleCallback||(f=>setTimeout(f,400));idle(()=>{getLoop('music','con');getLoop('amb','hum')});
+ const idle=window.requestIdleCallback||(f=>setTimeout(f,400));idle(()=>{getLoop('music','title');getLoop('music','con');getLoop('amb','hum')});
 }
 ['pointerdown','keydown','touchstart'].forEach(e=>addEventListener(e,audioOn,{passive:true}));
 function applyVolumes(){if(!AU)return;const v=SETTINGS.vol,c=x=>x*x,t=AC.currentTime;
@@ -36,7 +36,7 @@ const AREA_AUD={coachA:['home','train'],coachB:['home','train'],coachC:['home','
 const BG_AUD={carriage:['home','train'],con:['con','hum'],lock:['con','room'],ctf:['con','room'],soc:['con','room'],stream:['con','hum'],hotel:['hotel','hotel'],roof:['night','wind'],dawn:['night','wind'],stage:['hall','hall'],keynote:['hall','hall'],vendor:['con','hum'],party:['party','bar'],void:['tense',null],flat:['home','home'],bakery:['home','bakery'],office:['hotel','office'],train:['home','station'],cos:['con','hum'],chill:['night','room'],bar:['bar','bar'],lobby:['hotel','lobby']};
 function audioScene(){
  // the title stays silent through loading and "press any key"; the music comes in with the menu
- if($('title').classList.contains('on'))return typeof TS!=='undefined'&&TS.stage==='menu'?['night',null]:[null,null];
+ if($('title').classList.contains('on'))return typeof TS!=='undefined'&&TS.stage==='menu'?['title',null]:[null,null];
  if(!S)return['night',null];
  if(S.ending)return BG_AUD[CURBG]||['night',null];
  const vn=$('vn').classList.contains('on'),dimmed=$('bg').classList.contains('bg-dim');
@@ -60,8 +60,15 @@ function setLoop(bus,key){
   const s=AC.createBufferSource();s.buffer=buf;s.loop=true;const g=AC.createGain();g.gain.value=0;s.connect(g);g.connect(AU[bus]);
   const t=AC.currentTime;s.start(t,(t*.37)%buf.duration);g.gain.linearRampToValueAtTime(1,t+2.2);AU.cur[bus]={s,g,key}});
 }
+/* the title theme renders while the game boots: an offline render needs no click or key press, only playing it does,
+   so it's ready the moment you press a key on the title screen */
+const PREBUF={};
+function preRender(bus,key){const k=bus+':'+key,D=(bus==='music'?MUSIC:AMBS)[key];if(!D||PREBUF[k])return;if(!D.rms)D.rms=(bus==='music'?MUSIC_RMS:AMB_RMS)*(D.lvl||1);
+ try{PREBUF[k]=renderLoop(D).catch(()=>null)}catch(e){}}
+setTimeout(()=>preRender('music','title'),300);
 function getLoop(bus,key){
  const k=bus+':'+key;const D=(bus==='music'?MUSIC:AMBS)[key];if(D&&!D.rms)D.rms=(bus==='music'?MUSIC_RMS:AMB_RMS)*(D.lvl||1);if(AU.buf[k])return Promise.resolve(AU.buf[k]);if(AU.pending[k])return AU.pending[k];
+ if(PREBUF[k]){const p=PREBUF[k].then(b=>{delete AU.pending[k];if(b)AU.buf[k]=b;return b});delete PREBUF[k];return AU.pending[k]=p}
  const def=(bus==='music'?MUSIC:AMBS)[key];if(!def)return Promise.resolve(null);
  const p=renderLoop(def).then(b=>{AU.buf[k]=b;delete AU.pending[k];
   // keep memory in check: forget the least recently built loops
@@ -75,7 +82,7 @@ function renderLoop(def){
  const out=ctx.createGain();out.connect(ctx.destination);
  def.build(ctx,out,L+X,seeded(def.seed||7));
  return ctx.startRendering().then(b=>{
-  const n=Math.floor(L*sr),x=Math.floor(X*sr),res=AC.createBuffer(2,n,sr);
+  const n=Math.floor(L*sr),x=Math.floor(X*sr),res=typeof AudioBuffer==='function'?new AudioBuffer({numberOfChannels:2,length:n,sampleRate:sr}):AC.createBuffer(2,n,sr);
   for(let ch=0;ch<2;ch++){const src=b.getChannelData(ch),dst=res.getChannelData(ch);
    for(let i=0;i<n;i++)dst[i]=src[i];
    for(let i=0;i<x;i++){const t=i/x;dst[i]=src[i]*Math.sin(t*Math.PI/2)+src[n+i]*Math.cos(t*Math.PI/2)}}
@@ -161,6 +168,20 @@ const MUSIC={
   seq(ctx,out,dur,124,8,(t,i,b)=>{const c=ch[i%4];for(let s=0;s<16;s++)tone(ctx,bus,t+s*b/4,mtof(c[s%3]+12+(s%8>5?12:0)),b*.2,{type:'square',v:.03,a:.001,r:b*.18});
    for(let s=0;s<8;s++)tone(ctx,bus,t+s*b/2,mtof(c[0]-12+(s%2?12:0)),b*.4,{type:'triangle',v:.12,a:.002,r:b*.35});
    for(let s=0;s<4;s++){kick(ctx,bus,t+s*b,.25);hat(ctx,bus,t+s*b+b/2,.03,.03)}if(i%2)snare(ctx,bus,t+b*3.5,.04,.1,3000)});}},
+ /* the title theme: Am, F, C, G under a gated arpeggio, a sub bass, a soft kick and hats; the second half adds a lead
+    with a four-note hook */
+ title:{lvl:1.15,len:8*4*60/94,seed:7,build(ctx,out,dur,R){const rv=verb(ctx,3.2,2.4,.42);rv.o.connect(out);const bus=ctx.createGain();bus.gain.value=.95;bus.connect(out);bus.connect(rv.i);
+  // the arpeggio shares one filter (a filter per note made this loop slow to build)
+  const ab=ctx.createBiquadFilter();ab.type='lowpass';ab.frequency.value=2600;ab.Q.value=.7;ab.connect(bus);
+  const ch=[[57,60,64,69],[53,57,60,65],[48,52,55,60],[55,59,62,67]];
+  const hook=[[76,0,1.5],[74,1.5,.5],[72,2,1],[69,3,1]],hook2=[[72,0,1.5],[74,1.5,.5],[76,2,1.5],[79,3.5,.5]];
+  seq(ctx,out,dur,94,8,(t,i,b)=>{const c=ch[i%4],late=i>=4,bar=b*4;
+   padChord(ctx,bus,t,c.slice(0,3),bar*.98,.011,{lp:1300,a:bar*.25,r:bar*.45});
+   tone(ctx,bus,t,mtof(c[0]-24),bar*.95,{type:'sine',v:.16,a:.02,r:bar*.3,sus:1});
+   tone(ctx,bus,t+b*2.5,mtof(c[0]-12),b*1.2,{type:'triangle',v:.05,a:.01,r:b});
+   for(let s=0;s<16;s++)tone(ctx,ab,t+s*b/4,mtof(c[[0,1,2,3,2,1,2,3][s%8]]+12),b*.22,{type:'square',v:(s%4===0?.026:.016),a:.004,r:b*.18});
+   kick(ctx,bus,t,.32);kick(ctx,bus,t+b*2,.26);for(let s=0;s<8;s++)hat(ctx,bus,t+s*b/2,s%2?.035:.022,.04);snare(ctx,bus,t+b*3,.05,.25,2400);
+   if(late){const H=(i%2?hook2:hook);for(const[m,at,len]of H){epiano(ctx,bus,t+at*b,m,len*b*.95,.07);tone(ctx,bus,t+at*b,mtof(m),len*b*.9,{type:'triangle',v:.035,a:.02,r:len*b*.5,det:6})}}});}},
  party:{len:8*4*60/122,seed:81,build(ctx,out,dur,R){const rv=verb(ctx,2,3,.3);rv.o.connect(out);const bus=ctx.createGain();bus.connect(out);bus.connect(rv.i);
   const ch=[[57,60,64],[53,57,60],[48,52,55],[55,59,62]];
   seq(ctx,out,dur,122,8,(t,i,b)=>{const c=ch[i%4];for(let s=0;s<4;s++){kick(ctx,bus,t+s*b,.4);hat(ctx,bus,t+s*b+b/2,.05);padChord(ctx,bus,t+s*b+b/2,c,b*.45,.012,{lp:2400,a:.01,r:b*.3})}snare(ctx,bus,t+b,.08,.2,2000);snare(ctx,bus,t+b*3,.08,.2,2000);

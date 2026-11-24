@@ -226,7 +226,7 @@ function hud(){
  if(S.unl.exp)ms.push(['EXP '+S.exp,S.exp,'var(--coral)','Exposure '+S.exp+'/100 · resets to '+S.foot+' each morning']);
  $('meters').innerHTML=ms.map(m=>`<div class="m" title="${m[3]}">${m[0]}<b><i style="width:${m[1]}%;background:${m[2]}"></i></b></div>`).join('')+(S.unl.money||S.unl.cred?`<div class="m" style="width:auto;color:var(--butter)">£<br>${S.money||0}</div>`:'');
  $('phoneBtn').style.display='block';
- $('phoneBtn').innerHTML='Phone<span class="kn" style="margin:0 0 0 6px">Tab</span>'+(S.msgs.some(m=>!m.r)?'<span class="dot"></span>':'');
+ $('phoneBtn').innerHTML='Phone<span class="kn" style="margin:0 0 0 6px">P</span>'+(S.msgs.some(m=>!m.r)?'<span class="dot"></span>':'');
 }
 function show(id){document.body.classList.toggle('inworld',id==='world');if(id!=='title'&&typeof titleCamOn==='function'){titleCamOn(false);if(typeof titleCast==='function')titleCast(false)}if(id==='title'&&typeof vcShow==='function')vcShow(false);setTimeout(updBlur,0);document.querySelectorAll('.scr').forEach(s=>s.classList.toggle('on',s.id===id));$('hud').style.display=id==='title'?'none':'flex';$('gl').style.display=(id!=='title'&&S&&S.inWorld&&G.ok)?'block':'none';if(id!=='world'){WD.active=false;if((id==='title'||id==='hub')&&document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}}}
 
