@@ -4,6 +4,15 @@ addEventListener('touchstart',()=>{if(!WD.touch)setTouch(true)},{passive:true});
 /* no pinch or double-tap zoom on phones: the game owns every touch */
 for(const ev of['gesturestart','gesturechange','dblclick'])addEventListener(ev,e=>{if(e.cancelable)e.preventDefault()},{passive:false});
 addEventListener('mousemove',e=>{if(WD.touch&&e.movementX!==undefined&&(Math.abs(e.movementX)+Math.abs(e.movementY))>3&&!e.sourceCapabilities?.firesTouchEvents)setTouch(false)});
+/* a card (a chapter, a day) goes on with any key or click, once it's been up long enough to read the first line.
+   With the mouse captured, clicks land on the game, not the card, so they're caught here too. */
+function cardGo(){const c=$('card');if(!c.classList.contains('on')||performance.now()-(+c.dataset.at||0)<650)return;c.click()}
+addEventListener('mousedown',e=>{if(e.isTrusted&&e.button===0&&$('card').classList.contains('on')&&document.pointerLockElement){e.preventDefault();cardGo()}},true);
+/* in full screen the game keeps Esc, and the browser leaves full screen when Esc is held. So Esc acts when it's let go,
+   and only if it was a tap: holding it to leave full screen never opens or closes anything */
+addEventListener('keydown',e=>{if(e.key!=='Escape'||WD.escSynth||!(typeof escKept==='function'&&escKept()))return;e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)WD.escAt=performance.now()},true);
+addEventListener('keyup',e=>{if(e.key!=='Escape'||!WD.escAt)return;const t=performance.now()-WD.escAt;WD.escAt=0;if(t>550||!document.fullscreenElement)return;
+ WD.escSynth=true;try{dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',code:'Escape',bubbles:true,cancelable:true}))}finally{WD.escSynth=false}},true);
 addEventListener('keydown',e=>{
  // the postgame sits over everything: Esc leaves it (closing a drawer first), and the phone keys do nothing under it
  if($('pgx')){const k=e.key;if(k==='Escape'||k==='Backspace'&&!/INPUT|TEXTAREA/.test((document.activeElement||{}).tagName||'')){e.preventDefault();e.stopImmediatePropagation();pgEsc()}else if(k==='Tab'||k==='p'||k==='P'){e.preventDefault();e.stopImmediatePropagation()}return}
@@ -19,7 +28,7 @@ addEventListener('keydown',e=>{
  if(k==='Escape'&&isPhone){e.preventDefault();WD.phoneEscAt=performance.now();const ap=$('ov').dataset.app;if(ap==='world'&&WV.mode!=='phone')worldClose();else if(ap==='map'||ap==='world')closePhone();else if(ap)phoneBack();else closePhone();return}
  // Esc opens the phone (in the world the browser also uses Esc to release the mouse, which opens it too)
  if(k==='Escape'&&!ovOn&&!$('title').classList.contains('on')&&!$('card').classList.contains('on')){e.preventDefault();phone();return}
- if($('card').classList.contains('on')&&(k===' '||k==='Enter')){e.preventDefault();$('card').click();return}
+ if($('card').classList.contains('on')){if(['Shift','Control','Alt','Meta','Tab','CapsLock','p','P'].includes(k))return;e.preventDefault();cardGo();return}
  if(ovOn&&!isPhone){
   const ans=[...$('ov').querySelectorAll('.ans .ch:not([disabled])')];
   if(ans.length&&/^[1-9]$/.test(k)){const b=ans[+k-1];if(b){e.preventDefault();b.click()}return}

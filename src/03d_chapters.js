@@ -36,9 +36,9 @@ const CHN=['Prologue','Chapter One','Chapter Two','Chapter Three','Chapter Four'
 /* which chapter a day is: the first that fits, in order */
 function chapterFor(d){const ks=CHORDER.filter(k=>CHAP[k].day===d);for(const k of ks)if(!CHAP[k].when||CHAP[k].when())return k;return ks[ks.length-1]||null}
 /* starting a day's chapter: remembered in the run and across runs */
-function chapterStart(d){if(!S)return null;S.chaps=S.chaps||{};const k=S.chaps[d]||chapterFor(d);if(!k)return null;
+function chapterStart(d){if(!S)return null;S.chaps=S.chaps||{};const k=S.chaps[d]||(typeof dbgForce==='function'&&dbgForce(d))||chapterFor(d);if(!k)return null;
  const prev=d>0?S.chaps[d-1]:null;S.chaps[d]=k;
- if(!S.replay&&!S.epilogue){META.chaps=META.chaps||{};META.chpath=META.chpath||{};if(!S['ch_'+d+'_seen']){S['ch_'+d+'_seen']=1;META.chaps[k]=(META.chaps[k]||0)+1;if(prev)META.chpath[prev+'>'+k]=1;if(typeof saveMeta==='function')saveMeta()}}
+ if(!S.replay&&!S.epilogue&&!S.dbg){META.chaps=META.chaps||{};META.chpath=META.chpath||{};if(!S['ch_'+d+'_seen']){S['ch_'+d+'_seen']=1;META.chaps[k]=(META.chaps[k]||0)+1;if(prev)META.chpath[prev+'>'+k]=1;if(typeof saveMeta==='function')saveMeta()}}
  return k}
 const chapterNow=()=>S&&S.chaps&&S.chaps[S.day]||null;
 /* ---------- banners ----------

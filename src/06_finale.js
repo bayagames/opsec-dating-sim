@@ -75,14 +75,17 @@ function endingKey(){
  if(!romCount())return ROM.filter(g=>scn(g)>=2).length>=6?'opensource':'notfound';
  return'disclosure'}
 function finishEnding(k){
- S.ending=k;S.inWorld=0;WD.active=false;if(typeof vcShow==='function')vcShow(false);if(document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}if(typeof updBlur==='function')updBlur();META.ends[k]=1;META.runs=(META.runs||0)+1;saveMeta();const learned=typeof recordEnding==='function'&&!S.replay?recordEnding(k):[];ach('end_'+k);if(!S.fails)ach('survivor');if(S.foot<=5)ach('ghostfoot');
+ S.ending=k;S.inWorld=0;WD.active=false;if(typeof vcShow==='function')vcShow(false);if(typeof updBlur==='function')updBlur();META.ends[k]=1;META.runs=(META.runs||0)+1;saveMeta();const learned=typeof recordEnding==='function'&&!S.replay?recordEnding(k):[];ach('end_'+k);if(!S.fails)ach('survivor');if(S.foot<=5)ach('ghostfoot');
  LS.set(slotKey('auto'),'');
  const E=ENDINFO[k],seen=Object.keys(META.ends).length;
  const who=ROM.filter(loved);const face=k==='harem'?null:(S.partner||who[0]);
- ov(`<div class="card" style="text-align:center">${face?`<div style="width:150px;height:170px;margin:0 auto">${head(lookOf(face),'h')}</div>`:''}<p class="small">${{true:'TRUE ENDING',good:'ENDING',mixed:'ENDING',bad:'BAD ENDING',secret:'SECRET ENDING'}[E[2]]}</p><h3 style="font-size:40px">${esc(E[0])}</h3><p>${esc(E[1])}</p><p>${seen}/${ENDORDER.length} endings found.</p>
- <p class="small">${RANKS.skill[rank('skill')]} · ${RANKS.clout[rank('clout')]} · ${who.length} in love · ${Object.keys(S.solved).length}/12 mysteries · ${S.clues.length} clues</p>${learned.length?`<div class="ehints"><p class="small"><b>You learned something</b></p>${learned.map(h=>`<p class="hint ${h.riddle?'riddle':''}">${h.riddle?'<b>?</b> ':''}${esc(h.t)}</p>`).join('')}<p class="small">All your hints are in Postgame, on the title screen.</p></div>`:''}
- <div class="row" style="justify-content:center"><button class="btn pri" id="eT">Title screen</button></div></div>`);
- $('eT').onclick=()=>{closeOv();titleScreen()};
+ const tierN={true:'The true ending',good:'Ending',mixed:'Ending',bad:'Bad ending',secret:'Secret ending'}[E[2]];
+ ov(`<div class="endc">${face?`<div class="endface">${head(lookOf(face),'h')}</div>`:''}<p class="endk">${tierN} · ${String(ENDORDER.indexOf(k)+1).padStart(2,'0')} of ${ENDORDER.length}</p><h2>${esc(E[0])}</h2><p class="endd">${esc(E[1])}</p>
+ <div class="endstats"><span><b>${seen}</b> of ${ENDORDER.length} endings found</span><span><b>${who.length}</b> in love</span><span><b>${Object.keys(S.solved).length}</b>/12 mysteries</span><span><b>${S.clues.length}</b> clues</span><span>${RANKS.skill[rank('skill')]} · ${RANKS.clout[rank('clout')]}</span></div>
+ ${learned.length?`<div class="ehints"><p class="small"><b>You learned something</b></p>${learned.map(h=>`<p class="hint ${h.riddle?'riddle':''}">${h.riddle?'<b>?</b> ':''}${esc(h.t)}</p>`).join('')}<p class="small">All your hints are in the Postgame, on the title screen.</p></div>`:''}
+ <div class="row"><button class="btn pri" id="eT">Title screen</button></div></div>`);
+ {const o=$('ov');o.classList.add('endov');o.style.setProperty('--ec',typeof TIERC!=='undefined'&&TIERC[E[2]]||'#ff5d73')}
+ $('eT').onclick=()=>{$('ov').classList.remove('endov');closeOv();titleScreen()};
  if(k==='harem'){META.loopClosed=1;saveMeta()}
 }
 /* ---- title: choose a file, then play ---- */

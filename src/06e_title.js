@@ -43,7 +43,7 @@ function titleCast(on){const box=$('tcast');if(!box)return;
  TC.t=setInterval(()=>{if(document.hidden)return;const old=TC.el;old.classList.remove('s0');old.classList.add('gone');setTimeout(()=>old.remove(),1300);next(700)},10000);
  TC.smile=setInterval(()=>{const f=TC.el&&TC.el.querySelector('.tcface');if(!f||document.hidden)return;f.style.opacity=1;setTimeout(()=>f.style.opacity=0,2600)},6500)}
 // a little parallax with the mouse
-addEventListener('mousemove',e=>{const t=$('title');if(!t||!t.classList.contains('on')||TS.stage!=='menu')return;const c=$('tcast');if(!c)return;c.style.setProperty('--px',((e.clientX/innerWidth-.5)*-18).toFixed(1)+'px');c.style.setProperty('--py',((e.clientY/innerHeight-.5)*-8).toFixed(1)+'px')});
+addEventListener('mousemove',e=>{const t=$('title');if(!t||!t.classList.contains('on')||TS.stage!=='menu')return;const c=$('tcast');if(!c)return;c.style.setProperty('--px',((e.clientX/innerWidth-.5)*-18).toFixed(1)+'px');c.style.setProperty('--py','0px')});
 function titleStage(s){const t=$('title'),L=$('tlogo'),prev=t.dataset.stage;
  const kids=[...L.children],flip=prev&&prev!=='boot'&&prev!==s&&t.classList.contains('on');
  const first=flip?kids.map(k=>k.getBoundingClientRect()):null;
@@ -145,10 +145,13 @@ addEventListener('keydown',e=>{if(!titleOn())return;const k=e.key,tag=(document.
  if(tag==='INPUT'||tag==='TEXTAREA')return;
  if(k==='ArrowDown'||k==='s'||k==='S'){e.preventDefault();titleMove(1)}
  else if(k==='ArrowUp'||k==='w'||k==='W'){e.preventDefault();if(TS.view==='name'&&TS.focus.name===$('bGo')){$('hIn').focus();return}titleMove(-1)}
- else if(k==='Enter'||k===' '){e.preventDefault();const b=TS.focus[TS.view];if(b&&!b.disabled&&b.offsetParent)b.click()}
+ else if(k==='Enter'){e.preventDefault();const b=TS.focus[TS.view];if(b&&!b.disabled&&b.offsetParent)b.click()}
+ else if(k===' '){e.preventDefault()}
  else if(k==='Escape'||k==='Backspace'){e.preventDefault();titleBack()}
  else if((k==='Delete')&&TS.view==='files'){const b=TS.focus.files;if(b&&b.dataset.n&&readProf(+b.dataset.n))tconfDelete(+b.dataset.n)}});
 $('title').addEventListener('pointerdown',e=>{if(TS.stage==='press'){e.preventDefault();titlePress()}});
+// the browser's own Space-presses-the-focused-button is off on the title (only Enter or a click choose)
+addEventListener('keyup',e=>{if(e.key===' '&&titleOn()&&!/INPUT|TEXTAREA/.test((document.activeElement||{}).tagName||''))e.preventDefault()},true);
 $('title').addEventListener('mouseover',e=>{const b=e.target.closest&&e.target.closest('.ti');if(b&&!b.disabled&&TS.stage==='menu'&&TS.focus[TS.view]!==b){titleFocus(b);if(typeof sfx==='function')sfx('hover')}});
 /* the place on screen, top right, as the camera moves on */
 function titlePlace(k,slot){const el=$('tplace');if(!el)return;el.classList.remove('on');setTimeout(()=>{$('tplaceN').textContent=(TPLACE[k]||'')+' · '+TSLOT[slot||0];el.classList.add('on')},500)}

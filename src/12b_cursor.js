@@ -6,11 +6,13 @@
 const VC={x:0,y:0,on:false,hover:null,drag:null};
 const lockEl=()=>$('app');
 const locked=()=>document.pointerLockElement===lockEl();
-function vcActive(){return locked()&&S&&S.inWorld&&!worldLive()}
+/* wherever the mouse is still captured and you're not walking around: menus over the world, the title screen, the
+   postgame, endings. Keeping the capture across them is what stops the real cursor jumping about */
+function vcActive(){return locked()&&!worldLive()}
 function vcShow(on){if(on===VC.on)return;VC.on=on;$('vcur').style.display=on?'block':'none';if(on){if(!VC.placed){VC.placed=1;VC.x=innerWidth/2;VC.y=innerHeight*.62}vcMove(0,0)}else vcHover(null)}
 function vcMove(dx,dy){VC.x=clamp(VC.x+dx,0,innerWidth-2);VC.y=clamp(VC.y+dy,0,innerHeight-2);$('vcur').style.transform=`translate(${VC.x}px,${VC.y}px)`;
  if(VC.drag){vcSlide(VC.drag);return}
- vcHover(vcTarget())}
+ const el=vcTarget();if(el!==VC.over){VC.over=el;if(el)el.dispatchEvent(new MouseEvent('mouseover',{bubbles:true,clientX:VC.x,clientY:VC.y}))}vcHover(el)}
 function vcTarget(){const c=$('vcur');c.style.visibility='hidden';const el=document.elementFromPoint(VC.x,VC.y);c.style.visibility='';return el}
 function vcHover(el){const b=el&&el.closest?el.closest('button,input,.loc,#box,.app,.chat,label'):null;if(b===VC.hover)return;if(VC.hover)VC.hover.classList.remove('vhover');VC.hover=b;$('vcur').classList.toggle('hot',!!(b&&!b.disabled));if(b){b.classList.add('vhover');if(b.tagName==='BUTTON'&&!b.disabled&&typeof sfx==='function')sfx('hover')}}
 function vcSlide(r){const R=r.getBoundingClientRect(),t=clamp((VC.x-R.left)/R.width,0,1),mn=+r.min||0,mx=+r.max||100,st=+r.step||1;const v=Math.round((mn+t*(mx-mn))/st)*st;if(+r.value!==v){r.value=v;r.dispatchEvent(new Event('input',{bubbles:true}))}}
@@ -25,4 +27,4 @@ document.addEventListener('mouseup',e=>{if(!e.isTrusted||!vcActive()||e.button!=
  const el=vcTarget();if(!el||!VC.down)return;VC.down=null;
  if(el.closest('button')){const b=el.closest('button');if(!b.disabled)b.click();return}
  el.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,clientX:VC.x,clientY:VC.y,view:window}))});
-document.addEventListener('wheel',e=>{if(!e.isTrusted||!vcActive())return;let el=vcTarget();if(el&&el.tagName==='CANVAS'){el.dispatchEvent(new WheelEvent('wheel',{bubbles:true,cancelable:true,deltaY:e.deltaY,deltaX:e.deltaX,clientX:VC.x,clientY:VC.y}));return}while(el&&el!==document.body){const cs=getComputedStyle(el);if(/(auto|scroll)/.test(cs.overflowY)&&el.scrollHeight>el.clientHeight){el.scrollBy(0,e.deltaY);break}el=el.parentElement}},{passive:true});
+document.addEventListener('wheel',e=>{if(!e.isTrusted||!vcActive())return;let el=vcTarget();if(el&&(el.tagName==='CANVAS'||el.closest&&el.closest('svg#pgSvg'))){el.dispatchEvent(new WheelEvent('wheel',{bubbles:true,cancelable:true,deltaY:e.deltaY,deltaX:e.deltaX,clientX:VC.x,clientY:VC.y}));return}while(el&&el!==document.body){const cs=getComputedStyle(el);if(/(auto|scroll)/.test(cs.overflowY)&&el.scrollHeight>el.clientHeight){el.scrollBy(0,e.deltaY);break}el=el.parentElement}},{passive:true});

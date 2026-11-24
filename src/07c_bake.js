@@ -7,7 +7,7 @@
    4. gutters are dilated and the result is packed to 8-bit RGBM, which the materials read as a lightMap.
    So all light comes from the level's own sources, and every source casts shadows on everything in its reach.
    Characters and other moving things sample the same lights on the CPU (probeAt). */
-const BAKE={cube:320,fill:.11,soft:.22,rgbm:8};
+const BAKE={cube:448,fill:.2,soft:.15,rgbm:8,knee:.85,white:2.4};
 const PD12='const vec2 PD[12]=vec2[](vec2(-.326,-.406),vec2(-.840,-.074),vec2(-.696,.457),vec2(-.203,.621),vec2(.962,-.195),vec2(.473,-.480),vec2(.519,.767),vec2(.185,-.893),vec2(.507,.064),vec2(.896,.412),vec2(-.322,-.933),vec2(-.792,-.598));';
 function bakeOK(){const r=G.r;if(/[?&]nobake\b/.test(location.search))return false;return !!(r&&r.capabilities.isWebGL2&&(r.extensions.has('EXT_color_buffer_half_float')||r.extensions.has('EXT_color_buffer_float')))}
 function bakeMats(){
@@ -20,7 +20,7 @@ function bakeMats(){
   // the depth bias grows where the light grazes the surface: a cube texel covers a long strip of a wall seen edge-on,
   // and a flat bias there leaves rings of false shadow round every light (acne)
   float vis(vec3 p,float d,float ndl){vec3 dir=(p-lp)/d;vec3 t1=normalize(cross(dir,abs(dir.y)<.9?vec3(0.,1.,0.):vec3(1.,0.,0.)));vec3 t2=cross(dir,t1);
-   float r=soft*(.5+d*.08)/max(d,.3),bias=.035+d*.012+(1.-clamp(ndl,0.,1.))*(.03+d*.025),s=0.;for(int i=0;i<12;i++){vec2 o=PD[i]*r;vec2 c=textureCube(cube,dir+t1*o.x+t2*o.y).rg*far;s+=c.x>d-bias?(c.y>d-bias?1.:.6):0.;}return s/12.;}
+   float r=soft*(.5+d*.08)/max(d,.3),bias=.02+d*.008+(1.-clamp(ndl,0.,1.))*(.025+d*.02),s=0.;for(int i=0;i<12;i++){vec2 o=PD[i]*r;vec2 c=textureCube(cube,dir+t1*o.x+t2*o.y).rg*far;s+=c.x>d-bias?(c.y>d-bias?1.:.6):0.;}return s/12.;}
   void main(){vec3 n=normalize(wn);vec3 L=lp-wp;float d=length(L);if(d>lr)discard;vec3 l=L/d;float x=clamp(1.-d/lr,0.,1.),fall=x*x,ndl=dot(n,l);if(length(wn)>1.5&&ndl<0.){n=-n;ndl=-ndl;}
    // ceiling fittings (downlights, panels) shine down: what's level with or above them only gets a little spill
    if(dn>.5)fall*=mix(.05,1.,smoothstep(.05,.55,l.y));
@@ -31,11 +31,14 @@ function bakeMats(){
   vertexShader:'varying vec3 wp;void main(){wp=(modelMatrix*vec4(position,1.)).xyz;gl_Position=projectionMatrix*viewMatrix*vec4(wp,1.);}',
   fragmentShader:'uniform vec3 lp;uniform float far;varying vec3 wp;void main(){gl_FragColor=vec4(length(wp-lp)/far,1.,0.,1.);}',side:T.DoubleSide});
  // gutter dilation + RGBM encode into an 8-bit page
- const fin=new T.ShaderMaterial({uniforms:{src:{value:null},px:{value:1},M:{value:BAKE.rgbm}},
+ const fin=new T.ShaderMaterial({uniforms:{src:{value:null},px:{value:1},M:{value:BAKE.rgbm},kn:{value:BAKE.knee},wt:{value:BAKE.white}},
   vertexShader:'varying vec2 v;void main(){v=uv;gl_Position=vec4(position.xy,0.,1.);}',
-  fragmentShader:`uniform sampler2D src;uniform float px,M;varying vec2 v;void main(){vec4 c=texture2D(src,v);
+  fragmentShader:`uniform sampler2D src;uniform float px,M,kn,wt;varying vec2 v;void main(){vec4 c=texture2D(src,v);
    if(c.a<.5){vec3 a=vec3(0.);float n=0.;for(int y=-2;y<=2;y++)for(int x=-2;x<=2;x++){vec4 s=texture2D(src,v+vec2(float(x),float(y))*px);if(s.a>.5){a+=s.rgb;n+=1.;}}if(n>0.)c.rgb=a/n;}
-   vec3 h=max(c.rgb,0.);float m=clamp(max(max(h.r,h.g),max(h.b,1e-6))/M,1./255.,1.);m=ceil(m*255.)/255.;gl_FragColor=vec4(clamp(h/(m*M),0.,1.),m);}`,
+   // a soft shoulder on the brightest light: where several lamps overlap, the sum eases towards a white point instead of
+   // blowing out flat; everything below the knee (mid-tones and shadow) is left exactly as it was
+   vec3 h=max(c.rgb,0.);float Lm=max(max(h.r,h.g),h.b);if(Lm>kn){float e=Lm-kn,Ln=kn+e/(1.+e/(wt-kn));h*=Ln/Lm;}
+   float m=clamp(max(max(h.r,h.g),max(h.b,1e-6))/M,1./255.,1.);m=ceil(m*255.)/255.;gl_FragColor=vec4(clamp(h/(m*M),0.,1.),m);}`,
   depthTest:false,depthWrite:false,blending:T.NoBlending});
  // the sun: one directional light with an orthographic shadow map over the area that matters (G.sun[reg])
  const sun=new T.ShaderMaterial({uniforms:{sd:{value:new T.Vector3()},lc:{value:new T.Vector3()},cp:{value:new T.Vector3()},far:{value:1},smat:{value:new T.Matrix4()},smap:{value:null},tx:{value:1}},
@@ -125,7 +128,7 @@ const LMDB={db:null,open(){return new Promise(res=>{try{const q=indexedDB.open('
  put(k,v){if(!LMDB.db)return;try{const t=LMDB.db.transaction('lm','readwrite');t.objectStore('lm').put(v,k)}catch(e){}}};
 function lmKey(reg){const R=G.regions[reg],L=G.lights[reg]||[];let h=0;const add=v=>{h=(h*31+Math.round(v*100))|0};
  for(const l of L)l.forEach(add);const SU=G.sun&&G.sun[reg];if(SU)[...SU.d,...SU.c,SU.k,SU.half,...SU.c0].forEach(add);let verts=0;R.obj.traverse(o=>{if(o.isMesh&&o.userData.pg>=0){verts+=o.geometry.attributes.position.count;const a=o.geometry.attributes.lmuv.array;for(let i=0;i<a.length;i+=97)add(a[i]*1e4)}});
- return['v7',reg,R.lm.S,R.lm.pages,R.lm.D.toFixed(3),verts,h,G.LK,R.lk||1,LOOK.reach,BAKE.fill,BAKE.soft,BAKE.cube].join('|')}
+ return['v8',reg,R.lm.S,R.lm.pages,R.lm.D.toFixed(3),verts,h,G.LK,R.lk||1,LOOK.reach,BAKE.fill,BAKE.soft,BAKE.cube,BAKE.knee,BAKE.white].join('|')}
 function lmApply(reg,pages){const T=G.T,R=G.regions[reg],S=R.lm.S;R.lmTex=pages.map(px=>{const t=new T.DataTexture(px,S,S,T.RGBAFormat,T.UnsignedByteType);t.minFilter=t.magFilter=T.LinearFilter;t.generateMipmaps=false;t.channel=1;t.colorSpace=T.NoColorSpace;t.needsUpdate=true;t.onUpdate=()=>{t.image={width:S,height:S,data:null}};return t});
  R.obj.traverse(o=>{if(o.isMesh&&o.userData.mk&&o.userData.pg>=0){o.userData.lmk=reg+':'+o.userData.pg;o.material=getMat(o.userData.mk,o.userData.lmk)}})}
 /* Lightmaps live per region, and only the place you're in (plus the one you just left, so hopping between the
@@ -165,13 +168,18 @@ function regionNeed(reg,show){
  const R=G.regions[reg];if(!R||R.lmTex||R.lmSkip||!G.baked)return;if(G.lmBusy)return;
  G.lmBusy=reg;G.baking=true;
  // let go of the mouse while the loading screen is up (it's taken back when the bake is done, or on any click/key)
- const hadLock=show&&typeof locked==='function'&&locked();if(hadLock){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}
+ const hadLock=false;// the mouse stays captured through a loading screen: letting go made the cursor jump
  lmUI(show,reg,null);
  regionLM(reg,(f,cached)=>{G.bakeP=f;lmUI(show,reg,cached,f)}).then(ok=>{
   if(!ok&&!R.lmSkip){G.baked=false;setQuality(G.q)}
   G.lmBusy=null;G.baking=false;G.lmDoneAt=performance.now();lmUI(false);G.forceFrame=true;if(hadLock&&typeof relock==='function')setTimeout(relock,50)});
 }
-function lmUI(on,reg,cached,f){const e=$('loading');if(!e)return;e.classList.toggle('on',!!on);
+/* what the loading screen says: where you're going, and a tip, changed every few seconds */
+const LDNAME={con:'The Conference Quarter',f13:'The Halcyon · Thirteenth floor',home:'Linden Street',station:'Central Station',office:'Brindle & Co',train:'The Quarterline'};
+const LDTIPS=['A free app is paid for somehow. Check what it asks to see before you tap Allow.','Bluetooth left on is a little beacon. Turn it off when you\'re not using it.','Your email resets every other account you have. Give it its own long password and two-factor.','A photo carries more than its subject: a street sign, a window, sometimes the exact place it was taken.','Urgent, scary, and asking you to log in: that\'s the shape of most phishing.','People who know your handle and your face can usually find your door. Keep the two apart where you can.','A password manager means you only have to remember one good password. Make it a long sentence.','Location history is a diary you didn\'t know you were keeping. You can switch it off.','Public Wi-Fi with a login page asking for your socials is collecting more than a login.','The hotel will never call your room to ask for your card number.','The people around you can be a risk to your privacy without meaning to be. So can you, to theirs.'];
+function lmUI(on,reg,cached,f){const e=$('loading');if(!e)return;const was=e.classList.contains('on');e.classList.toggle('on',!!on);
+ if(on&&!was){$('loadT').textContent=LDNAME[reg]||'Loading';$('loadK').textContent=cached?'Getting there':'Lighting it, the first time';
+  const tip=()=>{const el=$('loadTip');if(!el)return;el.style.opacity=0;setTimeout(()=>{el.textContent=LDTIPS[(Math.random()*LDTIPS.length)|0];el.style.opacity=1},300)};tip();clearInterval(lmUI.t);lmUI.t=setInterval(()=>{if(!e.classList.contains('on')){clearInterval(lmUI.t);return}tip()},7000)}
  // the game view stays hidden while a bake runs: compositing a live canvas the GPU is busy baking into is slow and,
  // in some drivers, piles up memory
  const gl=$('gl');if(gl)gl.style.visibility=on?'hidden':'';if(!on)return;

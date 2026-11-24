@@ -226,7 +226,7 @@ function hud(){
  if(S.unl.exp)ms.push(['EXP '+S.exp,S.exp,'var(--coral)','Exposure '+S.exp+'/100 · resets to '+S.foot+' each morning']);
  $('meters').innerHTML=ms.map(m=>`<div class="m" title="${m[3]}">${m[0]}<b><i style="width:${m[1]}%;background:${m[2]}"></i></b></div>`).join('')+(S.unl.money||S.unl.cred?`<div class="m" style="width:auto;color:var(--butter)">£<br>${S.money||0}</div>`:'');
  $('phoneBtn').style.display='block';
- $('phoneBtn').innerHTML='Phone<span class="kn" style="margin:0 0 0 6px">P</span>'+(S.msgs.some(m=>!m.r)?'<span class="dot"></span>':'');
+ $('phoneBtn').innerHTML='Phone<span class="kn" style="margin:0 0 0 6px">Tab</span>'+(S.msgs.some(m=>!m.r)?'<span class="dot"></span>':'');
 }
 function show(id){document.body.classList.toggle('inworld',id==='world');if(id!=='title'&&typeof titleCamOn==='function'){titleCamOn(false);if(typeof titleCast==='function')titleCast(false)}if(id==='title'&&typeof vcShow==='function')vcShow(false);setTimeout(updBlur,0);document.querySelectorAll('.scr').forEach(s=>s.classList.toggle('on',s.id===id));$('hud').style.display=id==='title'?'none':'flex';$('gl').style.display=(id!=='title'&&S&&S.inWorld&&G.ok)?'block':'none';if(id!=='world'){WD.active=false;if((id==='title'||id==='hub')&&document.pointerLockElement){WD.selfUnlock=true;try{document.exitPointerLock()}catch(e){}}}}
 
@@ -317,7 +317,7 @@ const CHAT=t=>({w:'Chat',t});
 /* NB: the overlay is shared by minigames, tutorials and the phone. Any click handler the phone puts on the
    backdrop must not survive into a minigame, or clicking beside the card closes the game mid-story. */
 function ov(html){const o=$('ov');o.onclick=null;o.innerHTML=html;o.classList.add('on');o.scrollTop=0;updBlur();return o}
-function closeOv(){const o=$('ov');o.onclick=null;o.classList.remove('on');o.innerHTML='';updBlur()}
+function closeOv(){const o=$('ov');o.onclick=null;o.classList.remove('on','endov');o.innerHTML='';updBlur()}
 const TUT={
  aff:['Affection','Your choices change how people feel about you. Hearts float up when they do. Spending time together moves you closer: Met, Acquaintance, Friend, Close, Dating, and finally In love. Each person has a story of their own, and it ends with a scene that is only for the two of you.'],
  skill:['Skill','Real knowledge, earned by learning, answering honestly and doing the work. It builds in ranks, from Script Kiddie to Elite. Some people, and some doors, only open to a high enough rank.'],
@@ -348,7 +348,7 @@ function chapterCard(n,cb){
   // a chapter: its banner across the screen, slowly drifting, and the name over the bottom of it
   c.innerHTML=`<div class="chcard"><div class="chb">${chBanner(k)}</div><div class="chtx"><div class="chk">${esc(CHN[C.n]||'')}${n?' · '+esc(DAYN[n]):' · '+esc(DAYN[0])}</div><h2>${esc(C.t)}</h2><p class="chd">${esc(C.d)}</p>${dc[2]?`<p class="chs">${esc(dc[2])}</p>`:''}<div class="tap">${WD&&WD.touch?'Tap':'Press any key'} to continue</div></div></div>`}
  else{const t=typeof n==='object'?n:DAYCARD[n];c.innerHTML=`<div><div class="k">${esc(t[0])}</div><h2>${esc(t[1])}</h2><p>${esc(t[2]||'')}</p><div class="tap">tap to continue</div></div>`}
- c.classList.add('on');clearPor();if(typeof sfx==='function')sfx('chapter');
+ c.classList.add('on');c.dataset.at=performance.now();clearPor();if(typeof sfx==='function')sfx('chapter');
  c.onclick=()=>{c.onclick=null;const f=$('fade');f.style.transition='none';f.classList.add('on');void f.offsetWidth;c.classList.remove('on');cb();
   if(typeof G!=='undefined'&&G.ok)G.forceFrame=true;
   requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(()=>{f.style.transition='';f.classList.remove('on')},60)))};
