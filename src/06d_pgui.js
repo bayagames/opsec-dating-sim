@@ -24,43 +24,57 @@ function pgShell(inner,rail){let el=$('pgx');if(!el){el=document.createElement('
  $('pgClose').onclick=pgClose;
  el.querySelectorAll('[data-sec]').forEach(b=>b.onclick=()=>{PGV.sec=b.dataset.sec;PGV.end=null;PGV.node=null;pgDraw()});
  return el}
-function pgRail(){const S_=[['map','The Week','A map of every choice'],['ends','Endings',Object.keys(META.ends).length+' of '+ENDORDER.length],['scenes','Scenes','Watch again'],['records','Records','Every run, hints, trophies']];
+function pgRail(){const S_=[['map','The Week','Chapters, choices, endings'],['ends','Endings',Object.keys(META.ends).length+' of '+ENDORDER.length],['scenes','Scenes','Watch again'],['records','Records','Every run, hints, trophies']];
  if(META.loopClosed)S_.push(['after','The Week After','Monday, finally']);
  return S_.map(s=>`<button class="pgnav ${PGV.sec===s[0]?'on':''}" data-sec="${s[0]}"><b>${s[1]}</b><small>${s[2]}</small></button>`).join('')}
 function pgDraw(){const f={map:pgMap,ends:pgEnds,scenes:pgScenes,records:pgRecords,after:pgAfter}[PGV.sec]||pgMap;f()}
-/* ---------- The Week: the tree, left to right ---------- */
-const PGL={cw:250,rh:54,nw:210,nh:42,ew:180};
-function pgLayout(){const nodes=[],edges=[];let leaf=0,maxD=0;
- const walk=(n,d,par)=>{const me={n,d,kids:[],par,id:nodes.length};nodes.push(me);maxD=Math.max(maxD,d);if(par)edges.push([par,me]);
-  const kids=(n.kids||[]).slice();for(const k of n.ends||[])kids.push({end:k});
-  if(n.end){me.leaf=1;me.y=leaf++*PGL.rh;return me}
-  if(!kids.length){me.y=leaf++*PGL.rh;return me}
-  for(const c of kids)me.kids.push(walk(c,d+1,me));me.y=(me.kids[0].y+me.kids[me.kids.length-1].y)/2;return me};
- walk(TREE,0,null);
- for(const m of nodes)m.x=m.n.end?(maxD)*PGL.cw:m.d*PGL.cw;
- return{nodes,edges,w:maxD*PGL.cw+PGL.ew+40,h:leaf*PGL.rh}}
-function wrap2(t,n){const w=t.split(' '),L=['',''];let i=0;for(const x of w){if((L[i]+' '+x).trim().length>n&&i===0&&L[0])i=1;L[i]=(L[i]+' '+x).trim()}if(L[1].length>n)L[1]=L[1].slice(0,n-1)+'…';return L.filter(Boolean)}
-function pgMap(){const T=pgLayout(),fl=META.fl||{};
- const seenN=n=>!n.fl||!!fl[n.fl],hidden=n=>n.secret&&!seenN(n)&&!(n.need&&n.need());
- const nodeSVG=m=>{const n=m.n;
-  if(n.end){const k=n.end,got=!!META.ends[k],E=ENDINFO[k],c=TIERC[E[2]];return`<g class="tn te ${got?'got':''} ${PGV.end===k?'sel':''}" data-e="${k}" transform="translate(${m.x},${m.y})"><rect x="0" y="${-PGL.nh/2}" width="${PGL.ew}" height="${PGL.nh}" rx="21" style="--c:${c}"/><circle cx="18" cy="0" r="6" style="fill:${got?c:'none'};stroke:${c}"/><text x="32" y="5">${esc(got?E[0]:'? ? ?')}</text></g>`}
-  const s=seenN(n),h=hidden(n),L=h?['A hidden branch']:wrap2(n.t,30);
-  return`<g class="tn td ${s?'seen':''} ${h?'hid':''} ${PGV.node===m.id?'sel':''}" data-n="${m.id}" transform="translate(${m.x},${m.y})"><rect x="0" y="${-PGL.nh/2}" width="${PGL.nw}" height="${PGL.nh}" rx="9"/>${n.fl&&s?`<text class="tick" x="${PGL.nw-16}" y="5">✓</text>`:''}${L.map((l,i)=>`<text x="12" y="${(L.length===1?5:-3)+i*15}">${esc(l)}</text>`).join('')}</g>`};
- const edge=([a,b])=>{const x1=a.x+PGL.nw,y1=a.y,x2=b.x,y2=b.y,mx=(x1+x2)/2;const lit=(b.n.end?!!META.ends[b.n.end]:(!b.n.fl||fl[b.n.fl]));return`<path class="te-l ${lit?'lit':''}" d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}"/>`};
- const cols=[];for(const m of T.nodes)if(!m.n.end)cols[m.d]=1;
- const inner=`<div class="pgmapwrap"><div class="pghead"><h2>The Week</h2><p>Every big choice, left to right, and where it leads. Ticks are choices you've made in some run. Drag to move, scroll or pinch to zoom, tap anything.</p></div>
-  <div class="pgcanvas" id="pgCanvas"><svg id="pgSvg" width="100%" height="100%"><defs><pattern id="pgGrid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#ffffff08"/></pattern></defs><rect width="100%" height="100%" fill="url(#pgGrid)"/>
-   <g id="pgView">${T.edges.map(edge).join('')}${T.nodes.map(nodeSVG).join('')}</g></svg>
+/* ---------- The Week: the chapters, left to right ----------
+   A column for each day. In it, the chapters that day can be (the version you get depends on the choices before it);
+   the big choices sit between the columns; the endings make the last column, each joined to the chapter it comes out
+   of. Chapters you've reached show their banner; ones you haven't are greyed; secret ones stay hidden until found.
+   The paths you've actually taken are lit, and "Last run" traces your most recent week. */
+const PGL={cw:330,w:260,bh:98,h:150,ry:178,ew:200,eh:40,er:50};
+const PGDEC=[[2,'WHISPER\'s message'],[3,'Mira\'s ask'],[5,'Victor\'s offer'],[6,'The plan']];
+function pgLayout(){const fl=META.fl||{},seen=META.chaps||{};
+ const vis=k=>!CHAP[k].secret||seen[k]||(k==='zeroday'&&META.secret)||(k==='all'&&META.loop);
+ const nodes={},cols=[];
+ for(let d=0;d<=7;d++){const ks=CHORDER.filter(k=>CHAP[k].day===d&&vis(k));cols[d]=ks;ks.forEach((k,i)=>nodes[k]={k,x:d*PGL.cw,y:(i-(ks.length-1)/2)*PGL.ry})}
+ // endings: next to the chapter they come out of
+ const ends=ENDORDER.filter(k=>k!=='harem'||nodes.all).map(k=>{const src=(Object.keys(META.chend||{}).find(e=>e.endsWith('>'+k))||'').split('>')[0]||endSrc(k);return{k,src:nodes[src]?src:'keynote'}});
+ ends.sort((a,b)=>nodes[a.src].y-nodes[b.src].y||ENDORDER.indexOf(a.k)-ENDORDER.indexOf(b.k));
+ ends.forEach((e,i)=>{e.x=8*PGL.cw+40;e.y=(i-(ends.length-1)/2)*PGL.er});
+ const ys=[...Object.values(nodes).map(n=>n.y),...ends.map(e=>e.y)];
+ return{nodes,cols,ends,top:Math.min(...ys)-PGL.h/2-90,bot:Math.max(...ys)+PGL.h/2+20,w:8*PGL.cw+40+PGL.ew}}
+function pgMap(){const T=pgLayout(),seen=META.chaps||{},path=META.chpath||{},chend=META.chend||{},last=PGV.last?(META.lastPath||[]):null;
+ const onLast=k=>last&&last.includes(k),lastEnd=last&&META.hist&&META.hist[0]?META.hist[0].k:null;
+ const card=n=>{const C=CHAP[n.k],s=!!seen[n.k],cls=['ct',s?'seen':'',PGV.node===n.k?'sel':'',last?(onLast(n.k)?'onpath':'off'):''].join(' ');
+  const ban=chBanner(n.k,{lite:1}).replace('<svg ','<svg x="0" y="0" width="'+PGL.w+'" height="'+PGL.bh+'" ');
+  return`<g class="${cls}" data-c="${n.k}" transform="translate(${n.x},${n.y-PGL.h/2})"><rect class="ctbg" width="${PGL.w}" height="${PGL.h}" rx="12"/>
+  <g clip-path="url(#pgClip)" class="ctban">${ban}</g>${s?'':`<rect class="ctveil" width="${PGL.w}" height="${PGL.bh}" rx="12"/><text class="ctlock" x="${PGL.w/2}" y="${PGL.bh/2+6}" text-anchor="middle">NOT REACHED</text>`}
+  <text class="ctk" x="14" y="${PGL.bh+19}">${C.n?'CH '+C.n:'PROLOGUE'}${C.n?' · '+DAYN[C.day].slice(0,3).toUpperCase():''}${s&&seen[n.k]>1?' · ×'+seen[n.k]:''}</text>
+  <text class="ctn" x="14" y="${PGL.bh+39}">${esc(C.t)}</text>${C.via?`<text class="ctv" x="14" y="${PGL.bh+55}" >${esc(C.via.length>34?C.via.slice(0,33)+'…':C.via)}</text>`:''}${s?`<circle class="ctdot" cx="${PGL.w-16}" cy="${PGL.bh+16}" r="5"/>`:''}</g>`};
+ const edge=(a,b,lit,on)=>{const x1=a.x+PGL.w,y1=a.y,x2=b.x,y2=b.y,mx=(x1+x2)/2;return`<path class="ce ${lit?'lit':''} ${on?'onpath':''}" d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}"/>`};
+ let E='';for(const k in T.nodes)for(const nx of CHAP[k].next){const b=T.nodes[nx];if(!b)continue;const lit=!!path[k+'>'+nx];E+=edge(T.nodes[k],b,lit,last&&lit&&onLast(k)&&onLast(nx)&&last.indexOf(nx)===last.indexOf(k)+1)}
+ for(const e of T.ends){const a=T.nodes[e.src],got=!!META.ends[e.k],lit=!!chend[e.src+'>'+e.k];E+=edge(a,{x:e.x,y:e.y},lit||got&&e.src===endSrc(e.k)&&lit,last&&lastEnd===e.k&&onLast(e.src))}
+ const endN=e=>{const k=e.k,got=!!META.ends[k],I=ENDINFO[k],c=TIERC[I[2]];return`<g class="tn te ${got?'got':''} ${PGV.end===k?'sel':''} ${last?(lastEnd===k?'onpath':'off'):''}" data-e="${k}" transform="translate(${e.x},${e.y})"><rect x="0" y="${-PGL.eh/2}" width="${PGL.ew}" height="${PGL.eh}" rx="20" style="--c:${c}"/><circle cx="18" cy="0" r="6" style="fill:${got?c:'none'};stroke:${c}"/><text x="32" y="5">${esc(got?I[0]:'? ? ?')}</text></g>`};
+ const heads=[0,1,2,3,4,5,6,7].map(d=>`<text class="cday" x="${d*PGL.cw+PGL.w/2}" y="${T.top+28}" text-anchor="middle">${d?DAYN[d].toUpperCase():'TWO WEEKS EARLIER'}</text>`).join('')+`<text class="cday" x="${8*PGL.cw+40+PGL.ew/2}" y="${T.top+28}" text-anchor="middle">ENDINGS</text>`;
+ const decs=PGDEC.map(([d,t])=>{const x=d*PGL.cw+PGL.w+(PGL.cw-PGL.w)/2,ys=T.cols[d+1].map(k=>T.nodes[k].y);return`<g class="cdec" transform="translate(${x},${Math.min(...ys)-PGL.h/2-34})"><path d="M0 -12 L12 0 L0 12 L-12 0Z"/><text x="0" y="-20" text-anchor="middle">⚑ ${esc(t)}</text></g>`}).join('');
+ const nCh=CHORDER.filter(k=>!CHAP[k].secret).length,gotCh=CHORDER.filter(k=>seen[k]).length;
+ const inner=`<div class="pgmapwrap"><div class="pghead pgmh"><div><h2>The Week</h2><p>${gotCh} of ${nCh}${CHORDER.length>nCh?'+':''} chapters reached · ${Object.keys(META.ends).length} of ${ENDORDER.length} endings. Each day is a chapter; the choices between them decide which. Drag, zoom, tap anything.</p></div>
+  <button class="pglast ${PGV.last?'on':''}" id="pgLast" ${META.lastPath&&META.lastPath.length?'':'disabled'}>${PGV.last?'Showing your last run':'Show your last run'}</button></div>
+  <div class="pgcanvas" id="pgCanvas"><svg id="pgSvg" width="100%" height="100%"><defs><pattern id="pgGrid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#ffffff08"/></pattern><clipPath id="pgClip"><rect width="${PGL.w}" height="${PGL.bh}" rx="12"/></clipPath></defs><rect width="100%" height="100%" fill="url(#pgGrid)"/>
+   <g id="pgView">${[0,1,2,3,4,5,6,7,8].map(d=>`<rect class="ccol" x="${d*PGL.cw-16+(d===8?40:0)}" y="${T.top}" width="${(d===8?PGL.ew:PGL.w)+32}" height="${T.bot-T.top}" rx="18"/>`).join('')}${heads}${E}${decs}${Object.values(T.nodes).map(card).join('')}${T.ends.map(endN).join('')}</g></svg>
    <div class="pgzoom"><button id="pgZi" aria-label="Zoom in">+</button><button id="pgZo" aria-label="Zoom out">−</button><button id="pgZf" aria-label="Fit">⤢</button></div>
-   <div class="pglegend"><span><i class="lg seen"></i>Chosen</span><span><i class="lg"></i>Not yet</span><span><i class="lg hid"></i>Hidden</span><span><i class="lg end"></i>Ending</span></div>
+   <div class="pglegend"><span><i class="lg seen"></i>Reached</span><span><i class="lg"></i>Not yet</span><span><i class="lg path"></i>A path you've taken</span><span><i class="lg end"></i>Ending</span></div>
    ${pgDetail()}</div></div>`;
  const el=pgShell(inner,pgRail());const cv=$('pgCanvas'),svg=$('pgSvg'),G_=$('pgView');
+ $('pgLast').onclick=()=>{PGV.last=!PGV.last;pgMap()};
  const apply=()=>G_.setAttribute('transform',`translate(${PGV.tx},${PGV.ty}) scale(${PGV.k})`);
- const fit=()=>{const r=cv.getBoundingClientRect();const k=Math.min(1.2,Math.max(.25,Math.min((r.width-40)/T.w,(r.height-60)/(T.h+PGL.nh))));PGV.k=k;PGV.tx=24;PGV.ty=(r.height-T.h*k)/2;apply()};
- // open at a size you can read, on the start of the week; the fit button shows the whole thing
- const home=()=>{const r=cv.getBoundingClientRect(),root=T.nodes[0];PGV.k=r.width<700?.7:.95;PGV.tx=24;PGV.ty=r.height/2-root.y*PGV.k;apply()};
+ const fit=()=>{const r=cv.getBoundingClientRect(),H=T.bot-T.top;const k=Math.min(1.1,Math.max(.18,Math.min((r.width-40)/T.w,(r.height-30)/H)));PGV.k=k;PGV.tx=(r.width-T.w*k)/2;PGV.ty=(r.height-H*k)/2-T.top*k;apply()};
+ // open on the start of the week at a size you can read; the fit button shows all of it
+ const home=()=>{const r=cv.getBoundingClientRect();PGV.k=r.width<700?.55:.8;PGV.tx=28;PGV.ty=r.height/2;apply()};
  if(PGV.fit){PGV.fit=false;requestAnimationFrame(home)}else apply();
- const zoomAt=(f,cx,cy)=>{const k=Math.min(2.5,Math.max(.2,PGV.k*f));PGV.tx=cx-(cx-PGV.tx)*k/PGV.k;PGV.ty=cy-(cy-PGV.ty)*k/PGV.k;PGV.k=k;apply()};
+ const zoomAt=(f,cx,cy)=>{const k=Math.min(2.2,Math.max(.15,PGV.k*f));PGV.tx=cx-(cx-PGV.tx)*k/PGV.k;PGV.ty=cy-(cy-PGV.ty)*k/PGV.k;PGV.k=k;apply()};
  $('pgZi').onclick=()=>{const r=cv.getBoundingClientRect();zoomAt(1.25,r.width/2,r.height/2)};$('pgZo').onclick=()=>{const r=cv.getBoundingClientRect();zoomAt(.8,r.width/2,r.height/2)};$('pgZf').onclick=fit;
  cv.addEventListener('wheel',e=>{e.preventDefault();const r=cv.getBoundingClientRect();zoomAt(e.deltaY<0?1.12:.89,e.clientX-r.left,e.clientY-r.top)},{passive:false});
  const P=new Map();let moved=0,pinch=null;
@@ -72,18 +86,25 @@ function pgMap(){const T=pgLayout(),fl=META.fl||{};
   if(P.size===2&&pinch){const[a,b]=[...P.values()],d=Math.hypot(a[0]-b[0],a[1]-b[1]),r=cv.getBoundingClientRect();zoomAt(d/pinch,(a[0]+b[0])/2-r.left,(a[1]+b[1])/2-r.top);pinch=d;moved=99;return}
   moved+=Math.abs(dx)+Math.abs(dy);PGV.tx+=dx;PGV.ty+=dy;apply()});
  const up=e=>{if(!P.has(e.pointerId))return;drop(e);if(moved>6||P.size)return;
-  const t=document.elementFromPoint(e.clientX,e.clientY),g=t&&t.closest&&t.closest('.tn');if(!g){if(PGV.end||PGV.node!==null){PGV.end=null;PGV.node=null;pgMap()}return}
-  if(g.dataset.e){PGV.end=g.dataset.e;PGV.node=null}else{PGV.node=+g.dataset.n;PGV.end=null}pgMap()};
+  const t=document.elementFromPoint(e.clientX,e.clientY),g=t&&t.closest&&t.closest('.tn,.ct');if(!g){if(PGV.end||PGV.node){PGV.end=null;PGV.node=null;pgMap()}return}
+  if(g.dataset.e){PGV.end=g.dataset.e;PGV.node=null}else{PGV.node=g.dataset.c;PGV.end=null}pgMap()};
  svg.addEventListener('pointerup',up);svg.addEventListener('pointercancel',drop);
- pgDetailWire(T)}
-/* the drawer on the right: an ending, or a choice */
+ pgDetailWire()}
+/* the drawer on the right: a chapter, or an ending */
 function pgDetail(){if(PGV.end)return`<aside class="pgdrawer">${pgEndCard(PGV.end)}</aside>`;
- if(PGV.node!==null&&PGV.node!==undefined){const T=pgLayout(),m=T.nodes[PGV.node];if(!m)return'';const n=m.n,fl=META.fl||{},seen=!n.fl||fl[n.fl],hid=n.secret&&!seen&&!(n.need&&n.need());
-  const below=[];const col=x=>{for(const c of x.kids)if(c.n.end)below.push(c.n.end);else col(c)};col(m);
-  return`<aside class="pgdrawer"><button class="pgdx" id="pgDx">✕</button><p class="pgk">A choice</p><h3>${hid?'A hidden branch':esc(n.t)}</h3><p>${hid?'Something in the week you haven\'t found yet. The riddles in Records point the way.':seen?(n.fl?'You\'ve made this choice in at least one run.':'Where every week starts.'):'You haven\'t made this choice yet.'}</p>
-  ${below.length?`<p class="pgk">Leads to</p><div class="pgchips">${[...new Set(below)].map(k=>`<button class="pgchip ${META.ends[k]?'got':''}" data-e="${k}" style="--c:${TIERC[ENDINFO[k][2]]}">${META.ends[k]?esc(ENDINFO[k][0]):'? ? ?'}</button>`).join('')}</div>`:''}</aside>`}
- return''}
-function pgDetailWire(){const x=$('pgDx');if(x)x.onclick=()=>{PGV.end=null;PGV.node=null;pgDraw()};document.querySelectorAll('#pgx .pgdrawer [data-e]').forEach(b=>b.onclick=()=>{PGV.end=b.dataset.e;PGV.node=null;pgDraw()})}
+ const k=PGV.node;if(!k||!CHAP[k])return'';const C=CHAP[k],n=(META.chaps||{})[k]||0,s=n>0;
+ const nexts=C.next.filter(x=>!CHAP[x].secret||(META.chaps||{})[x]);
+ const ends=ENDORDER.filter(e=>(META.chend||{})[k+'>'+e]||(!(Object.keys(META.chend||{}).some(x=>x.endsWith('>'+e)))&&endSrc(e)===k)).filter(e=>e!=='harem'||s);
+ return`<aside class="pgdrawer pgchd"><button class="pgdx" id="pgDx">✕</button><div class="pgchb ${s?'':'dim'}">${chBanner(k)}</div>
+ <p class="pgk">${C.n?esc(CHN[C.n])+' · '+esc(DAYN[C.day]):'Prologue · '+esc(DAYN[0])}</p><h3>${esc(C.t)}</h3>
+ <p class="pglede">${s?esc(C.d):'You haven\'t reached this chapter yet.'}</p>
+ ${C.via?`<p class="pgk">How you get here</p><p>${esc(C.via)}.</p>`:''}
+ <p class="pgk">Reached</p><p>${s?`In ${n} run${n>1?'s':''}.`:'Never, yet.'}</p>
+ ${nexts.length?`<p class="pgk">What can come next</p><div class="pgchips">${nexts.map(x=>`<button class="pgchip ${(META.chaps||{})[x]?'got':''}" data-c="${x}" style="--c:${CHAP[x].art[3]}">${esc(CHAP[x].t)}</button>`).join('')}</div>`:''}
+ ${ends.length?`<p class="pgk">Endings from here</p><div class="pgchips">${ends.map(e=>`<button class="pgchip ${META.ends[e]?'got':''}" data-e="${e}" style="--c:${TIERC[ENDINFO[e][2]]}">${META.ends[e]?esc(ENDINFO[e][0]):'? ? ?'}</button>`).join('')}</div>`:''}</aside>`}
+function pgDetailWire(){const x=$('pgDx');if(x)x.onclick=()=>{PGV.end=null;PGV.node=null;pgDraw()};
+ document.querySelectorAll('#pgx .pgdrawer [data-e]').forEach(b=>b.onclick=()=>{PGV.end=b.dataset.e;PGV.node=null;pgDraw()});
+ document.querySelectorAll('#pgx .pgdrawer [data-c]').forEach(b=>b.onclick=()=>{PGV.node=b.dataset.c;PGV.end=null;pgDraw()})}
 function pgEndCard(k){const E=ENDINFO[k],got=!!META.ends[k],V=(META.endv&&META.endv[k])||[],hinted=HINTS.some(h=>META.hints.includes(h.id)&&!h.riddle&&h.t.toLowerCase().includes(E[0].toLowerCase()));
  return`<button class="pgdx" id="pgDx">✕</button><p class="pgk" style="color:${TIERC[E[2]]}">${TIERN[E[2]]}</p><h3>${got?esc(E[0]):'? ? ?'}</h3><p class="pglede">${got?esc(E[1]):'You haven\'t found this one yet.'}</p>
  <p class="pgk">How</p><p>${got||hinted?esc(ENDHOW[k]||''):'Unknown. Every ending you find teaches you a little more: look in Records for hints.'}</p>

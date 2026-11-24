@@ -94,6 +94,30 @@ Solving: pick the answer and the three clues that prove it. A wrong deduction co
 - D6 Sat: Morning F · Midday S CTF Finals (Ada; Mira's challenge names Halberd) · Afternoon F · Evening S The Raid (Room 1337 searched) · Night S War Council (choose the plan) · Late F (the night before)
 - D7 Sun: Morning S Positions · Midday S Krall's Move · Afternoon S The Keynote (tasks) · Evening S The Thirteenth Floor (roof, 1313, Mira, Krall, Ashgrove) · Night S 0xFF (afterparty, epilogue)
 
+## Chapters (03d_chapters.js)
+The week is told in chapters, one a day, and the branches below decide which version of a day you get. A chapter is
+picked when its day starts (every branch is settled the evening before) and opens with a full-screen card: its banner
+(drawn in code: the chapter's colours, a far-off skyline, its number, its picture), its name, and a line about it.
+
+| Day | Chapters |
+|---|---|
+| Prologue | Hello, World |
+| 1 Monday | Badge In |
+| 2 Tuesday | Capture the Flag |
+| 3 Wednesday | Dead Drop (answered WHISPER) · The Liaison (reported it) · Exposure (told nobody) |
+| 4 Thursday | Lantern (helped Mira) · Thirty Pieces (helped her, then told Krall) · Packet Loss (stayed out of it) |
+| 5 Friday | Home |
+| 6 Saturday | Suite 1313 (faked yes to Victor) · Lumen Blue (took his offer) · The Crew (said yes to Nyx) · Finals |
+| 7 Sunday | Closing Keynote · Krall's Way (gave Krall the plan) · The Big Score (the crew's plan) · Zero Day (secret) · All of Us (the loop) |
+
+The run keeps them in `S.chaps` (day → chapter; the phone's Story app uses the names), and the file remembers every
+chapter reached (`META.chaps`), every step between two (`META.chpath`), which chapter each ending came out of
+(`META.chend`) and the last run's path (`META.lastPath`). The postgame's The Week draws it: a column per day with its
+chapters as banner cards (greyed until reached; the two secret ones hidden until found), the four big choices marked
+between the columns, the endings in the last column joined to the chapter they come from, the paths you've taken lit,
+"Show your last run" tracing your most recent week, and a drawer for any chapter (what it is, how you get there, how
+often you have, what can follow, which endings come out of it).
+
 ## The branches
 Five big decisions (marked ⚑ in the game) change which beats you get:
 - **A. Day 2, late: WHISPER's message.** Answer it (`path_whisper`: a dead drop on Day 3 afternoon, only then), forward

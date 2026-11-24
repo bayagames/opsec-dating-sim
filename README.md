@@ -53,6 +53,7 @@ The first plays twelve whole runs with no 3D (`?test`) and reports endings, how 
 - `01c_script.js`  the scene language: scenes are written as plain text (`~` narration, `*` thoughts, `name.x:` lines, `?` choices, `if`, `[commands]`) and parsed on first use
 - `02_games.js`    minigames (quiz, phishing, terminal, timing, code review)
 - `03_data.js`     clues, the twelve mysteries, leads, items, achievements, endings
+- `03d_chapters.js` the chapters: one a day, which version you get by your choices, their banners (drawn in code)
 - `03b_flow.js`    story beats, free time, hangouts, leads, the case board, the final act's positions
 - `04_days.js`     the calendar: which part of which day belongs to the story
 - `04a`-`04h`      the prologue and Days 1 to 7; `04i_endings.js` endings; `04j` con events; `04o` the week's branches; `04p` new keynotes and endings; `04k` extra beats; `04l` final nights; `04m`/`04n` ending aftermaths

@@ -145,7 +145,7 @@ const APPS={
  /* ---- Story: your week so far ---- */
  story(){const by={};for(const e of S.sum)(by[e.d]=by[e.d]||[]).push(e);const ks=Object.keys(by).map(Number).sort((a,b)=>a-b);
   const d=PH.sday!==null&&by[PH.sday]?PH.sday:ks[ks.length-1];
-  return ks.length?`<div class="atabs">${ks.map(k=>`<button class="${k===d?'on':''}" data-sd="${k}">${k===0?'Prologue':'Day '+k}</button>`).join('')}</div><div class="abody sview"><h3>${d===0?'Two weeks before':'Day '+d+' · '+DAYN[d]}</h3>${by[d].map(e=>`<div class="sent">${d?`<small>${SLOTN[e.s]}</small>`:''}<p>${esc(e.t)}</p></div>`).join('')}</div>`:'<div class="abody"><p class="small">Your story so far will be written here.</p></div>'},
+  return ks.length?`<div class="atabs">${ks.map(k=>`<button class="${k===d?'on':''}" data-sd="${k}">${S.chaps&&S.chaps[k]&&CHAP[S.chaps[k]]?esc(CHAP[S.chaps[k]].t):k===0?'Prologue':'Day '+k}</button>`).join('')}</div><div class="abody sview"><h3>${d===0?'Two weeks before':'Day '+d+' · '+DAYN[d]}${S.chaps&&S.chaps[d]&&CHAP[S.chaps[d]]?` · <span class="chname">${esc(CHAP[S.chaps[d]].t)}</span>`:''}</h3>${by[d].map(e=>`<div class="sent">${d?`<small>${SLOTN[e.s]}</small>`:''}<p>${esc(e.t)}</p></div>`).join('')}</div>`:'<div class="abody"><p class="small">Your story so far will be written here.</p></div>'},
  /* ---- Achievements: across every run ---- */
  achieve(){const cat=k=>k.startsWith('end_')?'end':k.startsWith('love_')?'love':k.startsWith('solve_')||k.includes('clue')||k.includes('solve')||k==='first_lead'?'myst':k.startsWith('skill_')||k.startsWith('clout_')?'rank':'other';
   const all=achVis();if(PH.atab==='end'&&!pgOpen())PH.atab='all';const ks=all.filter(k=>PH.atab==='all'||cat(k)===PH.atab),got=all.filter(k=>META.ach[k]).length;
