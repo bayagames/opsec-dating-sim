@@ -169,7 +169,7 @@ function regionNeed(reg,show){
  lmUI(show,reg,null);
  regionLM(reg,(f,cached)=>{G.bakeP=f;lmUI(show,reg,cached,f)}).then(ok=>{
   if(!ok&&!R.lmSkip){G.baked=false;setQuality(G.q)}
-  G.lmBusy=null;G.baking=false;lmUI(false);G.forceFrame=true;if(hadLock&&typeof relock==='function')setTimeout(relock,50)});
+  G.lmBusy=null;G.baking=false;G.lmDoneAt=performance.now();lmUI(false);G.forceFrame=true;if(hadLock&&typeof relock==='function')setTimeout(relock,50)});
 }
 function lmUI(on,reg,cached,f){const e=$('loading');if(!e)return;e.classList.toggle('on',!!on);
  // the game view stays hidden while a bake runs: compositing a live canvas the GPU is busy baking into is slow and,
