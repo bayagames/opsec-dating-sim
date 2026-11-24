@@ -201,8 +201,8 @@ Boot (the convention is built and lit; the progress bar is the lightmap bake, ca
 right), then the menu: the logo glides into the corner and the options come in down the left. Mouse, arrows and
 Enter all work; Esc goes back. Deleting a file asks for confirmation and lists what goes. Without WebGL it falls back
 to a drawn background.
-With the menu, the cast steps in down the right: Ellie in front (smiling now and then), two of the others behind her
-in the half-light, swapped every nine seconds, anyone with creator art first, sized by their creator heights. The title
+With the menu, the cast steps in on the right, one at a time and big (head to about the knees): Ellie first, then
+the others every ten seconds, anyone with creator art first, sized by their creator heights, smiling now and then. The title
 is silent until "press any key"; the menu music comes in with the menu.
 
 ## The mouse

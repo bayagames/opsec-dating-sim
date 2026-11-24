@@ -21,29 +21,28 @@ function titleScreen(){
 /* the logo's lines change alignment and size between stages; measure them before and after and glide each one
    from where it was (FLIP), so nothing jumps before it moves */
 /* ---------- the cast on the right ----------
-   Ellie in front; behind her, two of the others, changed every few seconds (anyone with drawn creator art first).
-   Sizes follow the art: Ellie, head to toe, is 70% of the column; the creator's heights carry over. Drawn-in-code
-   figures stand at Ellie's height. The one in front smiles now and then. */
-const TC={on:false,t:null,i:0,els:[],smile:null};
-const TCH=70*.94; // Ellie's height in vh (70% of a 94vh column)
+   One at a time and big: head to about the knees, filling the right of the screen. Ellie first, then the others in
+   turn (anyone with drawn creator art first), each stepping in from the right and out to the left. The one on screen
+   smiles now and then. Sizes follow the art, so taller characters stand taller. */
+const TC={on:false,t:null,i:0,el:null,smile:null};
+const TCH=150; // Ellie's head-to-toe height in vh: tall enough that the bottom of the screen cuts her off at the knees
 function tcFig(id){const A=typeof artOf==='function'&&artOf(id),d=document.createElement('div');d.className='tc';d.dataset.id=id;const inn=document.createElement('div');inn.className='tcin';inn.style.setProperty('--bd',(-Math.random()*6).toFixed(2)+'s');d.appendChild(inn);
  if(A){const k=TCH/3078,b=A.body,W=b[2]*k,H=(A.foot-A.top)*k;inn.style.width=W+'vh';inn.style.height=H+'vh';
   const img=new Image();img.src=A.img;img.alt='';img.style.cssText=`left:0;top:${(b[1]-A.top)*k}vh;width:${W}vh;height:${b[3]*k}vh`;inn.appendChild(img);
-  if(A.face&&A.ex.h){const f=new Image();f.src=A.ex.h;f.alt='';f.className='tcface';f.style.cssText=`opacity:0;left:${(A.face[0]-b[0])*k}vh;top:${(A.face[1]-A.top)*k}vh;width:${A.face[2]*k}vh;height:${A.face[3]*k}vh`;inn.appendChild(f)}}
+  if(A.face&&A.ex.h){const f=new Image();f.src=A.ex.h;f.alt='';f.className='tcface';f.style.cssText=`opacity:0;left:${(A.face[0]-b[0])*k}vh;top:${(A.face[1]-A.top)*k}vh;width:${A.face[2]*k}vh;height:${A.face[3]*k}vh`;inn.appendChild(f)}
+  // taller characters' heads sit higher (Ellie's at the top margin)
+  d.style.setProperty('--lift',((A.foot-A.top)/3078-1)*TCH+'vh')}
  else{const k=TCH/447.5;inn.style.width=200*k+'vh';inn.style.height=447.5*k+'vh';inn.innerHTML=fullSVG(id);const sv=inn.firstElementChild;sv.style.cssText=`left:0;top:${-46.5*k}vh;width:${200*k}vh;height:${500*k}vh`}
  return d}
 function tcPool(){const seen=g=>typeof metEver==='function'&&metEver(g),art=g=>typeof artOf==='function'&&!!artOf(g);
- return ROM.filter(g=>g!=='ellie').sort((a,b)=>(art(b)-art(a))||(seen(b)-seen(a))||(Math.random()-.5))}
+ return ['ellie',...ROM.filter(g=>g!=='ellie').sort((a,b)=>(art(b)-art(a))||(seen(b)-seen(a))||(Math.random()-.5))]}
 function titleCast(on){const box=$('tcast');if(!box)return;
  if(!on){TC.on=false;clearInterval(TC.t);clearInterval(TC.smile);return}
  if(TC.on)return;TC.on=true;box.querySelectorAll('.tc').forEach(e=>e.remove());TC.pool=tcPool();TC.i=0;
- const put=(el,slot,delay)=>{box.appendChild(el);void el.offsetWidth;setTimeout(()=>el.classList.add(slot),delay)};
- TC.els=[tcFig('ellie'),tcFig(TC.pool[0]),tcFig(TC.pool[1])];TC.i=2;
- put(TC.els[0],'s0',350);put(TC.els[1],'s1',700);put(TC.els[2],'s2',900);
- // the two behind step out (the left one leftwards, the right one rightwards) and the next two step in
- TC.t=setInterval(()=>{if(document.hidden)return;for(const s of[1,2]){const old=TC.els[s];old.style.setProperty('--gx',s===1?'-24vw':'26vw');old.classList.remove('s1','s2');old.classList.add('gone');setTimeout(()=>old.remove(),1200);
-  const nx=tcFig(TC.pool[TC.i++%TC.pool.length]);TC.els[s]=nx;put(nx,'s'+s,s===1?650:850)}},9000);
- TC.smile=setInterval(()=>{const f=TC.els[0]&&TC.els[0].querySelector('.tcface');if(!f||document.hidden)return;f.style.opacity=1;setTimeout(()=>f.style.opacity=0,2600)},7000)}
+ const next=delay=>{const el=tcFig(TC.pool[TC.i++%TC.pool.length]);box.appendChild(el);void el.offsetWidth;setTimeout(()=>el.classList.add('s0'),delay);TC.el=el};
+ next(450);
+ TC.t=setInterval(()=>{if(document.hidden)return;const old=TC.el;old.classList.remove('s0');old.classList.add('gone');setTimeout(()=>old.remove(),1300);next(700)},10000);
+ TC.smile=setInterval(()=>{const f=TC.el&&TC.el.querySelector('.tcface');if(!f||document.hidden)return;f.style.opacity=1;setTimeout(()=>f.style.opacity=0,2600)},6500)}
 // a little parallax with the mouse
 addEventListener('mousemove',e=>{const t=$('title');if(!t||!t.classList.contains('on')||TS.stage!=='menu')return;const c=$('tcast');if(!c)return;c.style.setProperty('--px',((e.clientX/innerWidth-.5)*-18).toFixed(1)+'px');c.style.setProperty('--py',((e.clientY/innerHeight-.5)*-8).toFixed(1)+'px')});
 function titleStage(s){const t=$('title'),L=$('tlogo'),prev=t.dataset.stage;
